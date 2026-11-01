@@ -54,7 +54,7 @@ in
         - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
         - **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to reduce all the contributions.
 
-        ## Annotated example
+        ## Yen Flake example
 
         Yen has no dependencies. It is built only on Nix `builtins`. This is the most basic flake
         that takes a single Yen module.
@@ -188,32 +188,45 @@ in
         Errors are not throws. They are data that agents and humans can inspect, with **hints for fixes**: `code`, `path`,
         `got`, `want`, `fix`, and `near` for typos. ${doc "/principles/errors"}
 
-        ## Why Yen
+        ## Yen Capabilities
 
-        - **Minimal surface.** The Yen language is minimal. It lets you define the things in your world, a tree built from your data,
-          features that apply where a condition holds, and a place for each piece of configuration to go. ${doc "/start/overview/"}
-        - **Domain agnostic.** Yen can configure anything Nix can: NixOS, nix-darwin, home-manager, clusters and more. Name the
-          things in your world: hosts, users, services, or your own.
-        - **On par with advanced frameworks like Den.** Hosts, users, homes, includes, defaults, batteries, guests, roles, secrets,
-          generated files. Moving from Den is easy. ${doc "/migrate/from-den/"}
+        - **Errors you can read.** Yen never throws. A typo gets a "did you mean", and each error gives its place, what was
+          expected, and a fix. Agents read the same records. ${doc "/principles/errors/"}
         - **Queries, not merges.** Each value is a query on the files that declare it. Content spread over many files never
-          overwrites itself, and two different answers are an error you can read. ${doc "/principles/queried-not-merged/"}
-        - **Less to evaluate.** Yen itself is about 1% of a host's evaluation. Sharing one nixpkgs per system instead of one per host
-          saves about a third, and a check proves that every system is the same. ${doc "/perf/shared-pkgs/"}
-        - **Mistakes are caught early, with a fix.** A typo gets a "did you mean". Every error says where it is, what was
-          expected, and how to fix it. ${doc "/principles/errors/"}
-        - **Ask your fleet anything.** Graphs for deploy waves, cycles and impact; Datalog with negation; stored queries you name
-          once and ask from Nix, the CLI, or an agent. ${doc "/query/queries/"}
-        - **Values that solve themselves.** µKanren with finite domains, in pure Nix: a free port, guest memory that fits,
-          relations that run backward. ${doc "/query/krn/"}
-        - **Rules across machines.** Write a rule once, and a fleet that breaks it builds nothing. Each verdict comes with
-          a proof that a small checker verifies, and a seal anyone can check again. ${doc "/query/invariants/"}
-        - **Time and impact.** See what a host's elements reach, the fleet without one declaration, and instances valid at a
-          given date. ${doc "/agents/history/"}
-        - **Ready for agents.** An AI agent can ask about your fleet, stage a change, and see why it is refused, before
-          anything is applied. Yen ships an MCP server and a skill that teaches agents to use it. ${doc "/agents/mcp/"}
-        - **Just Nix.** Yen is built on Nix builtins with no dependencies. It provides two logic languages alongside its configuration kernel.
-        - **Tested and documented.** Every page you read is a tested example checked by CI, and all the docs are generated.
+          overwrites itself, and two different answers without explicit reduce strategy are an error. ${doc "/principles/queried-not-merged/"}
+        - **Rules across machines.** Write a rule once. A fleet that breaks it builds nothing. Each verdict comes with a proof
+          that a small checker verifies, and a seal anyone can check again. ${doc "/query/invariants/"}
+        - **Changes staged before they land.** `yen.lib.stage` compares the fleet with and without a change. A grant narrows
+          what a change may reach, and never widens it. ${doc "/agents/stage/"}
+        - **Ask your fleet anything.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
+          name once and ask from Nix, the CLI or an agent. ${doc "/query/queries/"}
+        - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
+          run backward. ${doc "/query/krn/"}
+        - **Batteries and kits.** Ready rules in `yen.lib.batteries`, and ready parts in `yen.lib.kits`: wireguard, dns, sshd,
+          backups, monitoring, postgres and more. You write the keys, the battery gives the values. ${doc "/batteries/"}
+        - **Every platform.** NixOS, nix-darwin, home-manager, nix-on-droid and microvm.nix. One aspect can serve them all.
+          ${doc "/batteries/platforms/"}
+        - **Generated files.** README, CI workflow, `flake.nix` and dev shell, written from fleet data. ${doc "/recipes/generated-files/"}
+        - **Secrets by name.** Secrets are data. A host gets exactly the secrets that name it. ${doc "/recipes/secrets/"}
+        - **Time and impact.** See what a host reaches, and which instances are valid at a given date. ${doc "/agents/history/"}
+        - **Less to evaluate.** Yen itself is about 1% of a host's evaluation. One nixpkgs per system instead of one per host
+          saves about a third, and a check proves every system is the same. ${doc "/perf/shared-pkgs/"}
+        - **On par with Den.** Hosts, users, homes, includes, defaults, batteries, guests, roles and secrets. Moving from Den is
+          easy. ${doc "/migrate/from-den/"}
+        - **Ready for agents.** Every answer is JSON-safe data. An agent asks about your fleet, stages a change, and sees why it
+          is refused, before anything is applied. Yen ships an MCP server and a skill for it. ${doc "/agents/mcp/"}
+        - **Just Nix.** Yen uses Nix builtins only, with no dependencies. It has no `throw`, no options and no `config`.
+        - **Assemblies and kits.** Build a machine from members, with layered settings, exports and contracts. Ready-made kits
+          cover backups, wifi, remote builders, binary caches, monitoring and postgres. ${doc "/recipes/assemblies/"} ${doc "/batteries/kits/"}
+        - **Roles.** A role is an aspect that applies where a fact holds, so no host file lists its roles. ${doc "/behavior/predicates/"}
+        - **Environments and cascades.** Group hosts by where they run, and let settings fall back along an ordered list. ${doc "/recipes/environments/"}
+        - **Guests.** Containers and VMs live under their host, and their config goes into the host. ${doc "/recipes/guests/"}
+        - **One aspect, many platforms.** A sink forwards its content to a platform's class, so one feature serves NixOS and home-manager. ${doc "/behavior/forwards/"}
+        - **Install and deploy.** Disk layouts as data, with install and rebuild apps. ${doc "/batteries/install/"}
+        - **Derived network config.** known_hosts, WireGuard peers and Syncthing devices are built from the other hosts. ${doc "/batteries/kits-network/"}
+        - **Editors and agent tools.** VS Code, Zed and one shared pool of agent skills and MCP servers. ${doc "/batteries/editors/"}
+        - **Export.** The fleet as sorted N-Triples with a checksum, and SHACL shapes for graph stores. ${doc "/agents/knowledge/"}
+        - **Migration.** Move from a single `configuration.nix`, a flake, or Den. ${doc "/migrate/from-configuration-nix/"}
 
         ## Try it
 
@@ -223,7 +236,7 @@ in
 
         Then read ${link "A fleet on one page" "/start/one-page-fleet/"} and the ${link "documentation" "/"}.
 
-        ## Sponsor
+        ## Sponsor Development
 
         Yen is made with love by [vic](https://github.com/vic). Years of work have gone into bringing formal verification
         to reproducible Nix fleets in our agentic era, because correctness matters most here.
