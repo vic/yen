@@ -9,7 +9,7 @@ let
   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
   follows = url: {
     inherit url;
-    inputs.nixpkgs.follows = "nixpkgs";
+    inputs.nixpkgs.follows = "nixpkgs-25";
   };
 in
 {
@@ -41,7 +41,8 @@ in
         yen.url = "path:../..";
         import-tree.url = "github:denful/import-tree";
         flake-file.url = "github:vic/flake-file";
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+        nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+        nixpkgs-25.url = "github:nixos/nixpkgs/nixos-25.05";
       };
     };
   };

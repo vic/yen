@@ -99,9 +99,9 @@ let
       "10.0.1.10"
       "10.0.1.11"
     ]);
-    guest-channel-stable = {
-      t1 = eq ((scope ci).channel.name) ("stable");
-      t2 = eq ((scope stage).channel.name) ("edge");
+    guest-channel-unstable = {
+      t1 = eq ((scope ci).channel.name) ("unstable");
+      t2 = eq ((scope stage).channel.name) ("unstable");
     };
     guest-pkgs-stable = eq ((first (
       nixosAt stage [
@@ -259,7 +259,7 @@ let
       "web-2"
     ]);
     root-emission = eq ((red "flake-file" "fleet:main").inputs.nixpkgs.url) (
-      "github:nixos/nixpkgs/nixos-25.05"
+      "github:nixos/nixpkgs/nixpkgs-unstable"
     );
     spawn-pixel-only-alice = {
       t1 = yes (lib.filter (s: s.parent != null && s.parent.id == "${S}/phone:pixel") r.scopes != [ ]);
@@ -525,7 +525,7 @@ let
               {
                 yen.guest.gpu = {
                   environment = yen.environment.prod;
-                  channel = yen.channel.stable;
+                  channel = yen.channel.unstable;
                   system = yen.system.x86_64-linux;
                   addr = "10.0.1.30";
                   on = yen.host.lb;
@@ -2220,7 +2220,7 @@ let
           {
             yen.guest.${n} = {
               environment = yen.environment.staging;
-              channel = yen.channel.stable;
+              channel = yen.channel.unstable;
               system = yen.system.x86_64-linux;
               addr = "10.0.2.3${toString (lib.length r)}";
               on = yen.host.stage;
@@ -2566,7 +2566,7 @@ let
             {
               yen.host.rogue = {
                 environment = yen.environment.lab;
-                channel = yen.channel.stable;
+                channel = yen.channel.unstable;
                 system = yen.system.x86_64-linux;
                 addr = "10.0.1.1";
               };
@@ -3120,7 +3120,7 @@ let
         };
       modlist-negative =
         let
-          np = inputs.nixpkgs;
+          np = inputs.nixpkgs-25; # nixos-25.05: the trimmed modlists are its module paths
           all = import "${np}/nixos/modules/module-list.nix";
           keep = lib.genAttrs (map (
             p: builtins.unsafeDiscardStringContext "${np}/nixos/modules/${p}"
@@ -3313,7 +3313,7 @@ let
       );
       den-chained-forward-built = eq (out.nixosConfigurations.lb.config.home-manager.users.alice.programs.git.extraConfig.init.defaultBranch) (
         "main"
-      ); # lb: stable channel, HM 25.05
+      ); # lb: unstable channel
       lb-minimal-built = {
         t1 = yes (
           lib.hasSuffix ".drv" out.nixosConfigurations.lb-minimal.config.system.build.toplevel.drvPath

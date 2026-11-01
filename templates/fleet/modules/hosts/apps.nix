@@ -3,7 +3,7 @@
 {
   yen.host = lib.genAttrs [ "app-1" "app-2" "app-3" "app-4" ] (n: {
     environment = yen.environment.lab;
-    channel = yen.channel.stable;
+    channel = if n == "app-2" then yen.channel.stable else yen.channel.unstable; # app-2: trimmed modlist (nixos-25.05)
     system = yen.system.x86_64-linux;
     addr = "10.0.9.${lib.removePrefix "app-" n}";
     sharedPkgs = n != "app-4";

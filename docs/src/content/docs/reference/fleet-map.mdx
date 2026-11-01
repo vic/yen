@@ -94,7 +94,7 @@ nix eval --impure --file tests.nix failed   # [ ]: a check for each pattern
 |---|---|
 | [`hosts/alice-laptop.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/alice-laptop.nix) | A standalone home: alice on the edge channel, no machine above. |
 | [`hosts/apps.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/apps.nix) | Four app hosts to compare shared pkgs: app-1..3 reuse one pkgs (app-1 leads), app-4 builds its own. |
-| [`hosts/ci.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/ci.nix) | ci is a guest on stage, built with the stable channel while stage uses edge. |
+| [`hosts/ci.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/ci.nix) | ci is a guest on stage: both on the unstable channel. |
 | [`hosts/inventory.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/inventory.nix) | web-1 and web-2 come from JSON: their names become refs. |
 | [`hosts/lb.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/lb.nix) |  |
 | [`hosts/pixel.nix`](https://github.com/vic/yen/blob/main/templates/fleet/modules/hosts/pixel.nix) |  |
