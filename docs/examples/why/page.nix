@@ -1,7 +1,6 @@
 let
-  site = "https://yen.oeiuwq.com";
-  link = text: path: "[${text}](${site}${path})"; # absolute: this page is also the repository README
-  doc = path: "<sup>[docs](${site}${path})</sup>"; # a small link after a point, so the prose stays clean
+  link = text: path: "[${text}](${path})"; # absolute: this page is also the repository README
+  doc = path: "<sup>[docs](${path})</sup>"; # a small link after a point, so the prose stays clean
   # the two hosts of variants/invariant.nix, as a caller outside the fleet names them: their identity
   web = {
     kind = "host";
@@ -39,7 +38,7 @@ in
         ## The Cycle model
 
         Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-        As in Cycle, an aspect ${doc "/behavior/aspect"} is a cycle ${doc "/behavior/cycle"} function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+        As in Cycle, an aspect ${doc "/behavior/aspects"} is a cycle ${doc "/behavior/cycle"} function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
         to observe the world, and it gets their answers back through `sources`. A yen module ${doc "/principles/modules"} follows the same model: its args are
         `sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
 

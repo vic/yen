@@ -1,6 +1,5 @@
 let
-  site = "https://yen.oeiuwq.com";
-  link = text: path: "[${text}](${site}${path})"; # absolute links
+  link = text: path: "[${text}](${path})"; # absolute links
 in
 {
   title = "A fleet on one page";
