@@ -17,7 +17,7 @@
     flake-file.url = "github:vic/flake-file";
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-25";
     };
     home-manager-unstable = {
       url = "github:nix-community/home-manager";
@@ -28,10 +28,15 @@
     microvm.url = "github:microvm-nix/microvm.nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-25";
+    };
+    nix-darwin-unstable = {
+      url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nix-on-droid.url = "github:nix-community/nix-on-droid";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-25.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     terranix.url = "github:terranix/terranix";
     yen.url = "path:../..";

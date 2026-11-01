@@ -13,7 +13,7 @@ in
   yen.kinds.home.sinks.os = { }; # a wall: the home's users give `os` here, and nothing reads it, so stage's NixOS stays untouched
   yen.home."alice@stage" = {
     user = yen.user.alice;
-    channel = yen.channel.edge;
+    channel = yen.channel.unstable;
     system = yen.system.x86_64-linux;
     on = yen.host.stage;
   };

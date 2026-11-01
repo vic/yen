@@ -1,5 +1,6 @@
 # Trimmed NixOS base module lists (checked variant), per host: nixos/modules paths of nixpkgs ac62194 (25.05) in module-list.nix order.
 # Computed by vic/modlist-research.md (closure of a learned core and the options the host defines). Same toplevel drvPath as the full list.
+# nixos-25.05 (nixpkgs-25 input, channel stable) is kept ONLY for web-1 and app-2 (trimmedModules). All other hosts: unstable.
 # A new nixpkgs rev needs new lists: the e2e check modlist-same-drv fails until then.
 {
   checked = {
@@ -76,6 +77,7 @@
       "misc/man-db.nix"
       "misc/meta.nix"
       "misc/nixpkgs-flake.nix"
+      "misc/nixpkgs.nix"
       "misc/passthru.nix"
       "misc/version.nix"
       "programs/bash/bash-completion.nix"
@@ -687,6 +689,7 @@
       "services/networking/wpa_supplicant.nix"
       "services/networking/x2goserver.nix"
       "services/networking/xinetd.nix"
+      "services/networking/zerotierone.nix"
       "services/networking/znc/default.nix"
       "services/printing/cupsd.nix"
       "services/printing/cups-pdf.nix"

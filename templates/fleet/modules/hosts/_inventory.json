@@ -10,7 +10,7 @@
   },
   "web-2": {
     "environment": "prod",
-    "channel": "stable",
+    "channel": "unstable",
     "system": "x86_64-linux",
     "addr": "10.0.1.11",
     "sharedPkgs": true,

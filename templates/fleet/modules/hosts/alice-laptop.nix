@@ -3,7 +3,7 @@
 {
   yen.home.alice-laptop = {
     user = yen.user.alice;
-    channel = yen.channel.edge;
+    channel = yen.channel.unstable;
     system = yen.system.x86_64-linux;
   };
 }
