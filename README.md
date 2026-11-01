@@ -4,7 +4,7 @@
 
 
 **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-You describe your fleet as terms and the relationships between them. Yen answers queries about it: which systems to build,
+You describe your fleet as terms <sup>[docs](https://yen.oeiuwq.com/model/kinds-fields)</sup> and the relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes)</sup>. Yen answers queries <sup>[docs](https://yen.oeiuwq.com/query/queries)</sup> about it: which systems to build,
 verification errors, dependency graphs of who gives what to whom, and whether your invariant rules hold across all machines.
 
 Yen is built on four concepts: **kinds**, **scopes**, **aspects** and **sinks**. The Yen kernel knows nothing about
@@ -18,8 +18,8 @@ or anything else you can model as Nix values. You define your own domain languag
 ## The Cycle model
 
 Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-As in Cycle, an aspect (a behavior) is a function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
-to observe the world, and it gets their answers back through `sources`. A yen module follows the same model: its args are
+As in Cycle, an aspect <sup>[docs](https://yen.oeiuwq.com/behavior/aspect)</sup> is a cycle <sup>[docs](https://yen.oeiuwq.com/behavior/cycle)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](https://yen.oeiuwq.com/principles/modules)</sup> follows the same model: its args are
 `sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
 
 For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.

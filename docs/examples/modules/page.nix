@@ -84,7 +84,7 @@
       ''
       (docs.caution "nixpkgs composite types do not check their items" ''
         In nixpkgs, `listOf`, `attrsOf`, `submodule` and `functionTo` check only the outer shape. The items are
-        checked in `merge`, which yen never calls. So in yen, `lib.types.listOf lib.types.int` accepts a list of
+        checked in `merge`, which yen never calls. So in nixpkgs, `(lib.types.listOf lib.types.int).check` accepts a list of
         strings:
 
         ${docs.nix ''
