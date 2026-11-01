@@ -24,7 +24,7 @@ in
       ''
 
         **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-        You describe your fleet as terms ${doc "/model/kinds-fields"} and the relationships between them ${doc "/model/scopes"}. Yen answers queries ${doc "/query/queries"} about it: which systems to build,
+        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen answers queries ${doc "/query/queries/"} about it: which systems to build,
         verification errors, dependency graphs of who gives what to whom, and whether your invariant rules hold across all machines.
 
         Yen is built on four concepts: **kinds**, **scopes**, **aspects** and **sinks**. The Yen kernel knows nothing about
@@ -38,8 +38,8 @@ in
         ## The Cycle model
 
         Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-        As in Cycle, an aspect ${doc "/behavior/aspects"} is a cycle ${doc "/behavior/cycle"} function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
-        to observe the world, and it gets their answers back through `sources`. A yen module ${doc "/principles/modules"} follows the same model: its args are
+        As in Cycle, an aspect ${doc "/behavior/aspects/"} is a cycle ${doc "/behavior/cycle/"} function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+        to observe the world, and it gets their answers back through `sources`. A yen module ${doc "/principles/modules/"} follows the same model: its args are
         `sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
 
         For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.
@@ -98,7 +98,7 @@ in
         ## Two Logic Languages
 
         Yen ships two pure-Nix logic languages to help you deploy in waves: well-founded models with proofs, why-not explanations,
-        and values synthesized under constraints ${doc "/query/queries"}.
+        and values synthesized under constraints ${doc "/query/queries/"}.
 
         µKanren-style logic programs let you synthesize configurations from constraints. For example, allocate a free port,
         or compute a VM's memory so it takes only a percentage of its host.
@@ -167,7 +167,7 @@ in
         Everything in Yen is expressed as a query, and every answer is JSON-safe data. Agents can propose changes to your
         infrastructure, and those changes are verified **before** any file is edited. Changes are staged, checked against
         invariants, limited by grants that can only narrow, and written as change programs. An MCP server answers agents and
-        lets them write only verified changes. ${doc "/agents/agent-surface"}
+        lets them write only verified changes. ${doc "/agents/agent-surface/"}
 
         ## How agents check a change
 
@@ -185,7 +185,7 @@ in
         ## Errors are data
 
         Errors are not throws. They are data that agents and humans can inspect, with **hints for fixes**: `code`, `path`,
-        `got`, `want`, `fix`, and `near` for typos. ${doc "/principles/errors"}
+        `got`, `want`, `fix`, and `near` for typos. ${doc "/principles/errors/"}
 
         ## Yen Capabilities
 

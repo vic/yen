@@ -6,7 +6,7 @@ import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Ta
 
 
 **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-You describe your fleet as terms <sup>[docs](/model/kinds-fields)</sup> and the relationships between them <sup>[docs](/model/scopes)</sup>. Yen answers queries <sup>[docs](/query/queries)</sup> about it: which systems to build,
+You describe your fleet as terms <sup>[docs](/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](/model/scopes/)</sup>. Yen answers queries <sup>[docs](/query/queries/)</sup> about it: which systems to build,
 verification errors, dependency graphs of who gives what to whom, and whether your invariant rules hold across all machines.
 
 Yen is built on four concepts: **kinds**, **scopes**, **aspects** and **sinks**. The Yen kernel knows nothing about
@@ -20,8 +20,8 @@ or anything else you can model as Nix values. You define your own domain languag
 ## The Cycle model
 
 Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-As in Cycle, an aspect <sup>[docs](/behavior/aspects)</sup> is a cycle <sup>[docs](/behavior/cycle)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
-to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](/principles/modules)</sup> follows the same model: its args are
+As in Cycle, an aspect <sup>[docs](/behavior/aspects/)</sup> is a cycle <sup>[docs](/behavior/cycle/)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](/principles/modules/)</sup> follows the same model: its args are
 `sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
 
 For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.
@@ -126,7 +126,7 @@ services or fleet members.
 ## Two Logic Languages
 
 Yen ships two pure-Nix logic languages to help you deploy in waves: well-founded models with proofs, why-not explanations,
-and values synthesized under constraints <sup>[docs](/query/queries)</sup>.
+and values synthesized under constraints <sup>[docs](/query/queries/)</sup>.
 
 µKanren-style logic programs let you synthesize configurations from constraints. For example, allocate a free port,
 or compute a VM's memory so it takes only a percentage of its host.
@@ -348,7 +348,7 @@ ties the verdict to hashes of the engine, the rules and the facts, so anyone can
 Everything in Yen is expressed as a query, and every answer is JSON-safe data. Agents can propose changes to your
 infrastructure, and those changes are verified **before** any file is edited. Changes are staged, checked against
 invariants, limited by grants that can only narrow, and written as change programs. An MCP server answers agents and
-lets them write only verified changes. <sup>[docs](/agents/agent-surface)</sup>
+lets them write only verified changes. <sup>[docs](/agents/agent-surface/)</sup>
 
 ## How agents check a change
 
@@ -366,7 +366,7 @@ The agent can show the staged answer to a person, with its violations, its diff 
 ## Errors are data
 
 Errors are not throws. They are data that agents and humans can inspect, with **hints for fixes**: `code`, `path`,
-`got`, `want`, `fix`, and `near` for typos. <sup>[docs](/principles/errors)</sup>
+`got`, `want`, `fix`, and `near` for typos. <sup>[docs](/principles/errors/)</sup>
 
 ## Yen Capabilities
 
