@@ -2943,14 +2943,17 @@ let
         "root"
       ]) ([ ]);
       # the homelab base puts emergency-access on its server and nodes (app-1..3), next to lb
-      t3 = eq (lib.concatMap (g: g.machines) (
-        lib.filter (g: g.name == "emergency-root") (lib.attrValues (red "generators" "fleet:main"))
-      )) ([
-        "app-1"
-        "app-2"
-        "app-3"
-        "lb"
-      ]);
+      t3 =
+        eq
+          (lib.concatMap (g: g.machines) (
+            lib.filter (g: g.name == "emergency-root") (lib.attrValues (red "generators" "fleet:main"))
+          ))
+          ([
+            "app-1"
+            "app-2"
+            "app-3"
+            "lb"
+          ]);
     };
     vars-generators = {
       t1 = eq (noApps (lib.sort (a: b: a < b) (lib.attrNames (red "generators" "fleet:main")))) ([
