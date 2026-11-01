@@ -1320,8 +1320,20 @@ let
             red "exports" "fleet:main"
           ))
           ([
+            # app-1 serves the homelab: base sshd, borg-sshd, borg, wireguard controller, sshd
+            "sshd:lab-base-sshd:server:app-1"
+            "sshd:lab-borg-sshd:server:app-1"
+            "borg:lab-borg:server:app-1"
+            "wireguard:lab-wg:controller:app-1"
             "sshd:sshd:server:app-1"
+            # app-2 and app-3 are homelab nodes: base sshd, monitoring exporter, wireguard peer, sshd
+            "sshd:lab-base-sshd:server:app-2"
+            "monitoring:lab-monitoring:exporter:app-2"
+            "wireguard:lab-wg:peer:app-2"
             "sshd:sshd:server:app-2"
+            "sshd:lab-base-sshd:server:app-3"
+            "monitoring:lab-monitoring:exporter:app-3"
+            "wireguard:lab-wg:peer:app-3"
             "sshd:sshd:server:app-3"
             "sshd:sshd:server:app-4"
             "sshd:sshd:server:lb-minimal"
@@ -1357,6 +1369,16 @@ let
       t1 = eq (map (e: e.kit.name) (red "exports" "fleet:main")) ([
         "sshd"
         "sshd"
+        "borg"
+        "wireguard"
+        "sshd"
+        "sshd"
+        "monitoring"
+        "wireguard"
+        "sshd"
+        "sshd"
+        "monitoring"
+        "wireguard"
         "sshd"
         "sshd"
         "sshd"
@@ -2628,6 +2650,9 @@ let
     # install and deploy kits (modules/kits/install.nix): disko layouts, install-<machine> and rebuild-<machine> apps
     disko-install-apps = {
       t1 = eq (lib.filter (lib.hasPrefix "install-") (lib.attrNames out.apps.x86_64-linux)) ([
+        "install-app-1"
+        "install-app-2"
+        "install-app-3"
         "install-stage"
         "install-web-1"
         "install-web-2"
@@ -2696,7 +2721,6 @@ let
         e = with' (
           { yen, ... }:
           {
-            imports = [ inputs.yen.lib.kits.facter ];
             yen.assembly.facts-lb = {
               kit = yen.kit.facter;
               roles.default = {
@@ -2918,9 +2942,15 @@ let
         "users"
         "root"
       ]) ([ ]);
+      # the homelab base puts emergency-access on its server and nodes (app-1..3), next to lb
       t3 = eq (lib.concatMap (g: g.machines) (
         lib.filter (g: g.name == "emergency-root") (lib.attrValues (red "generators" "fleet:main"))
-      )) ([ "lb" ]);
+      )) ([
+        "app-1"
+        "app-2"
+        "app-3"
+        "lb"
+      ]);
     };
     vars-generators = {
       t1 = eq (noApps (lib.sort (a: b: a < b) (lib.attrNames (red "generators" "fleet:main")))) ([
