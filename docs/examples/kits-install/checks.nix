@@ -13,10 +13,8 @@
     t3 = yes (result.flake.config.web.disko.devices.disk.main.content.partitions ? luks);
   };
   facter = {
-    t1 = yes (
-      builtins.match ".*/hardware/lb.json" (toString result.flake.config.lb.hardware.facter.reportPath)
-      != null
-    );
+    # no lb.json in ../hardware (not real hardware): the kit applies to no machine, so lb has no facter config
+    t1 = no (result.flake.config.lb ? hardware);
     t2 = no (result.flake.config.web ? hardware);
   };
   apps = {

@@ -202,7 +202,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.kits.disko`](https://github.com/vic/yen/blob/main/lib/kits/disko.nix#L5) | `module` | kit disko and its data kind layout: a machine's disks from a named layout |
 | [`lib.kits.dns`](https://github.com/vic/yen/blob/main/lib/kits/dns.nix#L5) | `module` | records for every endpoint that kits export: the `exports` sink read into one cname per endpoint |
 | [`lib.kits.emergency-access`](https://github.com/vic/yen/blob/main/lib/kits/emergency-access.nix#L6) | `{ yen, lib, ... } -> module` | kit emergency-access: root logs in with a key or a password, only where a member is |
-| [`lib.kits.facter`](https://github.com/vic/yen/blob/main/lib/kits/facter.nix#L5) | `module` | kit facter: the machine's nixos-facter report, read from the directory the assembly sets |
+| [`lib.kits.facter`](https://github.com/vic/yen/blob/main/lib/kits/facter.nix#L6) | `module` | kit facter: the machine's nixos-facter report, read from the directory the assembly sets |
 | [`lib.kits.homelab`](https://github.com/vic/yen/blob/main/lib/kits/homelab.nix#L9) | `module` | bundle homelab: one server and nodes, with base, a wireguard network, backups, monitoring and dns |
 | [`lib.kits.monitoring`](https://github.com/vic/yen/blob/main/lib/kits/monitoring.nix#L5) | `module` | one prometheus server reads the scrape target of every exporter of its assembly |
 | [`lib.kits.nix-cache`](https://github.com/vic/yen/blob/main/lib/kits/nix-cache.nix#L6) | `{ root; } -> module` | binary cache: a harmonia server and clients that trust the generated public key |

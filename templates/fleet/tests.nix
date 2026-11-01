@@ -675,7 +675,10 @@ let
       t2 = no (r.active.desktop.${ci});
       t3 = yes (r.active.thermald.${stage});
     };
-    unfree-set = eq (red "unfree" stage) ([ "terraform" "zerotierone" ]); # stage is a zerotier peer
+    unfree-set = eq (red "unfree" stage) ([
+      "terraform"
+      "zerotierone"
+    ]); # stage is a zerotier peer
     xmsg-trust = eq (hmAt "${lb}/user:alice" [
       "home"
       "file"
