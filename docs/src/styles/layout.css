@@ -14,6 +14,8 @@
   /* Routes Starlight's own mono usages (code, pre, kbd) through the loaded
      webfont, replacing per-element font-family assignments in custom.css. */
   --sl-font-mono: var(--font-jetbrains-mono);
+  /* Site default: the same face as long prose, so unstyled text matches the body. */
+  --sl-font: var(--font-jetbrains-mono);
   --sl-content-width: 62rem;
 
   /* Heading sizes are set through Starlight's own tokens rather than on the
