@@ -17,6 +17,7 @@
     darwin = inputs.nix-darwin;
   };
   yen.channel.unstable = {
+    darwin = inputs.nix-darwin-unstable;
     nixpkgs = inputs.nixpkgs; # nixpkgs-unstable: every host not in the modlists
     home-manager = inputs.home-manager-unstable;
   };

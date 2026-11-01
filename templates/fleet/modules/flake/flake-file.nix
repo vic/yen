@@ -57,6 +57,10 @@ in
         inputs.nixpkgs.follows = "nixpkgs-unstable";
       };
       nix-darwin = follows "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+      nix-darwin-unstable = {
+        url = "github:nix-darwin/nix-darwin";
+        inputs.nixpkgs.follows = "nixpkgs-unstable";
+      };
     };
   };
   yen.aspects.platform-inputs = {

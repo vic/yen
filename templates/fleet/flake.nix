@@ -26,6 +26,10 @@
     impermanence.url = "github:nix-community/impermanence";
     import-tree.url = "github:denful/import-tree";
     microvm.url = "github:microvm-nix/microvm.nix";
+    nix-darwin-unstable = {
+      url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
       inputs.nixpkgs.follows = "nixpkgs-25";

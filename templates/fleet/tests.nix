@@ -3160,7 +3160,6 @@ let
           );
           # lb-minimal: lb's variant inherits sharedPkgs
           own-pkgs = eq (lib.attrNames out.nixosConfigurationsOwnPkgs) [
-            "app-2"
             "app-3"
             "lb"
             "lb-minimal"
@@ -3313,7 +3312,7 @@ let
       hoag-claims-built = yes (
         lib.elem "app_web_1" out.nixosConfigurations.lb.config.services.postgresql.ensureDatabases
       );
-      den-chained-forward-built = eq (out.nixosConfigurations.lb.config.home-manager.users.alice.programs.git.extraConfig.init.defaultBranch) (
+      den-chained-forward-built = eq (out.nixosConfigurations.lb.config.home-manager.users.alice.programs.git.settings.init.defaultBranch) (
         "main"
       ); # lb: unstable channel
       lb-minimal-built = {
@@ -3329,6 +3328,7 @@ let
           {
             boot.loader.grub.device = "nodev";
             fileSystems."/".device = "x";
+            fileSystems."/".fsType = "ext4";
             system.stateVersion = "25.05";
           }
         ];
