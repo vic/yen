@@ -675,7 +675,7 @@ let
       t2 = no (r.active.desktop.${ci});
       t3 = yes (r.active.thermald.${stage});
     };
-    unfree-set = eq (red "unfree" stage) ([ "terraform" ]);
+    unfree-set = eq (red "unfree" stage) ([ "terraform" "zerotierone" ]); # stage is a zerotier peer
     xmsg-trust = eq (hmAt "${lb}/user:alice" [
       "home"
       "file"
@@ -2725,7 +2725,7 @@ let
               kit = yen.kit.facter;
               roles.default = {
                 at = yen.host.lb;
-                settings.dir = ./hardware;
+                settings.dir = ./modules; # no lb.json here: the kit must not apply
               };
             };
           }
@@ -2741,9 +2741,8 @@ let
           );
       in
       {
-        t1 = eq (map (x: lib.removePrefix (toString ./.) (toString x)) (paths lb)) ([
-          "/hardware/lb.json"
-        ]);
+        # no report for lb: the kit's aspect does not apply, so no reportPath (main's kernel.nix guard)
+        t1 = eq (paths lb) ([ ]);
         t2 = eq (paths web1) ([ ]); # a machine outside the assembly gets no report
       };
     kits-install-order =

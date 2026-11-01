@@ -8,7 +8,11 @@
   yen.aspects.grafana = {
     at = yen.host.lb;
     service-domains = "grafana.example.org";
-    nixos.services.grafana.enable = true;
+    # nixos-unstable has no default secret key: read it from a file on the host, never from the store
+    nixos.services.grafana = {
+      enable = true;
+      settings.security.secret_key = "$__file{/var/lib/grafana/secret_key}";
+    };
   };
   yen.aspects.status-page = {
     at = yen.host.lb;

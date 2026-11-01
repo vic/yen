@@ -38,6 +38,7 @@ in
       pkgs.actionlint
       pkgs.shellcheck
       pkgs.gh
+      pkgs.nix-unit
       inputs.fastest.packages.${pkgs.stdenv.hostPlatform.system}.fastest # tests run here, no flake fetch per run
     ];
   };

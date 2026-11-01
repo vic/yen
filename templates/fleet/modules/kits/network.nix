@@ -12,6 +12,10 @@ in
     (inputs.yen.lib.kits.wireguard { inherit root; })
     (inputs.yen.lib.kits.zerotier { inherit root; })
   ];
+  yen.aspects.zerotier-unfree = {
+    at = yen.kinds.host;
+    unfree = "zerotierone"; # bsl11: the zerotier kit needs it allowed on every member host
+  };
   yen.assembly = {
     vpn = {
       kit = kit.wireguard;
