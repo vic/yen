@@ -1,6 +1,7 @@
 let
-  link = text: path: "[${text}](${path})"; # absolute: this page is also the repository README
-  doc = path: "<sup>[docs](${path})</sup>"; # a small link after a point, so the prose stays clean
+  site = "https://yen.oeiuwq.com";
+  link = text: path: "[${text}](${site}${path})"; # absolute: this page is also the repository README
+  doc = path: "<sup>[docs](${site}${path})</sup>"; # a small link after a point, so the prose stays clean
   # the two hosts of variants/invariant.nix, as a caller outside the fleet names them: their identity
   web = {
     kind = "host";

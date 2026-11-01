@@ -6,7 +6,7 @@ import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Ta
 
 
 **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-You describe your fleet as terms <sup>[docs](/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](/model/scopes/)</sup>. Yen answers queries <sup>[docs](/query/queries/)</sup> about it: which systems to build,
+You describe your fleet as terms <sup>[docs](https://yen.oeiuwq.com/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes/)</sup>. Yen answers queries <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup> about it: which systems to build,
 verification errors, dependency graphs of who gives what to whom, and whether your invariant rules hold across all machines.
 
 Yen is built on four concepts: **kinds**, **scopes**, **aspects** and **sinks**. The Yen kernel knows nothing about
@@ -14,14 +14,14 @@ NixOS, but it can describe fleets over any configuration domain: NixOS, nix-darw
 or anything else you can model as Nix values. You define your own domain language, and Yen uses it.
 
 
-[Documentation](/) · [Getting started](/start/getting-started/) · [A fleet on one page](/start/one-page-fleet/) · [Reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+[Documentation](https://yen.oeiuwq.com/) · [Getting started](https://yen.oeiuwq.com/start/getting-started/) · [A fleet on one page](https://yen.oeiuwq.com/start/one-page-fleet/) · [Reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
 
 ## The Cycle model
 
 Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-As in Cycle, an aspect <sup>[docs](/behavior/aspects/)</sup> is a cycle <sup>[docs](/behavior/cycle/)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
-to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](/principles/modules/)</sup> follows the same model: its args are
+As in Cycle, an aspect <sup>[docs](https://yen.oeiuwq.com/behavior/aspects/)</sup> is a cycle <sup>[docs](https://yen.oeiuwq.com/behavior/cycle/)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](https://yen.oeiuwq.com/principles/modules/)</sup> follows the same model: its args are
 `sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
 
 For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.
@@ -126,7 +126,7 @@ services or fleet members.
 ## Two Logic Languages
 
 Yen ships two pure-Nix logic languages to help you deploy in waves: well-founded models with proofs, why-not explanations,
-and values synthesized under constraints <sup>[docs](/query/queries/)</sup>.
+and values synthesized under constraints <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup>.
 
 µKanren-style logic programs let you synthesize configurations from constraints. For example, allocate a free port,
 or compute a VM's memory so it takes only a percentage of its host.
@@ -348,7 +348,7 @@ ties the verdict to hashes of the engine, the rules and the facts, so anyone can
 Everything in Yen is expressed as a query, and every answer is JSON-safe data. Agents can propose changes to your
 infrastructure, and those changes are verified **before** any file is edited. Changes are staged, checked against
 invariants, limited by grants that can only narrow, and written as change programs. An MCP server answers agents and
-lets them write only verified changes. <sup>[docs](/agents/agent-surface/)</sup>
+lets them write only verified changes. <sup>[docs](https://yen.oeiuwq.com/agents/agent-surface/)</sup>
 
 ## How agents check a change
 
@@ -366,47 +366,47 @@ The agent can show the staged answer to a person, with its violations, its diff 
 ## Errors are data
 
 Errors are not throws. They are data that agents and humans can inspect, with **hints for fixes**: `code`, `path`,
-`got`, `want`, `fix`, and `near` for typos. <sup>[docs](/principles/errors/)</sup>
+`got`, `want`, `fix`, and `near` for typos. <sup>[docs](https://yen.oeiuwq.com/principles/errors/)</sup>
 
 ## Yen Capabilities
 
 - **Errors you can read.** Yen never throws. A typo gets a "did you mean", and each error gives its place, what was
-  expected, and a fix. Agents read the same records. <sup>[docs](/principles/errors/)</sup>
+  expected, and a fix. Agents read the same records. <sup>[docs](https://yen.oeiuwq.com/principles/errors/)</sup>
 - **Queries, not merges.** Each value is a query on the files that declare it. Content spread over many files never
-  overwrites itself, and two different answers without explicit reduce strategy are an error. <sup>[docs](/principles/queried-not-merged/)</sup>
+  overwrites itself, and two different answers without explicit reduce strategy are an error. <sup>[docs](https://yen.oeiuwq.com/principles/queried-not-merged/)</sup>
 - **Rules across machines.** Write a rule once. A fleet that breaks it builds nothing. Each verdict comes with a proof
-  that a small checker verifies, and a seal anyone can check again. <sup>[docs](/query/invariants/)</sup>
+  that a small checker verifies, and a seal anyone can check again. <sup>[docs](https://yen.oeiuwq.com/query/invariants/)</sup>
 - **Changes staged before they land.** `yen.lib.stage` compares the fleet with and without a change. A grant narrows
-  what a change may reach, and never widens it. <sup>[docs](/agents/stage/)</sup>
+  what a change may reach, and never widens it. <sup>[docs](https://yen.oeiuwq.com/agents/stage/)</sup>
 - **Ask your fleet anything.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
-  name once and ask from Nix, the CLI or an agent. <sup>[docs](/query/queries/)</sup>
+  name once and ask from Nix, the CLI or an agent. <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup>
 - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
-  run backward. <sup>[docs](/query/krn/)</sup>
+  run backward. <sup>[docs](https://yen.oeiuwq.com/query/krn/)</sup>
 - **Batteries and kits.** Ready rules in `yen.lib.batteries`, and ready parts in `yen.lib.kits`: wireguard, dns, sshd,
-  backups, monitoring, postgres and more. You write the keys, the battery gives the values. <sup>[docs](/batteries/)</sup>
+  backups, monitoring, postgres and more. You write the keys, the battery gives the values. <sup>[docs](https://yen.oeiuwq.com/batteries/)</sup>
 - **Every platform.** NixOS, nix-darwin, home-manager, nix-on-droid and microvm.nix. One aspect can serve them all.
-  <sup>[docs](/batteries/platforms/)</sup>
-- **Generated files.** README, CI workflow, `flake.nix` and dev shell, written from fleet data. <sup>[docs](/recipes/generated-files/)</sup>
-- **Secrets by name.** Secrets are data. A host gets exactly the secrets that name it. <sup>[docs](/recipes/secrets/)</sup>
-- **Time and impact.** See what a host reaches, and which instances are valid at a given date. <sup>[docs](/agents/history/)</sup>
+  <sup>[docs](https://yen.oeiuwq.com/batteries/platforms/)</sup>
+- **Generated files.** README, CI workflow, `flake.nix` and dev shell, written from fleet data. <sup>[docs](https://yen.oeiuwq.com/recipes/generated-files/)</sup>
+- **Secrets by name.** Secrets are data. A host gets exactly the secrets that name it. <sup>[docs](https://yen.oeiuwq.com/recipes/secrets/)</sup>
+- **Time and impact.** See what a host reaches, and which instances are valid at a given date. <sup>[docs](https://yen.oeiuwq.com/agents/history/)</sup>
 - **Less to evaluate.** Yen itself is about 1% of a host's evaluation. One nixpkgs per system instead of one per host
-  saves about a third, and a check proves every system is the same. <sup>[docs](/perf/shared-pkgs/)</sup>
+  saves about a third, and a check proves every system is the same. <sup>[docs](https://yen.oeiuwq.com/perf/shared-pkgs/)</sup>
 - **On par with Den.** Hosts, users, homes, includes, defaults, batteries, guests, roles and secrets. Moving from Den is
-  easy. <sup>[docs](/migrate/from-den/)</sup>
+  easy. <sup>[docs](https://yen.oeiuwq.com/migrate/from-den/)</sup>
 - **Ready for agents.** Every answer is JSON-safe data. An agent asks about your fleet, stages a change, and sees why it
-  is refused, before anything is applied. Yen ships an MCP server and a skill for it. <sup>[docs](/agents/mcp/)</sup>
+  is refused, before anything is applied. Yen ships an MCP server and a skill for it. <sup>[docs](https://yen.oeiuwq.com/agents/mcp/)</sup>
 - **Just Nix.** Yen uses Nix builtins only, with no dependencies. It has no `throw`, no options and no `config`.
 - **Assemblies and kits.** Build a machine from members, with layered settings, exports and contracts. Ready-made kits
-  cover backups, wifi, remote builders, binary caches, monitoring and postgres. <sup>[docs](/recipes/assemblies/)</sup> <sup>[docs](/batteries/kits/)</sup>
-- **Roles.** A role is an aspect that applies where a fact holds, so no host file lists its roles. <sup>[docs](/behavior/predicates/)</sup>
-- **Environments and cascades.** Group hosts by where they run, and let settings fall back along an ordered list. <sup>[docs](/recipes/environments/)</sup>
-- **Guests.** Containers and VMs live under their host, and their config goes into the host. <sup>[docs](/recipes/guests/)</sup>
-- **One aspect, many platforms.** A sink forwards its content to a platform's class, so one feature serves NixOS and home-manager. <sup>[docs](/behavior/forwards/)</sup>
-- **Install and deploy.** Disk layouts as data, with install and rebuild apps. <sup>[docs](/batteries/install/)</sup>
-- **Derived network config.** known_hosts, WireGuard peers and Syncthing devices are built from the other hosts. <sup>[docs](/batteries/kits-network/)</sup>
-- **Editors and agent tools.** VS Code, Zed and one shared pool of agent skills and MCP servers. <sup>[docs](/batteries/editors/)</sup>
-- **Export.** The fleet as sorted N-Triples with a checksum, and SHACL shapes for graph stores. <sup>[docs](/agents/knowledge/)</sup>
-- **Migration.** Move from a single `configuration.nix`, a flake, or Den. <sup>[docs](/migrate/from-configuration-nix/)</sup>
+  cover backups, wifi, remote builders, binary caches, monitoring and postgres. <sup>[docs](https://yen.oeiuwq.com/recipes/assemblies/)</sup> <sup>[docs](https://yen.oeiuwq.com/batteries/kits/)</sup>
+- **Roles.** A role is an aspect that applies where a fact holds, so no host file lists its roles. <sup>[docs](https://yen.oeiuwq.com/behavior/predicates/)</sup>
+- **Environments and cascades.** Group hosts by where they run, and let settings fall back along an ordered list. <sup>[docs](https://yen.oeiuwq.com/recipes/environments/)</sup>
+- **Guests.** Containers and VMs live under their host, and their config goes into the host. <sup>[docs](https://yen.oeiuwq.com/recipes/guests/)</sup>
+- **One aspect, many platforms.** A sink forwards its content to a platform's class, so one feature serves NixOS and home-manager. <sup>[docs](https://yen.oeiuwq.com/behavior/forwards/)</sup>
+- **Install and deploy.** Disk layouts as data, with install and rebuild apps. <sup>[docs](https://yen.oeiuwq.com/batteries/install/)</sup>
+- **Derived network config.** known_hosts, WireGuard peers and Syncthing devices are built from the other hosts. <sup>[docs](https://yen.oeiuwq.com/batteries/kits-network/)</sup>
+- **Editors and agent tools.** VS Code, Zed and one shared pool of agent skills and MCP servers. <sup>[docs](https://yen.oeiuwq.com/batteries/editors/)</sup>
+- **Export.** The fleet as sorted N-Triples with a checksum, and SHACL shapes for graph stores. <sup>[docs](https://yen.oeiuwq.com/agents/knowledge/)</sup>
+- **Migration.** Move from a single `configuration.nix`, a flake, or Den. <sup>[docs](https://yen.oeiuwq.com/migrate/from-configuration-nix/)</sup>
 
 ## Try it
 
@@ -414,7 +414,7 @@ Errors are not throws. They are data that agents and humans can inspect, with **
 nix flake init -t github:vic/yen#one-page-fleet
 ```
 
-Then read [A fleet on one page](/start/one-page-fleet/) and the [documentation](/).
+Then read [A fleet on one page](https://yen.oeiuwq.com/start/one-page-fleet/) and the [documentation](https://yen.oeiuwq.com/).
 
 ## Sponsor Development
 
