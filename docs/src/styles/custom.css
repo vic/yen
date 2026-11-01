@@ -1,11 +1,58 @@
 /*
  * Font assignment. Victor Mono carries headings and chrome, JetBrains Mono
- * carries body code and links.
+ * carries long prose paragraphs, asides and sidebar sub-items. Agave carries
+ * links. Pragmasevka carries every code block, fence and inline code span.
  *
  * The first selector list is mirrored by the emphasis rule in layout.css —
  * Victor Mono's italic is a cursive face, so wherever this applies, `em` has to
  * be restyled. Keep the two lists in step.
  */
+
+@font-face {
+  font-family: "Agave";
+  src: url("/fonts/Agave-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Agave";
+  src: url("/fonts/Agave-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pragmasevka";
+  src: url("/fonts/pragmasevka-nf-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pragmasevka";
+  src: url("/fonts/pragmasevka-nf-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pragmasevka";
+  src: url("/fonts/pragmasevka-nf-italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Tab labels: file names on code frames and Starlight tab strips use Victor Mono. */
+.expressive-code .title,
+[role='tab'] {
+  font-family: var(--font-victor-mono);
+}
 
 .copy,
 .site-title,
@@ -14,15 +61,38 @@ header,
 strong,
 article.card p.title,
 .starlight-aside__title,
-.expressive-code .title,
-pre[data-language="console"] *,
-pre[data-language="plaintext"] *,
 h1, h2, h3, h4, h5, h6, th {
   font-family: var(--font-victor-mono);
 }
 
-.testimonials blockquote,
-a, code, code * {
+p,
+.sl-markdown-content li,
+.sl-markdown-content td,
+.sl-markdown-content blockquote,
+.starlight-aside li,
+.sl-markdown-content .sl-link-card,
+.sl-markdown-content .sl-link-card :is(span, p) {
+  font-family: var(--font-jetbrains-mono);
+}
+
+pre,
+pre *,
+code,
+code *,
+.expressive-code,
+.expressive-code * {
+  font-family: "Pragmasevka", monospace;
+}
+
+.testimonials blockquote {
+  font-family: var(--font-jetbrains-mono);
+}
+
+a {
+  font-family: "Agave", monospace;
+}
+
+.starlight-aside p {
   font-family: var(--font-jetbrains-mono);
 }
 

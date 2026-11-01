@@ -41,6 +41,7 @@ export default defineConfig({
 				Header: './src/components/Header.astro',
 				Hero: './src/components/Hero.astro',
 				TableOfContents: './src/components/TableOfContents.astro',
+				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
 			plugins: [
 				catppuccin({

@@ -31,11 +31,18 @@ import { LinkButton, Icon } from '@astrojs/starlight/components';
 <style>
   .sponsor-card {
     border-radius: 1rem;
-    padding: 2rem 1.5rem;
+    padding: 1.25rem 1rem;
     margin: 2rem 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.4s ease;
-    max-width: 20em;
+    max-width: 16em;
+  }
+
+  /* Narrow screens stack the right sidebar above the page: keep the title first. */
+  @media (max-width: 72rem) {
+    .sponsor-card {
+      display: none;
+    }
   }
 
   .sponsor-card:hover {
@@ -72,6 +79,18 @@ import { LinkButton, Icon } from '@astrojs/starlight/components';
     color: inherit;
   }
 
+  /* Button labels and ecosystem names must not break across lines. */
+  .content > a.primary,
+  .header h4,
+  .ecosystem a {
+    white-space: nowrap;
+  }
+
+  /* The minimal link sits beside an icon at the card edge: keep it inside. */
+  .content > a:not(.primary) {
+    font-size: 0.8rem;
+  }
+
   .header {
     display: flex;
     align-items: center;
@@ -101,9 +120,9 @@ import { LinkButton, Icon } from '@astrojs/starlight/components';
   }
 
   .description {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin: 1rem 0 1.5rem 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin: 0.75rem 0 1rem 0;
     opacity: 0.95;
   }
 
@@ -121,16 +140,16 @@ import { LinkButton, Icon } from '@astrojs/starlight/components';
   .ecosystem {
     list-style: none;
     padding: 0;
-    margin: 1.5rem 0;
+    margin: 1rem 0;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    font-size: 0.9rem;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    font-size: 0.75rem;
   }
 
   .ecosystem li {
     background: rgba(255, 255, 255, 0.15);
-    padding: 0.5rem 0.75rem;
+    padding: 0.3rem 0.5rem;
     border-radius: 0.5rem;
     backdrop-filter: blur(10px);
   }

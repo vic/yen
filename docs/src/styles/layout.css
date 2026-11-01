@@ -14,7 +14,7 @@
   /* Routes Starlight's own mono usages (code, pre, kbd) through the loaded
      webfont, replacing per-element font-family assignments in custom.css. */
   --sl-font-mono: var(--font-jetbrains-mono);
-  --sl-content-width: 50rem;
+  --sl-content-width: 62rem;
 
   /* Heading sizes are set through Starlight's own tokens rather than on the
      heading elements. Anchor links live in a `.sl-heading-wrapper` that carries
@@ -85,7 +85,6 @@
     strong,
     article.card p.title,
     .starlight-aside__title,
-    .expressive-code .title,
     h1, h2, h3, h4, h5, h6, th
   ) em,
 .hero h1 em {
@@ -95,6 +94,26 @@
   text-decoration-thickness: 2px;
   text-underline-offset: 0.22em;
   text-decoration-color: color-mix(in srgb, var(--sl-color-accent) 45%, transparent);
+}
+
+/* Agave has a small x-height: links in running text get a step up to match JetBrains. */
+.sl-markdown-content a {
+  font-size: 1.05em;
+}
+
+/* Reading body: one size and leading for prose, lists and table cells. */
+.sl-markdown-content :is(p, li) {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.sl-markdown-content :is(li + li, li > p) {
+  margin-top: 0.4em;
+}
+
+.sl-markdown-content td {
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 /* Lead paragraph: the opening line of a page carries the summary. */
@@ -120,21 +139,51 @@
   border-radius: 4px;
 }
 
+/* Code frames read as editor panes: a rounded, hairline-bordered window. */
 .expressive-code .frame {
-  border: 1px solid var(--sl-color-hairline-light) !important;
-  border-radius: 4px !important;
-  box-shadow: none !important;
+  border: 1px solid var(--sl-color-hairline) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
   overflow: hidden;
 }
 
-.expressive-code .frame pre {
-  border: 0 !important;
-  border-radius: 0 !important;
+/* Editor surface: the frame is the darker chrome, the code sits in a lighter inset
+   well, as in VS Code. */
+.expressive-code .frame {
+  background: color-mix(in srgb, var(--sl-color-bg-nav) 72%, var(--sl-color-black)) !important;
 }
 
+.expressive-code .frame pre {
+  margin: 0.4rem 0.4rem 0.4rem;
+  border: 1px solid var(--sl-color-hairline) !important;
+  border-radius: 6px !important;
+  background: var(--sl-color-bg) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+/* The copy button lives in the tab strip, clear of the code. */
+.expressive-code .frame .copy {
+  top: 0.25rem !important;
+  right: 0.5rem !important;
+}
+
+
+/* Tab strip: darker than the code, like an editor's file-tab bar. */
 .expressive-code .frame.has-title:not(.is-terminal) .header {
-  background: var(--sl-color-bg-nav) !important;
-  border-color: var(--sl-color-hairline-light) !important;
+  background: color-mix(in srgb, var(--sl-color-bg-nav) 72%, var(--sl-color-black)) !important;
+  border-color: var(--sl-color-hairline) !important;
+  padding-top: 0.35rem !important;
+}
+
+/* The file name is the active tab: raised, with an accent top edge. */
+.expressive-code .frame.has-title:not(.is-terminal) .title {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  margin-bottom: -1px;
+  background: var(--ec-codeBg);
+  border-top: 2px solid var(--sl-color-accent);
+  border-radius: 6px 6px 0 0;
+  font-size: 0.8rem;
 }
 
 .sl-markdown-content .card {
@@ -157,7 +206,72 @@
   color: var(--sl-color-white);
 }
 
+/* ── Zen reading mode ─────────────────────────────────────────────────── */
+
+/* Hides the left navigation and the sponsor card, widens the reading column and
+   lifts the body size. The right "On this page" panel stays for section jumps. */
+:root[data-zen] {
+  --sl-content-width: 100%;
+  --sl-sidebar-width: 0rem;
+}
+
+:root[data-zen] .main-pane {
+  max-width: none;
+  margin-inline: 0;
+}
+
+/* Sidebars leave the layout; Menu and Outline reopen them as overlays. */
+:root[data-zen] #starlight__sidebar,
+:root[data-zen] .right-sidebar-panel {
+  display: none;
+}
+
+:root[data-zen][data-zen-nav] #starlight__sidebar,
+:root[data-zen][data-zen-toc] .right-sidebar-panel {
+  display: block;
+  position: fixed;
+  top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+  z-index: 40;
+  background: var(--sl-color-bg);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
+}
+
+:root[data-zen][data-zen-nav] #starlight__sidebar {
+  left: 0;
+  width: 18rem;
+}
+
+:root[data-zen][data-zen-toc] .right-sidebar-panel {
+  right: 0;
+  width: 18rem;
+  padding: 1.5rem 1rem;
+}
+
+/* The panel's children were sized by the grid column it left; let them fill the overlay. */
+:root[data-zen][data-zen-toc] .right-sidebar-panel * {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  letter-spacing: normal;
+}
+
+:root[data-zen] .sl-markdown-content :is(p, li) {
+  font-size: 1.15rem;
+  line-height: 1.9;
+}
+
+:root[data-zen] .sl-markdown-content td {
+  font-size: 1rem;
+}
+
 /* ── Sidebar ──────────────────────────────────────────────────────────── */
+
+/* Sidebar text sits a step below the reading body. */
+#starlight__sidebar :is(a, summary, span, li) {
+  font-size: 0.82rem;
+}
 
 /* Starlight fills the current entry solid. A tint plus a leading accent rule
    marks position without dominating the column. */
@@ -198,6 +312,14 @@
   --ec-tm-insBrdCol: color-mix(in srgb, var(--sl-color-green) 50%, transparent);
   --ec-tm-delBg: color-mix(in srgb, var(--sl-color-red) 16%, transparent);
   --ec-tm-delBrdCol: color-mix(in srgb, var(--sl-color-red) 50%, transparent);
+}
+
+/* Code fences: Pragmasevka at a size above the body text, for long listings.
+   Doubled selector: ec.css loads after this sheet and would win at equal specificity. */
+:root .expressive-code {
+  --ec-codeFontFml: "Pragmasevka", monospace;
+  --ec-codeFontSize: 1.0625rem;
+  --ec-codeLineHt: 1.6;
 }
 
 
