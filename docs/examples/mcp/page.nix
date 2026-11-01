@@ -28,7 +28,8 @@
       (docs.table [ "Tool" "What it answers" ] (
         map (t: [
           "`${t.name}`"
-          t.description
+          # MDX reads a bare { as a JSX expression: escape the braces in the description text
+          (builtins.replaceStrings [ "{" "}" ] [ "\\{" "\\}" ] t.description)
         ]) tools
       ))
       ''
