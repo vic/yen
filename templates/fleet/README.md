@@ -551,7 +551,7 @@ All of them at once, in parallel: `fastest-tests` in the devshell (`nix develop 
 GitHub Actions run all of these on each push and pull request ([.github/workflows/test.yml](https://github.com/vic/yen/blob/main/.github/workflows/test.yml)): the engine and cost oracles, the fleet checks and e2e evaluations, the fleet cost oracle, the MCP tests, `nix flake check` (with KVM for the VM test) and one job per `ci.json` target that must evaluate to a derivation.
 
 ## This fleet, live
-Generated from the fleet's queries: 141 scopes, 30 kinds, 217 aspects, 1122 routed elements.
+Generated from the fleet's queries: 141 scopes, 30 kinds, 218 aspects, 1136 routed elements.
 | Kind | Fields | Spawns | Sinks | Scopes |
 |---|---|---|---|---|
 | `assembly` | `kit`, `roles` |  |  | 0 |
@@ -1438,15 +1438,15 @@ flowchart LR
 
 | Machine | Kind | Aspects giving elements | Some aspects |
 |---|---|---|---|
-| `app-1` | host | 34 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +28 |
-| `app-2` | host | 34 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +28 |
-| `app-3` | host | 34 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +28 |
-| `app-4` | host | 32 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +26 |
-| `lb` | host | 52 | alloy, attic, base, caddy, ci-host, db-lockdown, +46 |
-| `lb-minimal` | host | 33 | alloy, base, deploy-record, dev, disko-devices, disko-option, +27 |
-| `web-1` | host | 50 | alloy, api-route, base, ci-host, db-claim, db-client, +44 |
-| `web-2` | host | 48 | alloy, autoinclude, base, ci-host, db-claim, db-client, +42 |
-| `stage` | host | 54 | alloy, base, ci-host, db-claim, db-client, db-lockdown, +48 |
+| `app-1` | host | 35 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +29 |
+| `app-2` | host | 35 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +29 |
+| `app-3` | host | 35 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +29 |
+| `app-4` | host | 33 | alloy, base, ci-host, db-lockdown, db-provide, deploy-record, +27 |
+| `lb` | host | 53 | alloy, attic, base, caddy, ci-host, db-lockdown, +47 |
+| `lb-minimal` | host | 34 | alloy, base, deploy-record, dev, disko-devices, disko-option, +28 |
+| `web-1` | host | 51 | alloy, api-route, base, ci-host, db-claim, db-client, +45 |
+| `web-2` | host | 49 | alloy, autoinclude, base, ci-host, db-claim, db-client, +43 |
+| `stage` | host | 55 | alloy, base, ci-host, db-claim, db-client, db-lockdown, +49 |
 | `ci` | guest | 12 | alloy, base, dev, docker, global-pkgs, globals-addr, +6 |
 | `studio` | mac | 11 | base, ci-mac, darwin-base, darwin-primary-user, dev, dock, +5 |
 
@@ -1500,10 +1500,10 @@ flowchart LR
 | `meta` | hive | hive | 2 |
 | `monitor` | host | host | 1 |
 | `monitoring-ingest` | cluster | fleet | 1 |
-| `nixos` | backup, guest, host, member, user, variant | backup, guest, host, variant | 283 |
+| `nixos` | backup, guest, host, member, user, variant | backup, guest, host, variant | 280 |
 | `no-gui` | system | system | 1 |
 | `nodes` | host | fleet | 1 |
-| `os` | export, guest, host, mac, member, user | export, guest, home, host, mac | 109 |
+| `os` | export, guest, host, mac, member, user | export, guest, home, host, mac | 117 |
 | `osConfig` | host | host | 9 |
 | `out` | cluster, environment, export, fleet, hive, home, +5 | fleet | 71 |
 | `overlays` | fleet | fleet | 1 |
@@ -1531,7 +1531,7 @@ flowchart LR
 | `token-claims` | host | fleet | 2 |
 | `treefmt` | system | system | 3 |
 | `tuning` | host | host | 14 |
-| `unfree` | host | host | 1 |
+| `unfree` | host | host | 10 |
 | `unifi` | environment | environment | 1 |
 | `unit-checks` | fleet | fleet | 1 |
 | `user-packages` | user | fleet | 9 |
@@ -1642,18 +1642,19 @@ flowchart LR
 ```mermaid
 flowchart LR
   n17840a4c3d[("pkgs stable/x86_64-linux")]
-  nd18f01cdeb["app-1"]
   n259a0eb06e["app-2"]
+  n9901f2bd1c["web-1"]
+  n47861ef990[("pkgs unstable/x86_64-linux")]
+  nd18f01cdeb["app-1"]
   n82d440be69["app-3"]
   ne7f551bf1b["lb"]
-  n9901f2bd1c["web-1"]
   nf4531efd27["web-2"]
-  n17840a4c3d -->|"leader"| nd18f01cdeb
-  n17840a4c3d -.->|"reuses"| n259a0eb06e
-  n17840a4c3d -.->|"reuses"| n82d440be69
-  n17840a4c3d -.->|"reuses"| ne7f551bf1b
+  n17840a4c3d -->|"leader"| n259a0eb06e
   n17840a4c3d -.->|"reuses"| n9901f2bd1c
-  n17840a4c3d -.->|"reuses"| nf4531efd27
+  n47861ef990 -->|"leader"| nd18f01cdeb
+  n47861ef990 -.->|"reuses"| n82d440be69
+  n47861ef990 -.->|"reuses"| ne7f551bf1b
+  n47861ef990 -.->|"reuses"| nf4531efd27
 ```
 
 **Research and pattern maps** (in `vic/` of the yen repository): `ai-infra-research.md`, `clan-patterns.txt`, `den-census.md`, `den-patterns.md`, `design.md`, `evalmodules-research.md`, `gen-query-research.txt`, `hoag-ci-patterns.txt`, `modlist-research.md`, `quipu-lessons.md`, `sini-patterns.md`.
