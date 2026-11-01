@@ -20,6 +20,13 @@ and `yen.lib.is` makes a type from any function.
 | `yen.lib.attrsOf type` | none: an attrset whose values pass the type |
 | `yen.lib.enum [ … ]` | none: one of the listed values |
 
+:::caution[WARNING: use `yen.lib.listOf` and `yen.lib.attrsOf`, not nixpkgs]
+nixpkgs `listOf` and `attrsOf` check only the outer shape. Their items are checked in `merge`, which yen
+never calls. So `(nixpkgs.lib.listOf x).check [ "a" ]` is `true` when `x` is an int, and the same holds for
+`attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item in `check`. See
+[the caution on nixpkgs composite types](/principles/modules/#types-anything-with-check).
+:::
+
 ```nix title="modules/host.nix" {13-14}
 # A type is anything with `check = value: bool`. yen adds defaults on top of it.
 { yen, lib, ... }:

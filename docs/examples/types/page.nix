@@ -54,6 +54,12 @@
           ]
         ]
       )
+      (docs.caution "WARNING: use `yen.lib.listOf` and `yen.lib.attrsOf`, not nixpkgs" ''
+        nixpkgs `listOf` and `attrsOf` check only the outer shape. Their items are checked in `merge`, which yen
+        never calls. So `(nixpkgs.lib.listOf x).check [ "a" ]` is `true` when `x` is an int, and the same holds for
+        `attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item in `check`. See
+        [the caution on nixpkgs composite types](/principles/modules/#types-anything-with-check).
+      '')
       (docs.fileWith "{13-14}" "modules/host.nix")
       ''
         Fields can nest. `settings.kernel.channel` is one field at a path, with its own type and default.
