@@ -7,7 +7,7 @@
 }:
 let
   inherit (yen.lib) opt is;
-  strs = lib.types.listOf lib.types.str;
+  strs = yen.lib.listOf lib.types.str;
 in
 {
   yen.kinds.fleet = {

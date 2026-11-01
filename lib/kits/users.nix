@@ -18,7 +18,7 @@ in
     roles.default.interface = {
       user.type = lib.types.str;
       groups = {
-        type = lib.types.listOf lib.types.str;
+        type = yen.lib.listOf lib.types.str;
         default = [ ];
       };
       shell = {

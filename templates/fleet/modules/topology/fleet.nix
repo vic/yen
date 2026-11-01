@@ -36,7 +36,7 @@ in
       };
       overlays = { }; # machines read it
       records = {
-        of = lib.types.attrsOf lib.types.str;
+        of = yen.lib.attrsOf lib.types.str;
         reduce = merge;
       }; # every machine's A record; prod reads it
       scrape.of = yen.lib.is (v: lib.isString (v.job or null) && lib.isString (v.target or null));

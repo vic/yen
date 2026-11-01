@@ -44,7 +44,7 @@ let
         fields.hosts = yen.helpers.listOf yen.kinds.host;
         spawns = { };
       }; # a link: refs, not containment
-      yen.helpers.listOf = t: yen.lib.is (v: lib.isList v && lib.all t.check v);
+      yen.helpers.listOf = yen.lib.listOf;
       yen.fleet.main = { };
       yen.env.prod = { };
       yen.host = {

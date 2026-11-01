@@ -11,8 +11,8 @@ let
     maybe
     opt
     is
+    listOf
     ;
-  listOf = t: is (v: lib.isList v && lib.all t.check v);
   meets = xs: ys: lib.any (x: lib.any (same x) ys) xs;
 in
 {

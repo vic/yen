@@ -20,7 +20,7 @@ in
       layout.type = yen.kinds.layout // {
         description = "layout ref";
       };
-      authorizedKeys.type = lib.types.listOf lib.types.str;
+      authorizedKeys.type = yen.lib.listOf lib.types.str;
       hardware.type = lib.types.path;
     };
     # a kit that needs others: one assembly of each, on the machines of the base's role

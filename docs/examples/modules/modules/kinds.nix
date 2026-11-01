@@ -8,7 +8,7 @@
     fields = {
       addr = lib.types.str;
       firewall.enable = yen.lib.opt lib.types.bool false; # mkEnableOption: a nested field with a default
-      firewall.ports = yen.lib.opt (lib.types.listOf lib.types.port) [ ]; # checks the list, not its items
+      firewall.ports = yen.lib.opt (yen.lib.listOf lib.types.port) [ ]; # checks every item
     };
     spawns.user = h: lib.filterAttrs (_: u: yen.lib.same u.on h) yen.user;
     sinks.nixos.reduce = yen.lib.reduce.merge;
