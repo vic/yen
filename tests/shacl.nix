@@ -1,6 +1,7 @@
 # yen shacl oracles. Run: nix-instantiate --eval --strict tests/shacl.nix -A failed   (expect [ ])
+self:
 let
-  yen = (import ../default.nix).lib;
+  yen = self.api;
   rdf = yen.rdf;
   b = builtins;
 
@@ -61,8 +62,6 @@ let
       )
     );
   f = "<https://yen.dev/fleet/";
-in
-rec {
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
   yes = x: eq x true;
@@ -107,5 +106,5 @@ rec {
       triples = eq (rdf.triples rRev) (rdf.triples rFwd);
     };
   };
-  tests = checks;
-}
+in
+checks
