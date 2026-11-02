@@ -9,8 +9,8 @@ when something reads it. A yen fleet is a fixpoint too, in two layers:
 
 - **Declarations.** Every module gets `yen`, which is computed from the declarations of all modules,
   its own too. A module reads `yen.host.a.addr` from any file, as a NixOS module reads `config.x`.
-- **Results.** An element reads the reduced value of a sink through an arg. That value can hold elements
-  that read other sinks. Sinks feed sources and sources feed sinks; laziness closes the loop.
+- **Results.** An element reads the reduced value of a [sink](/behavior/sinks/) through an arg. That value can hold elements
+  that read other sinks. Sinks feed [sources](/behavior/cycle/) and sources feed sinks; laziness closes the loop.
 
 The order of the files and of the definitions never matters.
 

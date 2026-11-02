@@ -19,14 +19,14 @@
       ''
         A yen module looks like a NixOS module: a path, a function or an attrset, with `imports`. It is not one.
         yen does not use the NixOS module system and does not depend on nixpkgs: it uses Nix builtins only.
-        A module is a function `sources -> sinks`, as in Cycle. Its keys:
+        A module is a function `sources -> sinks`, as in [Cycle](/behavior/cycle/). Its keys:
 
         - `imports`: more yen modules.
         - `yen`: every declaration.
         - any other key: a module sink, such as `lib` or `inputs`. Any module reads a sink as an arg.
 
         There is no `options` and no `config`. A sink that no module reads or declares is an error. So is a
-        key that yen does not read inside `yen` or inside a kind:
+        key that yen does not read inside `yen` or inside a [kind](/model/kinds-fields/):
       ''
       (docs.file "variants/nixos-style.nix")
       (docs.value (map (e: { inherit (e) code error path; }) (variant "variants/nixos-style.nix").errors))

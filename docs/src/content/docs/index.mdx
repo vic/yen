@@ -4,7 +4,7 @@
 
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-**yen is a query language for Nix configurations.** You write plain Nix data and behavior.
+**yen is a [query](/query/queries/) language for Nix configurations.** You write plain Nix data and behavior.
 yen answers queries on it: the NixOS, nix-darwin and home-manager systems to build, the errors,
 the graph of who gives what to whom, and whether your rules hold.
 
@@ -12,12 +12,12 @@ the graph of who gives what to whom, and whether your rules hold.
 <CardGrid>
 <Card title="Data is queried, not merged" icon="magnifier">
 
-Kinds, instances and typed fields are data. Content in many files never overwrites itself.
+[Kinds](/model/kinds-fields/), instances and typed fields are data. Content in many files never overwrites itself.
 
 </Card>
 <Card title="Behavior lands where you say" icon="puzzle">
 
-An aspect is active where its predicate holds. Its elements go to the nearest scope that collects them.
+An [aspect](/behavior/aspects/) is active where its predicate holds. Its elements go to the nearest [scope](/model/scopes/) that collects them.
 
 </Card>
 <Card title="Questions have answers" icon="approve-check">

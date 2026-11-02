@@ -20,7 +20,7 @@
         [
           [
             "a kind name (`host`, `environment`)"
-            "the nearest ancestor-or-self scope of that kind"
+            "the nearest ancestor-or-self [scope](/model/scopes/) of that kind"
           ]
           [
             "a sink name (`backends`)"

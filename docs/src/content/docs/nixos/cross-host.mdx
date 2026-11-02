@@ -10,7 +10,7 @@ backup targets. The usual answers:
 - A hand-written list of hosts in a shared file. It goes out of date when you add a host.
 - `self.nixosConfigurations.<other>.config` through `specialArgs`. When two hosts read derived values from
   each other, the evaluation can recurse without end.
-- The *collector aspect* of the
+- The *collector [aspect](/behavior/aspects/)* of the
   [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects):
   each host feature adds its own device to a shared NixOS module. It works, but every host gets every
   contribution, its own included.

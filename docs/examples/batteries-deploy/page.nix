@@ -11,7 +11,7 @@
       ''
         | Battery | Value of | Gives |
         |---|---|---|
-        | `deploy.colmena { from; makeHive; meta; }` | `out` of a merge sink of `{ <host> = module; }` | `colmenaHive` |
+        | `deploy.colmena { from; makeHive; meta; }` | `out` of a merge [sink](/behavior/sinks/) of `{ <host> = module; }` | `colmenaHive` |
         | `deploy.deploy-rs { configurations; hostname; activate; sshUser; }` | a function, in `yen.flake` | `deploy.nodes` from built configs |
         | `terranix.configuration { from; terranixConfiguration; system; name; }` | `out` of a terraform module sink | `terraformConfigurations.<name>` |
         | `k8s.manifests { from; lib; output; }` | `out` of a sink of manifest modules | `k8sManifests.<scope name>`, merged with the module system |

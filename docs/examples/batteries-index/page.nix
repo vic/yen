@@ -17,7 +17,7 @@
         - Generic batteries, at the top of `yen.lib.batteries`, know no domain: `mesh`, `claim`, `ordered`.
         - A pack is the batteries of one domain, under its name: `yen.lib.batteries.nixos`.
 
-        A battery never adds a word to your fleet. You write `yen.kinds.…`, the sinks and the aspects with your own
+        A battery never adds a word to your fleet. You write `yen.kinds.…`, the [sinks](/behavior/sinks/) and the [aspects](/behavior/aspects/) with your own
         names. The battery is the value of one key. It reads only `scope` and `sinks`, and it takes the sinks it reads
         as refs, so it works in any fleet:
       ''

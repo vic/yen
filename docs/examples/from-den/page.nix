@@ -8,9 +8,9 @@
     { docs, ... }:
     [
       ''
-        [Den](https://github.com/denful/den) and yen share the aspect idea. The difference is where structure comes from.
-        Den gives you a schema: `den.hosts`, users, homes and context pipes. In yen you declare those kinds yourself, in
-        plain Nix, and every rule of how content moves is a sink you can read.
+        [Den](https://github.com/denful/den) and yen share the [aspect](/behavior/aspects/) idea. The difference is where structure comes from.
+        Den gives you a schema: `den.hosts`, users, homes and context pipes. In yen you declare those [kinds](/model/kinds-fields/) yourself, in
+        plain Nix, and every rule of how content moves is a [sink](/behavior/sinks/) you can read.
 
         This page moves Den's default template to yen. The docs evaluate both and check that the host gets the same
         account, groups, home, packages and state versions.

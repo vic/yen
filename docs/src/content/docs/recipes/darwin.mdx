@@ -5,7 +5,7 @@
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 Many options mean the same on NixOS and nix-darwin: `networking.hostName`, `environment.systemPackages`,
-`nix.settings`. Write them once. A `host` forwards its `os` sink to `nixos`, and a `mac` forwards it to `darwin`.
+`nix.settings`. Write them once. A `host` forwards its `os` [sink](/behavior/sinks/) to `nixos`, and a `mac` forwards it to `darwin`.
 
 
 ```nix title="modules/platforms.nix" {12-13,24-25}

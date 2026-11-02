@@ -28,10 +28,10 @@
 
         ## Open an issue: bring code
 
-        An issue must have a yen module that shows the problem. The issue form asks for one. This is not a formality:
+        An issue must have a yen [module](/principles/modules/) that shows the problem. The issue form asks for one. This is not a formality:
         CI evaluates every `nix` block of the issue as one fleet and comments the answer, often before a person reads it.
 
-        Each block is one module of `modules/`. Declare the kinds it needs; `lib` is nixpkgs lib. For example:
+        Each block is one module of `modules/`. Declare the [kinds](/model/kinds-fields/) it needs; `lib` is nixpkgs lib. For example:
       ''
       (docs.file "issue/block-1.nix")
       (docs.file "issue/block-2.nix")

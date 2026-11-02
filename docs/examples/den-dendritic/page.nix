@@ -11,7 +11,7 @@
       ''
         Den is one way to write dendritic Nix. The
         [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects)
-        names eight aspect patterns that recur in dendritic configurations. Most Den users know them, by these names or
+        names eight [aspect](/behavior/aspects/) patterns that recur in dendritic configurations. Most Den users know them, by these names or
         by others. This page gives the yen form of each.
 
         In the guide, each pattern is a different way to write `flake.modules.<class>.<aspect>` and its `imports`. In yen
@@ -43,7 +43,7 @@
           [
             "Collector"
             "each host feature adds its part to a shared module"
-            "a sink at a common parent, read back with `entries`: [Facts from other hosts](/nixos/cross-host/)"
+            "a [sink](/behavior/sinks/) at a common parent, read back with `entries`: [Facts from other hosts](/nixos/cross-host/)"
           ]
           [
             "Constants"
@@ -58,7 +58,7 @@
           [
             "Factory"
             "a function that returns modules, such as `user \"bob\" true`"
-            "a kind and its instances, with fields for the arguments, below"
+            "a [kind](/model/kinds-fields/) and its instances, with fields for the arguments, below"
           ]
         ]
       )

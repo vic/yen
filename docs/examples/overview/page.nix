@@ -8,7 +8,7 @@
     { docs, result, ... }:
     [
       ''
-        yen is a query language for Nix configurations. You declare data and behavior in plain Nix files.
+        yen is a [query](/query/queries/) language for Nix configurations. You declare data and behavior in plain Nix files.
         yen answers queries on them: the systems to build, the errors, and the graph of who gives what to whom.
 
         yen is one small Nix file. It uses Nix builtins only: no nixpkgs, no module system, no flakes.

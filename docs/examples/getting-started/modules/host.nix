@@ -7,13 +7,13 @@
 }:
 {
   yen.kinds.host = {
-    fields.system = lib.types.str;
+    fields.system = lib.types.str; # (1)
     sinks.nixos.out =
-      { host, nixos, ... }:
+      { host, nixos, ... }: # (2)
       {
         nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem {
           inherit (host) system;
-          modules = nixos;
+          modules = nixos; # (3)
         };
       };
   };

@@ -12,7 +12,7 @@ Writing Nix is a poor interface for an agent: it can write anything, and a typo 
 |---|---|
 | `{ op = "set"; path; value; }` | one declaration path gets a value |
 | `{ op = "ref"; path; kind; name; }` | one declaration path gets an instance ref |
-| `{ op = "place"; aspect; kind; name; }` | the aspect is also active at that instance |
+| `{ op = "place"; aspect; kind; name; }` | the [aspect](/behavior/aspects/) is also active at that instance |
 | `{ op = "new"; kind; name; fields; }` | a new instance; a field `{ ref = { kind; name; }; }` is a ref |
 
 ```json title="programs/new-cache.json"

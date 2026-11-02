@@ -9,7 +9,7 @@
     [
       ''
         A person uses several machines. Some run NixOS, some only home-manager. In yen the person is data,
-        and their home is one aspect that is active in both places.
+        and their home is one [aspect](/behavior/aspects/) that is active in both places.
       ''
       (docs.fileWith "{15,20}" "modules/fleet.nix")
       ''

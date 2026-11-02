@@ -13,7 +13,7 @@
     }:
     [
       ''
-        A sink on a kind collects the elements that aspects give, and reduces them to one value.
+        A sink on a [kind](/model/kinds-fields/) collects the elements that [aspects](/behavior/aspects/) give, and reduces them to one value.
         `of` checks each element.
       ''
       (docs.table
@@ -21,7 +21,7 @@
         [
           [
             "`list` (default)"
-            "the elements in scope order"
+            "the elements in [scope](/model/scopes/) order"
             "none"
           ]
           [

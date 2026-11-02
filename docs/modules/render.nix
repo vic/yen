@@ -24,6 +24,14 @@ let
       )
     ); # continuation lines only
   attr = v: lib.replaceStrings [ "\"" ] [ "&quot;" ] v;
+  # the fence marks of a text: one quoted "(n)" for each `# (n)` note in it, once each, in order
+  notesOf =
+    text:
+    lib.concatMapStringsSep " " (n: ''"(${n})"'') (
+      lib.unique (
+        map builtins.head (builtins.filter builtins.isList (builtins.split "# \\(([0-9]+)\\)" text))
+      )
+    );
   # every file of a template, as Starlight's FileTree list
   treeOf =
     dir: pre:
@@ -48,6 +56,15 @@ let
         ]
       )) (builtins.readFile (dir + "/${p}"));
     file = fileWith "";
+    # a file with `# (1)` notes in its comments: each `(n)` is marked, so the prose can say "(1)" and the reader finds the line
+    fileNoted =
+      meta: p:
+      fileWith (lib.concatStringsSep " " (
+        lib.filter (x: x != "") [
+          meta
+          (notesOf (builtins.readFile (dir + "/${p}")))
+        ]
+      )) p;
     code = lang: text: fence lang "" text;
     nix = code "nix";
     sh = text: fence "sh" ''frame="terminal"'' text;
@@ -235,6 +252,7 @@ let
           lib
           pages
           commands
+          notesOf
           eq
           yes
           no

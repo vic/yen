@@ -12,7 +12,7 @@ appear in most Den configurations on GitHub.
 | Den | yen |
 |---|---|
 | `den.aspects.base` written in 26 files | the same: `yen.aspects.base` in many files; nothing is lost, see below |
-| `den.default.includes = [ base ]` | `at = yen.kinds.host` on the aspect |
+| `den.default.includes = [ base ]` | `at = yen.kinds.host` on the [aspect](/behavior/aspects/) |
 | a host's `includes` or `provides.to-users.includes = [ desktop openssh … ]` | the host file adds the host to each feature's `at` |
 | `(den.aspects.facter ./facter.json)`, `(mount-cifs "//nas/media")` | a host field, and one aspect whose `at` tests the field |
 | `den.aspects.pol.provides.x280`, `host-aspects` | an aspect at `all [ yen.user.pol (within yen.host.x280) ]` |

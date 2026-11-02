@@ -13,7 +13,7 @@
     }:
     [
       ''
-        A kind is also a type. A field of type `yen.kinds.environment` holds a ref to an environment instance:
+        A [kind](/model/kinds-fields/) is also a type. A field of type `yen.kinds.environment` holds a ref to an environment instance:
         `yen.environment.prod`, never the string `"prod"`.
       ''
       (docs.file "modules/kinds.nix")

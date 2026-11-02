@@ -8,7 +8,7 @@
     { docs, result, ... }:
     [
       ''
-        The keys of a sink, other than `reduce`, `of`, `at` and `out`, give elements to other sinks.
+        The keys of a [sink](/behavior/sinks/), other than `reduce`, `of`, `at` and `out`, give elements to other sinks.
         They run at the receiver, with the receiver's args. You already know one: `out` gives to the flake.
       ''
       (docs.fileWith "{8,15}" "modules/sinks.nix")

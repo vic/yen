@@ -17,18 +17,18 @@
     in
     [
       ''
-        Docs drift when they are written by hand. These batteries make them from the fleet itself: a renamed kind, a new
+        Docs drift when they are written by hand. These batteries make them from the fleet itself: a renamed [kind](/model/kinds-fields/), a new
         host or a moved line shows up in the next `nix run .#write-files`, or fails the eval.
 
         | Battery | Gives |
         |---|---|
         | `mermaid.flowchart { direction; shapes; } view` | the text of a flowchart; a node that others name as `group` is a subgraph |
-        | `mermaid.scopes { keep; label; group; edge; } graph` | a view of the scopes, each under its parent |
+        | `mermaid.scopes { keep; label; group; edge; } graph` | a view of the [scopes](/model/scopes/), each under its parent |
         | `mermaid.routes graph`, `mermaid.routing graph` | who gives what to whom; at kind level with counts |
-        | `mermaid.kinds kinds`, `mermaid.sinks lib` | spawns and ref fields; sinks that give to sinks and to flake outputs |
-        | `mermaid.gates aspects` | the aspects other aspects name in `at`, and what each reads (dashed under `not`) |
+        | `mermaid.kinds kinds`, `mermaid.sinks lib` | [spawns](/model/scopes/) and ref fields; [sinks](/behavior/sinks/) that give to sinks and to flake outputs |
+        | `mermaid.gates aspects` | the [aspects](/behavior/aspects/) other aspects name in `at`, and what each reads (dashed under `not`) |
         | `docs.table head rows`, `docs.kinds kinds graph` | markdown tables |
-        | `docs.links { root; base; }` | a reduce: links to the first line that contains a needle; a gone needle is an error |
+        | `docs.links { root; base; }` | a [reduce](/behavior/sinks/): links to the first line that contains a needle; a gone needle is an error |
         | `docs.vocabulary { what; names; lines; }` | errors: a live name with no doc line, a doc line with no live name |
         | `docs.templates { root; description; }` | flake templates from the directories that have a flake.nix (these docs use it) |
 

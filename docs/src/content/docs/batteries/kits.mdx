@@ -6,13 +6,13 @@ import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Ta
 
 A kit is data: it has roles, each role has typed settings, members export values to each other, and kits
 declare the secrets they generate. An assembly is one use of a kit: its `kit` is a ref, and each role takes the
-machines where its `at` predicate holds, the same predicates an aspect uses. `yen.lib.batteries.kits` gives
-the rules. You keep the words: here the machine kind is `machine` and the member kind is `member`.
+machines where its `at` predicate holds, the same predicates an [aspect](/behavior/aspects/) uses. `yen.lib.batteries.kits` gives
+the rules. You keep the words: here the machine [kind](/model/kinds-fields/) is `machine` and the member kind is `member`.
 
 | Battery | Value of | Does |
 |---|---|---|
 | `members { assemblies; holds; }` | `spawns.<member kind>` of a machine kind | one member per (assembly, role), with refs to its assembly and kit; settings layered: interface default, then the role's (attrs, or a function of the machine) |
-| `exports { isMember; }` | `reduce` of the exports sink | members write their own entry; another scope overrides an entry by refs; an unlisted export is an error |
+| `exports { isMember; }` | `reduce` of the exports [sink](/behavior/sinks/) | members write their own entry; another [scope](/model/scopes/) overrides an entry by refs; an unlisted export is an error |
 | `contract { assemblies; machines; holds; }` | `errors` | a kit that is no kit, an unknown role, an `at` that is no predicate, no roles, min and max machines per role, `maxAssemblies` |
 | `settings-typed` | `errors` at a member | every interface setting is set and has its type |
 

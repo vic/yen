@@ -32,8 +32,8 @@
       ''
         ## The fleet
 
-        yen has no built-in kinds. You say what a fleet is. The root kind is the one that nothing spawns.
-        Here the root `fleet` spawns every host, and its `out` sink is the flake.
+        yen has no built-in [kinds](/model/kinds-fields/). You say what a fleet is. The root kind is the one that nothing [spawns](/model/scopes/).
+        Here the root `fleet` spawns every host, and its `out` [sink](/behavior/sinks/) is the flake.
       ''
       (docs.file "modules/fleet.nix")
       ''
@@ -42,8 +42,11 @@
         A kind has `fields` (the data of each instance) and `sinks` (where behavior goes).
         The `nixos` sink collects NixOS modules. Its `out` key gives the built system to the flake.
       ''
-      (docs.fileWith "{13}" "modules/host.nix")
+      (docs.fileNoted "" "modules/host.nix")
       ''
+        `(1)` is a field: every host has a `system`, and it must be a string. `(2)` is the `out` function of the `nixos` sink.
+        yen fills `host` and `nixos` for you. At `(3)`, every NixOS module the sink collected goes to `nixosSystem`.
+
         ## Behavior
 
         An aspect is active where its `at` holds. Each key of an aspect gives one element to the sink
@@ -83,9 +86,16 @@
       eq,
       yes,
       no,
+      notesOf,
       ...
     }:
     {
+      # the fence marks of `docs.fileNoted`: each `# (n)` once, in order; a plain `(1)` is no note
+      notes = {
+        listed = eq (notesOf "a # (1)\nb # (2)\nc # (3)\nd # (3)") ''"(1)" "(2)" "(3)"'';
+        gaps = eq (notesOf "a # (1)\nc # (3)") ''"(1)" "(3)"'';
+        plain-text = eq (notesOf "no notes (1) here") "";
+      };
       scopes = eq (map (s: s.id) result.graph.scopes) ([
         "fleet:main"
         "fleet:main/host:laptop"

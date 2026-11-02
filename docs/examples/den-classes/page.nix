@@ -9,11 +9,11 @@
     { docs, ... }:
     [
       ''
-        In Den, a custom class is a new aspect key, such as `nix` or `persist`, and `den.batteries.forward` sends its
+        In Den, a custom class is a new [aspect](/behavior/aspects/) key, such as `nix` or `persist`, and `den.batteries.forward` sends its
         content into another class at a path: `fromClass`, `intoClass`, `intoPath`, `adaptArgs`. It is the fifth most
         used battery in public Den configurations.
 
-        In yen a custom class is a sink. Aspects give elements to it by its name. The sink's other keys give the reduced
+        In yen a custom class is a [sink](/behavior/sinks/). Aspects give elements to it by its name. The sink's other keys give the reduced
         content to other sinks, such as `nixos` or `homeManager`, and the function places it at any path. There is no
         `adaptArgs`: the function gets yen args, and the content is plain data.
       ''
@@ -30,7 +30,7 @@
           ]
           [
             "`intoClass`, `each = [ \"nixos\" \"homeManager\" ]`"
-            "one key per target, on each kind that has the sink"
+            "one key per target, on each [kind](/model/kinds-fields/) that has the sink"
           ]
           [
             "`intoPath = _: [ \"nix\" \"settings\" ]`"

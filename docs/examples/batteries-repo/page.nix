@@ -10,7 +10,7 @@
     [
       ''
         A repo has files that should follow the code: the README, the CI workflow, a matrix of CI targets, the dev shell,
-        `flake.nix`. These batteries write them from sinks, so any aspect can add a section, a job, a target or an input.
+        `flake.nix`. These batteries write them from [sinks](/behavior/sinks/), so any [aspect](/behavior/aspects/) can add a section, a job, a target or an input.
         [github:sini/files](https://github.com/sini/files) writes them (`nix run .#write-files`) and gives a check per
         file: CI fails when a committed file is stale.
 

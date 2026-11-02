@@ -8,7 +8,7 @@
     { docs, result, ... }:
     [
       ''
-        yen does not know what a flake is. The root kind declares an `out` sink with `merge`, and `yen.flake`
+        yen does not know what a flake is. The root [kind](/model/kinds-fields/) declares an `out` [sink](/behavior/sinks/) with `merge`, and `yen.flake`
         gives the flake's outputs. Each sink with an `out` key gives its part.
       ''
       (docs.fileWith "{6,8-11}" "modules/fleet.nix")
