@@ -68,6 +68,19 @@ let
       }
       // lib.optionalAttrs (!lib.elem command fast) { needs = after area; }
     );
+  # diagnostic: on a failed job, show memory and the kernel log, so an OOM kill is visible (exit 143 on fleet-e2e)
+  memoryAtFailure =
+    j:
+    j
+    // {
+      steps = j.steps ++ [
+        {
+          name = "memory at failure (diagnostic)";
+          "if" = "failure()";
+          run = "free -m; sudo dmesg | tail -40";
+        }
+      ];
+    };
   # jobs that break the order: a fast job with `needs`, or another job without exactly fmt and a fast test
   disordered = lib.filterAttrs (
     n: j:
@@ -197,7 +210,7 @@ in
       fleet-test = one "fleet" { } "fleet checks" "fleet-test";
       fleet-cost = one "fleet" { } "trimmed module lists cost oracle" "fleet-cost";
       fleet-mcp = one "fleet" { } "MCP server and flake app" "fleet-mcp";
-      fleet-e2e = one "fleet" { timeout = 120; } "real evaluations (e2e)" "fleet-e2e";
+      fleet-e2e = memoryAtFailure (one "fleet" { timeout = 120; } "real evaluations (e2e)" "fleet-e2e");
       # no KVM: VM tests are `vmTests`, not checks (hosted runners cannot run guests reliably)
       flake-check = one "fleet" { timeout = 120; } "nix flake check of the fleet" "fleet-check";
     }

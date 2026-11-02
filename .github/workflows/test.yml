@@ -213,6 +213,10 @@
       -
         "name": "real evaluations (e2e)"
         "run": "nix develop ./docs -c fleet-e2e"
+      -
+        "if": "failure()"
+        "name": "memory at failure (diagnostic)"
+        "run": "free -m; sudo dmesg | tail -40"
     "timeout-minutes": 120
   "fleet-mcp":
     "needs":
