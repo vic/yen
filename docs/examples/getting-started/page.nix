@@ -86,9 +86,16 @@
       eq,
       yes,
       no,
+      notesOf,
       ...
     }:
     {
+      # the fence marks of `docs.fileNoted`: each `# (n)` once, in order; a plain `(1)` is no note
+      notes = {
+        listed = eq (notesOf "a # (1)\nb # (2)\nc # (3)\nd # (3)") ''"(1)" "(2)" "(3)"'';
+        gaps = eq (notesOf "a # (1)\nc # (3)") ''"(1)" "(3)"'';
+        plain-text = eq (notesOf "no notes (1) here") "";
+      };
       scopes = eq (map (s: s.id) result.graph.scopes) ([
         "fleet:main"
         "fleet:main/host:laptop"

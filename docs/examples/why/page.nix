@@ -36,7 +36,7 @@ in
         ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · [Reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
 
-        It is written for two kinds of fleet. In a home lab, a few hosts live in one flake and a typo is an evaluation error.
+        It is written for two kinds of fleet. In a home lab, a few hosts live in one flake and a mistake fails at evaluation, before a deploy.
         In a business with a large infra, rules have to hold across all machines, and they are checked before anything is built.
 
         ## Main Concepts
@@ -74,7 +74,7 @@ in
 
       ''
 
-        To start with a NixOS host instead, run `nix flake init -t github:vic/yen#getting-started`. The rest of this page goes
+        To start with a NixOS host instead, run `nix flake init -t github:vic/yen#minimal`. The rest of this page goes
         deeper. Open the sections you need.
 
         <details>
