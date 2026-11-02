@@ -17,7 +17,8 @@ in
   inputs.nixpkgs = {
     outPath = nixpkgs;
     lib = lib // {
-      nixosSystem = args: import "${nixpkgs}/nixos/lib/eval-config.nix" args;
+      # system = null: the platform comes from nixpkgs.hostPlatform, as in lib.nixosSystem
+      nixosSystem = args: import "${nixpkgs}/nixos/lib/eval-config.nix" ({ system = null; } // args);
     };
   };
   inherit lib;

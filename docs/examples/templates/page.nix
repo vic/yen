@@ -91,7 +91,5 @@ in
       e2e-every-template = eq (builtins.attrNames (builtOf { })) names;
     };
 
-  e2e =
-    { inputs, eq, ... }:
-    checksOf eq (builtOf inputs);
+  e2e = { inputs, eq, ... }: checksOf eq (builtOf inputs);
 }
