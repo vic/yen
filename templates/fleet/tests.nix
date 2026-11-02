@@ -1756,10 +1756,16 @@ let
         };
     };
     svc-wifi-psk = {
-      t1 = eq ((red "generators" "fleet:main")."wifi.wifi".files) ({
-        "psk.home".secret = true;
-        "psk.office".secret = true;
-      });
+      # one generator per network, each with one secret file `psk`
+      t1 =
+        eq
+          (lib.mapAttrs (_: g: g.files) (
+            lib.filterAttrs (k: _: lib.hasPrefix "wifi.wifi." k) (red "generators" "fleet:main")
+          ))
+          ({
+            "wifi.wifi.home".psk.secret = true;
+            "wifi.wifi.office".psk.secret = true;
+          });
       # another assembly's networks get their own files and none of wifi's
       t2 =
         let
@@ -1776,9 +1782,38 @@ let
             }
           );
         in
-        eq ((x.reduced.generators."fleet:main")."wifi.wifi2".files) ({
-          "psk.lab".secret = true;
-        });
+        eq (lib.filter (lib.hasPrefix "wifi.wifi2.") (lib.attrNames x.reduced.generators."fleet:main")) ([
+          "wifi.wifi2.lab"
+        ]);
+      # a dot in an assembly or network name is an error: "a.b" + "c" and "a" + "b.c" would share one generator
+      t3 = yes (
+        hasMsg (with' (
+          { yen, ... }:
+          {
+            yen.assembly."wifi.x" = {
+              kit = yen.kit.wifi;
+              roles.default = {
+                at = yen.host.web-2;
+                settings.networks.lab = { };
+              };
+            };
+          }
+        )) "wifi: wifi.x has a dot.*"
+      );
+      t4 = yes (
+        hasMsg (with' (
+          { yen, ... }:
+          {
+            yen.assembly.wifi3 = {
+              kit = yen.kit.wifi;
+              roles.default = {
+                at = yen.host.web-2;
+                settings.networks."b.c" = { };
+              };
+            };
+          }
+        )) "wifi: b.c has a dot.*"
+      );
     };
     svc-contract =
       let
@@ -2981,7 +3016,8 @@ let
         "user-svc-a@lb"
         "user-svc-b@lb"
         "wifi.home"
-        "wifi.wifi"
+        "wifi.wifi.home"
+        "wifi.wifi.office"
       ]);
       t2 = yes (
         hasMsg (with' (

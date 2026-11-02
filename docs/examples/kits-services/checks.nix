@@ -50,14 +50,19 @@ in
     t2 = eq web.services.borgbackup.jobs.backup.startAt "02:00";
   };
   wifi = {
-    t3 = yes (!builtins.any (f: f.file == "psk.guest") result.flake.varsPlan.web.files); # only declared networks get a file
+    t3 = yes (!builtins.any (f: f.generator == "wifi.wifi.guest") result.flake.varsPlan.web.files); # only declared networks get a generator
     t1 = eq web.environment.etc."wifi/networks".text "home office";
+    # one generator per network, each with one file `psk`
     t2 =
       eq
-        (map (f: f.file) (builtins.filter (f: f.generator == "wifi.wifi") result.flake.varsPlan.web.files))
+        (map (f: "${f.generator}/${f.file}") (
+          builtins.filter (
+            f: builtins.match "wifi[.]wifi[.].*" f.generator != null
+          ) result.flake.varsPlan.web.files
+        ))
         [
-          "psk.home"
-          "psk.office"
+          "wifi.wifi.home/psk"
+          "wifi.wifi.office/psk"
         ];
   };
   two-servers = yes (has ".*cache2 role server: 2 machines, at most 1.*" "variants/two-servers.nix");

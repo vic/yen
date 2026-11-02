@@ -20,10 +20,14 @@
         | Battery | Value of | Gives |
         |---|---|---|
         | `disko { from; }` | a NixOS key | `disko.devices`: the merge of what the machine gave to sink `from` |
-        | `install.apps { from; pkgs; report; target; flake; }` | `out` of the machine's disks sink | `apps.<system>.install-<machine>`: nixos-anywhere with the disko layout, writing the facter report to `report` |
+        | `install.apps { from; pkgs; report; target; flake; }` | `out` of the machine's disks sink | `apps.<system>.install-<machine>`: nixos-anywhere with the disko layout, writing the facter report to the path `report` gives for the machine |
         | `deploy.rebuild { from; pkgs; flake; }` | `out` of the machine's deploy sink | `apps.<system>.rebuild-<machine>`: `nixos-rebuild switch --target-host user@address`, with `--build-host` when the deploy target has a `buildHost` |
 
         App names come from the scope name. No disks element, no install app; no deploy target, no rebuild app.
+        Arguments after `--` go to the tool: a deploy user that is not root runs `nix run .#rebuild-<machine> -- --sudo`.
+        `report` is a function from the machine to a path, such as `./facter/<machine>.json`. Point it into the directory
+        you give kit `facter` as `dir`: kit `facter` reads `<dir>/<machine>.json`. Commit the report after the install,
+        and the next build uses it. A machine with no report gets no facter config.
 
         | Kit | Role | Interface | Does |
         |---|---|---|---|

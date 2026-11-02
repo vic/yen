@@ -15,7 +15,8 @@
     [
       ''
         `yen.lib.kits` holds kits written as modules, so a fleet writes only assemblies. A kit that reads public values
-        takes `{ root; }`, the directory of the vars. Battery `addresses` gives each member an address of a prefix, in
+        takes `{ root; }`, the directory of the vars: the kit is a value in yen, not a file in your repo, so it cannot
+        find your vars by a relative path. Battery `addresses` gives each member an address of a prefix, in
         member order; a repeated address, a prefix that is no IPv4 /16 to /24 and a prefix too small are error records.
 
         | Kit | Roles | Interface | Does |

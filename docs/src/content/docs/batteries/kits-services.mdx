@@ -11,7 +11,7 @@ Each client reads what the servers of its own assembly export, never another ass
 | Kit | Roles | Server exports | Client does |
 |---|---|---|---|
 | `borg` | `client`, `server` (1) | `repo`, a known-hosts generator for the clients | `services.borgbackup.jobs` |
-| `wifi` | `default` with `networks` | | `/etc/wifi/networks`; one secret file `psk.<network>` in a generator shared by all machines of the role |
+| `wifi` | `default` with `networks` | | `/etc/wifi/networks`; a generator `wifi.<assembly>.<network>` per network, shared by all machines of the role, with one secret file `psk` |
 | `remote-builders` | `builder` (1 or more), `client` | `host`, `systems`, `speedFactor` | `nix.buildMachines`, with the battery `nixos.remote-builders` |
 | `nix-cache` | `server` (1), `client` | `url`, `key` (the ref of the generated `cache-key.pub`); a signing-key generator; harmonia with the `cache-key.pem` path | `nix.settings.substituters` and `trusted-public-keys`, read from the public var |
 | `monitoring` | `server` (1), `exporter` | exporter: `target` | server: `services.prometheus.scrapeConfigs`, one job per exporter |

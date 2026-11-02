@@ -1401,6 +1401,32 @@ let
         "c"
       ]);
       t3 = eq (gens.errors) ([ ]);
+      # an element may give a list of generators
+      t4 =
+        eq
+          (b.attrNames
+            (gen [
+              {
+                m = "a";
+                v = [
+                  {
+                    name = "p";
+                    files = { };
+                  }
+                  {
+                    name = "q";
+                    share = true;
+                    files = { };
+                  }
+                  null # a null in a list gives nothing, as a null element does
+                ];
+              }
+            ]).value
+          )
+          ([
+            "p@a"
+            "q"
+          ]);
     };
     vars-generators-dependency = eq (map (e: e.error) badDeps.errors) ([
       "vars: generator borg@c depends on nope, which c has not"

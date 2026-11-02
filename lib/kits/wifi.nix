@@ -1,7 +1,6 @@
-#: lib.kits.wifi :: module -- wifi kit: one role with `networks`; every network gets a PSK secret file in the assembly's generator
-# The generator is shared (all machines of the role get the same PSKs): one secret file `psk.<network>` per network.
-# A `generators` element is one attrset, so a generator per network is not possible. The network list lands in
-# /etc/wifi/networks; the PSK files are deployed by the vars plan.
+#: lib.kits.wifi :: module -- wifi kit: one role with `networks`; every network gets its own PSK generator
+# Generator `wifi.<assembly>.<network>` is shared (all machines of the role get the same PSK) and has one secret
+# file `psk`. The network list lands in /etc/wifi/networks; the PSK files are deployed by the vars plan.
 #   imports = [ inputs.yen.lib.kits.wifi ];
 { yen, lib, ... }:
 let
@@ -28,12 +27,16 @@ in
     inherit at;
     generators =
       { member, ... }:
-      {
-        name = "wifi.${member.assembly.name}";
+      map (n: {
+        name = "wifi.${member.assembly.name}.${n}";
         share = true;
-        files = lib.genAttrs (map (n: "psk.${n}") (lib.attrNames member.settings.networks)) (_: {
-          secret = true;
-        });
-      };
+        files.psk.secret = true;
+      }) (lib.attrNames member.settings.networks);
+    # a dot in a name would let two networks share one generator: assembly a.b with network c is a with b.c
+    errors =
+      { member, ... }:
+      map (n: "wifi: ${n} has a dot; assembly and network names must have none") (
+        lib.filter (lib.hasInfix ".") ([ member.assembly.name ] ++ lib.attrNames member.settings.networks)
+      );
   };
 }
