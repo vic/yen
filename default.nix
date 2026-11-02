@@ -1,6 +1,6 @@
 # yen: one fixpoint, united from the leaves of lib/. Builtins only.
 # A leaf is `self: value`, at the attr path of its file: lib/_core/helpers.nix is `_core.helpers`.
-# A directory is a nested attrset. A path component starting with `_` is private by convention: the public output is only what the bridge below exposes.
+# A directory is a nested attrset. A path component starting with `_` is private by convention: the public output is only what lib/api.nix lists.
 let
   b = builtins;
   stem = n: b.substring 0 (b.stringLength n - 4) n;
