@@ -23,11 +23,21 @@ let
         )
       )
     );
-  # the engine source: default.nix, every lib file
+  # the engine source: default.nix, every .nix under lib/ (recursive, as the loader reads it)
   engineFiles =
     dir:
-    map (n: dir + "/${n}") (
-      builtins.filter (n: builtins.match ".*\\.nix" n != null) (builtins.attrNames (builtins.readDir dir))
+    builtins.concatLists (
+      builtins.attrValues (
+        builtins.mapAttrs (
+          n: kind:
+          if kind == "directory" then
+            engineFiles (dir + "/${n}")
+          else if builtins.match ".*\\.nix" n != null then
+            [ (dir + "/${n}") ]
+          else
+            [ ]
+        ) (builtins.readDir dir)
+      )
     );
   engineText =
     yen:
@@ -57,6 +67,8 @@ let
     arity = "a rule atom has the wrong number of terms for its relation";
     unsafe-rule = "a variable of the head, a negative atom or a comparison is not bound by a positive atom";
     unencodable = "a field holds a float, a function or a derivation: no fact can state it";
+    claim = "a claimed key has more than one owner";
+    link-gone = "a doc link's needle is not found in its file";
     merge = "`merge`: two different leaves at one path";
     missing = "a required field has no value";
     missing-param = "a stored query is asked without a required parameter";
@@ -126,6 +138,15 @@ in
       ...
     }:
     {
+      # codes that live in subdirectories of lib/ are seen: the scan is recursive
+      subdir-codes-seen = yes (
+        builtins.all (c: builtins.elem c (codesOf (engineText inputs.yen))) [
+          "merge"
+          "one"
+          "error"
+          "claim"
+        ]
+      );
       every-code-explained = yes (builtins.all (c: meaning ? ${c}) (codesOf (engineText inputs.yen)));
     };
 }

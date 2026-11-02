@@ -18,18 +18,23 @@ The codes below are read from the engine source when the docs are written.
 | `bare-function` | an element is a function without named args (`x: …`): wrap it as `{ ... }:` |
 | `check` | a field value or a stored query parameter fails its type |
 | `check-not-bool` | a field type's check gives no bool (a curried check, such as a gen-types one, needs its other argument) |
+| `claim` | a claimed key has more than one owner |
 | `cycle` | an instance appears twice on its own scope path: `spawns` loops |
 | `edb-head` | a rule derives a fact yen extracts (`scope`, `instance`, `parent`, `kind`, `has`, `edge`, `error`, `ref`, `val`, or a comparison) |
+| `error` | a message from an aspect's `errors` key |
 | `external-not-bool` | a relation's `holds` function answers a tuple with something other than a bool |
 | `import-loop` | the `imports` of a module asks a sink that a module below it gives: a cycle in `result.modules` |
 | `invariant-data` | an invariant is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference |
 | `law-change` | a staged change declares `invariants`, `relations`, `labels` or `flake`: the law is the owner's, never a change's |
+| `link-gone` | a doc link's needle is not found in its file |
+| `merge` | `merge`: two different leaves at one path |
 | `missing` | a required field has no value |
 | `missing-param` | a stored query is asked without a required parameter |
 | `module` | a module asks for an arg no module gives or declares, or its `imports` or key names read an arg |
 | `not-a-literal` | a check question (`why`, `whyNot`, `proof`, `from`) is a hand-written list, not a literal by reference |
 | `not-a-scope` | a query takes a scope as a string or another value: pass an instance ref, `{ kind; name; }`, or a path of them |
 | `of` | a sink element, or a module's value for a `yen.sinks` sink, fails the sink's `of` type |
+| `one` | `one`: 0 or 2+ elements |
 | `order` | an `order` answer is not a number |
 | `outside-grant` | a staged change can reach a scope outside its grant |
 | `program` | a change program op is not valid |
