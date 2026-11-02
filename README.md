@@ -15,16 +15,8 @@ or anything else you can model as Nix values. You define your own domain languag
 [Documentation](https://yen.oeiuwq.com/) · [Getting started](https://yen.oeiuwq.com/start/getting-started/) · [A fleet on one page](https://yen.oeiuwq.com/start/one-page-fleet/) · [Reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
 
-## The Cycle model
-
-Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
-As in Cycle, an aspect <sup>[docs](https://yen.oeiuwq.com/behavior/aspects/)</sup> is a cycle <sup>[docs](https://yen.oeiuwq.com/behavior/cycle/)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
-to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](https://yen.oeiuwq.com/principles/modules/)</sup> follows the same model: its args are
-`sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
-
-For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.
-Most of the time, aspects are simple and look like plain Nix configurations. They need no knowledge of the underlying query model.
-
+It is written for two kinds of fleet. In a home lab, a few hosts live in one flake and a typo is an evaluation error.
+In a business with a large infra, rules have to hold across all machines, and they are checked before anything is built.
 
 ## Main Concepts
 
@@ -107,6 +99,23 @@ The output of this flake looks like this:
 ```
 
 
+To start with a NixOS host instead, run `nix flake init -t github:vic/yen#getting-started`. The rest of this page goes
+deeper. Open the sections you need.
+
+<details>
+<summary>How Yen works</summary>
+
+## The Cycle model
+
+Yen is designed around [Cycle.js](https://cycle.js.org) and other functional reactive programming principles.
+As in Cycle, an aspect <sup>[docs](https://yen.oeiuwq.com/behavior/aspects/)</sup> is a cycle <sup>[docs](https://yen.oeiuwq.com/behavior/cycle/)</sup> function `sources -> sinks`. It sends requests through its `sinks` to its parent cycles
+to observe the world, and it gets their answers back through `sources`. A yen module <sup>[docs](https://yen.oeiuwq.com/principles/modules/)</sup> follows the same model: its args are
+`sources`, and every key it gives, other than `imports` and `yen`, is a module sink that any module can read.
+
+For example, a user aspect can ask which host it lives on, or whether a service is enabled somewhere else in the fleet.
+Most of the time, aspects are simple and look like plain Nix configurations. They need no knowledge of the underlying query model.
+
+
 ## Design Principles
 
 Unlike the nixpkgs module system, where a type's `check` and `merge` are part of the same definition, Yen keeps data validation
@@ -120,6 +129,10 @@ From your definitions, Yen derives logic facts and relationships. You use them w
 that must hold across the parts of your fleet before it can even be built. Think of them as formal constraints over
 services or fleet members.
 
+</details>
+
+<details>
+<summary>Rules, reasons and values</summary>
 
 ## Two Logic Languages
 
@@ -341,6 +354,11 @@ Each verdict can come with a certificate. `yen.lib.datalog.checkCertificate` is 
 ties the verdict to hashes of the engine, the rules and the facts, so anyone can run `result.check.verify seal` again and get
 `{ ok = true; }`.
 
+</details>
+
+<details>
+<summary>Agents and errors</summary>
+
 ## Agents as first-class team members
 
 Everything in Yen is expressed as a query, and every answer is JSON-safe data. Agents can propose changes to your
@@ -365,6 +383,11 @@ The agent can show the staged answer to a person, with its violations, its diff 
 
 Errors are not throws. They are data that agents and humans can inspect, with **hints for fixes**: `code`, `path`,
 `got`, `want`, `fix`, and `near` for typos. <sup>[docs](https://yen.oeiuwq.com/principles/errors/)</sup>
+
+</details>
+
+<details>
+<summary>Everything Yen does</summary>
 
 ## Yen Capabilities
 
@@ -405,6 +428,8 @@ Errors are not throws. They are data that agents and humans can inspect, with **
 - **Editors and agent tools.** VS Code, Zed and one shared pool of agent skills and MCP servers. <sup>[docs](https://yen.oeiuwq.com/batteries/editors/)</sup>
 - **Export.** The fleet as sorted N-Triples with a checksum, and SHACL shapes for graph stores. <sup>[docs](https://yen.oeiuwq.com/agents/knowledge/)</sup>
 - **Migration.** Move from a single `configuration.nix`, a flake, or Den. <sup>[docs](https://yen.oeiuwq.com/migrate/from-configuration-nix/)</sup>
+
+</details>
 
 ## Try it
 
