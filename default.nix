@@ -52,6 +52,6 @@ let
   self = b.foldl' (acc: l: union acc (nest l.leaf (import l.file self))) { } leaves;
 in
 {
-  # R2': the monolith is the engine until R-eval; its `lib` is the public output (R6' replaces this bridge)
-  inherit (self._engine) lib;
+  # the public output is the flat list of lib/api.nix
+  lib = self.api;
 }

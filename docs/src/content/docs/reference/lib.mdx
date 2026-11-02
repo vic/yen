@@ -33,7 +33,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.kind`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L53) | `type` | a kind: yen.kinds.&lt;kind&gt; |
 | [`lib.listOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L48) | `type -> type` | a list whose elements pass the type; a list of refs is still a ref field |
 | [`lib.maybe`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L42) | `type -> type` | the type, or null (a maybe-ref is still a ref field) |
-| [`lib.mkFlake`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3135) | `sinks -> module -> flake` | the flake outputs of the fleet, or &#123; invalid-flake-errors &#125; when it has an error or a violation. |
+| [`lib.mkFlake`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3145) | `sinks -> module -> flake` | the flake outputs of the fleet, or &#123; invalid-flake-errors &#125; when it has an error or a violation. |
 | [`lib.narrow`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2663) | `grant -> grant -> grant` | two grants met: the scopes both cover, the sinks both allow; never wider |
 | [`lib.opt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L38) | `type -> default -> type` | the type, with a default when the field has no answer |
 | [`lib.secret`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L75) | `type -> type` | the type, but every answer states the value only by its sha256 |

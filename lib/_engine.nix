@@ -3128,25 +3128,34 @@ let
   };
 in
 {
-  lib = tools // {
-    inherit eval asOf history;
-    #: lib.mkFlake :: sinks -> module -> flake -- the flake outputs of the fleet, or { invalid-flake-errors } when it has an error or a violation.
-    # `sinks` is a root module: each of its keys but `imports` and `yen` is a module sink, declared for you
-    mkFlake =
-      sinks: m:
-      (eval {
-        imports = [
-          sinks
-          {
-            yen.sinks = mapAttrs (_: _: { }) (
-              removeAttrs sinks [
-                "imports"
-                "yen"
-              ]
-            );
-          }
-          m
-        ];
-      }).flake;
-  };
+  # the public names are listed in lib/api.nix
+  inherit (grants) grant narrow allowed;
+  inherit
+    eval
+    asOf
+    history
+    stage
+    change
+    program
+    diffData
+    without
+    ;
+  #: lib.mkFlake :: sinks -> module -> flake -- the flake outputs of the fleet, or { invalid-flake-errors } when it has an error or a violation.
+  # `sinks` is a root module: each of its keys but `imports` and `yen` is a module sink, declared for you
+  mkFlake =
+    sinks: m:
+    (eval {
+      imports = [
+        sinks
+        {
+          yen.sinks = mapAttrs (_: _: { }) (
+            removeAttrs sinks [
+              "imports"
+              "yen"
+            ]
+          );
+        }
+        m
+      ];
+    }).flake;
 }
