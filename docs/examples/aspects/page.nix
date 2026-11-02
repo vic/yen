@@ -8,8 +8,8 @@
     { docs, result, ... }:
     [
       ''
-        An aspect is one feature. It is active at every scope where its `at` predicate holds.
-        Each other key gives one element to the sink of that name. The element is a value, or a function
+        An aspect is one feature. It is active at every [scope](/model/scopes/) where its `at` predicate holds.
+        Each other key gives one element to the [sink](/behavior/sinks/) of that name. The element is a value, or a function
         that asks for args (see [Args](/behavior/args/)).
 
         In this example, hosts collect `packages`. Users live under hosts and have no `packages` sink,

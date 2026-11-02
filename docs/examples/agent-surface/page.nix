@@ -15,12 +15,12 @@ in
     { docs, result, ... }:
     [
       ''
-        An agent that manages a fleet works through queries. Every answer is data that `builtins.toJSON` prints,
+        An agent that manages a fleet works through [queries](/query/queries/). Every answer is data that `builtins.toJSON` prints,
         so a tool, a script or a model reads it the same way.
 
         ## One call to start
 
-        `result.agent` is the schema, the errors, the invariant check and the counts, JSON-safe:
+        `result.agent` is the schema, the errors, the [invariant](/query/invariants/) check and the counts, JSON-safe:
       ''
       (docs.value result.agent)
       ''

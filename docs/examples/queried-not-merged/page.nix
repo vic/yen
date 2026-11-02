@@ -14,7 +14,7 @@
     [
       ''
         The NixOS module system merges every definition into one value, then reads it.
-        yen does not merge. A read of a path is one query on the files that answer that path.
+        yen does not merge. A read of a path is one [query](/query/queries/) on the files that answer that path.
 
         Here two feature files declare settings at two paths of one field. Neither file knows the other:
       ''

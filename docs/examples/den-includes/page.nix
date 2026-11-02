@@ -22,7 +22,7 @@
           ]
           [
             "`den.default.includes = [ base ]`"
-            "`at = yen.kinds.host` on the aspect"
+            "`at = yen.kinds.host` on the [aspect](/behavior/aspects/)"
           ]
           [
             "a host's `includes` or `provides.to-users.includes = [ desktop openssh … ]`"

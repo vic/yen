@@ -6,7 +6,7 @@ import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Ta
 
 Den is one way to write dendritic Nix. The
 [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects)
-names eight aspect patterns that recur in dendritic configurations. Most Den users know them, by these names or
+names eight [aspect](/behavior/aspects/) patterns that recur in dendritic configurations. Most Den users know them, by these names or
 by others. This page gives the yen form of each.
 
 In the guide, each pattern is a different way to write `flake.modules.<class>.<aspect>` and its `imports`. In yen
@@ -19,10 +19,10 @@ each pattern is an aspect. What changes is its `at`, or the data it reads.
 | Multi context | a NixOS module adds a home module to `home-manager.sharedModules` | an aspect at the users `within` the hosts that have the feature: [System and home](/nixos/system-and-home/) |
 | Inheritance | `imports = [ parent ]` | the parent's `at` names the child aspect, below |
 | Conditional | `lib.mkMerge` and `lib.mkIf pkgs.stdenv.isLinux` | `at` tests a fact; `not` excludes, below |
-| Collector | each host feature adds its part to a shared module | a sink at a common parent, read back with `entries`: [Facts from other hosts](/nixos/cross-host/) |
+| Collector | each host feature adds its part to a shared module | a [sink](/behavior/sinks/) at a common parent, read back with `entries`: [Facts from other hosts](/nixos/cross-host/) |
 | Constants | a `generic` class module with `options.systemConstants` | a field of the fleet, read as the `fleet` arg, below |
 | DRY | a new class for values inside an attribute set of submodules | a sink that places its content at a path: [Custom classes](/den/classes/) |
-| Factory | a function that returns modules, such as `user "bob" true` | a kind and its instances, with fields for the arguments, below |
+| Factory | a function that returns modules, such as `user "bob" true` | a [kind](/model/kinds-fields/) and its instances, with fields for the arguments, below |
 
 ```nix title="modules/patterns.nix"
 # Five of the dendritic aspect patterns, in yen. Each one is an aspect; only its `at` differs.

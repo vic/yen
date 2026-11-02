@@ -14,7 +14,7 @@
     [
       ''
         yen never reads a secret. It plans which host gets which encrypted file, as data that a secrets tool
-        (agenix, sops-nix) reads. A secret is an instance of a data kind; its owners are host refs.
+        (agenix, sops-nix) reads. A secret is an instance of a data [kind](/model/kinds-fields/); its owners are host refs.
       ''
       (docs.fileWith "{12-17}" "modules/kinds.nix")
       (docs.file "modules/data.nix")

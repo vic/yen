@@ -5,7 +5,7 @@
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 `yen.lib.batteries.nixos` holds the NixOS rules that most fleets write. NixOS is the domain of these batteries:
-they set NixOS options. They still name no yen kind, sink or aspect. You write `yen.kinds.host`, the `nixos` and
+they set NixOS options. They still name no yen [kind](/model/kinds-fields/), [sink](/behavior/sinks/) or [aspect](/behavior/aspects/). You write `yen.kinds.host`, the `nixos` and
 `unfree` sinks and every aspect, in your own words.
 
 | Battery | Value of | Den |
@@ -16,7 +16,7 @@ they set NixOS options. They still name no yen kind, sink or aspect. You write `
 | `primary-user` | a NixOS key of an aspect | `den.batteries.primary-user` |
 | `unfree { from; }` | the NixOS key of a sink of package names | `den.batteries.unfree` |
 | `insecure { from; }` | the NixOS key of a sink of package names | `den.batteries.insecure` |
-| `user-shell { shell; }` | a NixOS key; `shell` reads the scope | `den.batteries.user-shell` |
+| `user-shell { shell; }` | a NixOS key; `shell` reads the [scope](/model/scopes/) | `den.batteries.user-shell` |
 | `autologin { user; }` | a NixOS key; `user` reads a ref or a name | `den.batteries.tty-autologin` |
 | `firewall { from; }` | the NixOS key of a sink of ports (`22` or `{ tcp; udp; }`) | quirks `firewall` |
 | `hosts { from; }` | a NixOS key; /etc/hosts and known_hosts of the other machines (`mesh`) | sini hostsfile |

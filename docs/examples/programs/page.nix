@@ -38,7 +38,7 @@
           ]
           [
             "`{ op = \"place\"; aspect; kind; name; }`"
-            "the aspect is also active at that instance"
+            "the [aspect](/behavior/aspects/) is also active at that instance"
           ]
           [
             "`{ op = \"new\"; kind; name; fields; }`"

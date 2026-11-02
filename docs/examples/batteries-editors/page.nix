@@ -10,12 +10,12 @@
     [
       ''
         An editor's extension list grows with every language you use, and every AI agent wants the same skills and MCP
-        servers in its own format. With these batteries a language aspect or a tool aspect gives what it needs once;
+        servers in its own format. With these batteries a language [aspect](/behavior/aspects/) or a tool aspect gives what it needs once;
         each editor and each agent reads the pool.
 
         | Battery | Value of | Gives |
         |---|---|---|
-        | `editors.vscode { from; profile; }` | a home-manager key of a sink of `{ extensions; settings; }` | `programs.vscode` |
+        | `editors.vscode { from; profile; }` | a home-manager key of a [sink](/behavior/sinks/) of `{ extensions; settings; }` | `programs.vscode` |
         | `editors.zed { from; }` | the same, extensions by name | `programs.zed-editor` |
         | `ai.extensions { from; types; build; }` | any key | `build` of the records of the given types (an element may be a list) |
         | `ai.skills dir` | an element | one `{ type = "skill"; name; path; }` per subdirectory with a SKILL.md |

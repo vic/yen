@@ -5,7 +5,7 @@
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 A home-manager module often needs its host's NixOS config: `{ osConfig, pkgs, ... }:`.
-In yen, `osConfig` is a sink. Each host gives its realized config to it, and a module names it like any sink arg.
+In yen, `osConfig` is a [sink](/behavior/sinks/). Each host gives its realized config to it, and a module names it like any sink arg.
 `pkgs` stays open, so home-manager fills its own `pkgs`.
 
 

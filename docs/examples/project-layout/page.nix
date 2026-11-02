@@ -8,13 +8,13 @@
     { docs, ... }:
     [
       ''
-        yen reads one module. A module is a path, a function or an attrset. Its keys are `imports`, `yen` and sinks.
+        yen reads one [module](/principles/modules/). A module is a path, a function or an attrset. Its keys are `imports`, `yen` and [sinks](/behavior/sinks/).
         yen does not know what `inputs` or `lib` are. The root module gives them as sinks, and declares them in `yen.sinks`.
         Any file asks for them as args.
       ''
       docs.tree
       ''
-        `modules/` is the fleet. Every file there is a module: put each kind, feature or host in its own file,
+        `modules/` is the fleet. Every file there is a module: put each [kind](/model/kinds-fields/), feature or host in its own file,
         and move files freely. File order never changes a result.
 
         ## Two entry points

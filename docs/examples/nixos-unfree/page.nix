@@ -16,7 +16,7 @@
         The usual fix declares a list option and sets the predicate once from it. Den ships the same fix as
         `den.batteries.unfree`, its most used battery.
 
-        In yen the list option is a sink. A feature gives the names that it needs. A user can give names too: they go
+        In yen the list option is a [sink](/behavior/sinks/). A feature gives the names that it needs. A user can give names too: they go
         up to each host of the user.
       ''
       (docs.file "modules/unfree.nix")

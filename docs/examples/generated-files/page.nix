@@ -14,7 +14,7 @@
         [sini/files](https://github.com/sini/files) writes `README.md` and the CI workflow. yen gives both the content.
 
         These docs are made this way: every page you read is a file that the docs fleet writes. So is yen's CI workflow:
-        each stage is an aspect, and one job per system comes from the reference fleet's `ci.json`
+        each stage is an [aspect](/behavior/aspects/), and one job per system comes from the reference fleet's `ci.json`
         ([docs/modules/ci.nix](https://github.com/vic/yen/blob/main/docs/modules/ci.nix)).
       ''
       (docs.fileWith "{17-36}" "modules/fleet.nix")

@@ -14,9 +14,9 @@
     in
     [
       ''
-        A stored query names a question about the fleet: `{ params; answer; }`. Each parameter has a type, and it is optional when
+        A stored [query](/query/queries/) names a question about the fleet: `{ params; answer; }`. Each parameter has a type, and it is optional when
         the type has a default (`yen.lib.opt`). `answer` gets the parameters and `result`, the same eval result as outside the fleet.
-        A parameter that names a kind, an instance or an aspect is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`), never a name.
+        A parameter that names a [kind](/model/kinds-fields/), an instance or an [aspect](/behavior/aspects/) is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`), never a name.
       ''
       (docs.file "modules/queries.nix")
       ''

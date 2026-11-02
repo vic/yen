@@ -10,7 +10,7 @@
       ''
         A guest is a machine that runs inside a host: a NixOS container here, a microvm in the
         [reference fleet](https://github.com/vic/yen/blob/main/templates/fleet/modules/platforms/microvm.nix).
-        It is a scope under its host, with its own `nixos` sink. That sink forwards its modules up, into the host.
+        It is a [scope](/model/scopes/) under its host, with its own `nixos` [sink](/behavior/sinks/). That sink forwards its modules up, into the host.
       ''
       (docs.fileWith "{23-24}" "modules/kinds.nix")
       (docs.file "modules/machines.nix")

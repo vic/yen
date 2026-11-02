@@ -33,7 +33,7 @@ in
     in
     [
       ''
-        **yen is a query language for Nix configurations**: one file of Nix builtins, no dependencies, no module system,
+        **yen is a [query](/query/queries/) language for Nix configurations**: one file of Nix builtins, no dependencies, no module system,
         no fixpoint, and no `throw`. You describe a fleet as data and behavior. yen answers queries on it: the systems to build,
         the errors, the graph of who gives what to whom, and whether your rules hold across machines.
 
@@ -46,10 +46,10 @@ in
 
         ## Four words
 
-        - **Kinds**: your nouns, typed. `yen.kinds.host.fields.addr = lib.types.str;`
-        - **Scopes**: where things live. `spawns` builds a tree from your data: a user under each host it is on.
-        - **Aspects**: behavior, active where a predicate holds: a kind, an instance, another aspect, or any fact.
-        - **Sinks**: where elements go. An element goes up to the nearest scope that collects it, and the sink reduces them.
+        - **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = lib.types.str;`
+        - **[Scopes](/model/scopes/)**: where things live. `spawns` builds a tree from your data: a user under each host it is on.
+        - **[Aspects](/behavior/aspects/)**: behavior, active where a predicate holds: a kind, an instance, another aspect, or any fact.
+        - **[Sinks](/behavior/sinks/)**: where elements go. An element goes up to the nearest scope that collects it, and the sink reduces them.
 
         Data is queried, not merged: each read is a query on the files that answer it, so content in many files never
         overwrites itself, and an error is a record you can read.

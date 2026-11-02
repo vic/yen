@@ -14,7 +14,7 @@
     [
       ''
         yen has no type system of its own. A type is any value with `check = value: bool`.
-        `lib.types` from nixpkgs works, a kind works (see [Instances and refs](/model/instances-refs/)),
+        `lib.types` from nixpkgs works, a [kind](/model/kinds-fields/) works (see [Instances and refs](/model/instances-refs/)),
         and `yen.lib.is` makes a type from any function.
       ''
       (docs.table

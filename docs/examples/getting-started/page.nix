@@ -32,8 +32,8 @@
       ''
         ## The fleet
 
-        yen has no built-in kinds. You say what a fleet is. The root kind is the one that nothing spawns.
-        Here the root `fleet` spawns every host, and its `out` sink is the flake.
+        yen has no built-in [kinds](/model/kinds-fields/). You say what a fleet is. The root kind is the one that nothing [spawns](/model/scopes/).
+        Here the root `fleet` spawns every host, and its `out` [sink](/behavior/sinks/) is the flake.
       ''
       (docs.file "modules/fleet.nix")
       ''

@@ -8,8 +8,8 @@
     { docs, result, ... }:
     [
       ''
-        Each key of an aspect gives one element. For 0 to n elements, or to ask the tree for data, write a component
-        under `cycle`. As in [Cycle.js](https://cycle.js.org), a component is a function from sources to sinks.
+        Each key of an [aspect](/behavior/aspects/) gives one element. For 0 to n elements, or to ask the tree for data, write a component
+        under `cycle`. As in [Cycle.js](https://cycle.js.org), a component is a function from sources to [sinks](/behavior/sinks/).
         Its sources are `tree`, `scope` and one source for each sink. It returns sinks by name, and `tree` requests.
       ''
       (docs.file "modules/network.nix")

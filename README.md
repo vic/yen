@@ -5,9 +5,9 @@
 
 **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
 You describe your fleet as terms <sup>[docs](https://yen.oeiuwq.com/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes/)</sup>. Yen answers queries <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup> about it: which systems to build,
-verification errors, dependency graphs of who gives what to whom, and whether your invariant rules hold across all machines.
+verification errors, dependency graphs of who gives what to whom, and whether your [invariant](https://yen.oeiuwq.com/query/invariants/) rules hold across all machines.
 
-Yen is built on four concepts: **kinds**, **scopes**, **aspects** and **sinks**. The Yen kernel knows nothing about
+Yen is built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
 NixOS, but it can describe fleets over any configuration domain: NixOS, nix-darwin, home-manager, clusters, terraform, k8s,
 or anything else you can model as Nix values. You define your own domain language, and Yen uses it.
 
@@ -23,7 +23,7 @@ In a business with a large infra, rules have to hold across all machines, and th
 - **Kinds**: the nouns of the things in your fleet, and their typed fields.
 - **Scopes**: how kinds nest inside each other. `.spawns.` builds the nested cycles from your data: a user under each host.
 - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
-- **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to reduce all the contributions.
+- **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the contributions.
 
 ## Yen Flake example
 

@@ -9,7 +9,7 @@
     { docs, ... }:
     [
       ''
-        A Den battery is an aspect that Den ships. You include it, sometimes with an argument:
+        A Den battery is an [aspect](/behavior/aspects/) that Den ships. You include it, sometimes with an argument:
         `(den.batteries.user-shell "fish")`. In yen there is nothing to ship. The argument becomes a typed field of
         the host or the user, and the battery is a short aspect whose `at` says where it applies.
 
@@ -42,7 +42,7 @@
           [
             "`forward`"
             "16"
-            "a sink whose key gives to another sink: [Custom classes](/den/classes/)"
+            "a [sink](/behavior/sinks/) whose key gives to another sink: [Custom classes](/den/classes/)"
           ]
           [
             "`user-shell \"fish\"`"
@@ -52,7 +52,7 @@
           [
             "`inputs'`, `self'`"
             "21"
-            "`inputs` is an arg of every yen module; per system: `inputs.x.packages.\${pkgs.stdenv.hostPlatform.system}`"
+            "`inputs` is an arg of every yen [module](/principles/modules/); per system: `inputs.x.packages.\${pkgs.stdenv.hostPlatform.system}`"
           ]
           [
             "`flake-scope`"

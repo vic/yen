@@ -17,7 +17,7 @@
     [
       ''
         An agent with a knowledge store (a triple store such as quipu) can keep the fleet as a graph and query it with SPARQL.
-        `yen.lib.rdf.share result` gives the eval result as sorted N-Triples: scopes, kinds, parents, active aspects, every routed
+        `yen.lib.rdf.share result` gives the eval result as sorted N-Triples: [scopes](/model/scopes/), [kinds](/model/kinds-fields/), parents, active [aspects](/behavior/aspects/), every routed
         element as a node with its origin, and errors. It adds a sha256 and a count.
       ''
       (docs.file "modules/hosts.nix")

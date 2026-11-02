@@ -48,8 +48,8 @@ This page builds one NixOS host with yen. You write four small files. At the end
 
 ## The fleet
 
-yen has no built-in kinds. You say what a fleet is. The root kind is the one that nothing spawns.
-Here the root `fleet` spawns every host, and its `out` sink is the flake.
+yen has no built-in [kinds](/model/kinds-fields/). You say what a fleet is. The root kind is the one that nothing [spawns](/model/scopes/).
+Here the root `fleet` spawns every host, and its `out` [sink](/behavior/sinks/) is the flake.
 
 
 ```nix title="modules/fleet.nix"

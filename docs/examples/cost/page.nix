@@ -11,8 +11,8 @@
         yen is one file of Nix builtins. Its own cost is small next to nixpkgs and the module system, and it stays
         small as a fleet grows:
 
-        - Each scope computes each aspect ref once, so aspects that read aspects cost linear time, however deep they nest.
-        - Sinks are lazy per receiver. A sink that nobody reads costs nothing.
+        - Each [scope](/model/scopes/) computes each [aspect](/behavior/aspects/) ref once, so aspects that read aspects cost linear time, however deep they nest.
+        - [Sinks](/behavior/sinks/) are lazy per receiver. A sink that nobody reads costs nothing.
         - Declarations are one lazy index over every file: a lookup walks its path, never all files.
       ''
       (docs.table

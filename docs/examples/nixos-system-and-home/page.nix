@@ -20,7 +20,7 @@
         - `lib.mkIf pkgs.stdenv.isLinux` to send a package list to the system on one machine and to the home on
           another. A `mkIf` around `imports` causes infinite recursion.
 
-        In yen, the feature is aspects. `at` says where each part goes. A user's home-manager content goes into each
+        In yen, the feature is [aspects](/behavior/aspects/). `at` says where each part goes. A user's home-manager content goes into each
         NixOS host that the user lives on. A standalone home builds its own `homeConfigurations` output.
       ''
       (docs.tabs [

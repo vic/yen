@@ -9,7 +9,7 @@ An element can be a function with named args. yen fills the args it knows:
 
 | Arg | Value |
 |---|---|
-| a kind name (`host`, `environment`) | the nearest ancestor-or-self scope of that kind |
+| a kind name (`host`, `environment`) | the nearest ancestor-or-self [scope](/model/scopes/) of that kind |
 | a sink name (`backends`) | the reduced value of that sink at its nearest receiver |
 | `scope` | the scope itself |
 | anything else (`pkgs`, `config`) | stays open: the element is still a function |

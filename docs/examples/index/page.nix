@@ -41,7 +41,7 @@
     { docs, ... }:
     [
       ''
-        **yen is a query language for Nix configurations.** You write plain Nix data and behavior.
+        **yen is a [query](/query/queries/) language for Nix configurations.** You write plain Nix data and behavior.
         yen answers queries on it: the NixOS, nix-darwin and home-manager systems to build, the errors,
         the graph of who gives what to whom, and whether your rules hold.
       ''
@@ -49,12 +49,12 @@
         {
           title = "Data is queried, not merged";
           icon = "magnifier";
-          body = "Kinds, instances and typed fields are data. Content in many files never overwrites itself.";
+          body = "[Kinds](/model/kinds-fields/), instances and typed fields are data. Content in many files never overwrites itself.";
         }
         {
           title = "Behavior lands where you say";
           icon = "puzzle";
-          body = "An aspect is active where its predicate holds. Its elements go to the nearest scope that collects them.";
+          body = "An [aspect](/behavior/aspects/) is active where its predicate holds. Its elements go to the nearest [scope](/model/scopes/) that collects them.";
         }
         {
           title = "Questions have answers";

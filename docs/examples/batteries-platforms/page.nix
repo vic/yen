@@ -9,8 +9,8 @@
     { docs, ... }:
     [
       ''
-        Each platform is a kind you declare, with a sink that collects its modules. One battery turns the sink into the
-        flake output. The builders and `pkgs` are roles that read the scope, so each machine can use its own channel.
+        Each platform is a [kind](/model/kinds-fields/) you declare, with a [sink](/behavior/sinks/) that collects its modules. One battery turns the sink into the
+        flake output. The builders and `pkgs` are roles that read the [scope](/model/scopes/), so each machine can use its own channel.
 
         | Battery | Value of | Gives |
         |---|---|---|

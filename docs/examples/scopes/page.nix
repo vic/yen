@@ -8,7 +8,7 @@
     { docs, result, ... }:
     [
       ''
-        A scope is one instance at one place in the tree. The root kind is the kind that no kind spawns.
+        A scope is one instance at one place in the tree. The root [kind](/model/kinds-fields/) is the kind that no kind spawns.
         `spawns.<kind>` is a function of the parent scope. It gives the instances that live under it.
       ''
       (docs.fileWith "{7,8,11}" "modules/tree.nix")

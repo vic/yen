@@ -12,7 +12,7 @@
         [
           [
             "kind"
-            "a type of thing, with fields, spawns and sinks"
+            "a type of thing, with fields, [spawns](/model/scopes/) and [sinks](/behavior/sinks/)"
             "[Kinds and fields](/model/kinds-fields/)"
           ]
           [
@@ -37,7 +37,7 @@
           ]
           [
             "data kind"
-            "a kind that no kind spawns: instances with no scope"
+            "a kind that no kind spawns: instances with no [scope](/model/scopes/)"
             "[Instances and refs](/model/instances-refs/#data-kinds)"
           ]
           [
@@ -97,7 +97,7 @@
           ]
           [
             "component"
-            "an aspect's `cycle`: sources in, sinks out, 0 to n elements"
+            "an aspect's `cycle`: [sources](/behavior/cycle/) in, sinks out, 0 to n elements"
             "[The cycle form](/behavior/cycle/)"
           ]
           [

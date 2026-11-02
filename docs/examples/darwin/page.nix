@@ -9,7 +9,7 @@
     [
       ''
         Many options mean the same on NixOS and nix-darwin: `networking.hostName`, `environment.systemPackages`,
-        `nix.settings`. Write them once. A `host` forwards its `os` sink to `nixos`, and a `mac` forwards it to `darwin`.
+        `nix.settings`. Write them once. A `host` forwards its `os` [sink](/behavior/sinks/) to `nixos`, and a `mac` forwards it to `darwin`.
       ''
       (docs.fileWith "{12-13,24-25}" "modules/platforms.nix")
       (docs.file "modules/shared.nix")
