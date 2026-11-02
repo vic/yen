@@ -2,7 +2,7 @@
 # a one-line comment in the syntax of a file's format (by extension), for a generated-file notice. Formats with no
 # comments (json) get "". A new line ends it.
 #   files.comment "README.md" "Generated. Edit modules/docs, then nix run .#write-files."
-path: text:
+_: path: text:
 let
   b = builtins;
   ext =

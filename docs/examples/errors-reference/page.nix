@@ -23,6 +23,27 @@ let
         )
       )
     );
+  # the engine source: default.nix, every .nix under lib/ (recursive, as the loader reads it)
+  engineFiles =
+    dir:
+    builtins.concatLists (
+      builtins.attrValues (
+        builtins.mapAttrs (
+          n: kind:
+          if kind == "directory" then
+            engineFiles (dir + "/${n}")
+          else if builtins.match ".*\\.nix" n != null then
+            [ (dir + "/${n}") ]
+          else
+            [ ]
+        ) (builtins.readDir dir)
+      )
+    );
+  engineText =
+    yen:
+    builtins.concatStringsSep "\n" (
+      map builtins.readFile ([ (yen + "/default.nix") ] ++ engineFiles (yen + "/lib"))
+    );
   meaning = {
     arg = "an element asks for an arg that has no answer";
     at = "`at` holds a value that is not a predicate";
@@ -46,6 +67,8 @@ let
     arity = "a rule atom has the wrong number of terms for its relation";
     unsafe-rule = "a variable of the head, a negative atom or a comparison is not bound by a positive atom";
     unencodable = "a field holds a float, a function or a derivation: no fact can state it";
+    claim = "a claimed key has more than one owner";
+    link-gone = "a doc link's needle is not found in its file";
     merge = "`merge`: two different leaves at one path";
     missing = "a required field has no value";
     missing-param = "a stored query is asked without a required parameter";
@@ -82,7 +105,7 @@ in
   body =
     { docs, inputs, ... }:
     let
-      codes = codesOf (builtins.readFile (inputs.yen + "/default.nix"));
+      codes = codesOf (engineText inputs.yen);
     in
     [
       ''
@@ -115,8 +138,15 @@ in
       ...
     }:
     {
-      every-code-explained = yes (
-        builtins.all (c: meaning ? ${c}) (codesOf (builtins.readFile (inputs.yen + "/default.nix")))
+      # codes that live in subdirectories of lib/ are seen: the scan is recursive
+      subdir-codes-seen = yes (
+        builtins.all (c: builtins.elem c (codesOf (engineText inputs.yen))) [
+          "merge"
+          "one"
+          "error"
+          "claim"
+        ]
       );
+      every-code-explained = yes (builtins.all (c: meaning ? ${c}) (codesOf (engineText inputs.yen)));
     };
 }

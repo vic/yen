@@ -2,6 +2,7 @@
 # Zed (home-manager `programs.zed-editor`) from sink `from`: `{ extensions ? [ ]; settings ? { }; }` per aspect,
 # extensions by name.
 #   yen.kinds.user.sinks.zed.homeManager = editors.zed { from = yen.kinds.user.sinks.zed; };
+_:
 { from }:
 { sinks, ... }:
 let

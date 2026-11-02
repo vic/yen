@@ -1,3 +1,4 @@
+_:
 # Transitive impact of a staged change, as dirty tokens. Builtins only.
 # A token is data, never a parsed string: { data = scope id; } (the scope's record), { sink; at; } (the reduced value of
 # that sink at that receiver), { instance; name; } (an instance's declared data), { aspect; at; } (where an aspect is active).

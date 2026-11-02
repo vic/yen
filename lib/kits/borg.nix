@@ -3,6 +3,7 @@
 # for the clients' machines (`deploy` is the clients' `at` predicate); each client reads them from the exports of its
 # own assembly. Every borg assembly adds an sshd assembly on its servers. Needs a machine field `addr`.
 #   imports = [ inputs.yen.lib.kits.borg ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

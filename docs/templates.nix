@@ -2,7 +2,7 @@
 # under templates/. Pure and cheap: no inputs, no yen evaluation. Both flakes use it: docs/flake.nix and the
 # repository root flake.nix. templates/fleet is the showcase fleet: its yen input is the repository itself.
 let
-  templates = import ../lib/batteries/docs/templates.nix;
+  templates = (import ../.).lib.batteries.docs.templates;
 in
 templates {
   root = ./examples;

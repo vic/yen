@@ -3,6 +3,7 @@
 # line of `root + "/${file}"` that contains `needle`. The line is found at eval time, so links follow edits; a needle
 # that is gone is an error record.
 #   sinks.links.reduce = docs.links { root = ./.; };   then read `sinks.links.<name>`
+_:
 {
   root,
   base ? "",

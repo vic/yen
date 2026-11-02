@@ -1,7 +1,7 @@
 # yen oracles. Run: nix-instantiate --eval --strict vic/tests -A failed   (expect [ ])
 let
   yen = (import ../default.nix).lib;
-  impactOf = (import ../lib/impact.nix).impactOf;
+  impactOf = (import ../lib/_impact.nix null).impactOf;
   b = builtins;
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
@@ -1232,9 +1232,10 @@ let
       };
     agent-json =
       let
-        a = yen.agent (ports {
-          yen.host.c.port = 70000;
-        });
+        a =
+          (ports {
+            yen.host.c.port = 70000;
+          }).agent;
       in
       {
         json = eq (b.fromJSON (b.toJSON a)) a;
@@ -1955,32 +1956,6 @@ let
                 value = 1;
               }
             ]).valid;
-        render =
-          eq
-            (b.fromJSON (
-              yen.program.render [
-                {
-                  op = "set";
-                  path = [
-                    "host"
-                    "c"
-                    "port"
-                  ];
-                  value = 1;
-                }
-              ]
-            ))
-            [
-              {
-                op = "set";
-                path = [
-                  "host"
-                  "c"
-                  "port"
-                ];
-                value = 1;
-              }
-            ];
       };
     invariants-why =
       eq

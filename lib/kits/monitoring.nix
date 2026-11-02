@@ -2,6 +2,7 @@
 # The exporter runs the node exporter on `port` and exports its target; the server turns every exporter of its own
 # assembly into one `services.prometheus.scrapeConfigs` job. Needs a machine field `addr`.
 #   imports = [ inputs.yen.lib.kits.monitoring ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

@@ -34,7 +34,7 @@
         | `lib.kits.disko` | `default` | `device` (str), `layout` (ref to a layout) | gives the layout's disko devices to sink `disks`; owns the kind `layout` |
         | `lib.kits.facter` | `default` | `dir` (path) | imports `<dir>/<machine>.json` with `nixos.facter` |
 
-        A kit is a module: put `inputs.yen.lib.kits.disko` in `imports` of the top module (here, imported by path).
+        A kit is a module: put `inputs.yen.lib.kits.disko` in `imports` of the top module.
 
         ## Layouts
 

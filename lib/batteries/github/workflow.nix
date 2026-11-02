@@ -3,8 +3,9 @@
 #   yen.kinds.repo.sinks.jobs = { reduce = yen.lib.reduce.merge;
 #     files = github.workflow { from = yen.kinds.repo.sinks.jobs; path = ".github/workflows/test.yml";
 #       doc = { name = "test"; on.push = { }; }; }; };
+self:
 let
-  yaml = import ./yaml.nix;
+  inherit (self.batteries.github) yaml;
 in
 {
   from,

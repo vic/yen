@@ -3,6 +3,7 @@
 # machine with their path (`neededFor = "users"` goes to secrets-for-users), its recipients, and the order to
 # generate in (dependencies first). `deploy = false` files never reach the machine.
 #   out = clan.vars-plan { from = yen.kinds.fleet.sinks.generators; machines = [ "lb" ]; recipientsOf = m: …; };
+self:
 {
   from,
   machines,
@@ -11,7 +12,7 @@
 { sinks, ... }:
 let
   b = builtins;
-  graphs = import ../../graphs.nix;
+  inherit (self) graphs;
   generators = sinks.${from.__sink};
   pathOf =
     gen: file: f:

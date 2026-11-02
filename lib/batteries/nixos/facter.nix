@@ -4,6 +4,7 @@
 #   nixos = nixos.facter { report = h: ./hosts/${h.name}/facter.json; };
 # `module`: the facter NixOS module, when your nixpkgs has none (inputs.nixos-facter-modules.nixosModules.facter).
 # Its option is `facter.reportPath`; NixOS's own is `hardware.facter.reportPath`. `option` overrides the path.
+_:
 {
   report,
   module ? null,

@@ -3,6 +3,7 @@
 # directory, or `{ directories ? [ ]; files ? [ ]; }`. Import the impermanence module in your host.
 # `hideMounts`: impermanence hides the bind mounts from file managers and `df` (default false: nothing is set).
 #   yen.kinds.host.sinks.persist.nixos = nixos.persist { from = yen.kinds.host.sinks.persist; };
+_:
 {
   from,
   root ? "/persist",

@@ -3,6 +3,7 @@
 # The value of the sink's `out` key. nixosConfigurations, darwinConfigurations, homeConfigurations, any builder.
 #   out = configurations { from = yen.kinds.host.sinks.nixos; output = "nixosConfigurations";
 #     build = _: modules: nixpkgs.lib.nixosSystem { inherit modules; }; };
+_:
 {
   from,
   output,

@@ -3,6 +3,7 @@
 # predicate, the machine count per role is within the kit's `constraints.roles.<role>.{min,max}`, and at most
 # `constraints.maxAssemblies` assemblies use one kit.
 #   errors = kits.contract { assemblies = attrValues yen.assembly; machines = attrValues yen.host; inherit (yen.lib) holds; };
+self:
 {
   assemblies,
   machines,
@@ -10,7 +11,7 @@
 }:
 let
   b = builtins;
-  inherit (import ./_roles.nix) takes;
+  inherit (self._roles) takes;
   isPredicate = p: b.isFunction p || b.isList p || b.isAttrs p;
   same = x: y: b.isAttrs x && x.kind or null == y.kind or null && x.name or null == y.name or null;
   check =

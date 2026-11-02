@@ -4,6 +4,7 @@
 # to read public keys from) gets programs.ssh.knownHosts for the servers of its own assembly, and an error when
 # the assembly has no server. Needs the fleet's `exports` sink (kits.exports) and `generators` sink (vars.generators).
 #   imports = [ inputs.yen.lib.kits.sshd ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

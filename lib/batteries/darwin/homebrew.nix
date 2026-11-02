@@ -2,6 +2,7 @@
 # homebrew from sink `from`: each element `{ casks ? [ ]; brews ? [ ]; masApps ? { }; }`. Any feature gives the
 # apps it needs; one darwin module installs them.
 #   yen.kinds.mac.sinks.brew.darwin = darwin.homebrew { from = yen.kinds.mac.sinks.brew; };
+_:
 { from }:
 { sinks, ... }:
 let

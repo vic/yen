@@ -4,6 +4,7 @@
 # `build` wants them (sini agent-extensions).
 #   homeManager = ai.extensions { from = yen.kinds.user.sinks.agent-ext; types = [ "mcp" ];
 #     build = mcps: { programs.claude-code.mcpServers = builtins.listToAttrs (map (m: { inherit (m) name; value = m.server; }) mcps); }; };
+_:
 {
   from,
   types,

@@ -3,6 +3,7 @@
 # kit lists in `exports`. An element from any other scope is the owner's override of one entry: refs
 # `{ assembly; role; machine; value; }`. Read the value with a filter on refs (`yen.lib.same`).
 #   yen.kinds.fleet.sinks.exports.reduce = kits.exports { isMember = yen.lib.holds yen.kinds.member; };
+_:
 {
   isMember,
   machineOf ? e: e.from.parent,

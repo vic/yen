@@ -3,6 +3,7 @@
 # the sink's `out` key; the shell is `devShells.<scope name>.default`, so give it to a scope named after a system.
 #   yen.kinds.system.sinks.devshell.out = devshell.mkshell { from = yen.kinds.system.sinks.devshell;
 #     pkgsOf = s: inputs.nixpkgs.legacyPackages.${s.name}; };
+_:
 { from, pkgsOf }:
 { scope, sinks, ... }:
 let

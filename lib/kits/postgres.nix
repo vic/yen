@@ -5,6 +5,7 @@
 # /etc/postgres/<database>.dsn. Needs a machine field `addr`.
 # shortcut: the line is `trust` by address, no password; upgrade when a generator can deploy one file to both sides.
 #   imports = [ inputs.yen.lib.kits.postgres ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

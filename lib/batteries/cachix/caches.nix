@@ -3,6 +3,7 @@
 # a key that gives a NixOS, nix-darwin or home-manager module: the same `nix.settings` in all three.
 #   yen.kinds.host.sinks.caches.nixos = cachix.caches { from = yen.kinds.host.sinks.caches; };
 #   yen.aspects.vix-cache = { at = yen.kinds.host; caches = { name = "vix"; publicKey = "vix.cachix.org-1:…"; }; };
+_:
 { from }:
 { sinks, ... }:
 let

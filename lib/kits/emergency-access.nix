@@ -3,6 +3,7 @@
 # member gets `users.users.root.openssh.authorizedKeys.keys` and a root password hash, a secret generated for that
 # machine (`emergency-root/hash`, users stage). A machine without a member is untouched.
 #   imports = [ inputs.yen.lib.kits.emergency-access ];
+_:
 { yen, lib, ... }:
 {
   yen.kit.emergency-access.roles.default.interface.authorizedKeys.type = yen.lib.listOf lib.types.str;

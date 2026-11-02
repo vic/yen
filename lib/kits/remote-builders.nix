@@ -3,6 +3,7 @@
 # (with its assembly and machine, dropped before the client writes it). The client uses the battery
 # `nixos.remote-builders` on the entries of its assembly, never on itself. Needs a machine field `addr`.
 #   imports = [ inputs.yen.lib.kits.remote-builders ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

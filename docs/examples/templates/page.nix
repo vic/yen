@@ -80,8 +80,10 @@ in
     ];
 
   checks =
-    { eq, ... }:
+    { eq, yes, ... }:
     {
+      # the flake output is a set, not a function waiting for its args
+      is-set = yes (builtins.isAttrs (import ../../templates.nix));
       # the docs flake lists every template under its own name, and no example has the same name
       listed = eq (builtins.filter (
         n: !(import ../../templates.nix) ? ${n} && has n "flake.nix"

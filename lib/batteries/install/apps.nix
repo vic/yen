@@ -5,6 +5,7 @@
 # `pkgs` is the caller's only dependency: writeShellScript, stdenv.hostPlatform.system and the tool; no nixpkgs lib is used.
 #   out = install.apps { from = yen.kinds.host.sinks.disks; inherit pkgs; report = h: "./facter/${h.name}.json";
 #     target = h: "root@${h.addr}"; };
+_:
 {
   from,
   pkgs,

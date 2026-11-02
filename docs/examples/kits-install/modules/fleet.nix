@@ -13,8 +13,8 @@ let
 in
 {
   imports = [
-    (import ../../../../lib/kits/disko.nix)
-    (import ../../../../lib/kits/facter.nix)
+    inputs.yen.lib.kits.disko
+    inputs.yen.lib.kits.facter
   ];
 
   yen.kinds.fleet = {

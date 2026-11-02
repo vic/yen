@@ -487,7 +487,13 @@ let
             ) (lib.attrNames sv.lib)
           )
         }.
-        Reduce strategies: ${fnList (lib.attrNames sv.lib.reduce)}. Change programs (`yen.lib.program`): ${fnList (lib.attrNames sv.lib.program)}. Grants: ${fnList (lib.attrNames sv.lib.grants)}.
+        Reduce strategies: ${fnList (lib.attrNames sv.lib.reduce)}. Change programs (`yen.lib.program`): ${fnList (lib.attrNames sv.lib.program)}. Grants: ${
+          fnList [
+            "grant"
+            "narrow"
+            "allowed"
+          ]
+        }.
 
         | Library | Functions |
         |---|---|

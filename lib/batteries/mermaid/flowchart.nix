@@ -4,6 +4,7 @@
 #   text = mermaid.flowchart { direction = "TD"; shapes = with mermaid.shapes; { mac = round; }; } (mermaid.scopes yen.lib.graph);
 # the text of one flowchart, without the ``` fence. A node that others name as `group` is a subgraph around them.
 # `shapes` is keyed by a node's `kind`; other nodes are boxes.
+_:
 let
   b = builtins;
   # md5 ids: any label is safe, and one id gets the same node in every view

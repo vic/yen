@@ -4,6 +4,7 @@
 #   yen.kinds.repo.sinks.commands.out = devshell.numtide { from = yen.kinds.repo.sinks.commands;
 #     inherit (inputs) devshell; systems = [ "x86_64-linux" ]; pkgsOf = s: inputs.nixpkgs.legacyPackages.${s};
 #     name = "repo"; packages = pkgs: [ pkgs.git ]; };
+_:
 {
   from,
   devshell,

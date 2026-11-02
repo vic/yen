@@ -2,6 +2,7 @@
 # TOML text from a Nix value, builtins only. Top-level attrsets, and attrsets of attrsets, become [tables] (nested:
 # [a.b]); other attrsets are inline tables. `inline` keeps the given table paths inline.
 #   files.toml { } { project.name = "app"; profiles.default.API_KEY = { description = "key"; }; }
+_:
 {
   inline ? [ ],
 }:

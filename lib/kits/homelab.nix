@@ -6,6 +6,7 @@
 # base and borg add are listed here too. Import the kits it uses (base, disko, facter, sshd, emergency-access,
 # wireguard, borg, monitoring, dns) as well; a machine needs the field `addr`.
 #   imports = [ inputs.yen.lib.kits.homelab ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) holds;
