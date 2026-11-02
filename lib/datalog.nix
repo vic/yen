@@ -112,10 +112,10 @@ let
       // b.listToAttrs (
         b.genList (i: {
           name = toString i;
-          value = b.groupBy (t: k (b.elemAt t i)) (b.filter (t: b.length t > i) ts);
+          value = builtins.groupBy (t: k (b.elemAt t i)) (b.filter (t: b.length t > i) ts);
         }) (b.foldl' (m: t: if b.length t > m then b.length t else m) 0 ts)
       )
-    ) (b.groupBy (x: b.head x) tuples);
+    ) (builtins.groupBy (x: b.head x) tuples);
   # the tuples an atom can match under s: the smallest bucket of a bound position, or all of its relation
   candidates =
     idx: s: a:
@@ -153,8 +153,7 @@ let
       } r
     );
   byAtom = m: m // { holds = a: m.holds (atom a); };
-in
-let
+
   raw = rec {
     inherit isVar comparisons;
     # ground instances of range-restricted rules over tuple facts: every instance whose positive atoms may hold.
@@ -314,7 +313,7 @@ let
           k = 0;
         };
         # the rules of each head, by index; the first rule of an atom whose body was decided before it
-        byHead = b.groupBy (i: (b.elemAt kr i).head) (b.genList (i: i) (b.length kr));
+        byHead = builtins.groupBy (i: (b.elemAt kr i).head) (b.genList (i: i) (b.length kr));
         ruleFor =
           x:
           let
@@ -366,7 +365,7 @@ let
         T = stages cert.true;
         U = stages cert.false;
         program = set (map norm rules);
-        byHead = b.groupBy (r: k r.head) (map norm rules);
+        byHead = builtins.groupBy (r: k r.head) (map norm rules);
         before =
           m: s: x:
           m ? ${k x} && m.${k x} < s;

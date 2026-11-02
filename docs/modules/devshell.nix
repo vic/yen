@@ -35,6 +35,8 @@ in
       pkgs.jq
       pkgs.git
       pkgs.nixfmt-rfc-style # the same nixfmt as the fleet's flake-file
+      pkgs.deadnix
+      pkgs.statix
       pkgs.actionlint
       pkgs.shellcheck
       pkgs.gh
@@ -93,6 +95,15 @@ in
         "issue-comment NUMBER FILE: post FILE on issue NUMBER, replacing yen's last comment (needs GH_TOKEN)"
         "gh issue comment \"$1\" --edit-last --body-file \"$2\" || gh issue comment \"$1\" --body-file \"$2\""
       )
+      # --no-lambda-pattern-names: a pattern name is the engine's protocol (functionArgs, pick args), not dead code
+      (cmd "fmt" "dead-check"
+        "deadnix: no unused let binding or positional argument in default.nix and lib/ (fails on any)"
+        "git ls-files -z default.nix 'lib/*.nix' | timeout 120 xargs -0 deadnix --fail --no-lambda-pattern-names"
+      )
+      (cmd "fmt" "statix-check"
+        "statix: no lint finding in default.nix and lib/ (the rules are in statix.toml)"
+        "git ls-files -z default.nix 'lib/*.nix' | timeout 120 xargs -0 -n1 statix check -o errfmt"
+      )
       (cmd "fmt" "lint" "the workflows are valid (actionlint, with shellcheck)"
         "actionlint .github/workflows/*.yml"
       )
@@ -148,7 +159,7 @@ in
     commands = [
       (cmd "ci" "ci"
         "run the CI stages locally, in order: fmt, engine, docs, fleet (fleet-check and the per-arch evals not included)"
-        "for c in fmt-check engine-test engine-cost docs-test docs-e2e docs-check docs-build fleet-test fleet-e2e fleet-cost fleet-mcp; do echo \"== $c\"; $c; done"
+        "for c in fmt-check dead-check statix-check engine-test engine-cost docs-test docs-e2e docs-check docs-build fleet-test fleet-e2e fleet-cost fleet-mcp; do echo \"== $c\"; $c; done"
       )
       (cmd "ci" "test-all" "every *-test command: engine, docs, fleet (no e2e, no cost)"
         "for c in engine-test docs-test fleet-test; do echo \"== $c\"; $c; done"
@@ -167,7 +178,7 @@ in
         ''
       )
       (cmd "ci" "check-all" "every *-check command: fmt, docs, fleet"
-        "for c in fmt-check docs-check fleet-check; do echo \"== $c\"; $c; done"
+        "for c in fmt-check dead-check statix-check docs-check fleet-check; do echo \"== $c\"; $c; done"
       )
     ];
   };

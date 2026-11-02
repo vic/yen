@@ -1546,8 +1546,8 @@ Every list below is computed from the engine and this fleet when the README is w
 
 **Queries on an eval result** (`result = yen.lib.eval module`): `active`, `ask`, `check`, `context`, `data`, `declaredIn`, `errors`, `explain`, `facts`, `flake`, `floor`, `graph`, `impact`, `labels`, `queries`, `reduced`, `root`, `schema`, `scopes`, `undefined`.
 
-**Engine library** (`yen.lib`): `agent`, `allowed`, `asOf`, `aspect`, `attrsOf`, `batteries`, `derive`, `diffData`, `enum`, `eval`, `grant`, `history`, `is`, `jsonSafe`, `kind`, `kits`, `listOf`, `maybe`, `mkFlake`, `narrow`, `opt`, `secret`, `stage`, `validAt`, `without`.
-Reduce strategies: `entries`, `flat`, `list`, `merge`, `one`, `set`. Change programs (`yen.lib.program`): `dryRun`, `opErrors`, `render`, `toModule`, `validate`. Grants: `allowed`, `grant`, `narrow`.
+**Engine library** (`yen.lib`): `allowed`, `asOf`, `aspect`, `attrsOf`, `batteries`, `derive`, `diffData`, `enum`, `eval`, `grant`, `history`, `is`, `jsonSafe`, `kind`, `kits`, `listOf`, `maybe`, `mkFlake`, `narrow`, `opt`, `secret`, `stage`, `validAt`, `without`.
+Reduce strategies: `entries`, `flat`, `list`, `merge`, `one`, `set`. Change programs (`yen.lib.program`): `dryRun`, `opErrors`, `toModule`, `validate`. Grants: `allowed`, `grant`, `narrow`.
 
 | Library | Functions |
 |---|---|

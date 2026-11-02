@@ -1232,9 +1232,9 @@ let
       };
     agent-json =
       let
-        a = yen.agent (ports {
+        a = (ports {
           yen.host.c.port = 70000;
-        });
+        }).agent;
       in
       {
         json = eq (b.fromJSON (b.toJSON a)) a;
@@ -1958,7 +1958,7 @@ let
         render =
           eq
             (b.fromJSON (
-              yen.program.render [
+              b.toJSON [
                 {
                   op = "set";
                   path = [

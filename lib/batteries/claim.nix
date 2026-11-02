@@ -16,7 +16,7 @@ in
 }:
 es:
 let
-  groups = b.groupBy (e: key e.value) es;
+  groups = builtins.groupBy (e: key e.value) es;
   pick =
     k: g:
     let
@@ -27,7 +27,7 @@ let
     in
     if b.length top == 1 then
       {
-        value = (b.head top).value;
+        inherit ((b.head top)) value;
         errors = [ ];
       }
     else

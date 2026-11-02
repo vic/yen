@@ -21,7 +21,7 @@ let
     ]
     ++ modules;
   };
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
   packages.${system}.write-flake = e.config.flake-file.apps.write-flake pkgs;

@@ -162,14 +162,14 @@ let
   # the kind a type refers to, through `maybe` and `listOf`; null when it is no ref
   refKind =
     t:
-    if t ? __kind then
-      t.__kind
-    else if t ? __maybe then
-      refKind t.__maybe
-    else if t ? __of then
-      refKind t.__of
-    else
-      null;
+    t.__kind or (
+      if t ? __maybe then
+        refKind t.__maybe
+      else if t ? __of then
+        refKind t.__of
+      else
+        null
+    );
   # a secret value is stated by its hash; a type is secret itself or through `maybe`
   hide =
     v:
@@ -331,8 +331,6 @@ let
         mapAttrs (_: static.jsonSafe) v
       else
         v;
-    #: lib.agent :: result -> agent -- the summary of an eval result for an agent: counts, check, schema, errors, undefined
-    agent = r: r.agent;
     # valid time: an instance with validFrom / validTo (ISO dates) holds at a date the caller passes; no clock in pure eval
     #: lib.validAt :: date -> scope -> bool -- the scope instance holds at the ISO date (validFrom, validTo; absent is open)
     validAt =
@@ -644,7 +642,7 @@ let
       # one lazy index over every file (zipAttrsWith): a lookup walks its path, never all files
       zipDefs = vs: {
         vals = vs;
-        kids = b.zipAttrsWith (_: zipDefs) (filter (v: isAttrs v && !isLeaf v) vs);
+        kids = builtins.zipAttrsWith (_: zipDefs) (filter (v: isAttrs v && !isLeaf v) vs);
       };
       answersIn =
         index: path:
@@ -1520,7 +1518,7 @@ let
             v: if d ? of && isType d.of && d.of ? __kind && isRef v then instances.${v.kind}.${v.name} else v;
           red = (d.reduce or reduce.list) (
             map (x: {
-              from = x.e.from;
+              inherit (x.e) from;
               value = resolve x.ok;
             }) (filter okOf filled)
           );
@@ -1533,7 +1531,7 @@ let
           ) (filter (x: !okOf x) filled);
         in
         {
-          value = red.value;
+          inherit (red) value;
           errors =
             bad
             ++ map (
@@ -2226,7 +2224,7 @@ let
         // genAttrs combinators (
           c: p: {
             "__${c}" = p;
-            __functor = self: holds self;
+            __functor = holds;
           }
         )
         // {
@@ -2240,8 +2238,6 @@ let
             ; # queries readable inside the fleet (docs); `check` and `context` read errors, so not here
           #: yen.lib.same :: x -> y -> bool -- x and y are the same instance; a non-instance is never the same
           same = x: y: isRef x && isRef y && x.kind == y.kind && x.name == y.name; # total: a non-instance is never the same
-          #: yen.lib.nearest :: kind -> scope -> scope or null -- the nearest scope of that kind, the scope itself first, then up
-          nearest = k: nearest k.__kind;
           #: yen.lib.scopesOf :: instance -> [ scope ] -- the scopes of an instance
           scopesOf = x: filter (s: s.kind == x.kind && s.name == x.name) scopes;
           #: yen.lib.children :: predicate -> scope -> [ scope ] -- the children of the scope where the predicate holds, sorted
@@ -2259,7 +2255,7 @@ let
           // (if refKind t != null then { ref = refKind t; } else { })
           // (
             if t ? default && elem (b.typeOf t.default) (words "string int bool null list") then
-              { default = t.default; }
+              { inherit (t) default; }
             else
               { }
           )
@@ -2370,7 +2366,6 @@ let
           bad
         else
           f (map (x: x.ok) ts);
-      noScope = from: id: unknown from id (attrNames byId) { code = "unknown-scope"; };
       trace =
         d: p: s:
         let
@@ -2491,7 +2486,7 @@ let
         let
           sc = scopeIn "context" t;
           s = sc.ok;
-          id = s.id;
+          inherit (s) id;
           edges = es: cut maxEdges (map edgeOut es);
         in
         if !(sc ? ok) then
@@ -2531,7 +2526,7 @@ let
         }:
         let
           sc = scopeIn "impact" t;
-          id = sc.ok.id;
+          inherit (sc.ok) id;
           # a sink by reference: yen.kinds.<kind>.sinks.<sink>, or { sink; } from outside the fleet
           names =
             if sinks == null then
@@ -2773,7 +2768,7 @@ let
         data = mapAttrs (
           k: _:
           mapAttrs (
-            n: i:
+            _: i:
             static.jsonSafe (
               mapAttrs (f: v: if isRef v then "${v.kind}:${v.name}" else shown k f v) (
                 removeAttrs i (words "kind name")
@@ -2911,7 +2906,7 @@ let
       ];
   sinkOf = k: if isAttrs k then k.__sink or k.sink or null else null;
   grants = {
-    #: lib.grant, lib.grants.grant :: { scopes; sinks ? null; } -> grant -- where a change may reach, by reference: scope paths or instances, sink refs (null: every sink)
+    #: lib.grant :: { scopes; sinks ? null; } -> grant -- where a change may reach, by reference: scope paths or instances, sink refs (null: every sink)
     grant =
       {
         scopes,
@@ -2921,7 +2916,7 @@ let
         scopes = map entryOf scopes;
         sinks = if sinks == null then null else map sinkOf sinks;
       };
-    #: lib.narrow, lib.grants.narrow :: grant -> grant -> grant -- two grants met: the scopes both cover, the sinks both allow; never wider
+    #: lib.narrow :: grant -> grant -> grant -- two grants met: the scopes both cover, the sinks both allow; never wider
     narrow = g: h: {
       scopes = uniq (concatMap (e: concatMap (meet e) h.scopes) g.scopes);
       sinks =
@@ -2932,7 +2927,7 @@ let
         else
           filter (x: elem x h.sinks) g.sinks;
     };
-    #: lib.allowed, lib.grants.allowed :: grant -> { to; sink; } -> bool -- the grant covers the scope path `to` and the sink (a ref or { sink; })
+    #: lib.allowed :: grant -> { to; sink; } -> bool -- the grant covers the scope path `to` and the sink (a ref or { sink; })
     allowed =
       g: e:
       any (p: covers p (map ident e.to)) g.scopes && (g.sinks == null || elem (sinkOf e.sink) g.sinks);
@@ -3020,7 +3015,7 @@ let
             });
       # D14 exact: a change reaches what its seeds reach through reads, in either eval (lib/impact.nix, vic/r-yen.md)
       declares = path: declared.declaredIn path != [ ];
-      impactOf = (import ./lib/impact.nix).impactOf;
+      inherit (import ./lib/impact.nix) impactOf;
       instT = k: n: {
         instance = k;
         name = n;
@@ -3280,7 +3275,7 @@ let
     opErrors =
       r: i: o:
       let
-        kinds = r.schema.kinds;
+        inherit (r.schema) kinds;
         k = head o.path;
         f = b.elemAt o.path 2;
         fs = attrNames (kinds.${k}.fields or { });
@@ -3366,8 +3361,6 @@ let
         }
       else
         removeAttrs s [ "render" ] // { valid = true; };
-    #: lib.program.render :: [ op ] -> string -- the program as JSON, to read back with fromJSON
-    render = b.toJSON;
   };
   # a change as data: set one declaration path (`change.set [ "host" "web-1" "port" ] 8080`)
   change = {
@@ -3380,7 +3373,6 @@ let
       stage
       change
       program
-      grants
       diffData
       without
       ;

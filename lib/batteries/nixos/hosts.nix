@@ -12,7 +12,7 @@
       b = builtins;
     in
     {
-      networking.hosts = b.zipAttrsWith (_: ns: b.concatLists ns) (
+      networking.hosts = builtins.zipAttrsWith (_: ns: b.concatLists ns) (
         map (p: { ${p.addr} = [ p.name ]; }) peers
       );
       programs.ssh.knownHosts = b.listToAttrs (

@@ -210,7 +210,7 @@ let
       { d = _: mplus s2 (s1.d null); }
     else
       {
-        h = s1.h;
+        inherit (s1) h;
         t = mplus s1.t s2;
       };
   bind =
