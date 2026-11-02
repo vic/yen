@@ -18,7 +18,7 @@ let
     if has n "flake.nix" then
       "`nix flake init -t github:vic/yen#${n}`"
     else
-      "copy `templates/${n}`, then `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel`";
+      "`curl -L https://github.com/vic/yen/archive/main.tar.gz | tar xz --strip-components=2 yen-main/templates/${n}`, then in `${n}/`: `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel`";
   # a template's own flake.nix, with the docs inputs; flake-parts reads self as a flake, not a path
   selfOf = all: n: {
     outPath = root + "/${n}";
@@ -55,7 +55,7 @@ let
 in
 {
   title = "Templates";
-  description = "Start a new project from a template: one host, no flakes, flake-parts, or three platforms.";
+  description = "Start a new project from a template: one host, without flakes, inside flake-parts, or three platforms.";
   section = "start";
   order = 6;
 
@@ -74,7 +74,7 @@ in
         ]) names
       ))
       ''
-        Not sure which one? Take `minimal`, then read [Getting started](/start/getting-started/).
+        Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
         `templates/fleet` is the showcase fleet. Read it, but do not start from it: its `yen` input is this repository.
       ''
     ];

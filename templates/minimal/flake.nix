@@ -1,5 +1,6 @@
 {
-  description = "yen: one NixOS host";
+  # build: nixos-rebuild build --flake .#laptop
+  description = "One NixOS host";
 
   outputs =
     inputs:

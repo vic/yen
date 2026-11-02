@@ -1,5 +1,6 @@
 {
-  description = "yen inside flake-parts";
+  # build: nixos-rebuild build --flake .#laptop
+  description = "One NixOS host inside flake-parts, next to its perSystem outputs";
 
   # yen gives the `flake` outputs (nixosConfigurations); flake-parts keeps perSystem and its own modules
   outputs =

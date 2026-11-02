@@ -1,5 +1,5 @@
 ---
-{"description":"Start a new project from a template: one host, no flakes, flake-parts, or three platforms.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/templates/page.nix","title":"Templates"}
+{"description":"Start a new project from a template: one host, without flakes, inside flake-parts, or three platforms.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/templates/page.nix","title":"Templates"}
 ---
 
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
@@ -10,11 +10,11 @@ a template is a whole project. Each one here is evaluated in our CI.
 
 | Template | What it is | Start |
 |---|---|---|
-| `flake-parts` | yen inside flake-parts | `nix flake init -t github:vic/yen#flake-parts` |
-| `minimal` | yen: one NixOS host | `nix flake init -t github:vic/yen#minimal` |
-| `multi-platform` | yen: NixOS, nix-darwin and home-manager in one fleet | `nix flake init -t github:vic/yen#multi-platform` |
-| `noflake` | yen: one NixOS host, without flakes | copy `templates/noflake`, then `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel` |
+| `flake-parts` | One NixOS host inside flake-parts, next to its perSystem outputs | `nix flake init -t github:vic/yen#flake-parts` |
+| `minimal` | One NixOS host | `nix flake init -t github:vic/yen#minimal` |
+| `multi-platform` | NixOS, nix-darwin and home-manager hosts in one fleet | `nix flake init -t github:vic/yen#multi-platform` |
+| `noflake` | One NixOS host, without flakes | `curl -L https://github.com/vic/yen/archive/main.tar.gz | tar xz --strip-components=2 yen-main/templates/noflake`, then in `noflake/`: `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel` |
 
-Not sure which one? Take `minimal`, then read [Getting started](/start/getting-started/).
+Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
 `templates/fleet` is the showcase fleet. Read it, but do not start from it: its `yen` input is this repository.
 

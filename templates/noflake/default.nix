@@ -1,4 +1,4 @@
-# yen: one NixOS host, without flakes
+# One NixOS host, without flakes
 # Pin the sources with npins, niv or fetchTarball.
 # Build: nix-build -A nixosConfigurations.laptop.config.system.build.toplevel
 {
@@ -21,6 +21,8 @@ in
     };
   };
   inherit lib;
+  # declare `inputs` and `lib` as module sinks: every module then reads the two values above as its
+  # `{ inputs, lib, ... }` args (yen.lib.mkFlake does this for you in the flake templates)
   yen.sinks = {
     inputs = { };
     lib = { };

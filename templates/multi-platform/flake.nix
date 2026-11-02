@@ -1,5 +1,7 @@
 {
-  description = "yen: NixOS, nix-darwin and home-manager in one fleet";
+  # build: nixos-rebuild build --flake .#server, darwin-rebuild build --flake .#studio,
+  # home-manager build --flake .#alice@work
+  description = "NixOS, nix-darwin and home-manager hosts in one fleet";
 
   outputs =
     inputs:
