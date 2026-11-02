@@ -1785,6 +1785,35 @@ let
         eq (lib.filter (lib.hasPrefix "wifi.wifi2.") (lib.attrNames x.reduced.generators."fleet:main")) ([
           "wifi.wifi2.lab"
         ]);
+      # a dot in an assembly or network name is an error: "a.b" + "c" and "a" + "b.c" would share one generator
+      t3 = yes (
+        hasMsg (with' (
+          { yen, ... }:
+          {
+            yen.assembly."wifi.x" = {
+              kit = yen.kit.wifi;
+              roles.default = {
+                at = yen.host.web-2;
+                settings.networks.lab = { };
+              };
+            };
+          }
+        )) "wifi: wifi.x has a dot.*"
+      );
+      t4 = yes (
+        hasMsg (with' (
+          { yen, ... }:
+          {
+            yen.assembly.wifi3 = {
+              kit = yen.kit.wifi;
+              roles.default = {
+                at = yen.host.web-2;
+                settings.networks."b.c" = { };
+              };
+            };
+          }
+        )) "wifi: b.c has a dot.*"
+      );
     };
     svc-contract =
       let

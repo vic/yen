@@ -32,5 +32,11 @@ in
         share = true;
         files.psk.secret = true;
       }) (lib.attrNames member.settings.networks);
+    # a dot in a name would let two networks share one generator: assembly a.b with network c is a with b.c
+    errors =
+      { member, ... }:
+      map (n: "wifi: ${n} has a dot; assembly and network names must have none") (
+        lib.filter (lib.hasInfix ".") ([ member.assembly.name ] ++ lib.attrNames member.settings.networks)
+      );
   };
 }

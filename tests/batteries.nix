@@ -1418,6 +1418,7 @@ let
                     share = true;
                     files = { };
                   }
+                  null # a null in a list gives nothing, as a null element does
                 ];
               }
             ]).value
