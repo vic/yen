@@ -1,6 +1,7 @@
 # datalog oracles. Run: nix-instantiate --eval --strict tests/datalog.nix -A failed   (expect [ ])
+root:
 let
-  D = (import ../default.nix).lib.datalog;
+  D = root.api.datalog;
   b = builtins;
   depth =
     p:
@@ -446,7 +447,4 @@ let
     judgeNeither = eq (D.judge [ ] "p" "q") "neither";
   };
 in
-{
-  # fastest: tests.<suite>.<test> = { expr; expected; }
-  tests = checks;
-}
+checks

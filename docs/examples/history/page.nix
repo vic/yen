@@ -73,7 +73,7 @@ in
 
         `yen.lib.asOf { url; rev; module; }` evaluates the fleet at a git revision. `yen.lib.history { url; revs; module; }`
         lists each revision with the field changes from the one before (`diffData` over `result.data`). The engine's own tests
-        run both on this repository: see [tests/default.nix](https://github.com/vic/yen/blob/main/tests/default.nix).
+        run both on this repository: see [tests/engine.nix](https://github.com/vic/yen/blob/main/tests/engine.nix).
       ''
     ];
 

@@ -58,7 +58,7 @@
         3. For a feature, add a page: copy an example directory, edit `page.nix` and `modules/`, and give it `checks`.
         4. Run `docs-write` to regenerate the pages, then `ci` for every stage.
 
-        A change to the engine also needs a test in `tests/default.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
+        A change to the engine also needs a test in `tests/engine.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
 
         ## Set up
 

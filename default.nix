@@ -36,7 +36,8 @@ let
         ) (b.readDir dir)
       )
     );
-  all = leavesOf [ ] ./lib;
+  # tests/ loads under the path prefix `tests`: tests/krn.nix is `tests.krn`, apart from lib/krn.nix
+  all = leavesOf [ ] ./lib ++ leavesOf [ "tests" ] ./tests;
   # a leaf path that is a prefix of another (or equal: duplicate) clashes; both files are named
   clashes = b.filter (
     p:
@@ -54,4 +55,12 @@ in
 {
   # the public output is the flat list of lib/api.nix
   lib = self.api;
+  # the suites, for github:denful/fastest: tests.<suite>.<test> = { expr; expected; }
+  # a suite is a file directly in tests/; its subdirectories hold fixtures and cost cases, which are not suites
+  tests = b.listToAttrs (
+    map (l: {
+      name = b.elemAt l.leaf 1;
+      value = self.tests.${b.elemAt l.leaf 1};
+    }) (b.filter (l: l.path == [ "tests" ]) leaves)
+  );
 }

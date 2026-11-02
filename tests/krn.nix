@@ -1,5 +1,6 @@
+self:
 let
-  K = (import ../default.nix).lib.krn;
+  K = self.api.krn;
   fives =
     x:
     K.disj [
@@ -127,6 +128,4 @@ let
     appendo-finite-ok = eq app.complete true;
   };
 in
-{
-  tests = checks;
-}
+checks

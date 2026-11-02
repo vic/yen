@@ -1,6 +1,7 @@
 # Battery and sink-ref oracles. Run: nix-instantiate --eval --strict tests -A failed   (expect [ ])
+self:
 let
-  yen = (import ../default.nix).lib;
+  yen = self.api;
   b = builtins;
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
@@ -1993,7 +1994,4 @@ let
       };
   };
 in
-{
-  inherit checks;
-  tests = checks; # fastest: tests.<test> = { expr; expected; }
-}
+checks

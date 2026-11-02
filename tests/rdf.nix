@@ -1,6 +1,7 @@
 # yen rdf oracles. Run: nix-instantiate --eval --strict tests/rdf.nix -A failed   (expect [ ])
+self:
 let
-  yen = (import ../default.nix).lib;
+  yen = self.api;
   rdf = yen.rdf;
   b = builtins;
 
@@ -73,8 +74,6 @@ let
       )
     );
   escLines = rdf.triples rEsc;
-in
-rec {
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
   yes = x: eq x true;
@@ -103,5 +102,5 @@ rec {
       b.elem "<https://yen.dev/fleet/scope/fleet:main/host:db> <https://yen.dev/fleet/yen/parent> <https://yen.dev/fleet/scope/fleet:main> ." lines
     );
   };
-  tests = checks;
-}
+in
+checks
