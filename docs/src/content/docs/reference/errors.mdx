@@ -24,14 +24,12 @@ The codes below are read from the engine source when the docs are written.
 | `import-loop` | the `imports` of a module asks a sink that a module below it gives: a cycle in `result.modules` |
 | `invariant-data` | an invariant is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference |
 | `law-change` | a staged change declares `invariants`, `relations`, `labels` or `flake`: the law is the owner's, never a change's |
-| `merge` | `merge`: two different leaves at one path |
 | `missing` | a required field has no value |
 | `missing-param` | a stored query is asked without a required parameter |
 | `module` | a module asks for an arg no module gives or declares, or its `imports` or key names read an arg |
 | `not-a-literal` | a check question (`why`, `whyNot`, `proof`, `from`) is a hand-written list, not a literal by reference |
 | `not-a-scope` | a query takes a scope as a string or another value: pass an instance ref, `{ kind; name; }`, or a path of them |
 | `of` | a sink element, or a module's value for a `yen.sinks` sink, fails the sink's `of` type |
-| `one` | `one`: 0 or 2+ elements |
 | `order` | an `order` answer is not a number |
 | `outside-grant` | a staged change can reach a scope outside its grant |
 | `program` | a change program op is not valid |

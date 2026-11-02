@@ -70,124 +70,20 @@ let
     unknown
     near
     ;
-  typeName =
-    t:
-    t.name or t.description
-      or (if t ? __kind then "a ${t.__kind} ref" else "a value its check accepts");
-  isLeaf =
-    v: !isAttrs v || v ? check || v ? __kind || v ? __functor || (v.type or null) == "derivation";
-  isType = t: isAttrs t && (t ? check || t ? __kind);
-  # the kind a type refers to, through `maybe` and `listOf`; null when it is no ref
-  refKind =
-    t:
-    if t ? __kind then
-      t.__kind
-    else if t ? __maybe then
-      refKind t.__maybe
-    else if t ? __of then
-      refKind t.__of
-    else
-      null;
-  # a secret value is stated by its hash; a type is secret itself or through `maybe`
-  hide =
-    v:
-    "sha256:"
-    + b.hashString "sha256" (
-      b.toJSON (
-        if isRef v then
-          "${v.kind}:${v.name}"
-        else if isFunction v then
-          "<function>"
-        else
-          v
-      )
-    );
-  isSecret = t: isAttrs t && (t ? __secret || t ? __maybe && isSecret t.__maybe);
-  # a check that gives no bool (a curried gen-types check) fails, never throws; `boolCheck` names it in the error
-  checkOf =
-    t:
-    if t ? __kind then
-      (v: isAttrs v && (v.kind or null) == t.__kind)
-    else
-      (v: b.isBool (t.check v) && t.check v);
-  boolCheck = t: v: t ? __kind || b.isBool (t.check v);
-  get =
-    path: v:
-    foldl' (
-      r: n: if r ? ok && isAttrs r.ok && !isLeaf r.ok && r.ok ? ${n} then { ok = r.ok.${n}; } else { }
-    ) { ok = v; } path;
-  attrsIn = xs: concatMap (x: if isAttrs x && !isLeaf x then attrNames x else [ ]) xs;
-
-  # ── reduce strategies: elements in, { value; errors; } out ──
-  mergeAt =
-    path: a: bv:
-    let
-      subs = mapAttrs (
-        n: v:
-        let
-          p = path ++ [ n ];
-        in
-        if !(a ? ${n}) then
-          pure v
-        else if isLeaf a.${n} || isLeaf v then
-          {
-            value = a.${n};
-            errors = optional (a.${n} != v) (
-              errWith "merge" "merge conflict at ${concatStringsSep "." p}" {
-                code = "merge";
-                path = p;
-              }
-            );
-          }
-        else
-          mergeAt p a.${n} v
-      ) bv;
-    in
-    {
-      value = a // mapAttrs (_: x: x.value) subs;
-      errors = concatMap (x: x.errors) (b.attrValues subs);
-    };
-  pure = value: {
-    inherit value;
-    errors = [ ];
-  };
-  reduce = {
-    #: lib.reduce.list :: [ element ] -> { value = [ v ]; errors; } -- every element value, in the order the elements arrive
-    list = es: pure (map (e: e.value) es);
-    #: lib.reduce.set :: [ element ] -> { value = [ v ]; errors; } -- the element values without duplicates
-    set = es: pure (uniq (map (e: e.value) es));
-    #: lib.reduce.flat :: [ element ] -> { value = [ v ]; errors; } -- the element values joined: a list element gives its items, any other value itself; without duplicates, in first-seen order
-    flat = es: pure (uniq (concatMap (e: if isList e.value then e.value else [ e.value ]) es));
-    #: lib.reduce.one :: [ element ] -> { value; errors; } -- the one element value; zero or two or more elements is the error one
-    one = es: {
-      value = if es == [ ] then null else (head es).value;
-      errors = optional (length es != 1) (
-        errWith "one" "one: got ${toString (length es)} elements" {
-          code = "one";
-          got = length es;
-          want = 1;
-        }
-      );
-    };
-    #: lib.reduce.merge :: [ element ] -> { value = attrs; errors; } -- the element values merged as attrsets; two different answers at one path are an error
-    merge = foldl' (
-      acc: e:
-      let
-        m = mergeAt [ ] acc.value e.value;
-      in
-      m // { errors = acc.errors ++ m.errors; }
-    ) (pure { });
-    #: lib.reduce.entries :: [ element ] -> { value = [ element ]; errors; } -- the elements themselves, each with its value and where it came from
-    entries = pure;
-  };
-  # each built-in reduce is callable and carries its name, so `schema` can say which strategy a sink uses
-  reduceNamed = mapAttrs (n: f: {
-    __functor = _: f;
-    name = n;
-  }) reduce;
-  static = import ./_core/static.nix {
-    inherit b checkOf reduceNamed;
-  };
+  inherit (self._core.types)
+    typeName
+    isLeaf
+    isType
+    refKind
+    hide
+    isSecret
+    checkOf
+    boolCheck
+    get
+    attrsIn
+    ;
+  inherit (self._core.reduce) pure reduce;
+  inherit (self._core) static;
 
   #: lib.eval :: module -> result -- evaluate a fleet module; the result answers every query
   eval =

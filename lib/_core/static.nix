@@ -1,12 +1,9 @@
-# The static lib: type constructors, reduce strategies by name, JSON-safe values. `b` is builtins;
-# `checkOf` and `reduceNamed` come from _engine.nix.
-{
-  b,
-  checkOf,
-  reduceNamed,
-}:
+# The static lib: type constructors, reduce strategies by name, JSON-safe values.
+self:
 let
-  inherit (b)
+  inherit (self._core.types) checkOf;
+  inherit (self._core.reduce) reduceNamed;
+  inherit (builtins)
     all
     concatStringsSep
     elem
@@ -65,11 +62,11 @@ in
   #: lib.enum :: [ value ] -> type -- one of the listed values
   enum = xs: {
     check = v: elem v xs;
-    description = "one of ${concatStringsSep ", " (map b.toJSON xs)}";
+    description = "one of ${concatStringsSep ", " (map builtins.toJSON xs)}";
   };
   #: lib.attrsOf :: type -> type -- an attrset whose values pass the type
   attrsOf = t: {
-    check = v: isAttrs v && all (checkOf t) (b.attrValues v);
+    check = v: isAttrs v && all (checkOf t) (builtins.attrValues v);
     description = "an attrset of values its check accepts";
   };
   # a secret: checked like t, but no answer (facts, data, scopes, errors, exports) ever states its value, only its
