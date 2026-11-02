@@ -210,7 +210,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.kits.remote-builders`](https://github.com/vic/yen/blob/main/lib/kits/remote-builders.nix#L6) | `module` | builders and clients: a client builds on the builders of its own assembly |
 | [`lib.kits.sshd`](https://github.com/vic/yen/blob/main/lib/kits/sshd.nix#L7) | `{ yen, lib, ... } -> module` | kit sshd: servers run openssh and export a host key, clients trust the servers of their own assembly |
 | [`lib.kits.users`](https://github.com/vic/yen/blob/main/lib/kits/users.nix#L7) | `{ yen, lib, ... } -> module` | kit users: one login user per assembly, its password hash a secret on that machine only |
-| [`lib.kits.wifi`](https://github.com/vic/yen/blob/main/lib/kits/wifi.nix#L6) | `module` | wifi kit: one role with `networks`; every network gets a PSK secret file in the assembly's generator |
+| [`lib.kits.wifi`](https://github.com/vic/yen/blob/main/lib/kits/wifi.nix#L5) | `module` | wifi kit: one role with `networks`; every network gets its own PSK generator |
 | [`lib.kits.wireguard`](https://github.com/vic/yen/blob/main/lib/kits/wireguard.nix#L5) | `{ root; } -> module` | a wireguard network: one controller, peers; addresses from battery `addresses`, keys from generators |
 | [`lib.kits.zerotier`](https://github.com/vic/yen/blob/main/lib/kits/zerotier.nix#L6) | `{ root; } -> module` | a zerotier network: one controller, up to four moons, peers; identities from generators |
 

@@ -1400,7 +1400,8 @@ flowchart LR
   n5bf3ea6cc8["user-svc-a@lb · lb"]
   n6e0ffb2ea1["user-svc-b@lb · lb"]
   n232f52aea6{{"wifi.home · stage"}}
-  neca8350936{{"wifi.wifi · stage"}}
+  n5aa2849cee{{"wifi.wifi.home · stage"}}
+  nc0cb7c6009{{"wifi.wifi.office · stage"}}
   n100bbb9e62 --> n74bd4a0a3c
   nc571bbff1f --> n77b243f0ea
   n4d8486d320 --> ne06c6af0c5

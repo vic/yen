@@ -14,6 +14,9 @@ The install lane has three batteries and two kits. The flake sink carries `apps`
 | `deploy.rebuild { from; pkgs; flake; }` | `out` of the machine's deploy sink | `apps.<system>.rebuild-<machine>`: `nixos-rebuild switch --target-host user@address`, with `--build-host` when the deploy target has a `buildHost` |
 
 App names come from the scope name. No disks element, no install app; no deploy target, no rebuild app.
+Arguments after `--` go to the tool: a deploy user that is not root runs `nix run .#rebuild-<machine> -- --sudo`.
+The install app writes the facter report to `report`; commit that file, and kit `facter` reads it on the next
+build. A machine with no report gets no facter config.
 
 | Kit | Role | Interface | Does |
 |---|---|---|---|
