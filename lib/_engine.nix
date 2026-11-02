@@ -57,6 +57,13 @@ let
     kindKeys
     ;
   inherit (self._core.text) hasInfix floorOf uniqueBy;
+  inherit (self)
+    graphs
+    rdf
+    datalog
+    krn
+    _impact
+    ;
   inherit (self._core.errors)
     err
     errWith
@@ -312,7 +319,7 @@ let
           };
         }) found
       );
-      moduleGraph = static.graphs.fromEdges (
+      moduleGraph = graphs.fromEdges (
         concatMap (
           n:
           optional (n.parent != null) {
@@ -336,13 +343,12 @@ let
         ) ok0
       );
       roundNames = removeAttrs (keySet (concatMap gives ok0 ++ concatMap declares ok0)) [ "yen" ]; # `yen` never answers `imports`
-      onCycle = keySet (static.graphs.cycles moduleGraph);
+      onCycle = keySet (graphs.cycles moduleGraph);
       # the importers on a cycle; when the rounds never settle, every importer
       looping = keySet (
         map (n: n.key) (filter (n: (n.importer or false) && (!settled || onCycle ? ${n.key})) found)
       );
-      moduleAbove =
-        n: static.graphs.reach (mapAttrs (_: m: optional (m.parent != null) m.parent) modules) n.key;
+      moduleAbove = n: graphs.reach (mapAttrs (_: m: optional (m.parent != null) m.parent) modules) n.key;
       # the sinks some module gives or declares in `yen.sinks` (`yen` always); a declared sink counts as read
       gives = n: filter (c: c != "imports") (attrNames n.p0);
       declares = n: attrNames (n.p0.yen.sinks or { });
@@ -625,7 +631,7 @@ let
           x
           y
         ]
-      ) static.datalog.comparisons
+      ) datalog.comparisons
       // mapAttrs (k: d: mapAttrs (f: _: fieldLit k f) (d.fields or { })) kinds;
       #: yen.facts.<kind>.<field> :: scope -> term -> literal -- the field of the scope holds the term; for a ref field, the term is a scope of the instance it refers to, or a ref constant
       #: yen.facts.<kind>.<field>.set :: scope -> literal -- the field of the scope holds a value
@@ -1417,7 +1423,7 @@ let
           inherit (e) origin;
         }) routed;
       }; # origin: "aspect x" or "sink y": who gave it
-      # ── reads: what each routed element reads, as tokens (lib/parts/impact.nix). A value reads the fleet only through its
+      # ── reads: what each routed element reads, as tokens (lib/_impact.nix). A value reads the fleet only through its
       # args and its cycle's sources, so these are all its reads: a staged change follows them, never more ──
       dataT = id: { data = id; };
       sinkT = n: id: {
@@ -1686,7 +1692,7 @@ let
       #: result.check :: { … } -- the invariants verdict, with its certificate, seal and explanations (below)
       check =
         let
-          D = static.datalog;
+          D = datalog;
           invs = yen.invariants;
           # a rule is a function of its variables, `{ H, D }: { bad = H; pos = [ … ]; neg = [ … ]; }`, its literals by
           # reference (yen.facts, yen.relations). One call with { var = "H"; } terms gives the rule as data (D3), so every
@@ -1935,7 +1941,7 @@ let
             engine = hash (
               map (f: b.hashFile "sha256" f) [
                 ./_engine.nix
-                ./parts/datalog.nix
+                ./datalog.nix
               ]
             );
             rules = hash (map (x: x.r) checked);
@@ -2854,9 +2860,9 @@ let
               prefix = null;
               file = null;
             });
-      # D14 exact: a change reaches what its seeds reach through reads, in either eval (lib/parts/impact.nix, vic/r-yen.md)
+      # D14 exact: a change reaches what its seeds reach through reads, in either eval (lib/_impact.nix, vic/r-yen.md)
       declares = path: declared.declaredIn path != [ ];
-      impactOf = (import ./parts/impact.nix).impactOf;
+      impactOf = _impact.impactOf;
       instT = k: n: {
         instance = k;
         name = n;
@@ -3211,6 +3217,10 @@ let
   # agent tools: the engine library outside an eval, and inside the fleet too
   tools = static // {
     inherit
+      graphs
+      rdf
+      datalog
+      krn
       stage
       change
       program

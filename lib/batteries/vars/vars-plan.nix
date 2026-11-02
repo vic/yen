@@ -11,7 +11,7 @@
 { sinks, ... }:
 let
   b = builtins;
-  graphs = import ../../parts/graphs.nix;
+  graphs = import ../../graphs.nix null;
   generators = sinks.${from.__sink};
   pathOf =
     gen: file: f:

@@ -1,3 +1,4 @@
+_:
 # rdf.nix: an eval result as sorted, de-duplicated N-Triples, and its content hash. Builtins only.
 let
   b = builtins;

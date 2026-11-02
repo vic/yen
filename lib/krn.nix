@@ -1,3 +1,4 @@
+_:
 # krn: µKanren (Hemann, Friedman 2013) with constraints, in pure Nix. Builtins only.
 #
 # Terms: Nix values. A logic variable is { __lvar = n; }. Unification walks attrsets (same keys), Nix lists (same

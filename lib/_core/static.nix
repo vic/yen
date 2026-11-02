@@ -1,4 +1,4 @@
-# The static lib: type constructors, reduce strategies by name, JSON-safe values, and the parts. `b` is builtins;
+# The static lib: type constructors, reduce strategies by name, JSON-safe values. `b` is builtins;
 # `checkOf` and `reduceNamed` come from _engine.nix.
 {
   b,
@@ -76,9 +76,6 @@ in
   # sha256; an aspect still reads it
   #: lib.secret :: type -> type -- the type, but every answer states the value only by its sha256
   secret = t: t // { __secret = true; };
-  graphs = import ../parts/graphs.nix; # reach, transpose, topo, layers, sccs, cycles, paths, shortest over succ attrsets
-  rdf = import ../parts/rdf.nix; # triples, ntriples, share: an eval result as sorted N-Triples with a content hash
-  datalog = import ../parts/datalog.nix; # ground rules with negation: wfs (three values), stable, why
   batteries = import ../batteries; # roles in, a yen module out: pool, gated, system; nixos.*
   kits = import ../kits; # ready-made kits: modules a fleet imports
   # valid time: an instance with validFrom / validTo (ISO dates) holds at a date the caller passes; no clock in pure eval
@@ -89,6 +86,5 @@ in
       bound = k: d: if (s.${k} or null) == null then d else s.${k};
     in
     bound "validFrom" "0000-00-00" <= date && date <= bound "validTo" "9999-12-31"; # absent or null: open
-  krn = import ../parts/krn.nix; # µKanren: logic variables, unification, run, fresh, conde, appendo, facto
   inherit jsonSafe;
 }

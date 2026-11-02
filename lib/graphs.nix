@@ -1,3 +1,4 @@
+_:
 # Graph algorithms over plain data. A graph is `succ`: an attrset from node to a list of successors, or `of nodes next`:
 # a graph over instances, whose answers are refs { kind; name; }.
 # Builtins only. Every result is in sorted node order, so file order never changes an answer.

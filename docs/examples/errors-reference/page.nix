@@ -23,13 +23,13 @@ let
         )
       )
     );
-  # the engine source: default.nix, every lib file and every lib/parts file
+  # the engine source: default.nix, every lib file
   engineFiles =
     dir:
     map (n: dir + "/${n}") (builtins.filter (n: builtins.match ".*\\.nix" n != null) (builtins.attrNames (builtins.readDir dir)));
   engineText =
     yen:
-    builtins.concatStringsSep "\n" (map builtins.readFile ([ (yen + "/default.nix") ] ++ engineFiles (yen + "/lib") ++ engineFiles (yen + "/lib/parts")));
+    builtins.concatStringsSep "\n" (map builtins.readFile ([ (yen + "/default.nix") ] ++ engineFiles (yen + "/lib")));
   meaning = {
     arg = "an element asks for an arg that has no answer";
     at = "`at` holds a value that is not a predicate";

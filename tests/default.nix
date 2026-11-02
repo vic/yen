@@ -1,7 +1,7 @@
 # yen oracles. Run: nix-instantiate --eval --strict vic/tests -A failed   (expect [ ])
 let
   yen = (import ../default.nix).lib;
-  impactOf = (import ../lib/parts/impact.nix).impactOf;
+  impactOf = (import ../lib/_impact.nix null).impactOf;
   b = builtins;
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
