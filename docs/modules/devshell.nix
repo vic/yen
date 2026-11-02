@@ -112,8 +112,9 @@ in
     at = yen.kinds.site;
     commands = [
       (cmd "fleet" "fleet-test" "the reference fleet's checks" (fastest "?dir=templates/fleet" "fleet"))
+      # 4 eval workers: 8 x 2 GiB filled a 16 GB runner, and the step got SIGTERM (exit 143) mid-eval
       (cmd "fleet" "fleet-e2e" "the reference fleet's real evaluations" (
-        fastest "?dir=templates/fleet" "e2e"
+        "FASTEST_WORKERS=4 " + fastest "?dir=templates/fleet" "e2e"
       ))
       (cmd "fleet" "fleet-cost" "the trimmed-module-list cost oracle"
         "cd templates/fleet && bash cost.sh"

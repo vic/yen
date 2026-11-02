@@ -1,6 +1,7 @@
-# .github/workflows/test.yml is generated: each stage is an aspect that gives jobs to the `workflow` sink.
-# Stages run one after another (`needs`), so a push never starts every job at once on GitHub's runners:
-#   fmt -> engine -> docs -> fleet -> flake-check, and one eval job per system of templates/fleet/ci.json.
+# .github/workflows/test.yml is generated: each area is an aspect that gives jobs to the `workflow` sink.
+# A PR reports its fast checks first: fmt, engine-test, docs-test and fleet-test start at once. Every other job
+# (costs, e2e, site build, flake check, one eval per system of templates/fleet/ci.json) needs fmt and the fast test of
+# its area, so a deep evaluation runs only on a change that passed the cheap checks. Check `ci.order` holds this.
 {
   yen,
   lib,
@@ -46,6 +47,53 @@ let
     inherit name;
     run = "nix develop ./docs -c ${command}";
   };
+  # the jobs with no `needs`; a job of an area is `<area>-test` when fast, else it waits for fmt and that test
+  fast = [
+    "fmt"
+    "engine-test"
+    "docs-test"
+    "fleet-test"
+  ];
+  after = area: [
+    "fmt"
+    "${area}-test"
+  ];
+  # one devshell command per job, named as the command
+  one =
+    area: args: name: command:
+    job (
+      args
+      // {
+        steps = [ (dev name command) ];
+      }
+      // lib.optionalAttrs (!lib.elem command fast) { needs = after area; }
+    );
+  # diagnostic: on a failed job, show memory and the kernel log, so an OOM kill is visible (exit 143 on fleet-e2e)
+  memoryAtFailure =
+    j:
+    j
+    // {
+      steps = j.steps ++ [
+        {
+          name = "memory at failure (diagnostic)";
+          "if" = "failure()";
+          run = "free -m; sudo dmesg | tail -40";
+        }
+      ];
+    };
+  # jobs that break the order: a fast job with `needs`, or another job without exactly fmt and a fast test
+  disordered = lib.filterAttrs (
+    n: j:
+    if lib.elem n fast then
+      j ? needs
+    else
+      !(
+        j ? needs
+        && lib.length j.needs == 2
+        && lib.all (x: lib.elem x fast) j.needs
+        && lib.elem "fmt" j.needs
+      )
+  );
   # the fleet's CI targets, grouped by system: one job per system, its targets one after another
   targets = lib.groupBy (t: t.system) (
     builtins.fromJSON (builtins.readFile (inputs.yen + "/templates/fleet/ci.json"))
@@ -142,51 +190,52 @@ in
   };
   yen.aspects.ci-engine = {
     at = yen.kinds.site;
-    workflow.engine = job {
-      timeout = 20;
-      steps = [
-        (dev "engine and library oracles" "engine-test")
-        (dev "cost oracles (memos)" "engine-cost")
-      ];
+    workflow = {
+      engine-test = one "engine" { timeout = 20; } "engine and library oracles" "engine-test";
+      engine-cost = one "engine" { timeout = 20; } "cost oracles (memos)" "engine-cost";
     };
   };
   yen.aspects.ci-docs = {
     at = yen.kinds.site;
-    workflow.docs = job {
-      timeout = 60;
-      steps = [
-        (dev "docs examples" "docs-test")
-        (dev "docs examples: real evaluations (e2e)" "docs-e2e")
-        (dev "docs flake check: pages and workflows current" "docs-check")
-        (dev "site build" "docs-build")
-      ];
+    workflow = {
+      docs-test = one "docs" { } "docs examples" "docs-test";
+      docs-check = one "docs" { } "docs flake check: pages and workflows current" "docs-check";
+      docs-e2e = one "docs" { timeout = 60; } "docs examples: real evaluations (e2e)" "docs-e2e";
+      docs-build = one "docs" { } "site build" "docs-build";
     };
   };
   yen.aspects.ci-fleet = {
     at = yen.kinds.site;
     workflow = {
-      fleet = job {
-        timeout = 120;
-        steps = [
-          (dev "fleet checks" "fleet-test")
-          (dev "real evaluations (e2e)" "fleet-e2e")
-          (dev "trimmed module lists cost oracle" "fleet-cost")
-          (dev "MCP server and flake app" "fleet-mcp")
-        ];
-      };
-      flake-check = job {
-        timeout = 120;
-        # no KVM: VM tests are `vmTests`, not checks (hosted runners cannot run guests reliably)
-        steps = [ (dev "nix flake check of the fleet" "fleet-check") ];
-      };
+      fleet-test = one "fleet" { } "fleet checks" "fleet-test";
+      fleet-cost = one "fleet" { } "trimmed module lists cost oracle" "fleet-cost";
+      fleet-mcp = one "fleet" { } "MCP server and flake app" "fleet-mcp";
+      fleet-e2e = memoryAtFailure (one "fleet" { timeout = 120; } "real evaluations (e2e)" "fleet-e2e");
+      # no KVM: VM tests are `vmTests`, not checks (hosted runners cannot run guests reliably)
+      flake-check = one "fleet" { timeout = 120; } "nix flake check of the fleet" "fleet-check";
     }
     // lib.mapAttrs' (
       system: _:
-      lib.nameValuePair "eval-${system}" (job {
-        needs = [ "fleet" ];
-        runs-on = runner.${system};
-        steps = [ (dev "every ${system} target of ci.json evaluates" "fleet-eval ${system}") ];
-      })
+      lib.nameValuePair "eval-${system}" (
+        one "fleet" {
+          runs-on = runner.${system};
+        } "every ${system} target of ci.json evaluates" "fleet-eval ${system}"
+      )
     ) targets;
+  };
+  # the order is data: check it, so a new job cannot skip the fast checks or block them
+  yen.aspects.ci-order = {
+    at = yen.kinds.site;
+    tests =
+      { sinks, ... }:
+      {
+        ci = {
+          fast.order = {
+            expr = lib.attrNames (disordered sinks.workflow);
+            expected = [ ];
+          };
+          e2e = { };
+        };
+      };
   };
 }
