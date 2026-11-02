@@ -4,7 +4,14 @@
 let
   inherit (yen) host kit;
   k = inputs.yen.lib.kits;
-  shared = import ../shared.nix yen;
+  # the settings every role of a homelab needs; the variants reuse them so only the contract differs
+  shared = {
+    device = "/dev/sda";
+    layout = yen.layout.single-ext4;
+    authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdminKeyNotReal admin" ];
+    hardware = ../hardware; # placeholder: create this directory for your hardware
+    prefix = "10.8.0.0/24";
+  };
 in
 {
   imports = [

@@ -1,4 +1,5 @@
 {
+  # build: nixos-rebuild build --flake .#db
   description = "yen: machines from the library bundle base (disk, hardware report, ssh, break-glass login)";
 
   outputs =

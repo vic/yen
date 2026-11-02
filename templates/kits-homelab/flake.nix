@@ -1,4 +1,5 @@
 {
+  # build: nixos-rebuild build --flake .#web
   description = "yen: a homelab fleet from the library kits (base, wireguard, borg, monitoring, dns)";
 
   outputs =

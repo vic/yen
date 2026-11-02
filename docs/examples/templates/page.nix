@@ -122,6 +122,23 @@ in
       names-free = eq (builtins.filter (n: builtins.pathExists (../. + "/${n}")) names) [ ];
       # a new template directory needs its e2e: builtOf has one key per template (keys only, nothing evaluates)
       e2e-every-template = eq (builtins.attrNames (builtOf { })) names;
+      # the homelab's dummy WireGuard public keys are well formed: 44 characters of base64 ending in `=`
+      homelab-wg-keys =
+        let
+          key = h: builtins.readFile (root + "/kits-homelab/vars/${h}/from-exports/wg-lab-wg.pub/value");
+          ok = k: builtins.stringLength k == 44 && builtins.substring 43 1 k == "=";
+        in
+        eq
+          (builtins.map (h: ok (key h)) [
+            "lb"
+            "nas"
+            "web"
+          ])
+          [
+            true
+            true
+            true
+          ];
     };
 
   e2e = { inputs, eq, ... }: checksOf eq (builtOf inputs);

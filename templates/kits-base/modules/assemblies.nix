@@ -28,7 +28,7 @@ in
         device = "/dev/sda";
         layout = yen.layout.single-ext4;
         authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdminKeyNotReal admin" ];
-        hardware = ../hardware; # nixos-facter reports, <machine>.json; the install app writes them
+        hardware = ../hardware; # placeholder: create this directory for your hardware; nixos-facter reports, <machine>.json; the install app writes them
       };
     };
   };
