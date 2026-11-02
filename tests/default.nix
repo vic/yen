@@ -1232,9 +1232,10 @@ let
       };
     agent-json =
       let
-        a = (ports {
-          yen.host.c.port = 70000;
-        }).agent;
+        a =
+          (ports {
+            yen.host.c.port = 70000;
+          }).agent;
       in
       {
         json = eq (b.fromJSON (b.toJSON a)) a;

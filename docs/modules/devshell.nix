@@ -19,7 +19,7 @@ let
     command = "set -eu; cd \"$(git rev-parse --show-toplevel)\"; ${command}";
   }; # from any directory of the rep
   # every suite runs on github:denful/fastest: tests.<suite>.<test> = { expr; expected; }, in parallel
-  fastest = dir: suite: ''fastest --flake "$PWD${dir}#tests" ${suite}'';
+  fastest = dir: suite: ''fastest --flake "path:$PWD${dir}#tests" ${suite}'';
   fleet = "path:$PWD?dir=templates/fleet";
 in
 {
