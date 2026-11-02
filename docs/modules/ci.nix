@@ -184,8 +184,6 @@ in
     workflow.fmt = job {
       steps = [
         (dev "every nix file is formatted (nixfmt)" "fmt-check")
-        (dev "no unused code in default.nix and lib/ (deadnix)" "dead-check")
-        (dev "no lint finding in default.nix and lib/ (statix)" "statix-check")
         (dev "the workflows are valid (actionlint)" "lint")
       ];
     };

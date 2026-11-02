@@ -10,7 +10,7 @@
   from,
   rootOf,
   entry,
-  keep ? _: _: true,
+  keep ? scope: e: true,
 }:
 let
   b = builtins;

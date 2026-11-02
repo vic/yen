@@ -1,7 +1,7 @@
 # yen oracles. Run: nix-instantiate --eval --strict vic/tests -A failed   (expect [ ])
 let
   yen = (import ../default.nix).lib;
-  impactOf = (import ../lib/impact.nix).impactOf;
+  impactOf = (import ../lib/parts/impact.nix).impactOf;
   b = builtins;
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
@@ -1955,32 +1955,6 @@ let
                 value = 1;
               }
             ]).valid;
-        render =
-          eq
-            (b.fromJSON (
-              b.toJSON [
-                {
-                  op = "set";
-                  path = [
-                    "host"
-                    "c"
-                    "port"
-                  ];
-                  value = 1;
-                }
-              ]
-            ))
-            [
-              {
-                op = "set";
-                path = [
-                  "host"
-                  "c"
-                  "port"
-                ];
-                value = 1;
-              }
-            ];
       };
     invariants-why =
       eq

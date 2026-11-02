@@ -59,11 +59,12 @@ let
   on2 =
     f: g: x: y:
     if g ? __nodes then back g (f g.succ (key x) (key y)) else f g x y;
-
+in
+let
   raw = rec {
     inherit nodesOf reach transpose;
     #: lib.graphs.fromEdges :: [ { from; to; } ] -> succ -- a graph from a list of edges
-    fromEdges = es: b.mapAttrs (_: xs: sort (map (e: e.to) xs)) (builtins.groupBy (e: e.from) es);
+    fromEdges = es: b.mapAttrs (_: xs: sort (map (e: e.to) xs)) (b.groupBy (e: e.from) es);
     #: lib.graphs.reachers :: succ -> node -> [ node ] -- the nodes that reach node (its dependents, when succ is "depends on")
     reachers = succ: reach (transpose succ);
     #: lib.graphs.cycles :: succ -> [ node ] -- the nodes on a cycle

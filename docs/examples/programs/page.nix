@@ -73,7 +73,7 @@
             "validate, then [stage](/agents/stage/)"
           ]
           [
-            "`render prog`"
+            "`builtins.toJSON prog`"
             "JSON, to store or send"
           ]
         ]

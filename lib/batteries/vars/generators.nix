@@ -17,7 +17,7 @@ let
   ) es;
   byKey = b.mapAttrs (
     _: xs: b.removeAttrs (b.head xs) [ "machine" ] // { machines = unique (map (g: g.machine) xs); }
-  ) (builtins.groupBy keyOf gs);
+  ) (b.groupBy keyOf gs);
 in
 {
   value = byKey;

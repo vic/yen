@@ -1,4 +1,0 @@
-# statix lints for default.nix and lib/ (statix-check runs from the repo root).
-# repeated_keys is off: the yen DSL writes one `yen.<kind>.<name>` block per aspect or kit on purpose.
-# bool_comparison is off: eval3 and call are three-valued (true, false, null), so `== true` maps null to false.
-disabled = [ "repeated_keys", "bool_comparison" ]

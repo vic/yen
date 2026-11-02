@@ -23,6 +23,13 @@ let
         )
       )
     );
+  # the engine source: default.nix, every lib file and every lib/parts file
+  engineFiles =
+    dir:
+    map (n: dir + "/${n}") (builtins.filter (n: builtins.match ".*\\.nix" n != null) (builtins.attrNames (builtins.readDir dir)));
+  engineText =
+    yen:
+    builtins.concatStringsSep "\n" (map builtins.readFile ([ (yen + "/default.nix") ] ++ engineFiles (yen + "/lib") ++ engineFiles (yen + "/lib/parts")));
   meaning = {
     arg = "an element asks for an arg that has no answer";
     at = "`at` holds a value that is not a predicate";
@@ -82,7 +89,7 @@ in
   body =
     { docs, inputs, ... }:
     let
-      codes = codesOf (builtins.readFile (inputs.yen + "/default.nix"));
+      codes = codesOf (engineText inputs.yen);
     in
     [
       ''
@@ -116,7 +123,7 @@ in
     }:
     {
       every-code-explained = yes (
-        builtins.all (c: meaning ? ${c}) (codesOf (builtins.readFile (inputs.yen + "/default.nix")))
+        builtins.all (c: meaning ? ${c}) (codesOf (engineText inputs.yen))
       );
     };
 }

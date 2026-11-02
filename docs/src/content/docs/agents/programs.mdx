@@ -136,7 +136,7 @@ Writing Nix is a poor interface for an agent: it can write anything, and a typo 
 | `validate result prog` | error records, `[ ]` when the program is valid |
 | `toModule prog` | the program as a yen module, to import |
 | `dryRun { base; prog; grant; rejected; }` | validate, then [stage](/agents/stage/) |
-| `render prog` | JSON, to store or send |
+| `builtins.toJSON prog` | JSON, to store or send |
 
 :::tip[Run this example]
 Every block on this page is a file of the template `programs`. Copy it and run it:

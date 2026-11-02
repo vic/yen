@@ -320,7 +320,7 @@ SELECT ?name WHERE { ?s rdf:type <https://yen.dev/fleet/kind/host> ; <https://ye
 
 **Safe between machines, before deploy.** Field literals such as `yen.facts.machine.dbOn H D` read field values and refs. Invariants over them hold across machines ([agent/invariants.nix](modules/agent/invariants.nix)): a host's database is in its own environment (`db-exists`, `db-same-env`), no two machines share an address (`unique-addr`), and a host never depends on a host in a less trusted environment (`trust-order`). A staged change that breaks one is refused with the atom, and `check.whyNot` / `check.proof` explain an answer.
 
-**Change programs.** `yen.lib.program` writes a change as data ops: `set`, `ref`, `place` and `new`. `validate result prog` checks it against the schema (with `near`), `toModule` makes the module, `dryRun { base; prog; }` validates and stages it, and `render` gives JSON. An agent writes a program, not Nix code.
+**Change programs.** `yen.lib.program` writes a change as data ops: `set`, `ref`, `place` and `new`. `validate result prog` checks it against the schema (with `near`), `toModule` makes the module, `dryRun { base; prog; }` validates and stages it, and `builtins.toJSON prog` gives JSON. An agent writes a program, not Nix code.
 
 **Install order.** The stored query `installOrder { assembly }` gives the waves of an assembly: the servers first, then the clients ([agent/queries.nix](modules/agent/queries.nix), `yen.lib.graphs.layers`). For the backup instance: `[ [ "lb" ] [ … every client … ] ]`.
 

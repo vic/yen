@@ -11,7 +11,7 @@ let
   alloc =
     es:
     yen.lib.batteries.addresses {
-      inherit ((b.head es).value) prefix; # the same in every member: a difference is an error (check)
+      prefix = (b.head es).value.prefix; # the same in every member: a difference is an error (check)
       members = map (name: { inherit name; }) (lib.unique (map (x: x.machine.name) es));
     };
 in

@@ -4,7 +4,7 @@
 #   sinks.sections.reduce = ordered;
 let
   b = builtins;
-  graphs = import ../graphs.nix;
+  graphs = import ../parts/graphs.nix;
   pair = name: value: { inherit name value; };
 in
 es:

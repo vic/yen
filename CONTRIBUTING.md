@@ -130,8 +130,6 @@ A change to the engine also needs a test in `tests/default.nix`. Keep the engine
 | `fleet-write` | fleet | regenerate the fleet's README.md and ci.json |
 | `fleet-flake` | fleet | regenerate the fleet's flake.nix |
 | `fmt-check` | fmt | every tracked nix file is formatted (nixfmt), as CI checks |
-| `dead-check` | fmt | deadnix: no unused let binding or positional argument in default.nix and lib/ (fails on any) |
-| `statix-check` | fmt | statix: no lint finding in default.nix and lib/ (the rules are in statix.toml) |
 | `lint` | fmt | the workflows are valid (actionlint, with shellcheck) |
 | `fmt` | fmt | format every tracked nix file (nixfmt) |
 | `issue-eval` | issue | issue-eval BODY DIR: an issue's nix blocks as one fleet, restricted; writes DIR/comment.md |

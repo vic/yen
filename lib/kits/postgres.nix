@@ -8,7 +8,7 @@
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;
-  inherit (lib.types) str;
+  str = lib.types.str;
   member =
     role:
     all [
@@ -48,7 +48,7 @@ in
       {
         dsn = {
           host = scope.parent.addr;
-          inherit (member.settings) port;
+          port = member.settings.port;
         };
       };
     nixos =

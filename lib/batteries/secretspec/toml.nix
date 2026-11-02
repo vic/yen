@@ -30,7 +30,7 @@ let
         ];
       }) ss
     )
-  ) (builtins.groupBy profileOf secrets);
+  ) (b.groupBy profileOf secrets);
   # profile-level settings (`profiles.<p>.defaults`) next to the secrets of that profile
   merged = declared // b.mapAttrs (p: v: (declared.${p} or { }) // v) profiles;
 in

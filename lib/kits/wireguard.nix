@@ -57,7 +57,7 @@ in
       { exports, ... }:
       map (e: e.error) (
         lib.concatMap (es: lib.optionals (same (lib.head es).kit yen.kit.wireguard) (check es)) (
-          lib.attrValues (builtins.groupBy (x: x.assembly.name) exports)
+          lib.attrValues (lib.groupBy (x: x.assembly.name) exports)
         )
       );
   };

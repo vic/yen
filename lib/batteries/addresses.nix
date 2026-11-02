@@ -46,7 +46,7 @@ let
     out = [ ];
     full = [ ];
   } members;
-  groups = builtins.groupBy (x: x.address) r.out;
+  groups = b.groupBy (x: x.address) r.out;
   twice = b.filter (a: b.length groups.${a} > 1) (b.attrNames groups);
   err = code: msg: got: {
     error = "addresses: ${msg}";

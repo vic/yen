@@ -162,7 +162,7 @@ let
   shacl =
     r:
     let
-      inherit (r.schema) kinds;
+      kinds = r.schema.kinds;
       names = b.filter (k: kinds.${k}.scopes > 0) (b.attrNames kinds);
       kiri = k: "<${base}kind/${iriPart k}>";
       spawners = k: b.filter (p: b.elem k kinds.${p}.spawns) (b.attrNames kinds);
