@@ -1,5 +1,5 @@
 ---
-{"description":"Start a new project from a template: one host, without flakes, inside flake-parts, or three platforms.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/templates/page.nix","title":"Templates"}
+{"description":"Start a new project from a template.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/templates/page.nix","title":"Templates"}
 ---
 
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
@@ -11,6 +11,8 @@ a template is a whole project. Each one here is evaluated in our CI.
 | Template | What it is | Start |
 |---|---|---|
 | `flake-parts` | One NixOS host inside flake-parts, next to its perSystem outputs | `nix flake init -t github:vic/yen#flake-parts` |
+| `kits-base` | yen: machines from the library bundle base (disk, hardware report, ssh, break-glass login) | `nix flake init -t github:vic/yen#kits-base` |
+| `kits-homelab` | yen: a homelab fleet from the library kits (base, wireguard, borg, monitoring, dns) | `nix flake init -t github:vic/yen#kits-homelab` |
 | `minimal` | One NixOS host | `nix flake init -t github:vic/yen#minimal` |
 | `multi-platform` | NixOS, nix-darwin and home-manager hosts in one fleet | `nix flake init -t github:vic/yen#multi-platform` |
 | `noflake` | One NixOS host, without flakes | `curl -L https://github.com/vic/yen/archive/main.tar.gz | tar xz --strip-components=2 yen-main/templates/noflake`, then in `noflake/`: `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel` |

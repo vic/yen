@@ -1,0 +1,140 @@
+# The fleet's words: hosts with an address, members of assemblies, and the sinks the library kits write to.
+# Each host's NixOS keys become `nixosConfigurations.<host>`.
+{
+  yen,
+  lib,
+  inputs,
+  ...
+}:
+let
+  kits = yen.lib.batteries.kits;
+  inherit (yen.lib) opt holds;
+  attrs = yen.lib.is lib.isAttrs;
+  # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
+  added =
+    a:
+    lib.mapAttrsToList (
+      name: v:
+      v
+      // {
+        kind = "assembly";
+        inherit name;
+      }
+    ) (a.kit.adds a);
+  own = lib.attrValues yen.assembly;
+  assemblies = own ++ lib.concatMap added own;
+  # tree requests: every assembly and host, with their data
+  assemblyTree.instances = yen.kinds.assembly;
+  hostTree.instances = yen.kinds.host;
+  machineOf = s: if holds yen.kinds.member s then s.parent else s;
+  get = tree: q: lib.head (tree.select q);
+  # the generators that exports carry to this host (their `deploy` holds), as one generator
+  exportedTo =
+    scope:
+    lib.concatMap (
+      x: lib.filter (g: holds g.deploy scope) (lib.attrValues (x.value.generators or { }))
+    );
+  fromExports =
+    gens:
+    if gens == [ ] then
+      null
+    else
+      {
+        name = "from-exports";
+        files = lib.foldl' (a: g: a // g.files) { } gens;
+      };
+in
+{
+  yen.kinds.fleet = {
+    spawns.host = _: yen.host;
+    sinks = {
+      out.reduce = yen.lib.reduce.merge;
+      exports.reduce = kits.exports { isMember = holds yen.kinds.member; };
+      generators = {
+        reduce = yen.lib.batteries.vars.generators { inherit machineOf; };
+        out = yen.lib.batteries.vars.vars-plan {
+          from = yen.kinds.fleet.sinks.generators;
+          machines = lib.attrNames yen.host;
+          recipientsOf = _: [ "age1admin" ];
+        };
+      };
+    };
+  };
+  yen.kinds.host = {
+    fields.addr = lib.types.str;
+    spawns.member = kits.members { inherit assemblies holds; };
+    # the NixOS keys of a host, as data
+    sinks.disks.reduce = yen.lib.reduce.merge; # kit disko gives disks here
+    # a kit's `os` keys (sshd's server) are the host's NixOS
+    sinks.os.nixos =
+      { os, ... }:
+      {
+        imports = os;
+      };
+    sinks.nixos = {
+      reduce = yen.lib.reduce.merge;
+      out = yen.lib.batteries.configurations {
+        from = yen.kinds.host.sinks.nixos;
+        output = "nixosConfigurations";
+        build =
+          _: keys:
+          inputs.nixpkgs.lib.nixosSystem {
+            modules = [
+              keys
+              inputs.disko.nixosModules.disko
+              {
+                nixpkgs.hostPlatform = "x86_64-linux";
+                system.stateVersion = "25.05";
+              }
+            ];
+          };
+      };
+    };
+  };
+  yen.kinds.member = { };
+  yen.kinds.kit.fields = {
+    roles = opt attrs { };
+    constraints = opt attrs { };
+    exports = opt (yen.lib.is lib.isList) [ ];
+    adds = opt (yen.lib.is lib.isFunction) (_: { });
+  };
+  yen.kinds.assembly.fields = {
+    kit = yen.kinds.kit;
+    roles = opt attrs { };
+  };
+  # the fleet is read through tree requests, never as refs: an aspect reads instance data only through args
+  yen.aspects.contract = {
+    at = yen.kinds.fleet;
+    cycle =
+      { tree, ... }:
+      {
+        tree = [
+          assemblyTree
+          hostTree
+        ];
+        errors = [
+          (kits.contract {
+            assemblies = get tree assemblyTree ++ lib.concatMap added (get tree assemblyTree);
+            machines = get tree hostTree;
+            inherit holds;
+          })
+        ];
+      };
+  };
+  yen.aspects.settings-typed = {
+    at = yen.kinds.member;
+    errors = kits.settings-typed;
+  };
+  # a generator that an export carries goes to the machines of its `deploy` predicate
+  yen.aspects.generators-from-exports = {
+    at = yen.kinds.host;
+    generators = { scope, exports, ... }: fromExports (exportedTo scope exports);
+  };
+  # the disks kit disko gave a host become its `disko.devices`
+  yen.aspects.disko-devices = {
+    at = yen.kinds.host;
+    nixos = yen.lib.batteries.disko { from = yen.kinds.host.sinks.disks; };
+  };
+  yen.fleet.main = { };
+  yen.flake = { out, ... }: out;
+}

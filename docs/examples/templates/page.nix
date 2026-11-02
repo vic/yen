@@ -28,6 +28,14 @@ let
   inputsOf =
     inputs: n: extra:
     inputs // extra // { self = selfOf (inputsOf inputs n extra) n; };
+  # the kits templates import disko's NixOS module; a stand-in, so the docs flake needs no disko input
+  disko.nixosModules.disko =
+    { lib, ... }:
+    {
+      options.disko.devices = lib.mkOption { type = lib.types.attrs; };
+    };
+  hosts = t: builtins.mapAttrs (_: h: h.config) t.nixosConfigurations;
+  sshd = t: builtins.mapAttrs (_: c: c.services.openssh.enable) (hosts t);
   # every template, evaluated with the docs inputs
   builtOf = inputs: {
     minimal = (inputsOf inputs "minimal" { }).self.outputs;
@@ -39,6 +47,8 @@ let
     flake-parts =
       (inputsOf inputs "flake-parts" { inherit (inputs.terranix.inputs) flake-parts; }).self.outputs;
     multi-platform = (inputsOf inputs "multi-platform" { }).self.outputs;
+    kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
+    kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
   laptop = c: c.nixosConfigurations.laptop.config;
   checksOf = eq: t: {
@@ -51,11 +61,32 @@ let
     multi-nixos = eq t.multi-platform.nixosConfigurations.server.config.home-manager.users.alice.home.stateVersion "25.05";
     multi-darwin = eq t.multi-platform.darwinConfigurations.studio.config.networking.hostName "studio";
     multi-home = eq t.multi-platform.homeConfigurations."alice@work".config.home.username "alice";
+    # bundle base: every machine gets its disk layout and an ssh server
+    kits-base = eq (sshd t.kits-base) {
+      db = true;
+      web = true;
+    };
+    kits-base-disks = eq (builtins.attrNames (hosts t.kits-base).db.disko.devices) [ "disk" ];
+    # bundle homelab: base everywhere, a wireguard network, the server monitors, the nodes are backed up
+    kits-homelab = eq (sshd t.kits-homelab) {
+      lb = true;
+      nas = true;
+      web = true;
+    };
+    kits-homelab-wg =
+      eq (builtins.attrNames (hosts t.kits-homelab).web.networking.wireguard.interfaces)
+        [
+          "lab-wg"
+        ];
+    kits-homelab-monitor = eq (hosts t.kits-homelab).nas.services.prometheus.enable true;
+    kits-homelab-backup = eq (builtins.attrNames (hosts t.kits-homelab).web.services.borgbackup.jobs) [
+      "lab-borg"
+    ];
   };
 in
 {
   title = "Templates";
-  description = "Start a new project from a template: one host, without flakes, inside flake-parts, or three platforms.";
+  description = "Start a new project from a template.";
   section = "start";
   order = 6;
 
