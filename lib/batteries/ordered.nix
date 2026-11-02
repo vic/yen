@@ -2,9 +2,10 @@
 # a reduce: elements `{ name; value; before ? [ ]; after ? [ ]; }` in an order that meets every before and after.
 # value: the values in that order. A cycle, an unknown name or a name given twice is an error.
 #   sinks.sections.reduce = ordered;
+self:
 let
   b = builtins;
-  graphs = import ../graphs.nix null;
+  inherit (self) graphs;
   pair = name: value: { inherit name value; };
 in
 es:

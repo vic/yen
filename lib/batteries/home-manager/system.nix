@@ -2,12 +2,13 @@
 # homeConfigurations.<scope name>, a standalone home: `homeManagerConfiguration` and `pkgs` read the scope.
 #   out = home-manager.system { from = yen.kinds.home.sinks.homeManager; pkgs = h: pkgsOf h;
 #     homeManagerConfiguration = h: h.channel.home-manager.lib.homeManagerConfiguration; };
+self:
 {
   from,
   homeManagerConfiguration,
   pkgs,
 }:
-import ../configurations.nix {
+self.batteries.configurations {
   inherit from;
   output = "homeConfigurations";
   build =

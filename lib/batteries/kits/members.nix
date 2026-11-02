@@ -3,6 +3,7 @@
 # `at` holds at the machine. A member carries refs to its assembly and kit, the role and its layered settings, so an
 # aspect at the member kind runs once per assembly and role.
 #   yen.kinds.host.spawns.member = kits.members { assemblies = attrValues yen.assembly; inherit (yen.lib) holds; };
+self:
 {
   assemblies,
   holds,
@@ -10,7 +11,7 @@
 m:
 let
   b = builtins;
-  inherit (import ./_roles.nix) takes settingsOf;
+  inherit (self._roles) takes settingsOf;
 in
 b.listToAttrs (
   b.concatMap (

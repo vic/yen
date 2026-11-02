@@ -6,6 +6,7 @@
 # `errors` for an errors key.
 #   kh = vars.known-hosts { from = yen.kinds.fleet.sinks.exports; rootOf = s: s.settings.root;
 #     entry = e: { host = e.machine.name; machine = e.machine.name; inherit (e.value.hostKey) generator file; }; };
+self:
 {
   from,
   rootOf,
@@ -14,7 +15,7 @@
 }:
 let
   b = builtins;
-  pub = import ./public-value.nix;
+  pub = self.batteries.vars.public-value;
   pick =
     { scope, sinks, ... }:
     map (

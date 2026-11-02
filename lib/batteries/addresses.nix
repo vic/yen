@@ -4,6 +4,7 @@
 # a prefix that is no IPv4 /16 to /24 and a prefix too small for its members are error records `{ error; code; got; }`.
 # shortcut: IPv4 only, add IPv6 when a kit needs it
 #   addresses { prefix = "10.8.0.0/24"; members = [ { name = "lb"; } { name = "web"; address = "10.8.0.9"; } ]; }
+_:
 { prefix, members }:
 let
   b = builtins;

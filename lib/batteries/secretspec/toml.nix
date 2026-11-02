@@ -4,6 +4,7 @@
 # gives to the files sink. Give the sink `reduce = yen.lib.batteries.claim { key = s: "${s.profile or "default"}/${s.name}"; }`
 # so one secret declared twice is an error; a list reduce works too.
 #   files = secretspec.toml { from = yen.kinds.repo.sinks.secrets; project.name = "app"; };
+self:
 {
   from,
   project,
@@ -15,7 +16,7 @@
 { sinks, ... }:
 let
   b = builtins;
-  toml = import ../files/toml.nix { };
+  toml = self.batteries.files.toml { };
   raw = sinks.${from.__sink};
   secrets = if b.isAttrs raw then b.attrValues raw else raw;
   profileOf = s: s.profile or "default";

@@ -3,8 +3,9 @@
 # `{ name; addr; key ? null; }` (the `mesh` battery). A machine never lists itself.
 #   yen.kinds.fleet.sinks.peers.reduce = yen.lib.reduce.entries;
 #   yen.aspects.peers = { at = yen.kinds.host; nixos = nixos.hosts { from = yen.kinds.fleet.sinks.peers; }; };
+self:
 { from }:
-(import ../mesh.nix) {
+self.batteries.mesh {
   inherit from;
   build =
     peers:

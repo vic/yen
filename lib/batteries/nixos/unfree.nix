@@ -1,6 +1,7 @@
 #: lib.batteries.nixos.unfree :: { from; } -> key value -- one allowUnfreePredicate from the names of sink from
 # nixpkgs.config does not merge: allowUnfreePredicate is a function. `from` collects package names; one module allows them.
 #   yen.kinds.host.sinks.unfree.nixos = nixos.unfree { from = yen.kinds.host.sinks.unfree; };
+_:
 { from }:
 { sinks, ... }:
 { lib, ... }:

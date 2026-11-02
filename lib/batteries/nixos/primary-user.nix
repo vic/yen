@@ -1,5 +1,6 @@
 #: lib.batteries.nixos.primary-user :: { scope; } -> module -- the scope account administers the machine
 # the scope's account administers the machine (Den's primary-user)
+_:
 { scope, ... }:
 {
   users.users.${scope.name}.extraGroups = [

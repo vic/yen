@@ -3,6 +3,7 @@
 # entry (`{ hostName; system; maxJobs ? ; sshUser ? ; sshKey ? ; supportedFeatures ? ; … }`). A machine never builds
 # on itself; `keep scope builder` picks (default: same system as `systemOf scope`, when given).
 #   nixos = nixos.remote-builders { from = yen.kinds.fleet.sinks.builders; systemOf = h: h.system; };
+self:
 {
   from,
   systemOf ? null,
@@ -11,7 +12,7 @@
 { scope, sinks, ... }@args:
 let
   machines = builtins.filter (keep scope) (
-    (import ../mesh.nix) {
+    self.batteries.mesh {
       inherit from;
       build = ms: ms;
     } args

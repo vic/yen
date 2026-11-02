@@ -33,12 +33,12 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.kind`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L53) | `type` | a kind: yen.kinds.&lt;kind&gt; |
 | [`lib.listOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L48) | `type -> type` | a list whose elements pass the type; a list of refs is still a ref field |
 | [`lib.maybe`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L42) | `type -> type` | the type, or null (a maybe-ref is still a ref field) |
-| [`lib.mkFlake`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3134) | `sinks -> module -> flake` | the flake outputs of the fleet, or &#123; invalid-flake-errors &#125; when it has an error or a violation. |
+| [`lib.mkFlake`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3135) | `sinks -> module -> flake` | the flake outputs of the fleet, or &#123; invalid-flake-errors &#125; when it has an error or a violation. |
 | [`lib.narrow`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2663) | `grant -> grant -> grant` | two grants met: the scopes both cover, the sinks both allow; never wider |
 | [`lib.opt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L38) | `type -> default -> type` | the type, with a default when the field has no answer |
 | [`lib.secret`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L75) | `type -> type` | the type, but every answer states the value only by its sha256 |
 | [`lib.stage`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2689) | `{ base; change; rejected ? [ ]; grant ? null; by ? null; id ? null; baseResult ? eval base; } -> { ok; errors; violations; incomplete; refused; diff; labels; floor; sha; render; }` | a change evaluated with the base and applied nowhere; ok only when nothing new is wrong |
-| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L80) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
+| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L79) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
 | [`lib.without`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2996) | `{ files; path; args ? { }; } -> { dropped; result; }` | the fleet without the files that declare path; args = sinks the root gives |
 
 ## `lib.aspect`
@@ -66,7 +66,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.batteries.deploy.rebuild`](https://github.com/vic/yen/blob/main/lib/batteries/deploy/rebuild.nix#L7) | `{ from; pkgs; flake ? ; } -> out value` | apps.&lt;system&gt;.rebuild-&lt;machine&gt;: nixos-rebuild --target-host |
 | [`lib.batteries.devshell.mkshell`](https://github.com/vic/yen/blob/main/lib/batteries/devshell/mkshell.nix#L6) | `{ from; pkgsOf; } -> out value` | a nixpkgs mkShell at devShells.&lt;scope name&gt;.default |
 | [`lib.batteries.devshell.numtide`](https://github.com/vic/yen/blob/main/lib/batteries/devshell/numtide.nix#L7) | `{ from; devshell; systems; pkgsOf; name; packages ? ; shell ? ; } -> out value` | a numtide/devshell per system, its commands from sink from |
-| [`lib.batteries.disko`](https://github.com/vic/yen/blob/main/lib/batteries/disko/default.nix#L5) | `{ from; } -> key value` | disko.devices from the disk layouts given to sink from |
+| [`lib.batteries.disko`](https://github.com/vic/yen/blob/main/lib/batteries/disko.nix#L5) | `{ from; } -> key value` | disko.devices from the disk layouts given to sink from |
 | [`lib.batteries.distributed.nodes`](https://github.com/vic/yen/blob/main/lib/batteries/distributed/nodes.nix#L5) | `{ from; } -> key value` | each machine imports the modules other scopes wrote for it |
 | [`lib.batteries.docs.kinds`](https://github.com/vic/yen/blob/main/lib/batteries/docs/kinds.nix#L4) | `kinds -> graph -> string` | a markdown table of the kinds: fields, spawns, sinks and scope counts |
 | [`lib.batteries.docs.links`](https://github.com/vic/yen/blob/main/lib/batteries/docs/links.nix#L6) | `{ root; base ? ; } -> reduce` | source links that find their line by a needle at eval time |

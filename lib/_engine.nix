@@ -3124,6 +3124,7 @@ let
       without
       ;
     inherit (grants) grant narrow allowed;
+    inherit (self) batteries;
   };
 in
 {

@@ -2,6 +2,7 @@
 # system.primaryUser (the user that user-level options such as the dock apply to): `user` reads a ref or a name
 # from the scope; null falls back to root.
 #   darwin = darwin.primary-user { user = m: m.system-owner; };
+_:
 { user }:
 { scope, ... }:
 let

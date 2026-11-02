@@ -2,7 +2,7 @@
 # skills from a directory: one record `{ type = "skill"; name; path; }` per subdirectory that has a SKILL.md, for an
 # extensions pool.
 #   agent-ext = ai.skills ./skills;
-dir:
+_: dir:
 let
   b = builtins;
   ds = b.readDir dir;

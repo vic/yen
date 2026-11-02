@@ -1,13 +1,13 @@
 #: lib.batteries.docs.kinds :: kinds -> graph -> string -- a markdown table of the kinds: fields, spawns, sinks and scope counts
 # a markdown table of the kinds: fields, spawns, sinks, and how many scopes each has in `graph`.
 #   docs.kinds yen.kinds yen.lib.graph
-kinds: graph:
+self: kinds: graph:
 let
   b = builtins;
   names = v: if b.isAttrs v then b.attrNames v else [ ];
   code = xs: b.concatStringsSep ", " (map (x: "`${x}`") xs);
 in
-import ./table.nix [ "Kind" "Fields" "Spawns" "Sinks" "Scopes" ] (
+self.batteries.docs.table [ "Kind" "Fields" "Spawns" "Sinks" "Scopes" ] (
   map (
     k:
     let

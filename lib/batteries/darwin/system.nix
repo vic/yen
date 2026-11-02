@@ -2,12 +2,13 @@
 # darwinConfigurations.<scope name>: `darwinSystem` and `system` read the scope (its channel, its system).
 #   out = darwin.system { from = yen.kinds.mac.sinks.darwin; darwinSystem = m: m.channel.darwin.lib.darwinSystem;
 #     system = m: m.system.name; };
+self:
 {
   from,
   darwinSystem,
   system,
 }:
-import ../configurations.nix {
+self.batteries.configurations {
   inherit from;
   output = "darwinConfigurations";
   build =

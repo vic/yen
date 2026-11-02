@@ -1,4 +1,5 @@
 # shared by the kits batteries: a machine takes a role when the role's `at` holds there; the settings layers
+_:
 let
   b = builtins;
   merge =

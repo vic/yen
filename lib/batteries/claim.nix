@@ -2,6 +2,7 @@
 # a reduce: each key has one owner. Two givers of one key is an error, unless `rank` (a number from a value)
 # picks one highest. value: { <key> = value; }
 #   sinks.addrs.reduce = claim { key = v: v.addr; };
+_:
 let
   b = builtins;
   pair = name: value: { inherit name value; };

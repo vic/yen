@@ -2,6 +2,7 @@
 # a view of the gates: the aspects that other aspects name in `at`, and what each gate's own `at` reads (kinds,
 # instances, fact tests). The edge label is the operators on the way (`not`, `within`, `has`); dashed under a `not`.
 #   mermaid.flowchart { } (mermaid.gates yen.aspects)
+_:
 let
   b = builtins;
   sorted =

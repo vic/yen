@@ -3,8 +3,9 @@
 # (the committed file must match). The value of the sink's `out` key.
 #   yen.kinds.repo.sinks.files.out = yen.lib.batteries.files.writer {
 #     from = yen.kinds.repo.sinks.files; inherit (inputs) files; inherit lib pkgs; root = inputs.self; };
+self:
 let
-  eval-modules = import ../eval-modules.nix;
+  inherit (self.batteries) eval-modules;
 in
 {
   from,

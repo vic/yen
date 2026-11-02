@@ -73,7 +73,6 @@ in
   # sha256; an aspect still reads it
   #: lib.secret :: type -> type -- the type, but every answer states the value only by its sha256
   secret = t: t // { __secret = true; };
-  batteries = import ../batteries; # roles in, a yen module out: pool, gated, system; nixos.*
   kits = import ../kits; # ready-made kits: modules a fleet imports
   # valid time: an instance with validFrom / validTo (ISO dates) holds at a date the caller passes; no clock in pure eval
   #: lib.validAt :: date -> scope -> bool -- the scope instance holds at the ISO date (validFrom, validTo; absent is open)

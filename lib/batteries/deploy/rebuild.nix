@@ -4,6 +4,7 @@
 # the build runs there (`--build-host`).
 # `pkgs` is the caller's only dependency: writeShellScript, stdenv.hostPlatform.system and the tool; no nixpkgs lib is used.
 #   deploy.out = deploy.rebuild { from = yen.kinds.host.sinks.deploy; inherit pkgs; };
+_:
 {
   from,
   pkgs,

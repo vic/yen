@@ -4,6 +4,7 @@
 # `checks.<system>.flake-file` (the committed flake.nix must match).
 #   yen.kinds.repo.sinks.flake-file = { reduce = yen.lib.reduce.merge; out = flake-file.write {
 #     from = yen.kinds.repo.sinks.flake-file; inherit (inputs.nixpkgs) lib; inherit inputs pkgs; }; };
+_:
 {
   from,
   lib,

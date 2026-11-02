@@ -2,6 +2,7 @@
 # the same caches as flake.nix `nixConfig` (extra-substituters, extra-trusted-public-keys): the value of a key that
 # gives to a flake-file sink, so `nix` asks to trust them when it evaluates the flake.
 #   flake-file = cachix.flake-config { from = yen.kinds.fleet.sinks.caches; };
+_:
 { from }:
 { sinks, ... }:
 let

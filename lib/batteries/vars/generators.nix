@@ -3,6 +3,7 @@
 # (null gives nothing, alone or in a list). A shared generator is one for every machine that gives it; any other is keyed name@machine. A dependency
 # must name a generator the same machine has, or a shared one. value: key -> generator // { machines; }.
 #   yen.kinds.fleet.sinks.generators.reduce = clan.generators { machineOf = s: if holds yen.kinds.member s then s.parent else s; };
+_:
 { machineOf }:
 es:
 let

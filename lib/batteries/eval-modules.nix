@@ -2,6 +2,7 @@
 # the modules of sink `from` and `modules`, evaluated with `lib.evalModules`: any module system (NixOS options,
 # flake-parts, sini/files). `result` turns the evaluation into the value, `config` by default.
 #   out = eval-modules { from = yen.kinds.repo.sinks.files; inherit lib; modules = [ inputs.files.module ]; };
+_:
 {
   from,
   lib,

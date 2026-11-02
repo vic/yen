@@ -2,6 +2,7 @@
 # a doc line for every live name: the value of an aspect's `errors` key. A live name with no line, or a line that
 # names nothing live, is an error record, so the doc never drifts from the fleet.
 #   errors = docs.vocabulary { what = "kinds"; names = builtins.attrNames yen.kinds; lines = (import ./vocab.nix).kinds; };
+_:
 {
   what,
   names,
