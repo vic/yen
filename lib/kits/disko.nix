@@ -2,9 +2,10 @@
 # The kit `disko` owns the kind `layout` (data): `devices` makes disko devices from a device string. Its member gives
 # them to sink `disks` of the machine kind, which the fleet declares (merge). The setting `layout` is a ref.
 #   imports = [ inputs.yen.lib.kits.disko ];
+self:
 { yen, lib, ... }:
 let
-  layouts = import ./_layouts.nix { inherit lib; };
+  layouts = self._layouts { inherit lib; };
 in
 {
   yen.kinds.layout.fields.devices = yen.lib.is lib.isFunction;

@@ -4,6 +4,7 @@
 # server on the same machines) and emergency-access. Users are left out: a user needs a name, and a name per machine
 # would be a string. Import the four kits it adds (disko, facter, sshd, emergency-access) too.
 #   imports = [ inputs.yen.lib.kits.base ];
+_:
 { yen, lib, ... }:
 let
   pick =

@@ -2,6 +2,7 @@
 # Generator `wifi.<assembly>.<network>` is shared (all machines of the role get the same PSK) and has one secret
 # file `psk`. The network list lands in /etc/wifi/networks; the PSK files are deployed by the vars plan.
 #   imports = [ inputs.yen.lib.kits.wifi ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;

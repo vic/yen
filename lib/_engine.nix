@@ -3124,7 +3124,7 @@ let
       without
       ;
     inherit (grants) grant narrow allowed;
-    inherit (self) batteries;
+    inherit (self) batteries kits; # kits: ready-made modules a fleet imports
   };
 in
 {

@@ -2,6 +2,7 @@
 # `root`: where public keys are read from. Interface: `prefix` (IPv4 /16 to /24), `port` (51820). Members take addresses in
 # member order (battery `addresses`), export the public key ref and key generator; the private key is a path only.
 #   imports = [ (inputs.yen.lib.kits.wireguard { root = ../../vars/per-machine; }) ];
+self:
 { root }:
 { yen, lib, ... }:
 let
@@ -20,7 +21,7 @@ let
     };
   };
   pk = x: pub x.machine.name "from-exports" x.value.public null; # null: the public file is missing
-  inherit (import ./_wireguard-check.nix { inherit yen lib pk; }) alloc check;
+  inherit (self._wireguard-check { inherit yen lib pk; }) alloc check;
 in
 {
   yen.kit.wireguard = {

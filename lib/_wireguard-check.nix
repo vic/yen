@@ -1,6 +1,7 @@
 # the addresses and the error records of one wireguard assembly (kit wireguard): `es` are the reduced exports of the
 # assembly; `pk` reads a public key or null. `check` lists address errors, members that disagree on the prefix and
 # members whose public key file is missing.
+_:
 {
   yen,
   lib,

@@ -3,6 +3,7 @@
 # value) and exports its url and the ref of the generated `cache-key.pub`. A client sets `nix.settings.substituters` and
 # `trusted-public-keys` from that file; a server whose file is missing is an error record. Needs a machine field `addr`.
 #   imports = [ (inputs.yen.lib.kits.nix-cache { root = ../../vars/per-machine; }) ];
+_:
 { root }:
 { yen, lib, ... }:
 let

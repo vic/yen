@@ -38,7 +38,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.opt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L38) | `type -> default -> type` | the type, with a default when the field has no answer |
 | [`lib.secret`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L75) | `type -> type` | the type, but every answer states the value only by its sha256 |
 | [`lib.stage`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2689) | `{ base; change; rejected ? [ ]; grant ? null; by ? null; id ? null; baseResult ? eval base; } -> { ok; errors; violations; incomplete; refused; diff; labels; floor; sha; render; }` | a change evaluated with the base and applied nowhere; ok only when nothing new is wrong |
-| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L79) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
+| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L78) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
 | [`lib.without`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2996) | `{ files; path; args ? { }; } -> { dropped; result; }` | the fleet without the files that declare path; args = sinks the root gives |
 
 ## `lib.aspect`

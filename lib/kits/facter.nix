@@ -3,6 +3,7 @@
 # `nixos.facter`; `module` (the facter NixOS module) is set when your nixpkgs has none.
 # A machine without a report gets no facter config: the aspect applies only where `<machine>.json` exists (as main's kernel.nix).
 #   imports = [ inputs.yen.lib.kits.facter ];
+_:
 { yen, lib, ... }:
 {
   yen.kit.facter.roles.default.interface.dir.type = lib.types.path;

@@ -3,6 +3,7 @@
 # identities are secret files linked by path, never in the store. A member reads the exports of its own assembly.
 # shortcut: moons are listed in /etc/zerotier/moons, add orbit when NixOS has an option for it
 #   imports = [ (inputs.yen.lib.kits.zerotier { root = ../../vars/per-machine; }) ];
+_:
 { root }:
 { yen, lib, ... }:
 let

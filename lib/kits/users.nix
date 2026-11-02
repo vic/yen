@@ -4,6 +4,7 @@
 # `user-<user>/hash`, a secret for the users stage, on the machine of that member and no other. Two assemblies for
 # one user on one machine are an error. Needs the fleet's `exports` and `generators` sinks.
 #   imports = [ inputs.yen.lib.kits.users ];
+_:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;
