@@ -42,8 +42,11 @@
         A kind has `fields` (the data of each instance) and `sinks` (where behavior goes).
         The `nixos` sink collects NixOS modules. Its `out` key gives the built system to the flake.
       ''
-      (docs.fileWith "{13}" "modules/host.nix")
+      (docs.fileNoted "" "modules/host.nix")
       ''
+        `(1)` is a field: every host has a `system`, and it must be a string. `(2)` is the `out` function of the `nixos` sink.
+        yen fills `host` and `nixos` for you. At `(3)`, every NixOS module the sink collected goes to `nixosSystem`.
+
         ## Behavior
 
         An aspect is active where its `at` holds. Each key of an aspect gives one element to the sink

@@ -71,7 +71,7 @@ A kind has `fields` (the data of each instance) and `sinks` (where behavior goes
 The `nixos` sink collects NixOS modules. Its `out` key gives the built system to the flake.
 
 
-```nix title="modules/host.nix" {13}
+```nix title="modules/host.nix" "(1)" "(2)" "(3)"
 # A host has a system. Its `nixos` sink collects NixOS modules and builds the host.
 {
   yen,
@@ -81,13 +81,13 @@ The `nixos` sink collects NixOS modules. Its `out` key gives the built system to
 }:
 {
   yen.kinds.host = {
-    fields.system = lib.types.str;
+    fields.system = lib.types.str; # (1)
     sinks.nixos.out =
-      { host, nixos, ... }:
+      { host, nixos, ... }: # (2)
       {
         nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem {
           inherit (host) system;
-          modules = nixos;
+          modules = nixos; # (3)
         };
       };
   };
@@ -95,6 +95,9 @@ The `nixos` sink collects NixOS modules. Its `out` key gives the built system to
   yen.host.laptop.system = "x86_64-linux";
 }
 ```
+
+`(1)` is a field: every host has a `system`, and it must be a string. `(2)` is the `out` function of the `nixos` sink.
+yen fills `host` and `nixos` for you. At `(3)`, every NixOS module the sink collected goes to `nixosSystem`.
 
 ## Behavior
 
