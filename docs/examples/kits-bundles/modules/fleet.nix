@@ -43,6 +43,12 @@ in
     spawns.member = kits.members { inherit assemblies holds; };
     # the NixOS keys of a host, as data
     sinks.disks.reduce = yen.lib.reduce.merge; # kit disko gives disks here
+    # a kit's `os` keys (sshd's server) are the host's NixOS; without this sink they are dropped
+    sinks.os.nixos =
+      { os, ... }:
+      {
+        imports = os;
+      };
     sinks.nixos = {
       reduce = yen.lib.reduce.merge;
       out =

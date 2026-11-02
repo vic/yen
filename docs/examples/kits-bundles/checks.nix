@@ -36,6 +36,22 @@ in
         true
         true
       ];
+  # the sshd servers base adds run openssh: their `os` key reaches each machine's NixOS (as imports)
+  openssh =
+    eq
+      (map
+        (m: builtins.elem { services.openssh.enable = true; } (result.flake.config.${m}.imports or [ ]))
+        [
+          "lb"
+          "web"
+          "nas"
+        ]
+      )
+      [
+        true
+        true
+        true
+      ];
   exports = eq (builtins.length members.exports) 10;
   two-servers = yes (has ".*lab2 role server: 2 machines, at most 1.*" "variants/two-servers.nix");
   no-server = yes (has ".*lab0 role server: 0 machines, at least 1.*" "variants/no-server.nix");
