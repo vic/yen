@@ -58,7 +58,7 @@ in
       exports.reduce = yen.lib.reduce.entries; # what members publish, with the scope that published it
     };
   };
-  yen.kinds.assembly.fields.roles = is lib.isAttrs; # role name -> host refs
+  yen.kinds.assembly.fields.roles = yen.lib.attrs; # role name -> host refs
   yen.kinds.host = {
     fields.addr = yen.lib.str;
     spawns.member = membersOf;

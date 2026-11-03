@@ -8,7 +8,7 @@
 let
   inherit (yen.lib) opt holds;
   kits = yen.lib.batteries.kits;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.lib.attrs;
   # a kit that needs another kit adds assemblies of it, per assembly of its own
   added =
     a:

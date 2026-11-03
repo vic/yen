@@ -23,7 +23,7 @@
       };
   };
   yen.kinds.user = {
-    fields.hosts = yen.lib.is lib.isList;
+    fields.hosts = yen.lib.listOf yen.kinds.host;
     sinks.homeManager.nixos =
       { user, homeManager, ... }:
       {

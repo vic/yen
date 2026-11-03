@@ -28,6 +28,6 @@ in
     {
       nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
     };
-  yen.kinds.user.fields.on = is lib.isList;
+  yen.kinds.user.fields.on = yen.lib.listOf yen.kinds.host;
   yen.flake = { out, ... }: out;
 }

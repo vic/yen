@@ -3977,6 +3977,26 @@ let
               ]
             ];
       };
+    # a value one of the types accepts: a list of host or mac refs, and a string that is neither
+    one-of =
+      let
+        t = yen.listOf (
+          yen.oneOf [
+            yen.str
+            yen.int
+          ]
+        );
+        inherit (self._core.types) checkOf;
+      in
+      {
+        both = yes (
+          checkOf t [
+            "a"
+            1
+          ]
+        );
+        neither = no (checkOf t [ true ]);
+      };
     # the verdict as the Lean checker reads it (lean/Main.lean): JSON, every atom its key, one entry per certificate entry
     lean-export =
       let

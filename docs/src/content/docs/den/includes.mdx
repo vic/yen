@@ -50,7 +50,7 @@ in
       };
   };
   yen.kinds.user.fields = {
-    hosts = is lib.isList;
+    hosts = yen.lib.listOf yen.kinds.host;
     fullname = yen.lib.str;
     authorizedKeys = opt strs [ ];
   };

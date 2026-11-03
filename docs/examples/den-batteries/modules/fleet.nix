@@ -23,7 +23,7 @@ in
       };
   };
   yen.kinds.user.fields = {
-    hosts = is lib.isList;
+    hosts = yen.lib.listOf yen.kinds.host;
     shell = opt (yen.lib.enum [
       "bash"
       "zsh"

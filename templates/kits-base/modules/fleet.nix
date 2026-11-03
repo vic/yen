@@ -9,7 +9,7 @@
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.lib.attrs;
   # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
   added =
     a:
@@ -95,7 +95,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    exports = opt (yen.lib.listOf yen.lib.str) [ ];
     adds = opt (yen.lib.is lib.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {

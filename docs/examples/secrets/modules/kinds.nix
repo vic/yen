@@ -7,7 +7,7 @@
   };
   yen.kinds.secret.fields = {
     file = yen.lib.str; # the encrypted file in the repo
-    owners = yen.lib.is lib.isList; # host refs
+    owners = yen.lib.listOf yen.kinds.host;
   };
   yen.kinds.host.sinks.secrets = {
     reduce = yen.lib.reduce.set;

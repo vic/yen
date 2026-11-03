@@ -99,7 +99,12 @@ in
     };
   };
   yen.kinds.user = {
-    fields.on = yen.lib.is lib.isList;
+    fields.on = yen.lib.listOf (
+      yen.lib.oneOf [
+        yen.kinds.host
+        yen.kinds.mac
+      ]
+    );
     # a user's home goes into the machine it is on
     sinks.homeManager.os = b.home-manager.into-host { from = yen.kinds.user.sinks.homeManager; };
   };

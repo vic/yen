@@ -87,7 +87,7 @@ in
   yen.kinds.machine.fields = {
     apps = yen.lib.opt (yen.helpers.listOf yen.lib.str) [ ];
     portRange = yen.lib.opt (yen.helpers.listOf yen.lib.int) [ ];
-    portBefore = yen.lib.opt (yen.lib.is lib.isAttrs) { };
+    portBefore = yen.lib.opt yen.lib.attrs { };
     dbRole = yen.lib.opt yen.lib.bool false;
     ram = yen.lib.opt yen.lib.int 0;
     ramReserve = yen.lib.opt yen.lib.int 0;

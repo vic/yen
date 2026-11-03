@@ -19,8 +19,8 @@
       };
   };
   yen.kinds.user.fields = {
-    hosts = yen.lib.is lib.isList;
-    groups = yen.lib.opt (yen.lib.is lib.isList) [ ];
+    hosts = yen.lib.listOf yen.kinds.host;
+    groups = yen.lib.opt (yen.lib.listOf yen.lib.str) [ ];
   };
 
   yen.fleet.main = { };

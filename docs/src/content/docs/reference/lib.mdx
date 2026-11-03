@@ -21,32 +21,33 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 | [`lib.allowed`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3009) | `grant -> { to; sink; } -> bool` | the grant covers the scope path `to` and the sink (a ref or &#123; sink; &#125;) |
 | [`lib.any`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L105) | `type` | any value, unchecked: a nixpkgs input, a package set |
 | [`lib.asOf`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3311) | `{ url; rev; module; } -> result` | the fleet at a git revision |
-| [`lib.aspect`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L128) | `type` | an aspect: yen.aspects.&lt;name&gt; |
+| [`lib.aspect`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L135) | `type` | an aspect: yen.aspects.&lt;name&gt; |
 | [`lib.attrs`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L100) | `type` | any attrset |
-| [`lib.attrsOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L138) | `type -> type` | an attrset whose values pass the type |
+| [`lib.attrsOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L145) | `type -> type` | an attrset whose values pass the type |
 | [`lib.bool`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L85) | `type` | a bool |
 | [`lib.derive`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L45) | `type -> (instance -> value) -> type` | the type, with a default computed from the instance itself |
 | [`lib.diffData`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3289) | `data -> data -> [ { path; old; new; } ]` | the field changes between two data answers, sorted by path |
-| [`lib.enum`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L133) | `[ value ] -> type` | one of the listed values |
+| [`lib.enum`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L140) | `[ value ] -> type` | one of the listed values |
 | [`lib.eval`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L95) | `module -> result` | evaluate a fleet module; the result answers every query |
-| [`lib.functionTo`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L110) | `type -> type` | a function; what it returns is checked where it lands: a typed sink or field |
+| [`lib.functionTo`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L117) | `type -> type` | a function; what it returns is checked where it lands: a typed sink or field |
 | [`lib.grant`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2988) | `{ scopes; sinks ? null; } -> grant` | where a change may reach, by reference: scope paths or instances, sink refs (null: every sink) |
 | [`lib.history`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3319) | `{ url; revs; module; } -> [ { rev; errors; scopes; changes; } ]` | the fleet at each revision, with the field changes from the one before |
 | [`lib.int`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L80) | `type` | an int |
 | [`lib.is`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L41) | `(v -> bool) -> type` | a type from a check |
 | [`lib.jsonSafe`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L23) | `value -> value` | the value with functions and derivations as strings, so toJSON never fails |
-| [`lib.kind`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L123) | `type` | a kind: yen.kinds.&lt;kind&gt; |
+| [`lib.kind`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L130) | `type` | a kind: yen.kinds.&lt;kind&gt; |
 | [`lib.listOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L54) | `type -> type` | a list whose elements pass the type; a list of refs is still a ref field |
 | [`lib.maybe`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L47) | `type -> type` | the type, or null (a maybe-ref is still a ref field) |
 | [`lib.mkFlake`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3485) | `sinks -> module -> flake` | the flake outputs of the fleet, or &#123; invalid-flake-errors &#125; when it has an error or a violation. |
 | [`lib.narrow`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L2998) | `grant -> grant -> grant` | two grants met: the scopes both cover, the sinks both allow; never wider |
+| [`lib.oneOf`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L110) | `[ type ] -> type` | a value one of the types accepts |
 | [`lib.opt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L43) | `type -> default -> type` | the type, with a default when the field has no answer |
 | [`lib.path`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L95) | `type` | a path, or a string that starts with / |
 | [`lib.port`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L90) | `type` | a TCP or UDP port: an int from 0 to 65535 |
-| [`lib.secret`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L159) | `type -> type` | the type, but every answer states the value only by its sha256 |
+| [`lib.secret`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L166) | `type -> type` | the type, but every answer states the value only by its sha256 |
 | [`lib.stage`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3024) | `{ base; change; rejected ? [ ]; grant ? null; by ? null; id ? null; baseResult ? eval base; } -> { ok; errors; violations; incomplete; refused; diff; labels; floor; lean; sha; render; }` | a change evaluated with the base and applied nowhere; ok only when nothing new is wrong |
 | [`lib.str`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L75) | `type` | a string |
-| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L162) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
+| [`lib.validAt`](https://github.com/vic/yen/blob/main/lib/_core/static.nix#L169) | `date -> scope -> bool` | the scope instance holds at the ISO date (validFrom, validTo; absent is open) |
 | [`lib.without`](https://github.com/vic/yen/blob/main/lib/_engine.nix#L3336) | `{ files; path; args ? { }; } -> { dropped; result; }` | the fleet without the files that declare path; args = sinks the root gives |
 
 ## `lib.any`

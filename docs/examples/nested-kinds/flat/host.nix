@@ -3,7 +3,7 @@
 {
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    fields.user = yen.lib.is builtins.isAttrs;
+    fields.user = yen.lib.attrs;
     spawns.user = s: s.user;
   };
   yen.kinds.user.fields.shell = yen.lib.str;

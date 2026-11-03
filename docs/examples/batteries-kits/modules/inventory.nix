@@ -3,7 +3,7 @@
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds same;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.lib.attrs;
   assemblies = lib.attrValues yen.assembly; # spawns read data
   # tree requests: every assembly and machine, with their data
   allAssemblies.instances = yen.kinds.assembly;
@@ -31,7 +31,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    exports = opt (yen.lib.listOf yen.lib.str) [ ];
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;

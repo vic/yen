@@ -106,6 +106,13 @@ in
     check = _: true;
     description = "any value";
   };
+  #: lib.oneOf :: [ type ] -> type -- a value one of the types accepts
+  oneOf = ts: {
+    check = v: builtins.any (t: checkOf t v) ts;
+    description = "one of: ${
+      concatStringsSep ", " (map (t: t.description or "a value its check accepts") ts)
+    }";
+  };
   #: lib.functionTo :: type -> type -- a function; what it returns is checked where it lands: a typed sink or field
   functionTo = t: {
     check = v: isFunction v || isAttrs v && v ? __functor;

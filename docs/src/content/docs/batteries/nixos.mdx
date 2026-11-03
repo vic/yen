@@ -52,7 +52,7 @@ in
     sinks.insecure.nixos = nixos.insecure { from = yen.kinds.host.sinks.insecure; };
   };
   yen.kinds.user.fields = {
-    hosts = yen.lib.is lib.isList;
+    hosts = yen.lib.listOf yen.kinds.host;
     shell = yen.lib.opt (yen.lib.enum [
       "bash"
       "fish"

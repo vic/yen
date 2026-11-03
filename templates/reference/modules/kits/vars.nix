@@ -35,7 +35,7 @@ in
     "age"
     "password-store"
   ]) "sops";
-  yen.kinds.fleet.fields.recipients = opt (yen.lib.is lib.isAttrs) {
+  yen.kinds.fleet.fields.recipients = opt yen.lib.attrs {
     default = [ ];
     hosts = { };
   };

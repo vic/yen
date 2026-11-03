@@ -7,6 +7,7 @@ self: {
     maybe
     listOf
     functionTo
+    oneOf
     str
     int
     bool
