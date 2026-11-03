@@ -1,8 +1,8 @@
 let
   root = ../../../templates;
-  # every directory of templates/ but the showcase fleet: the list cannot go stale
+  # every directory of templates/ but the showcase template: the list cannot go stale
   dirs = builtins.readDir root;
-  names = builtins.filter (n: dirs.${n} == "directory" && n != "fleet") (builtins.attrNames dirs);
+  names = builtins.filter (n: dirs.${n} == "directory" && n != "reference") (builtins.attrNames dirs);
   has = n: f: builtins.pathExists (root + "/${n}/${f}");
   # a flake template says what it is in its flake.nix; noflake in the first comment of its default.nix
   describe =
@@ -106,7 +106,7 @@ in
       ))
       ''
         Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
-        `templates/fleet` is the showcase fleet. Read it, but do not start from it: its `yen` input is this repository.
+        `templates/reference` is the showcase template. Read it, but do not start from it: its `yen` input is this repository.
       ''
     ];
 

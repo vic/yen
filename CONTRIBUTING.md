@@ -116,7 +116,7 @@ Follow these rules in new code under `lib/` and `tests/`:
 
 | Command | Group | What it does |
 |---|---|---|
-| `ci` | ci | run the CI stages locally, in order: fmt, engine, docs, fleet (fleet-check and the per-arch evals not included) |
+| `ci` | ci | run the CI stages locally, in order: fmt, engine, docs, fleet (reference-check and the per-arch evals not included) |
 | `test-all` | ci | every *-test command: engine, docs, fleet (no e2e, no cost) |
 | `fastest-all` | ci | every fastest suite at once, in parallel: engine, docs fast and e2e, fleet and e2e (FASTEST_WORKERS each, default 4) |
 | `check-all` | ci | every *-check command: fmt, docs, fleet |
@@ -130,19 +130,19 @@ Follow these rules in new code under `lib/` and `tests/`:
 | `engine-test` | engine | the engine and library suites |
 | `engine-cost` | engine | the memo cost oracles |
 | `each-flake` | flake | run command in every flake.nix directory that has it |
-| `fleet-test` | fleet | the reference fleet's checks |
-| `fleet-e2e` | fleet | the reference fleet's real evaluations |
-| `fleet-cost` | fleet | the trimmed-module-list cost oracle |
-| `fleet-mcp` | fleet | the MCP server tests |
-| `fleet-check` | fleet | nix flake check of the fleet (VM tests are vmTests, not checks) |
-| `fleet-eval` | fleet | fleet-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation |
-| `fleet-write` | fleet | regenerate the fleet's README.md and ci.json |
-| `fleet-flake` | fleet | regenerate the fleet's flake.nix |
 | `fmt-check` | fmt | every tracked nix file is formatted (nixfmt), as CI checks |
 | `lint` | fmt | the workflows are valid (actionlint, with shellcheck) |
 | `fmt` | fmt | format every tracked nix file (nixfmt) |
 | `issue-eval` | issue | issue-eval BODY DIR: an issue's nix blocks as one fleet, restricted; writes DIR/comment.md |
 | `issue-comment` | issue | issue-comment NUMBER FILE: post FILE on issue NUMBER, replacing yen's last comment (needs GH_TOKEN) |
+| `reference-test` | reference | the reference template's checks |
+| `reference-e2e` | reference | the reference template's real evaluations |
+| `reference-cost` | reference | the trimmed-module-list cost oracle |
+| `reference-mcp` | reference | the MCP server tests |
+| `reference-check` | reference | nix flake check of the fleet (VM tests are vmTests, not checks) |
+| `reference-eval` | reference | reference-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation |
+| `reference-write` | reference | regenerate the reference template's README.md and ci.json |
+| `reference-flake` | reference | regenerate the reference template's flake.nix |
 
 ## Generated files
 
@@ -155,8 +155,8 @@ Do not edit generated files. Edit their source, then run the generator. A check 
 | `.github/workflows/test.yml` | `docs/modules/ci.nix` | `docs-write` |
 | `.github/workflows/issue.yml`, `.github/ISSUE_TEMPLATE/*` | `docs/modules/issues.nix` | `docs-write` |
 | `CONTRIBUTING.md` | `docs/examples/contributing/page.nix` | `docs-write` |
-| `templates/fleet/README.md`, `templates/fleet/ci.json` | `templates/fleet/modules/docs/` | `fleet-write` |
-| `templates/fleet/flake.nix` | the `flake-file` sink of the fleet | `fleet-flake` |
+| `templates/reference/README.md`, `templates/reference/ci.json` | `templates/reference/modules/docs/` | `reference-write` |
+| `templates/reference/flake.nix` | the `flake-file` sink of the fleet | `reference-flake` |
 
 ## Which task to run, and when
 
@@ -171,14 +171,14 @@ Fast, run them often:
 |---|---|
 | an example under `docs/examples/` | `docs-example NAME` for that example, then `docs-test` |
 | the engine (`default.nix`, `lib/`) or a battery | `engine-test`, and the `docs-example` of the page that shows it |
-| the reference fleet (`templates/fleet/`) | `fleet-test` |
+| the reference template (`templates/reference/`) | `reference-test` |
 | any Nix file | `fmt`, last |
 
 Before every push, run the generator of every generated file whose source you changed (see the table above).
 A red CI job that says a file is stale means you did not run its generator. The two that are easy to forget:
 
 - `docs-write` writes the docs pages, the library reference and `CONTRIBUTING.md`.
-- `fleet-write` writes the reference fleet's README, which lists engine names such as the reduce strategies and the
+- `reference-write` writes the reference template's README, which lists engine names such as the reduce strategies and the
   library functions. A change to the engine often changes both, so run both.
 
 Heavy, leave them to CI:
@@ -186,10 +186,10 @@ Heavy, leave them to CI:
 
 | Task | Why it waits for CI |
 |---|---|
-| `docs-e2e`, `fleet-e2e` | real NixOS, nix-darwin and home-manager evaluations |
-| `engine-cost`, `fleet-cost` | cost oracles over whole evaluations |
-| `fleet-check`, `fleet-eval`, `docs-check`, `docs-build` | a flake check or a build of every output, or of the site |
-| `fleet-mcp` | builds the Rust server |
+| `docs-e2e`, `reference-e2e` | real NixOS, nix-darwin and home-manager evaluations |
+| `engine-cost`, `reference-cost` | cost oracles over whole evaluations |
+| `reference-check`, `reference-eval`, `docs-check`, `docs-build` | a flake check or a build of every output, or of the site |
+| `reference-mcp` | builds the Rust server |
 | `ci` | every stage in one terminal, one after another |
 
 Fix a failed push with a new commit on the same branch. Do not rewrite pushed history.
@@ -201,9 +201,9 @@ then `flake-check` and one evaluation job per system. `ci` in the devshell runs 
 
 ## Maintenance
 
-- **Update inputs.** Run `nix flake update` in `docs/` and in `templates/fleet/`, then `ci`. nixpkgs comes from the
+- **Update inputs.** Run `nix flake update` in `docs/` and in `templates/reference/`, then `ci`. nixpkgs comes from the
   nixos.org channel tarballs, not from GitHub.
-- **After a nixpkgs update**, the fleet's trimmed module lists belong to the old revision: `fleet-e2e` fails on
+- **After a nixpkgs update**, the reference template's trimmed module lists belong to the old revision: `reference-e2e` fails on
   `modlist-same-drv` until they are computed again.
 - **Format** with `fmt`; CI checks it with `fmt-check`.
 - **A new error code** in the engine fails the docs until the Error codes page (`docs/examples/errors-reference`) explains it.

@@ -1,6 +1,6 @@
 # .github/workflows/test.yml is generated: each area is an aspect that gives jobs to the `workflow` sink.
-# A PR reports its fast checks first: fmt, engine-test, docs-test and fleet-test start at once. Every other job
-# (costs, e2e, site build, flake check, one eval per system of templates/fleet/ci.json) needs fmt and the fast test of
+# A PR reports its fast checks first: fmt, engine-test, docs-test and reference-test start at once. Every other job
+# (costs, e2e, site build, flake check, one eval per system of templates/reference/ci.json) needs fmt and the fast test of
 # its area, so a deep evaluation runs only on a change that passed the cheap checks. Check `ci.order` holds this.
 {
   yen,
@@ -52,7 +52,7 @@ let
     "fmt"
     "engine-test"
     "docs-test"
-    "fleet-test"
+    "reference-test"
   ];
   after = area: [
     "fmt"
@@ -68,7 +68,7 @@ let
       }
       // lib.optionalAttrs (!lib.elem command fast) { needs = after area; }
     );
-  # diagnostic: on a failed job, show memory and the kernel log, so an OOM kill is visible (exit 143 on fleet-e2e)
+  # diagnostic: on a failed job, show memory and the kernel log, so an OOM kill is visible (exit 143 on reference-e2e)
   memoryAtFailure =
     j:
     j
@@ -96,7 +96,7 @@ let
   );
   # the fleet's CI targets, grouped by system: one job per system, its targets one after another
   targets = lib.groupBy (t: t.system) (
-    builtins.fromJSON (builtins.readFile (inputs.yen + "/templates/fleet/ci.json"))
+    builtins.fromJSON (builtins.readFile (inputs.yen + "/templates/reference/ci.json"))
   );
   runner = {
     x86_64-linux = "ubuntu-latest";
@@ -204,22 +204,24 @@ in
       docs-build = one "docs" { } "site build" "docs-build";
     };
   };
-  yen.aspects.ci-fleet = {
+  yen.aspects.ci-reference = {
     at = yen.kinds.site;
     workflow = {
-      fleet-test = one "fleet" { } "fleet checks" "fleet-test";
-      fleet-cost = one "fleet" { } "trimmed module lists cost oracle" "fleet-cost";
-      fleet-mcp = one "fleet" { } "MCP server and flake app" "fleet-mcp";
-      fleet-e2e = memoryAtFailure (one "fleet" { timeout = 120; } "real evaluations (e2e)" "fleet-e2e");
+      reference-test = one "reference" { } "fleet checks" "reference-test";
+      reference-cost = one "reference" { } "trimmed module lists cost oracle" "reference-cost";
+      reference-mcp = one "reference" { } "MCP server and flake app" "reference-mcp";
+      reference-e2e = memoryAtFailure (
+        one "reference" { timeout = 120; } "real evaluations (e2e)" "reference-e2e"
+      );
       # no KVM: VM tests are `vmTests`, not checks (hosted runners cannot run guests reliably)
-      flake-check = one "fleet" { timeout = 120; } "nix flake check of the fleet" "fleet-check";
+      flake-check = one "reference" { timeout = 120; } "nix flake check of the fleet" "reference-check";
     }
     // lib.mapAttrs' (
       system: _:
       lib.nameValuePair "eval-${system}" (
-        one "fleet" {
+        one "reference" {
           runs-on = runner.${system};
-        } "every ${system} target of ci.json evaluates" "fleet-eval ${system}"
+        } "every ${system} target of ci.json evaluates" "reference-eval ${system}"
       )
     ) targets;
   };

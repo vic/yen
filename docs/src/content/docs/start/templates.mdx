@@ -18,5 +18,5 @@ a template is a whole project. Each one here is evaluated in our CI.
 | `noflake` | One NixOS host, without flakes | `curl -L https://github.com/vic/yen/archive/main.tar.gz | tar xz --strip-components=2 yen-main/templates/noflake`, then in `noflake/`: `nix-build -A nixosConfigurations.laptop.config.system.build.toplevel` |
 
 Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
-`templates/fleet` is the showcase fleet. Read it, but do not start from it: its `yen` input is this repository.
+`templates/reference` is the showcase template. Read it, but do not start from it: its `yen` input is this repository.
 

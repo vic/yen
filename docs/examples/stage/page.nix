@@ -85,7 +85,7 @@
       '')
       (docs.tip "Safe places for an aspect" ''
         A stored query can stage an aspect on each machine and return where it is safe, and why the others are refused.
-        See `safeHostsFor` in the reference fleet's ${
+        See `safeHostsFor` in the reference template's ${
           docs.fleet "modules/agent/synthesis.nix" null "agent/synthesis.nix"
         }.
       '')

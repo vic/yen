@@ -69,7 +69,7 @@
           ]
           [
             "[vic/ren](https://github.com/vic/ren)"
-            "the fleet template that yen's reference fleet models"
+            "the fleet template that yen's reference template models"
           ]
           [
             "vic/yen"
@@ -78,7 +78,7 @@
         ]
       )
       ''
-        The [reference fleet](/reference/fleet-map/) shows every capability of Den, den-hoag and clan, and the advanced
+        The [reference template](/reference/fleet-map/) shows every capability of Den, den-hoag and clan, and the advanced
         patterns of real fleets (vix, sini's and others), each with a check. [Contributing](/project/contributing/) says how to help.
       ''
     ];

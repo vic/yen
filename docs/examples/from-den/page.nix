@@ -176,7 +176,7 @@
         - **A host's home content leaking to its users.** Elements go up the tree, never down.
       '')
       (docs.tip "Every Den capability" ''
-        The [reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) shows every capability that Den's CI tests pin
+        The [reference template](https://github.com/vic/yen/tree/main/templates/reference) shows every capability that Den's CI tests pin
         (168 patterns), and den-hoag's laws, each with a check. See ${
           docs.fleet "modules/den/patterns.nix" null "den/patterns.nix"
         }.

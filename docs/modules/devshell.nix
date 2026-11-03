@@ -20,7 +20,7 @@ let
   }; # from any directory of the rep
   # every suite runs on github:denful/fastest: tests.<suite>.<test> = { expr; expected; }, in parallel
   fastest = dir: suite: ''fastest --flake "path:$PWD${dir}#tests" ${suite}'';
-  fleet = "path:$PWD?dir=templates/fleet";
+  reference = "path:$PWD?dir=templates/reference";
 in
 {
   yen.kinds.site.sinks.commands.out = yen.lib.batteries.devshell.numtide {
@@ -108,37 +108,39 @@ in
       (cmd "engine" "engine-cost" "the memo cost oracles" "bash tests/cost.sh")
     ];
   };
-  yen.aspects.fleet-commands = {
+  yen.aspects.reference-commands = {
     at = yen.kinds.site;
     commands = [
-      (cmd "fleet" "fleet-test" "the reference fleet's checks" (fastest "?dir=templates/fleet" "fleet"))
-      # 4 eval workers: 8 x 2 GiB filled a 16 GB runner, and the step got SIGTERM (exit 143) mid-eval
-      (cmd "fleet" "fleet-e2e" "the reference fleet's real evaluations" (
-        "FASTEST_WORKERS=4 " + fastest "?dir=templates/fleet" "e2e"
+      (cmd "reference" "reference-test" "the reference template's checks" (
+        fastest "?dir=templates/reference" "reference"
       ))
-      (cmd "fleet" "fleet-cost" "the trimmed-module-list cost oracle"
-        "cd templates/fleet && bash cost.sh"
+      # 4 eval workers: 8 x 2 GiB filled a 16 GB runner, and the step got SIGTERM (exit 143) mid-eval
+      (cmd "reference" "reference-e2e" "the reference template's real evaluations" (
+        "FASTEST_WORKERS=4 " + fastest "?dir=templates/reference" "e2e"
+      ))
+      (cmd "reference" "reference-cost" "the trimmed-module-list cost oracle"
+        "cd templates/reference && bash cost.sh"
       )
-      (cmd "fleet" "fleet-mcp" "the MCP server tests" "bash mcp/test.sh")
-      (cmd "fleet" "fleet-check" "nix flake check of the fleet (VM tests are vmTests, not checks)"
-        "nix flake check -L \"${fleet}\""
+      (cmd "reference" "reference-mcp" "the MCP server tests" "bash mcp/test.sh")
+      (cmd "reference" "reference-check" "nix flake check of the fleet (VM tests are vmTests, not checks)"
+        "nix flake check -L \"${reference}\""
       )
-      (cmd "fleet" "fleet-eval"
-        "fleet-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation"
+      (cmd "reference" "reference-eval"
+        "reference-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation"
         ''
-          system=''${1:?usage: fleet-eval SYSTEM}
-          jq -r --arg s "$system" '.[] | select(.system == $s) | .attr' templates/fleet/ci.json | while read -r attr; do
-            drv=$(nix eval --raw "${fleet}#$attr.drvPath")
+          system=''${1:?usage: reference-eval SYSTEM}
+          jq -r --arg s "$system" '.[] | select(.system == $s) | .attr' templates/reference/ci.json | while read -r attr; do
+            drv=$(nix eval --raw "${reference}#$attr.drvPath")
             echo "$attr $drv"
             case "$drv" in /nix/store/*.drv) ;; *) exit 1 ;; esac
           done
         ''
       )
-      (cmd "fleet" "fleet-write" "regenerate the fleet's README.md and ci.json"
-        "cd templates/fleet && nix run .#write-files"
+      (cmd "reference" "reference-write" "regenerate the reference template's README.md and ci.json"
+        "cd templates/reference && nix run .#write-files"
       )
-      (cmd "fleet" "fleet-flake" "regenerate the fleet's flake.nix"
-        "cd templates/fleet && nix run .#write-flake"
+      (cmd "reference" "reference-flake" "regenerate the reference template's flake.nix"
+        "cd templates/reference && nix run .#write-flake"
       )
     ];
   };
@@ -147,18 +149,18 @@ in
     at = yen.kinds.site;
     commands = [
       (cmd "ci" "ci"
-        "run the CI stages locally, in order: fmt, engine, docs, fleet (fleet-check and the per-arch evals not included)"
-        "for c in fmt-check engine-test engine-cost docs-test docs-e2e docs-check docs-build fleet-test fleet-e2e fleet-cost fleet-mcp; do echo \"== $c\"; $c; done"
+        "run the CI stages locally, in order: fmt, engine, docs, fleet (reference-check and the per-arch evals not included)"
+        "for c in fmt-check engine-test engine-cost docs-test docs-e2e docs-check docs-build reference-test reference-e2e reference-cost reference-mcp; do echo \"== $c\"; $c; done"
       )
       (cmd "ci" "test-all" "every *-test command: engine, docs, fleet (no e2e, no cost)"
-        "for c in engine-test docs-test fleet-test; do echo \"== $c\"; $c; done"
+        "for c in engine-test docs-test reference-test; do echo \"== $c\"; $c; done"
       )
       (cmd "ci" "fastest-all"
         "every fastest suite at once, in parallel: engine, docs fast and e2e, fleet and e2e (FASTEST_WORKERS each, default 4)"
         ''
           export FASTEST_WORKERS=''${FASTEST_WORKERS:-4}
           pids=()
-          for t in "|" "?dir=docs|fast" "?dir=docs|e2e" "?dir=templates/fleet|fleet" "?dir=templates/fleet|e2e"; do
+          for t in "|" "?dir=docs|fast" "?dir=docs|e2e" "?dir=templates/reference|reference" "?dir=templates/reference|e2e"; do
             ${fastest "\${t%%|*}" "\${t#*|}"} & pids+=("$!")
           done
           rc=0
@@ -167,7 +169,7 @@ in
         ''
       )
       (cmd "ci" "check-all" "every *-check command: fmt, docs, fleet"
-        "for c in fmt-check docs-check fleet-check; do echo \"== $c\"; $c; done"
+        "for c in fmt-check docs-check reference-check; do echo \"== $c\"; $c; done"
       )
     ];
   };

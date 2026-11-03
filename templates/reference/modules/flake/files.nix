@@ -14,7 +14,7 @@
       inherit lib;
       pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
       root = inputs.self;
-      relativeRoot = "templates/fleet";
+      relativeRoot = "templates/reference";
     };
   };
   yen.aspects.files-input = {

@@ -135,7 +135,7 @@ let
       );
     fleet =
       path: line: label:
-      "[${label}](${repo}/blob/main/templates/fleet/${path}${
+      "[${label}](${repo}/blob/main/templates/reference/${path}${
         lib.optionalString (line != null) "#L${toString line}"
       })";
     src = p: "${repo}/blob/main/docs/examples/${baseNameOf dir}/${p}";

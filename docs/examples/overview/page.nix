@@ -116,8 +116,8 @@
           description = "One NixOS host, in four files.";
         }
         {
-          title = "The reference fleet";
-          href = "https://github.com/vic/yen/tree/main/templates/fleet";
+          title = "The reference template";
+          href = "https://github.com/vic/yen/tree/main/templates/reference";
           description = "Every capability, in one running specification.";
         }
       ])

@@ -113,14 +113,14 @@
             "`docs-write`"
           ]
           [
-            "`templates/fleet/README.md`, `templates/fleet/ci.json`"
-            "`templates/fleet/modules/docs/`"
-            "`fleet-write`"
+            "`templates/reference/README.md`, `templates/reference/ci.json`"
+            "`templates/reference/modules/docs/`"
+            "`reference-write`"
           ]
           [
-            "`templates/fleet/flake.nix`"
+            "`templates/reference/flake.nix`"
             "the `flake-file` sink of the fleet"
-            "`fleet-flake`"
+            "`reference-flake`"
           ]
         ]
       )
@@ -145,8 +145,8 @@
             "`engine-test`, and the `docs-example` of the page that shows it"
           ]
           [
-            "the reference fleet (`templates/fleet/`)"
-            "`fleet-test`"
+            "the reference template (`templates/reference/`)"
+            "`reference-test`"
           ]
           [
             "any Nix file"
@@ -159,7 +159,7 @@
         A red CI job that says a file is stale means you did not run its generator. The two that are easy to forget:
 
         - `docs-write` writes the docs pages, the library reference and `CONTRIBUTING.md`.
-        - `fleet-write` writes the reference fleet's README, which lists engine names such as the reduce strategies and the
+        - `reference-write` writes the reference template's README, which lists engine names such as the reduce strategies and the
           library functions. A change to the engine often changes both, so run both.
 
         Heavy, leave them to CI:
@@ -168,19 +168,19 @@
         [ "Task" "Why it waits for CI" ]
         [
           [
-            "`docs-e2e`, `fleet-e2e`"
+            "`docs-e2e`, `reference-e2e`"
             "real NixOS, nix-darwin and home-manager evaluations"
           ]
           [
-            "`engine-cost`, `fleet-cost`"
+            "`engine-cost`, `reference-cost`"
             "cost oracles over whole evaluations"
           ]
           [
-            "`fleet-check`, `fleet-eval`, `docs-check`, `docs-build`"
+            "`reference-check`, `reference-eval`, `docs-check`, `docs-build`"
             "a flake check or a build of every output, or of the site"
           ]
           [
-            "`fleet-mcp`"
+            "`reference-mcp`"
             "builds the Rust server"
           ]
           [
@@ -199,9 +199,9 @@
 
         ## Maintenance
 
-        - **Update inputs.** Run `nix flake update` in `docs/` and in `templates/fleet/`, then `ci`. nixpkgs comes from the
+        - **Update inputs.** Run `nix flake update` in `docs/` and in `templates/reference/`, then `ci`. nixpkgs comes from the
           nixos.org channel tarballs, not from GitHub.
-        - **After a nixpkgs update**, the fleet's trimmed module lists belong to the old revision: `fleet-e2e` fails on
+        - **After a nixpkgs update**, the reference template's trimmed module lists belong to the old revision: `reference-e2e` fails on
           `modlist-same-drv` until they are computed again.
         - **Format** with `fmt`; CI checks it with `fmt-check`.
         - **A new error code** in the engine fails the docs until the Error codes page (`docs/examples/errors-reference`) explains it.

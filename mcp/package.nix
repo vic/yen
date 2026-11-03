@@ -1,5 +1,5 @@
 # yen-mcp: the Rust server, wrapped with its tool.nix and git. Nix itself comes from the caller's PATH: its version,
-# its store. The mcp flake and the reference fleet both build this one derivation.
+# its store. The mcp flake and the reference template both build this one derivation.
 {
   lib,
   rustPlatform,
