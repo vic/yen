@@ -15,13 +15,12 @@ let
   }
   // yen.kit.base.roles.default.interface;
   # the settings of the role that holds the machine, restricted to names
+  # the role that holds the machine, and its settings: a role's settings may be a function of the machine
+  roleOf = a: m: if holds a.roles.server.at m then a.roles.server else a.roles.node;
+  settingsOf = r: m: if lib.isFunction (r.settings or { }) then r.settings m else r.settings or { };
   of =
     a: names: m:
-    let
-      r = if holds a.roles.server.at m then a.roles.server else a.roles.node;
-      s = r.settings or { };
-    in
-    lib.intersectAttrs (lib.genAttrs names (_: null)) (if lib.isFunction s then s m else s);
+    lib.intersectAttrs (lib.genAttrs names (_: null)) (settingsOf (roleOf a m) m);
 in
 {
   yen.kit.homelab = {
@@ -32,60 +31,53 @@ in
       min = 1;
       max = 1;
     };
-    adds =
-      a:
-      let
-        s = a.roles.server;
-        d = a.roles.node;
-        both = [
-          s.at
-          d.at
-        ];
-      in
-      {
-        base = {
-          kit = yen.kit.base;
-          roles.default = {
-            at = both;
-            settings = of a [
-              "device"
-              "layout"
-              "authorizedKeys"
-              "hardware"
-            ];
+    adds = a: {
+      base = {
+        kit = yen.kit.base;
+        roles.default = {
+          at = [
+            a.roles.server.at
+            a.roles.node.at
+          ];
+          settings = of a [
+            "device"
+            "layout"
+            "authorizedKeys"
+            "hardware"
+          ];
+        };
+      };
+      wg = {
+        kit = yen.kit.wireguard;
+        roles = {
+          controller = {
+            inherit (a.roles.server) at;
+            settings = of a [ "prefix" ];
           };
-        };
-        wg = {
-          kit = yen.kit.wireguard;
-          roles = {
-            controller = {
-              inherit (s) at;
-              settings = of a [ "prefix" ];
-            };
-            peer = {
-              inherit (d) at;
-              settings = of a [ "prefix" ];
-            };
-          };
-        };
-        monitoring = {
-          kit = yen.kit.monitoring;
-          roles = {
-            server = { inherit (s) at; };
-            exporter = { inherit (d) at; };
-          };
-        };
-        dns = {
-          kit = yen.kit.dns;
-          roles.default = { inherit (s) at; };
-        };
-        borg = {
-          kit = yen.kit.borg;
-          roles = {
-            server = { inherit (s) at; };
-            client = { inherit (d) at; };
+          peer = {
+            inherit (a.roles.node) at;
+            settings = of a [ "prefix" ];
           };
         };
       };
+      monitoring = {
+        kit = yen.kit.monitoring;
+        roles = {
+          server = { inherit (a.roles.server) at; };
+          exporter = { inherit (a.roles.node) at; };
+        };
+      };
+      dns = {
+        kit = yen.kit.dns;
+        roles.default = { inherit (a.roles.server) at; };
+      };
+      borg = {
+        kit = yen.kit.borg;
+        roles = {
+          server = { inherit (a.roles.server) at; };
+          client = { inherit (a.roles.node) at; };
+        };
+      };
+    };
   };
 }

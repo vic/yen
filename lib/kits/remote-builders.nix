@@ -17,6 +17,22 @@ let
     from = yen.kinds.fleet.sinks.builders;
     keep = scope: m: same m.assembly scope.assembly && !same m.machine scope.parent;
   };
+  # the client's NixOS keys from the battery: each build machine without its assembly and machine refs
+  clientOf =
+    r:
+    if r == { } then
+      { }
+    else
+      r
+      // {
+        nix.buildMachines = map (
+          m:
+          removeAttrs m [
+            "assembly"
+            "machine"
+          ]
+        ) r.nix.buildMachines;
+      };
 in
 {
   yen.kinds.fleet.sinks.builders.reduce = yen.lib.reduce.entries;
@@ -62,21 +78,8 @@ in
     at = member "client";
     nixos =
       { scope, sinks, ... }:
-      let
-        r = battery { inherit scope sinks; };
-      in
-      if r == { } then
-        { }
-      else
-        r
-        // {
-          nix.buildMachines = map (
-            m:
-            removeAttrs m [
-              "assembly"
-              "machine"
-            ]
-          ) r.nix.buildMachines;
-        };
+      clientOf (battery {
+        inherit scope sinks;
+      });
   };
 }

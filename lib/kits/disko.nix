@@ -12,6 +12,8 @@ let
     check = v: builtins.isAttrs v && builtins.isFunction (v.devices or null);
     description = "a layout of kit disko (yen.kit.disko.layouts.<name>)";
   };
+  # the disko devices of a member's settings; a setting that is no layout gives none (settings-typed reports it)
+  devicesOf = s: if s.layout ? devices then s.layout.devices s.device else { };
 in
 {
   yen.kinds.kit.fields.layouts = yen.lib.opt (yen.lib.attrsOf layout) { };
@@ -28,11 +30,6 @@ in
       (s: yen.lib.same (s.kit or null) yen.kit.disko)
     ];
     # a setting that is no layout is the error settings-typed gives; here it gives no disks ({ })
-    disks =
-      { member, ... }:
-      let
-        s = member.settings;
-      in
-      if s.layout ? devices then s.layout.devices s.device else { };
+    disks = { member, ... }: devicesOf member.settings;
   };
 }

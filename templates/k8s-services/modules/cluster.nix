@@ -16,6 +16,17 @@ let
     from = yen.kinds.cluster.sinks.k8s;
     inherit lib;
   };
+  # the manifests of a cluster, and one List of them for `kubectl apply -f`
+  outOf = name: m: {
+    k8sManifests.${name} = m;
+    packages.x86_64-linux.${name} = pkgs.writeText "${name}.json" (
+      builtins.toJSON {
+        apiVersion = "v1";
+        kind = "List";
+        items = lib.attrValues m;
+      }
+    );
+  };
 in
 {
   yen.kinds.fleet = {
@@ -36,19 +47,7 @@ in
         sinks,
         ...
       }:
-      let
-        m = (manifests args).k8sManifests.${cluster.name};
-      in
-      {
-        k8sManifests.${cluster.name} = m;
-        packages.x86_64-linux.${cluster.name} = pkgs.writeText "${cluster.name}.json" (
-          builtins.toJSON {
-            apiVersion = "v1";
-            kind = "List";
-            items = lib.attrValues m;
-          }
-        );
-      };
+      outOf cluster.name (manifests args).k8sManifests.${cluster.name};
     kinds.app = {
       fields = {
         namespace = yen.lib.opt yen.lib.str "default";

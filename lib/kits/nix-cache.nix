@@ -18,6 +18,11 @@ let
   gen = a: "nix-cache-${a.name}"; # a generator name
   key = e: pub e.machine.name e.value.key.generator e.value.key.file null;
   servers = a: exports: lib.filter (e: same e.assembly a && e.role == "server") exports;
+  # a client trusts every server of its assembly: its URL and its public key
+  settingsOf = ss: {
+    substituters = map (e: e.value.url) ss;
+    trusted-public-keys = lib.filter (k: k != null) (map key ss);
+  };
 in
 {
   yen.kit.nix-cache = {
@@ -76,12 +81,8 @@ in
     at = member "client";
     nixos =
       { member, exports, ... }:
-      let
-        ss = servers member.assembly exports;
-      in
       {
-        nix.settings.substituters = map (e: e.value.url) ss;
-        nix.settings.trusted-public-keys = lib.filter (k: k != null) (map key ss);
+        nix.settings = settingsOf (servers member.assembly exports);
       };
   };
 }

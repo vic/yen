@@ -27,7 +27,7 @@
           ]
           [
             "type"
-            "any value with `check = value: bool`"
+            "any value with `check = value: bool`; a composite also gives `parse`: its shape now, its parts later"
             "[Types and defaults](/model/types/)"
           ]
           [
@@ -139,6 +139,41 @@
             "knowledge pack"
             "the fleet as sorted N-Triples with a sha256"
             "[Knowledge packs](/agents/knowledge/)"
+          ]
+          [
+            "nested kind"
+            "a kind declared in a kind, `kinds.<c>`; its instances live under the parent"
+            "[Nested kinds](/model/nested-kinds/)"
+          ]
+          [
+            "owned aspect"
+            "an aspect in a kind (`aspects.<a>`, on that kind by default) or in an instance; named by its declaration path"
+            "[Aspects](/behavior/aspects/#aspects-a-kind-or-an-instance-owns)"
+          ]
+          [
+            "deep check"
+            "`result.deep`: the parts of typed values (list elements, attrset values) checked after evaluation"
+            "[Types and defaults](/model/types/)"
+          ]
+          [
+            "certificate"
+            "the steps that prove a verdict; a small checker in Nix and a checker proved in Lean accept it"
+            "[Verified by Lean](/query/lean/)"
+          ]
+          [
+            "battery"
+            "a ready value for one key of your fleet: `yen.lib.batteries`"
+            "[Battery packs](/batteries/)"
+          ]
+          [
+            "kit, assembly, member"
+            "a kit is a reusable part with roles; an assembly is one use of it; a member is one machine in one role"
+            "[Kits](/batteries/kits/)"
+          ]
+          [
+            "module sink"
+            "a top-level key of a module that any module reads as an arg; `yen.sinks` declares it"
+            "[Modules](/principles/modules/)"
           ]
         ]
       )

@@ -22,6 +22,34 @@ let
   };
   pk = x: pub x.machine.name "from-exports" x.value.public null; # null: the public file is missing
   inherit (self._wireguard-check { inherit yen lib pk; }) alloc check;
+  # the exports of a member's assembly, and the address of each of its machines
+  assemblyOf = member: lib.filter (x: same x.assembly member.assembly);
+  ipsOf = member: exports: (alloc (assemblyOf member exports)).value;
+  # a peer as one machine sees another: a controller routes the peer's address, a peer routes the network
+  peerOf =
+    member: ips: x:
+    {
+      publicKey = pk x;
+      allowedIPs = [
+        (if member.role == "controller" then "${ips.${x.machine.name}}/32" else member.settings.prefix)
+      ];
+    }
+    // lib.optionalAttrs (member.role != "controller") {
+      endpoint = "${x.machine.addr}:${toString member.settings.port}";
+    };
+  # the interface of a machine `me`: its address, its key, and its peers (a peer sees only the controllers)
+  interfaceOf = member: me: es: ips: {
+    networking.wireguard.interfaces.${member.assembly.name} = {
+      ips = [ "${ips.${me}}/32" ];
+      privateKeyFile = "/run/secrets/vars/from-exports/${key member.assembly}.key"; # a path only
+      peers = map (peerOf member ips) (
+        lib.filter (
+          x: x.machine.name != me && (member.role == "controller" || x.role == "controller") && pk x != null
+        ) es
+      );
+    }
+    // lib.optionalAttrs (member.role == "controller") { listenPort = member.settings.port; };
+  };
 in
 {
   yen.kit.wireguard = {
@@ -71,28 +99,8 @@ in
         exports,
         ...
       }:
-      let
-        me = scope.parent.name;
-        es = lib.filter (x: same x.assembly member.assembly) exports;
-        ips = (alloc es).value;
-        ctl = member.role == "controller";
-        peer =
-          x:
-          {
-            publicKey = pk x;
-            allowedIPs = [ (if ctl then "${ips.${x.machine.name}}/32" else member.settings.prefix) ];
-          }
-          // lib.optionalAttrs (!ctl) { endpoint = "${x.machine.addr}:${toString member.settings.port}"; };
-      in
-      lib.optionalAttrs (ips ? ${me}) {
-        networking.wireguard.interfaces.${member.assembly.name} = {
-          ips = [ "${ips.${me}}/32" ];
-          privateKeyFile = "/run/secrets/vars/from-exports/${key member.assembly}.key"; # a path only
-          peers = map peer (
-            lib.filter (x: x.machine.name != me && (ctl || x.role == "controller") && pk x != null) es
-          );
-        }
-        // lib.optionalAttrs ctl { listenPort = member.settings.port; };
-      };
+      lib.optionalAttrs (ipsOf member exports ? ${scope.parent.name}) (
+        interfaceOf member scope.parent.name (assemblyOf member exports) (ipsOf member exports)
+      );
   };
 }

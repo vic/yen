@@ -108,6 +108,25 @@ Follow these rules in new code under `lib/` and `tests/`:
 - Do not use `import`. Get a value from the `self` argument.
 - Write a leaf file as `self: value`. If the file does not use `self`, write `_: value`.
 
+Write a Yen module (a kit, a template, an example) in one form: its bindings in one top-level `let`, its
+attributes simple assignments that use them. A binding that needs a value of an element (a `member`, a
+`scope`) is a function of it; there is no `let` inside an element. The let bindings refer to each other
+without `rec`, and they keep the details private:
+
+```nix
+{ yen, lib, ... }:
+let
+  serversOf = member: lib.filter (e: yen.lib.same e.assembly member.assembly && e.role == "server");
+in
+{
+  yen.kit.borg.aspects.client.nixos =
+    { member, exports, ... }:
+    { services.borgbackup.jobs.x.repo = (lib.head (serversOf member exports)).value.repo; };
+}
+```
+
+The test `batteries.one-let` holds every kit and every template module to one `let`.
+
 ## Set up
 
 `nix develop ./docs` from the repository root (or `nix develop` in `docs/`) gives a devshell with every command below.

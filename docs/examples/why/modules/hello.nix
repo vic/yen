@@ -11,7 +11,7 @@
   # World is the container of all our human languages
   yen.kinds.world = {
     spawns.language = world: yen.language;
-    # all greetings contributions get merged as attrsets
+    # all greetings elements get merged as attrsets
     sinks.greetings.reduce = yen.lib.reduce.merge;
   };
 

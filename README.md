@@ -73,7 +73,7 @@ home-manager, clusters, terraform, k8s, or anything else you can model as Nix va
 - **Kinds**: the nouns of the things in your fleet, and their typed fields.
 - **Scopes**: how kinds nest inside each other. `.spawns.` builds the nested cycles from your data: a user under each host.
 - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
-- **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the contributions.
+- **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the elements.
 
 Yen is built only on Nix `builtins`. This is the most basic NixOS host, the whole `minimal` template
 (`nix flake init -t github:vic/yen#minimal`). The flake takes the modules of a directory:

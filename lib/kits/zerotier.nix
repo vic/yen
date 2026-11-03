@@ -18,6 +18,25 @@ let
   stem =
     role: a: m:
     if role == "controller" then "zt-${a.name}" else "zt-${a.name}-${m}";
+  # the file a controller (`nwid`) or a moon (`moon`) publishes
+  fileOf = role: if role == "controller" then "nwid" else "moon";
+  # a controller's or a moon's identity: a generator on its machine, and the public file it exports
+  idsOf = k: id: machine: {
+    public = "${k}.${id}";
+    generators.${k} = {
+      deploy = [ machine ];
+      files."${k}.identity".secret = true;
+      files."${k}.${id}".secret = false;
+    };
+  };
+  # the public values of one role in a member's assembly: network ids or moon ids
+  publicOf =
+    member: exports: role:
+    lib.filter (v: v != null) (
+      map pk (
+        lib.filter (x: same x.assembly member.assembly && x ? value.public && x.role == role) exports
+      )
+    );
 in
 {
   yen.kit.zerotier = {
@@ -42,18 +61,9 @@ in
     at = members;
     exports =
       { member, scope, ... }:
-      let
-        k = stem member.role member.assembly scope.parent.name;
-        id = if member.role == "controller" then "nwid" else "moon";
-      in
-      lib.optionalAttrs (member.role != "peer") {
-        public = "${k}.${id}";
-        generators.${k} = {
-          deploy = [ scope.parent ];
-          files."${k}.identity".secret = true;
-          files."${k}.${id}".secret = false;
-        };
-      };
+      lib.optionalAttrs (member.role != "peer") (
+        idsOf (stem member.role member.assembly scope.parent.name) (fileOf member.role) scope.parent
+      );
   };
   yen.kit.zerotier.aspects.check = {
     at = yen.kinds.fleet;
@@ -72,21 +82,18 @@ in
         exports,
         ...
       }:
-      let
-        es = lib.filter (x: same x.assembly member.assembly && x ? value.public) exports;
-        ids = role: lib.filter (v: v != null) (map pk (lib.filter (x: x.role == role) es));
-        k = stem member.role member.assembly scope.parent.name;
-      in
       {
         services.zerotierone = {
           enable = true;
-          joinNetworks = ids "controller";
+          joinNetworks = publicOf member exports "controller";
         };
-        environment.etc."zerotier/moons".text = lib.concatStringsSep "\n" (ids "moon");
+        environment.etc."zerotier/moons".text = lib.concatStringsSep "\n" (publicOf member exports "moon");
       }
       // lib.optionalAttrs (member.role != "peer") {
         systemd.tmpfiles.rules = [
-          "L+ /var/lib/zerotier-one/identity.secret - - - - /run/secrets/vars/from-exports/${k}.identity"
+          "L+ /var/lib/zerotier-one/identity.secret - - - - /run/secrets/vars/from-exports/${
+            stem member.role member.assembly scope.parent.name
+          }.identity"
         ];
       };
   };
