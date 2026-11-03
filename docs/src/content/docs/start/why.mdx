@@ -298,7 +298,7 @@ let
 in
 {
   yen.kinds.world.spawns.host = _: yen.host;
-  yen.kinds.host.fields.apps = yen.lib.is (v: builtins.isList v && builtins.all builtins.isString v);
+  yen.kinds.host.fields.apps = yen.lib.listOf (yen.lib.is builtins.isString);
   yen.host.lb.apps = [
     "grafana"
     "loki"

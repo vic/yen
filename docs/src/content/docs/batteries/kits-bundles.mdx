@@ -130,7 +130,7 @@ in
     roles = opt attrs { };
     constraints = opt attrs { };
     exports = opt (yen.lib.is lib.isList) [ ];
-    adds = opt (yen.lib.is lib.isFunction) (_: { });
+    adds = opt (yen.lib.is builtins.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;

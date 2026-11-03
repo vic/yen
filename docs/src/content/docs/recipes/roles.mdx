@@ -30,7 +30,7 @@ in
       "nvidia"
       "amd"
     ]) "none";
-    labels = opt (is (v: lib.isList v && lib.all lib.isString v)) [ ];
+    labels = opt (yen.lib.listOf (is builtins.isString)) [ ];
   };
 
   yen.fleet.main = { };
