@@ -51,6 +51,7 @@ let
     neovim = (inputsOf inputs "neovim" { nixpkgs = inputs.nixpkgs-unstable; }).self.outputs;
     agent-containers = (inputsOf inputs "agent-containers" { }).self.outputs;
     k8s-services = (inputsOf inputs "k8s-services" { }).self.outputs;
+    agent-swarm = (inputsOf inputs "agent-swarm" { }).self.outputs;
     kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
@@ -81,6 +82,33 @@ let
     ];
     basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
     basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
+    # agent swarm: one service and timer per agent, on the host's ollama endpoint
+    swarm =
+      let
+        c = (hosts t.agent-swarm).ai;
+      in
+      eq
+        {
+          timers = builtins.mapAttrs (_: t: t.timerConfig.OnCalendar) (
+            builtins.removeAttrs c.systemd.timers (
+              builtins.filter (n: builtins.substring 0 6 n != "agent-") (builtins.attrNames c.systemd.timers)
+            )
+          );
+          models = c.services.ollama.loadModels;
+          endpoint = builtins.match ".*(http://127.0.0.1:11434/v1/chat/completions).*" c.systemd.services.agent-writer.script;
+        }
+        {
+          timers = {
+            agent-planner = "weekly";
+            agent-reviewer = "daily";
+            agent-writer = "hourly";
+          };
+          models = [
+            "qwen2.5-coder:7b"
+            "llama3.2:3b"
+          ];
+          endpoint = [ "http://127.0.0.1:11434/v1/chat/completions" ];
+        };
     # k8s services: two charts, two image apps, a ServiceMonitor for the app with metrics, and the apply list
     k8s = eq (builtins.attrNames t.k8s-services.k8sManifests.lab) [
       "api-deployment"
