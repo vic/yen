@@ -85,7 +85,7 @@ let
     reserved = "a sink is named `scope` or `sinks`: those names are fixed args of every element";
     scope-ambiguous = "a query names an instance with two or more scopes: pass one of the paths in `scopes`";
     unknown-aspect = "a query names an aspect that does not exist";
-    unknown-key = "`yen`, a kind or a `yen.sinks` declaration has a key yen does not read (yen modules are not NixOS modules)";
+    unknown-key = "`yen`, a kind, an aspect or a `yen.sinks` declaration has a key yen does not read (yen modules are not NixOS modules)";
     unread-sink = "a module gives a sink that no module reads or declares in `yen.sinks`";
     import-loop = "the `imports` of a [module](/principles/modules/) asks a [sink](/behavior/sinks/) that a module below it gives: a cycle in `result.modules`";
     unknown-field = "an instance sets a field its kind does not declare";
