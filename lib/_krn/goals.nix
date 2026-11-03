@@ -15,10 +15,8 @@ let
   #: lib.krn.eq :: u -> v -> goal -- u and v unify
   eq =
     u: v: st:
-    let
-      s = unify st.s u v;
-    in
-    if s == null then null else post (st // { inherit s; });
+    eqWith st (unify st.s u v);
+  eqWith = st: s: if s == null then null else post (st // { inherit s; });
   #: lib.krn.succeed :: goal -- the goal that holds once
   succeed = unit;
   #: lib.krn.fail :: goal -- the goal that never holds
@@ -33,15 +31,16 @@ let
   #: lib.krn.freshNamed :: [ name ] -> ({ name = lvar; } -> goal) -> goal -- one new variable per name, the names from data
   freshNamed =
     names: f: st:
-    let
-      vs = b.listToAttrs (
-        b.genList (i: {
-          name = b.elemAt names i;
-          value = var (st.c + i);
-        }) (b.length names)
-      );
-    in
-    goal (f vs) (st // { c = st.c + b.length names; });
+    goal (f (varsFrom st.c names)) (st // { c = st.c + b.length names; });
+  # one variable per name, numbered from c
+  varsFrom =
+    c: names:
+    b.listToAttrs (
+      b.genList (i: {
+        name = b.elemAt names i;
+        value = var (c + i);
+      }) (b.length names)
+    );
   #: lib.krn.project :: term -> (value -> goal) -> goal -- the goal from the current value of the term
   project =
     x: f: st:
@@ -51,16 +50,10 @@ let
   #: lib.krn.neq :: u -> v -> goal -- u and v never unify, now or later
   neq =
     u: v: st:
-    let
-      s2 = unify st.s u v;
-    in
-    if s2 == null then
-      unit st
-    else
-      let
-        p = prefixOf st.s s2;
-      in
-      if p == { } then null else unit (st // { neq = st.neq ++ [ p ]; });
+    neqWith st (unify st.s u v);
+  # s2: the substitution with u and v made equal, or null
+  neqWith = st: s2: if s2 == null then unit st else neqStore st (prefixOf st.s s2);
+  neqStore = st: p: if p == { } then null else unit (st // { neq = st.neq ++ [ p ]; });
 
 in
 {

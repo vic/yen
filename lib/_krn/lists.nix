@@ -57,27 +57,25 @@ let
   #: lib.krn.membero :: x -> l -> goal -- x is in the list l (a Nix list or a relational list)
   membero =
     x: l: st:
-    let
-      w = walk st.s l;
-    in
-    (
-      if b.isList w then
-        disj (map (y: eq x y) w)
-      else
-        conde [
-          [ (fresh ({ d }: eq l (cons x d))) ]
-          [
-            (fresh (
-              { a, d }:
-              [
-                (eq l (cons a d))
-                (membero x d)
-              ]
-            ))
-          ]
+    memberIn x l (walk st.s l) st;
+  # w: the list as far as it is known now
+  memberIn =
+    x: l: w:
+    if b.isList w then
+      disj (map (y: eq x y) w)
+    else
+      conde [
+        [ (fresh ({ d }: eq l (cons x d))) ]
+        [
+          (fresh (
+            { a, d }:
+            [
+              (eq l (cons a d))
+              (membero x d)
+            ]
+          ))
         ]
-    )
-      st;
+      ];
   # a table: each row is a fact; the pattern unifies with a row (attrsets or lists)
   #: lib.krn.facto :: [ row ] -> pattern -> goal -- the pattern unifies with one row of the table
   facto = rows: pattern: disj (map (r: eq pattern r) rows);
