@@ -7,7 +7,7 @@ self:
 let
   b = builtins;
   inherit (self._core.types) checkOf typeName;
-  # yen types name themselves with an article ("a string"); kind refs and nixpkgs types do not ("layout ref")
+  # yen types name themselves with an article ("a string"); kind refs and nixpkgs types do not ("host ref")
   named = t: if b.match "(a|an|any) .*" (typeName t) != null then typeName t else "a ${typeName t}";
   iface = scope.kit.roles.${scope.role}.interface or { };
 in

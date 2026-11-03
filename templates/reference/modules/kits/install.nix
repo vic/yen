@@ -49,7 +49,7 @@ in
         at = yen.host.stage;
         settings = {
           device = "/dev/sda";
-          layout = yen.layout.single-ext4;
+          layout = yen.kit.disko.layouts.single-ext4;
         };
       };
     };
@@ -59,7 +59,7 @@ in
         at = yen.host.web-1;
         settings = {
           device = "/dev/nvme0n1";
-          layout = yen.layout.btrfs-luks;
+          layout = yen.kit.disko.layouts.btrfs-luks;
         };
       };
     };
@@ -69,7 +69,7 @@ in
         at = yen.host.web-2;
         settings = {
           device = "/dev/sda /dev/sdb";
-          layout = yen.layout.zfs-mirror;
+          layout = yen.kit.disko.layouts.zfs-mirror;
         };
       };
     };

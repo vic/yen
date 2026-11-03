@@ -551,7 +551,7 @@ All of them at once, in parallel: `fastest-tests` in the devshell (`nix develop 
 GitHub Actions run all of these on each push and pull request ([.github/workflows/test.yml](https://github.com/vic/yen/blob/main/.github/workflows/test.yml)): the engine and cost oracles, the fleet checks and e2e evaluations, the fleet cost oracle, the MCP tests, `nix flake check` (with KVM for the VM test) and one job per `ci.json` target that must evaluate to a derivation.
 
 ## This fleet, live
-Generated from the fleet's queries: 141 scopes, 30 kinds, 219 aspects, 1137 routed elements.
+Generated from the fleet's queries: 141 scopes, 29 kinds, 219 aspects, 1137 routed elements.
 | Kind | Fields | Spawns | Sinks | Scopes |
 |---|---|---|---|---|
 | `assembly` | `kit`, `roles` |  |  | 0 |
@@ -569,8 +569,7 @@ Generated from the fleet's queries: 141 scopes, 30 kinds, 219 aspects, 1137 rout
 | `hive` | `environment` |  | `meta` | 2 |
 | `home` | `channel`, `on`, `system`, `user` | `user` | `homeManager`, `os` | 2 |
 | `host` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` | `backup`, `guest`, `home`, `host`, `member`, `pet`, `user`, `variant` | `age-secrets`, `aspect-settings`, `deploy`, `dev`, `disks`, `fw`, `fw-tcp`, `isNixos`, `monitor`, `nixos`, `os`, `osConfig`, `pairs`, `persist`, `platform`, `service-domains`, `tags`, `tuning`, `unfree` | 9 |
-| `kit` | `adds`, `constraints`, `exports`, `roles` |  |  | 0 |
-| `layout` | `devices` |  |  | 0 |
+| `kit` | `adds`, `constraints`, `exports`, `layouts`, `roles` |  |  | 0 |
 | `mac` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` | `member`, `user` | `darwin`, `os` | 1 |
 | `machine` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` |  |  | 0 |
 | `member` |  |  |  | 80 |
@@ -886,7 +885,6 @@ flowchart LR
   nd265c5f895["home"]
   n91a43a88c2["host"]
   n969fdcbc29["kit"]
-  n227773463f["layout"]
   n25061baf77["mac"]
   n5e4f590e9f["machine"]
   nf384c24853["member"]

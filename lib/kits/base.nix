@@ -1,5 +1,5 @@
 #: lib.kits.base :: module -- bundle base: what a new machine needs (disk, hardware report, ssh, break-glass login) in one assembly
-# One role, `default`. Interface: `device` (str), `layout` (a layout ref), `authorizedKeys` (public keys), `hardware`
+# One role, `default`. Interface: `device` (str), `layout` (one of `yen.kit.disko.layouts`), `authorizedKeys` (public keys), `hardware`
 # (a path: the directory of `<machine>.json` nixos-facter reports). It adds one assembly each of disko, facter, sshd (a
 # server on the same machines) and emergency-access. Users are left out: a user needs a name, and a name per machine
 # would be a string. Import the four kits it adds (disko, facter, sshd, emergency-access) too.
@@ -18,9 +18,7 @@ in
   yen.kit.base = {
     roles.default.interface = {
       device.type = yen.lib.str;
-      layout.type = yen.kinds.layout // {
-        description = "layout ref";
-      };
+      layout.type = yen.kit.disko.roles.default.interface.layout.type; # a layout of kit disko
       authorizedKeys.type = yen.lib.listOf yen.lib.str;
       hardware.type = yen.lib.path;
     };

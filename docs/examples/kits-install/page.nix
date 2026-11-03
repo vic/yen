@@ -31,14 +31,14 @@
 
         | Kit | Role | Interface | Does |
         |---|---|---|---|
-        | `lib.kits.disko` | `default` | `device` (str), `layout` (ref to a layout) | gives the layout's disko devices to sink `disks`; owns the [kind](/model/kinds-fields/) `layout` |
+        | `lib.kits.disko` | `default` | `device` (str), `layout` (one of `yen.kit.disko.layouts`) | gives the layout's disko devices to sink `disks`; owns its layouts, `yen.kit.disko.layouts` |
         | `lib.kits.facter` | `default` | `dir` (path) | imports `<dir>/<machine>.json` with `nixos.facter` |
 
         A kit is a [module](/principles/modules/): put `inputs.yen.lib.kits.disko` in `imports` of the top module.
 
         ## Layouts
-
-        `layout` is a data kind owned by the kit `disko`. Each layout is `yen.layout.<name>` with a `devices` function
+        A layout belongs to the kit `disko`: `yen.kit.disko.layouts.<name>`, a value of the kit, not a kind, so the kit adds
+        no name outside itself. Each layout has a `devices` function
         of the device string: `single-ext4`, `btrfs-luks` and `zfs-mirror` (two devices, separated by a space).
       ''
       (docs.file "modules/fleet.nix")
@@ -56,7 +56,7 @@
       ''
       (docs.value (builtins.attrNames result.flake.apps.x86_64-linux))
       ''
-        ## A layout is a ref
+        ## A layout is a value of the kit
 
         A string where the layout goes is an error record, not a silent default:
       ''

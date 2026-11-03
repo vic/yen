@@ -222,7 +222,7 @@ module of the target system; a *predicate* is what `at` takes; a *view* is `{ no
 |---|---|---|
 | [`lib.kits.base`](https://github.com/vic/yen/blob/main/lib/kits/base.nix#L7) | `module` | bundle base: what a new machine needs (disk, hardware report, ssh, break-glass login) in one assembly |
 | [`lib.kits.borg`](https://github.com/vic/yen/blob/main/lib/kits/borg.nix#L6) | `module` | backup kit: roles client (startAt) and server (1); the server exports its repo address |
-| [`lib.kits.disko`](https://github.com/vic/yen/blob/main/lib/kits/disko.nix#L5) | `module` | kit disko and its data kind layout: a machine's disks from a named layout |
+| [`lib.kits.disko`](https://github.com/vic/yen/blob/main/lib/kits/disko.nix#L7) | `module` | kit disko: a machine's disks from a named layout of the kit |
 | [`lib.kits.dns`](https://github.com/vic/yen/blob/main/lib/kits/dns.nix#L5) | `module` | records for every endpoint that kits export: the `exports` sink read into one cname per endpoint |
 | [`lib.kits.emergency-access`](https://github.com/vic/yen/blob/main/lib/kits/emergency-access.nix#L6) | `{ yen, lib, ... } -> module` | kit emergency-access: root logs in with a key or a password, only where a member is |
 | [`lib.kits.facter`](https://github.com/vic/yen/blob/main/lib/kits/facter.nix#L6) | `module` | kit facter: the machine's nixos-facter report, read from the directory the assembly sets |
