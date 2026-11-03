@@ -899,6 +899,24 @@ let
   ];
 
   checks = {
+    # #59: a kit or a template module has one top-level `let` (its bindings), never a nested one
+    one-let =
+      let
+        nixIn =
+          d: map (n: d + "/${n}") (b.filter (n: b.match ".*\\.nix" n != null) (b.attrNames (b.readDir d)));
+        lets =
+          f:
+          b.length (b.filter (l: b.isString l && b.match "[ ]*let" l != null) (b.split "\n" (b.readFile f)));
+        templates = b.attrNames (b.readDir ../templates);
+        modules = b.concatMap (
+          t:
+          if b.pathExists (../templates + "/${t}/modules") then
+            nixIn (../templates + "/${t}/modules")
+          else
+            [ ]
+        ) templates;
+      in
+      eq (map toString (b.filter (f: lets f > 1) (nixIn ../lib/kits ++ modules))) [ ];
     # #97: a sink at a system scope as flake.<group>.<system>, and the inputs read at one system
     per-system =
       let

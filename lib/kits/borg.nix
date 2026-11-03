@@ -13,6 +13,8 @@ let
       yen.kinds.member
       (s: same (s.kit or null) yen.kit.borg && s.role == role)
     ];
+  # the servers of a member's assembly, from the exports
+  serversOf = member: lib.filter (e: same e.assembly member.assembly && e.role == "server");
 in
 {
   yen.kit.borg = {
@@ -60,12 +62,9 @@ in
         exports,
         ...
       }:
-      let
-        servers = lib.filter (e: same e.assembly member.assembly && e.role == "server") exports;
-      in
       {
         services.borgbackup.jobs.${member.assembly.name} = {
-          repo = "${(lib.head servers).value.repo}:/srv/${scope.parent.name}";
+          repo = "${(lib.head (serversOf member exports)).value.repo}:/srv/${scope.parent.name}";
           paths = [ "/var/lib" ];
           encryption.mode = "none";
           inherit (member.settings) startAt;

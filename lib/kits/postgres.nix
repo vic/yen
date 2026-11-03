@@ -19,6 +19,26 @@ let
   peers =
     role: member: exports:
     lib.filter (e: same e.assembly member.assembly && e.role == role) exports;
+  # the server: a database and a user per client of its assembly, each let in by its machine address only
+  server = clients: port: {
+    enable = true;
+    enableTCPIP = true;
+    settings.port = port;
+    ensureDatabases = map (c: c.value.database) clients;
+    ensureUsers = map (c: { name = c.value.user; }) clients;
+    authentication = lib.concatMapStrings (
+      c: "host ${toString c.value.database} ${toString c.value.user} ${c.machine.addr}/32 trust\n" # settings-typed reports a wrong type; no abort here
+    ) clients;
+  };
+  # a client: one DSN file per server of its assembly
+  dsnFiles =
+    s: servers:
+    lib.listToAttrs (
+      map (e: {
+        name = "postgres/${s.database}.dsn";
+        value.text = "postgresql://${s.user}@${e.value.dsn.host}:${toString e.value.dsn.port}/${s.database}";
+      }) servers
+    );
 in
 {
   yen.kit.postgres = {
@@ -54,20 +74,8 @@ in
       };
     nixos =
       { member, exports, ... }:
-      let
-        clients = peers "client" member exports;
-      in
       {
-        services.postgresql = {
-          enable = true;
-          enableTCPIP = true;
-          settings.port = member.settings.port;
-          ensureDatabases = map (c: c.value.database) clients;
-          ensureUsers = map (c: { name = c.value.user; }) clients;
-          authentication = lib.concatMapStrings (
-            c: "host ${toString c.value.database} ${toString c.value.user} ${c.machine.addr}/32 trust\n" # settings-typed reports a wrong type; no abort here
-          ) clients;
-        };
+        services.postgresql = server (peers "client" member exports) member.settings.port;
       };
   };
   yen.kit.postgres.aspects.client = {
@@ -79,16 +87,8 @@ in
       };
     nixos =
       { member, exports, ... }:
-      let
-        s = member.settings;
-      in
       {
-        environment.etc = lib.listToAttrs (
-          map (e: {
-            name = "postgres/${s.database}.dsn";
-            value.text = "postgresql://${s.user}@${e.value.dsn.host}:${toString e.value.dsn.port}/${s.database}";
-          }) (peers "server" member exports)
-        );
+        environment.etc = dsnFiles member.settings (peers "server" member exports);
       };
   };
 }

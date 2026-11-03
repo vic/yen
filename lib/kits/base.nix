@@ -7,12 +7,11 @@
 _:
 { yen, lib, ... }:
 let
+  # the settings of a role at a machine: a role's settings may be a function of the machine
+  settingsOf = r: m: if lib.isFunction (r.settings or { }) then r.settings m else r.settings or { };
   pick =
-    names: a:
-    let
-      s = a.roles.default.settings or { };
-    in
-    m: lib.intersectAttrs (lib.genAttrs names (_: null)) (if lib.isFunction s then s m else s);
+    names: a: m:
+    lib.intersectAttrs (lib.genAttrs names (_: null)) (settingsOf a.roles.default m);
 in
 {
   yen.kit.base = {

@@ -8,6 +8,16 @@
 }:
 let
   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+  neovimOf = modules: (inputs.nvf.lib.neovimConfiguration { inherit pkgs modules; }).neovim;
+  # the terminal editor, and the same editor in neovide, which runs this nvim: $NEOVIM_BIN
+  packagesOf = name: neovim: {
+    packages.x86_64-linux = {
+      ${name} = neovim;
+      "${name}-gui" = pkgs.writeShellScriptBin "neovide-${name}" ''
+        NEOVIM_BIN=${neovim}/bin/nvim exec ${pkgs.neovide}/bin/neovide "$@"
+      '';
+    };
+  };
 in
 {
   yen.kinds.fleet = {
@@ -23,24 +33,7 @@ in
       style = yen.lib.str; # the theme's style: night, mocha, dark, …
       languages = yen.lib.listOf yen.lib.str; # nvf languages: go, nix, typescript, css, markdown, …
     };
-    sinks.nvf.out =
-      { editor, nvf, ... }:
-      let
-        neovim =
-          (inputs.nvf.lib.neovimConfiguration {
-            inherit pkgs;
-            modules = nvf;
-          }).neovim;
-      in
-      {
-        packages.x86_64-linux = {
-          ${editor.name} = neovim;
-          # neovide runs this variant's nvim: $NEOVIM_BIN
-          "${editor.name}-gui" = pkgs.writeShellScriptBin "neovide-${editor.name}" ''
-            NEOVIM_BIN=${neovim}/bin/nvim exec ${pkgs.neovide}/bin/neovide "$@"
-          '';
-        };
-      };
+    sinks.nvf.out = { editor, nvf, ... }: packagesOf editor.name (neovimOf nvf);
   };
 
   # every variant: its theme, and the languages it lists

@@ -43,14 +43,11 @@ in
     inherit at;
     nixos =
       { member, ... }:
-      let
-        s = member.settings;
-      in
       {
-        users.users.${s.user} = {
+        users.users.${member.settings.user} = {
           isNormalUser = true;
-          extraGroups = s.groups;
-          hashedPasswordFile = "/run/secrets-for-users/vars/user-${s.user}/hash";
+          extraGroups = member.settings.groups;
+          hashedPasswordFile = "/run/secrets-for-users/vars/user-${member.settings.user}/hash";
         };
       };
     generators =
