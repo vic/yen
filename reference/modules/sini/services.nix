@@ -3,7 +3,7 @@
 { yen, lib, ... }:
 let
   inherit (yen.lib) all opt;
-  inherit (yen.lib.reduce) entries;
+  inherit (yen.lib.reduce) elements;
   named = n: lib.filter (e: e.value.name == n);
 in
 {
@@ -40,8 +40,8 @@ in
   yen.kinds.machine.fields.settings.inference.clients = opt (yen.lib.listOf yen.lib.str) [ ];
   yen.host.lb.settings.inference.clients = [ "web-1" ];
   yen.kinds.fleet.sinks = {
-    host-addrs.reduce = entries;
-    inference-clients.reduce = entries;
+    host-addrs.reduce = elements;
+    inference-clients.reduce = elements;
   };
   yen.aspects.host-addrs = {
     at = yen.kinds.host;

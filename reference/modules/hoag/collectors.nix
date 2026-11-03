@@ -4,7 +4,7 @@
 {
   yen.kinds.fleet.spawns.hive = _: yen.hive;
   # each host gives its environment at the fleet: a hive reads its members there, so the read is an edge
-  yen.kinds.fleet.sinks.host-envs.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.host-envs.reduce = yen.lib.reduce.elements;
   yen.aspects.host-envs = {
     at = yen.kinds.host;
     host-envs = { host, ... }: host.environment;

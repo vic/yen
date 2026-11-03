@@ -7,7 +7,7 @@ let
     flat
     one
     merge
-    entries
+    elements
     ;
   sorted = es: {
     value = lib.sort (a: b: a < b) (map (e: e.value) es);
@@ -27,7 +27,7 @@ in
     packages.reduce = flat;
     admin.reduce = one;
     nginx.reduce = merge;
-    owners.reduce = entries;
+    owners.reduce = elements;
     groups.reduce = sorted;
   };
   # every sink of a host, read as args, to one flake output

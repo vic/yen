@@ -14,7 +14,7 @@ in
         recipientsOf = m: [ "age1admin" ];
       };
     };
-    public-reads.reduce = yen.lib.reduce.entries;
+    public-reads.reduce = yen.lib.reduce.elements;
   };
   yen.aspects.ssh-vars = {
     at = yen.kinds.machine;

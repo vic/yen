@@ -14,8 +14,8 @@ in
   };
   # every host gives a peer record and a builder record to the fleet; each host reads the others'
   yen.kinds.fleet.sinks = {
-    peers.reduce = yen.lib.reduce.entries;
-    builders.reduce = yen.lib.reduce.entries;
+    peers.reduce = yen.lib.reduce.elements;
+    builders.reduce = yen.lib.reduce.elements;
   };
   yen.aspects.peer = {
     at = yen.kinds.host;

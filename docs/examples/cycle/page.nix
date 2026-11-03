@@ -1,6 +1,6 @@
 {
   title = "The cycle form";
-  description = "A component asks the tree for data and gives 0 to n elements.";
+  description = "A cycle asks the tree for data and gives 0 to n elements.";
   section = "behavior";
   order = 2;
 
@@ -8,13 +8,13 @@
     { docs, result, ... }:
     [
       ''
-        Each key of an [aspect](/behavior/aspects/) gives one element. For 0 to n elements, or to ask the tree for data, write a component
-        under `cycle`. As in [Cycle.js](https://cycle.js.org), a component is a function from sources to [sinks](/behavior/sinks/).
+        Each key of an [aspect](/behavior/aspects/) gives one element. For 0 to n elements, or to ask the tree for data, give the aspect a
+        `cycle`. As in [Cycle.js](https://cycle.js.org), a cycle is a function from sources to [sinks](/behavior/sinks/).
         Its sources are `tree`, `scope` and one source for each sink. It returns sinks by name, and `tree` requests.
       ''
       (docs.file "modules/network.nix")
       ''
-        The host has two guests, so the component gives two bridges:
+        The host has two guests, so the cycle gives two bridges:
       ''
       (docs.value result.flake.bridges)
       ''
@@ -57,7 +57,7 @@
         ]
       )
       (docs.note "When to use it" ''
-        Most aspects never need `cycle`. Use it when the number of elements depends on the tree, or when a component
+        Most aspects never need `cycle`. Use it when the number of elements depends on the tree, or when a cycle
         reports its own `errors`.
       '')
       ''

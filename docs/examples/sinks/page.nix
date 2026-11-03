@@ -1,6 +1,6 @@
 {
   title = "Sinks and reduce";
-  description = "A sink collects elements and reduces them: list, set, flat, one, merge, entries, or your own function.";
+  description = "A sink collects elements and reduces them: list, set, flat, one, merge, elements, or your own function.";
   section = "behavior";
   order = 4;
 
@@ -45,7 +45,7 @@
             "two different leaves at one path"
           ]
           [
-            "`entries`"
+            "`elements`"
             "`[ { from; value; } ]`: each value with the scope that gave it"
             "none"
           ]
@@ -77,7 +77,7 @@
 
         A reduce is any function from `[ { from; value; } ]` to `{ value; errors; }`. Write one when the merge order
         is the point: ranked layers, per-key strategies with provenance, or an export store where a scope can only write
-        its own entries. The engine sets `from`. An element cannot say where it comes from, so a scope cannot write for another.
+        its own elements. The engine sets `from`. An element cannot say where it comes from, so a scope cannot write for another.
       ''
       (docs.tip "Errors and warnings as data" ''
         A sink such as `warnings` with `reduce = list` holds messages that do not fail the fleet.

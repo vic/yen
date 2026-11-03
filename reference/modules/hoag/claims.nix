@@ -10,7 +10,7 @@ in
   yen.host.web-1.dbOn = yen.host.lb;
   yen.host.web-2.dbOn = yen.host.lb;
   yen.host.stage.dbOn = yen.host.stage;
-  yen.kinds.fleet.sinks.db-claims.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.db-claims.reduce = yen.lib.reduce.elements;
   yen.aspects.db-claim = {
     at = yen.lib.all [
       yen.kinds.host

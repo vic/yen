@@ -14,7 +14,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   # the sharing hosts, at the fleet: a host reads its group through this sink, so the read is an edge
-  yen.kinds.fleet.sinks.shared-pkgs.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.shared-pkgs.reduce = yen.lib.reduce.elements;
   yen.aspects.shared-pkgs = {
     at = yen.lib.all [
       yen.kinds.host

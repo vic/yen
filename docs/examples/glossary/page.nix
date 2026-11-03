@@ -76,6 +76,21 @@
             "[Sinks and reduce](/behavior/sinks/)"
           ]
           [
+            "reduce"
+            "a sink's `reduce`: a function from its elements to one value, with errors"
+            "[Sinks and reduce](/behavior/sinks/)"
+          ]
+          [
+            "key value"
+            "the value of an aspect key named after a sink: an element, or `{ scope, <sink>, ... }: element`"
+            "[Aspects](/behavior/aspects/)"
+          ]
+          [
+            "out value"
+            "the value of a sink's `out` key: from the reduced sink to flake outputs"
+            "[Sinks and reduce](/behavior/sinks/)"
+          ]
+          [
             "receiver"
             "the nearest ancestor-or-self scope with the sink, where its `at` holds"
             "[Routing and walls](/behavior/routing/)"
@@ -96,8 +111,8 @@
             "[Args](/behavior/args/)"
           ]
           [
-            "component"
-            "an aspect's `cycle`: [sources](/behavior/cycle/) in, sinks out, 0 to n elements"
+            "cycle"
+            "an aspect key: a function from [sources](/behavior/cycle/) to sinks, for 0 to n elements"
             "[The cycle form](/behavior/cycle/)"
           ]
           [

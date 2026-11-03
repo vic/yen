@@ -8,7 +8,7 @@ yen is a verified language for Nix configurations. You declare data and behavior
 
 yen is a small Nix file with no dependencies. It uses builtins only. It does not use nixpkgs, the module system or flakes. It never calls `throw`: an error is data that you query.
 
-yen follows [Cycle.js](https://cycle.js.org): a component reads sources and writes sinks, and drivers answer the sinks. In Nix, laziness closes the loop. There is no `evalModules` fixpoint and no merge step. A value is computed only when something reads it.
+yen follows [Cycle.js](https://cycle.js.org): an aspect's `cycle` reads sources and writes sinks, and drivers answer the sinks. In Nix, laziness closes the loop. There is no `evalModules` fixpoint and no merge step. A value is computed only when something reads it.
 
 This template is the reference example. It models the [Ren](https://github.com/vic/ren) fleet template, every capability of [Den](https://github.com/denful/den) and of den-hoag (Den on Gen), and the advanced cases of four real configurations (sini, swarsel, adda, vix). Every section below points to the file that shows it.
 
@@ -143,7 +143,7 @@ yen.kinds.host.sinks.persist = { reduce = yen.lib.reduce.set; of = lib.types.str
 | `set` | the elements without duplicates | none |
 | `one` | the single element | 0 or 2+ elements |
 | `merge` | a deep attrset | two different leaves at one path |
-| `entries` | `[ { from; value; } ]`: the giving scope comes with each value | none |
+| `elements` | `[ { from; value; } ]`: the giving scope comes with each value | none |
 
 An element goes to the nearest ancestor-or-self scope that has the sink and where the sink's `at` holds. A user under host `lb` gives `os`. The user has no `os` sink, the host has one, so the element goes to `lb`. The same user under a mac goes to the mac.
 
@@ -182,7 +182,7 @@ If an arg has no answer, the element is not given, and `errors` lists it. `{ clu
 
 ## The cycle form
 
-The keys above give one element each. For 0 to n elements, or to ask the tree for data, write a component:
+The keys above give one element each. For 0 to n elements, or to ask the tree for data, write a `cycle`:
 
 ```nix
 yen.aspects.kernel = {
@@ -190,7 +190,7 @@ yen.aspects.kernel = {
   cycle = { tree, ... }: let env.nearest = yen.kinds.environment; in {   # a request
     tree = [ env ];
     nixos = map (e: { boot.kernelParams = [ "env=${e.name}" ]; }) (tree.select env);   # selected by itself
-    errors = [ ];                                                          # a component can report errors
+    errors = [ ];                                                          # a cycle can report errors
   };
 };
 ```
@@ -430,10 +430,10 @@ The home reads stage's `monitor` sink like any child. It still builds its own `h
 | custom classes, chained forwards (hjem, maid) | a user sink whose keys feed other sinks | [den/custom-classes.nix](modules/den/custom-classes.nix) |
 | `hasAspect`, projected `hasAspect` | `yen.lib.holds`, and `graph` edges with `origin` | [sini/roles.nix](modules/sini/roles.nix) |
 | a policy gated on `hasAspect` that creates structure (#525) | `spawns` that reads `holds` at the parent | [den/presence-structure.nix](modules/den/presence-structure.nix) |
-| quirks and pipes: collect, expose, broadcast, provenance | a sink at a common ancestor with `entries`, and a filter in the reader | [sini/clusters.nix](modules/sini/clusters.nix) |
+| quirks and pipes: collect, expose, broadcast, provenance | a sink at a common ancestor with `elements`, and a filter in the reader | [sini/clusters.nix](modules/sini/clusters.nix) |
 | a value that reads a realized config (#713, `osConfig`) | an `osConfig` sink that each host gives from `out.nixosConfigurations.<host>.config`, lazily | [den/os-config.nix](modules/den/os-config.nix), [den/standalone-home-on-host.nix](modules/den/standalone-home-on-host.nix) |
 | settings layers with authority, the projects facet (A8, A14) | a sink with your own reduce | [hoag/settings.nix](modules/hoag/settings.nix) |
-| claim and provide, "who claims me" | an `entries` sink and a reader filter | [hoag/claims.nix](modules/hoag/claims.nix) |
+| claim and provide, "who claims me" | an `elements` sink and a reader filter | [hoag/claims.nix](modules/hoag/claims.nix) |
 | collectors: an aggregate with its own content | a `hive` kind that selects its members | [hoag/collectors.nix](modules/hoag/collectors.nix) |
 | relations and the query calculus (`rel*`, layers) | plain Nix over ref fields, with `genericClosure` | [hoag/relations.nix](modules/hoag/relations.nix) |
 | permutation-stable output (A12), per-member laziness (A17) | file order never changes a result, and sinks are lazy per receiver | `tests.nix`: `den-permutation-stable`, `den-sibling-laziness` |
@@ -1545,7 +1545,7 @@ Every list below is computed from the engine and this fleet when the README is w
 **Queries on an eval result** (`result = yen.lib.eval module`): `active`, `ask`, `check`, `context`, `data`, `declaredIn`, `errors`, `explain`, `facts`, `flake`, `floor`, `graph`, `impact`, `labels`, `queries`, `reduced`, `root`, `schema`, `scopes`, `undefined`.
 
 **Engine library** (`yen.lib`): `allowed`, `any`, `asOf`, `aspect`, `attrs`, `attrsOf`, `batteries`, `bool`, `derive`, `diffData`, `enum`, `eval`, `functionTo`, `grant`, `history`, `int`, `is`, `jsonSafe`, `kind`, `kits`, `listOf`, `maybe`, `mkFlake`, `narrow`, `oneOf`, `opt`, `path`, `port`, `secret`, `stage`, `str`, `validAt`, `without`.
-Reduce strategies: `entries`, `flat`, `list`, `merge`, `one`, `set`. Change programs (`yen.lib.program`): `dryRun`, `opErrors`, `toModule`, `validate`. Grants: `allowed`, `grant`, `narrow`.
+Reduce strategies: `elements`, `flat`, `list`, `merge`, `one`, `set`. Change programs (`yen.lib.program`): `dryRun`, `opErrors`, `toModule`, `validate`. Grants: `allowed`, `grant`, `narrow`.
 
 | Library | Functions |
 |---|---|

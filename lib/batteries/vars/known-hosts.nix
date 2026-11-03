@@ -1,7 +1,7 @@
 #: lib.batteries.vars.known-hosts :: { from; rootOf; entry; keep ? ; } -> { nixos; errors } -- programs.ssh.knownHosts from public host keys in vars
 # known hosts from public vars (see public-value): each entry of sink `from` that `keep scope entry` takes and
 # `entry` names (`entry e` is `{ host; machine; generator; file; }`, or null: no host key) becomes a knownHosts record,
-# the key read from `rootOf scope`/<machine>/<generator>/<file>/value. The battery names no field of the entries.
+# the key read from `rootOf scope`/<machine>/<generator>/<file>/value. The battery names no field of the elements.
 # A key file that is missing is an error record and no record, never a throw. `nixos` is the value for a nixos key,
 # `errors` for an errors key.
 #   kh = vars.known-hosts { from = yen.kinds.fleet.sinks.exports; rootOf = s: s.settings.root;

@@ -1,8 +1,8 @@
-# Each aspect says where it is active. `entries` keeps the giving scope with each value.
+# Each aspect says where it is active. `elements` keeps the giving scope with each value.
 { yen, lib, ... }:
 {
   yen.kinds.fleet.sinks.seen = {
-    reduce = yen.lib.reduce.entries;
+    reduce = yen.lib.reduce.elements;
     out =
       { seen, ... }:
       {

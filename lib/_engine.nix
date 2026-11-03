@@ -1285,7 +1285,7 @@ let
         ) (filter (p: !isPredicate p) (toList (aspects.${n}.at or [ ])))
       ) aspectNames;
 
-      # ── components: one cycle per (aspect, scope). Its own tree requests feed its sources ──
+      # ── cycles: one per (aspect, scope). Its own tree requests feed its sources ──
       cycleOuts = mapAttrs (
         n: a:
         byScope (

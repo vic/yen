@@ -29,7 +29,7 @@ in
         recipientsOf = m: fleet.recipients.hosts.${m} or fleet.recipients.default; # a host list replaces the default, never adds to it
       } args;
   };
-  yen.kinds.fleet.sinks.public-reads.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.public-reads.reduce = yen.lib.reduce.elements;
   yen.kinds.fleet.fields.secretStore = opt (yen.lib.enum [
     "sops"
     "age"

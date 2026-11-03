@@ -181,7 +181,7 @@ in
   };
 
   # #115 broadcast: the SENDER tags who receives; readers keep what targets them, never their own
-  yen.kinds.fleet.sinks.peer-dev.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.peer-dev.reduce = yen.lib.reduce.elements;
   yen.aspects.peer-dev = {
     at = all [
       yen.kinds.user

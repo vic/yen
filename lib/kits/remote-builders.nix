@@ -1,7 +1,7 @@
 #: lib.kits.remote-builders :: module -- builders and clients: a client builds on the builders of its own assembly
 # A builder exports host, systems and speed factor, and gives the `builders` sink one `nix.buildMachines` entry
 # (with its assembly and machine, dropped before the client writes it). The client uses the battery
-# `nixos.remote-builders` on the entries of its assembly, never on itself. Needs a machine field `addr`.
+# `nixos.remote-builders` on the elements of its assembly, never on itself. Needs a machine field `addr`.
 #   imports = [ inputs.yen.lib.kits.remote-builders ];
 _:
 { yen, lib, ... }:
@@ -35,7 +35,7 @@ let
       };
 in
 {
-  yen.kinds.fleet.sinks.builders.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.builders.reduce = yen.lib.reduce.elements;
   yen.kit.remote-builders = {
     roles = {
       builder.interface = {

@@ -9,7 +9,7 @@ let
     same
     opt
     ;
-  inherit (yen.lib.reduce) entries;
+  inherit (yen.lib.reduce) elements;
   hosts = lib.filterAttrs (_: h: h ? addr) yen.host; # spawns read data
   allHosts.instances = yen.kinds.host; # a tree request: every host, with its data
   addressed = xs: lib.listToAttrs (map (h: lib.nameValuePair h.name h) (lib.filter (h: h ? addr) xs));
@@ -176,7 +176,7 @@ in
   # H73: a route claim is split into a secret claim and a connect claim by sink stages
   yen.kinds.fleet.sinks = {
     route-claims = {
-      reduce = entries;
+      reduce = elements;
       secret-claims =
         { route-claims, ... }:
         lib.listToAttrs (map (e: lib.nameValuePair e.value { by = e.from.name; }) route-claims);

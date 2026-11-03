@@ -43,7 +43,7 @@
           [
             "Collector"
             "each host feature adds its part to a shared module"
-            "a [sink](/behavior/sinks/) at a common parent, read back with `entries`: [Facts from other hosts](/nixos/cross-host/)"
+            "a [sink](/behavior/sinks/) at a common parent, read back with `elements`: [Facts from other hosts](/nixos/cross-host/)"
           ]
           [
             "Constants"

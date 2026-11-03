@@ -2,7 +2,7 @@
 # every Syncthing host reads them back and adds the others as devices.
 { yen, lib, ... }:
 {
-  yen.kinds.fleet.sinks.syncthing-device.reduce = yen.lib.reduce.entries; # each id with the host that gave it
+  yen.kinds.fleet.sinks.syncthing-device.reduce = yen.lib.reduce.elements; # each id with the host that gave it
 
   yen.aspects.syncthing = {
     at = [

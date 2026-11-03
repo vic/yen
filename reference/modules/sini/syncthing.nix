@@ -5,8 +5,8 @@ let
 in
 {
   yen.kinds.fleet.sinks = {
-    syncthing-peers.reduce = yen.lib.reduce.entries;
-    replicate-home.reduce = yen.lib.reduce.entries;
+    syncthing-peers.reduce = yen.lib.reduce.elements;
+    replicate-home.reduce = yen.lib.reduce.elements;
   };
   yen.kinds.machine.fields.settings.syncthing.isHub = yen.lib.opt yen.lib.bool false;
   yen.host.stage.settings.syncthing.isHub = true;

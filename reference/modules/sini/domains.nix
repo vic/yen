@@ -14,7 +14,7 @@ in
     spawns.domain = s: lib.filterAttrs (_: d: d.under != null && yen.lib.same d.under s) yen.domain;
   };
   yen.kinds.fleet.sinks = {
-    dns-records.reduce = yen.lib.reduce.entries;
+    dns-records.reduce = yen.lib.reduce.elements;
     certificate-domains.of = yen.lib.str;
   };
   yen.domain."example.org".mail.enable = true;

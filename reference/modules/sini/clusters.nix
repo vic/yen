@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 let
   inherit (yen.lib) maybe same;
-  inherit (yen.lib.reduce) entries;
+  inherit (yen.lib.reduce) elements;
   clusterOf = h: lib.findFirst (c: lib.any (same h) c.hosts) null (lib.attrValues yen.cluster); # for `at`
   clusters.instances = yen.kinds.cluster; # a tree request: every cluster, with its data
   members = c: lib.filter (e: lib.any (same e.from) c.hosts);
@@ -33,7 +33,7 @@ in
     k8s-manifests.target.branch = "main";
   };
 
-  yen.kinds.environment.sinks.k3s-nodes.reduce = entries;
+  yen.kinds.environment.sinks.k3s-nodes.reduce = elements;
   yen.aspects.k3s = {
     at = s: clusterOf s != null;
     k3s-nodes = { host, ... }: host.addr;
@@ -80,7 +80,7 @@ in
   # Across environments: reduce at the fleet, filter by a ref field.
   yen.kinds.environment.fields.monitoring = maybe yen.kinds.cluster;
   yen.environment.prod.monitoring = yen.cluster.axon;
-  yen.kinds.fleet.sinks.monitoring-ingest.reduce = entries;
+  yen.kinds.fleet.sinks.monitoring-ingest.reduce = elements;
   yen.aspects.ingest = {
     at = yen.lib.all [
       yen.kinds.cluster
