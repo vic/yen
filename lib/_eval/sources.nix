@@ -88,13 +88,9 @@ let
       scope = s;
       tree.select = q: if any (r: known r && reqKey r == reqKey q) requests then answer s q else [ ];
     }
-    // genAttrs sinkNames (
-      n:
-      let
-        r = receiverIn n s.rup;
-      in
-      if r == null then [ ] else [ (memo.${n}.${r.id} or (reduceAt n r)).value ]
-    ); # a receiver with no element yet reduces to its empty value
+    // genAttrs sinkNames (n: elementAt n (receiverIn n s.rup));
+  # the element of sink n at its receiver r; a receiver with no element yet reduces to its empty value
+  elementAt = n: r: if r == null then [ ] else [ (memo.${n}.${r.id} or (reduceAt n r)).value ];
   known = q: !(q ? category) && any (k: q ? ${k}) requestKinds && !nestedAsk q; # no category: a request is selected by itself
   nestedAsk = q: isList (q.instances.__kind or null); # instances live in a table of top kinds only
   requestErrors = concatMap (

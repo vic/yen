@@ -56,6 +56,7 @@ let
     yenKeys
     kindKeys
     ;
+  inherit (self._core) fix;
   inherit (self._core.text) hasInfix floorOf uniqueBy;
   inherit (self)
     graphs
@@ -112,6 +113,7 @@ in
     errWith
     filter
     first
+    fix
     floorOf
     foldl'
     functionArgs

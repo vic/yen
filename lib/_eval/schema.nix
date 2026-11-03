@@ -43,17 +43,13 @@ let
       mapAttrs (_: fieldsOf) t
     else
       { type = b.typeOf t; };
-  sinkSchema =
-    v:
-    let
-      d = if isAttrs v then v else { };
-    in
-    {
-      reduce = if d ? reduce then d.reduce.name or "custom" else "list";
-      of = if d ? of then typeName d.of else null;
-      feeds = attrNames (removeAttrs d sinkMeta);
-      conditional = d ? at;
-    };
+  sinkSchema = v: declSchema (if isAttrs v then v else { });
+  declSchema = d: {
+    reduce = if d ? reduce then d.reduce.name or "custom" else "list";
+    of = if d ? of then typeName d.of else null;
+    feeds = attrNames (removeAttrs d sinkMeta);
+    conditional = d ? at;
+  };
   #: result.schema, yen.lib.schema :: { kinds; aspects; invariants; queries; } -- what the fleet declares, as JSON-safe data
   schema = {
     kinds = mapAttrs (k: d: {
