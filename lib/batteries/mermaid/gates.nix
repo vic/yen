@@ -1,6 +1,6 @@
 #: lib.batteries.mermaid.gates :: aspects -> view -- the aspects other aspects name in at, and what each gate reads
 # a view of the gates: the aspects that other aspects name in `at`, and what each gate's own `at` reads (kinds,
-# instances, fact tests). The edge label is the operators on the way (`not`, `within`, `has`); dashed under a `not`.
+# instances, fact tests). The edge label is the operators on the way (`not`, `within`, `below`); dashed under a `not`.
 #   mermaid.flowchart { } (mermaid.gates yen.aspects)
 self:
 let
@@ -27,8 +27,8 @@ let
       walk (op ++ [ "not" ]) p.__not
     else if p ? __within then
       walk (op ++ [ "within" ]) p.__within
-    else if p ? __has then
-      walk (op ++ [ "has" ]) p.__has
+    else if p ? __below then
+      walk (op ++ [ "below" ]) p.__below
     else if p ? __kind then
       [
         {

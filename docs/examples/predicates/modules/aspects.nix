@@ -4,7 +4,7 @@ let
     all
     not
     within
-    has
+    below
     ;
 in
 {
@@ -19,7 +19,7 @@ in
       (not yen.aspects.builder)
     ]; # an aspect ref, negated
     vm-tools.at = within yen.aspects.cuda; # a proper ancestor holds
-    vm-host.at = has yen.kinds.guest; # a child holds
+    vm-host.at = below yen.kinds.guest; # a child holds
     monitored.at = [
       yen.host.small
       yen.aspects.vm-host

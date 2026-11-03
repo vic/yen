@@ -765,7 +765,7 @@ let
               all
               not
               within
-              has
+              below
               ;
           in
           {
@@ -793,7 +793,7 @@ let
             ]; # within crosses scopes: no cycle
             v.at = all [
               yen.kinds.host
-              (has yen.aspects.w)
+              (below yen.aspects.w)
             ];
           };
       }
@@ -2654,7 +2654,7 @@ let
           "c@${h}"
           "v@${h}"
           "w@${h}/user:u"
-        ]); # within and has carry it across scopes
+        ]); # within and below carry it across scopes
         t2 = no (r.active.a.${h});
         t3 = no (r.active.b.${h});
         t4 = no (r.active.c.${h});
@@ -2679,7 +2679,7 @@ let
         t1 = no (r.active.p."top:t/host:h");
         t2 = no (b.any (x: x.aspect == "p" || x.aspect == "q") r.undefined);
       };
-    within-has-no-cycle =
+    within-below-no-cycle =
       let
         r = logic false;
       in

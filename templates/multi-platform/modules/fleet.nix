@@ -64,7 +64,7 @@
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.has yen.kinds.user;
+    at = yen.lib.below yen.kinds.user;
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;

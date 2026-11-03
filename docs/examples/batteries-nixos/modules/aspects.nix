@@ -14,7 +14,7 @@ in
   };
   yen.aspects.admin = {
     at = yen.user.ana;
-    nixos = nixos.primary-user;
+    nixos = nixos.primary-user { };
   };
   # Den's user-shell and tty-autologin: the battery reads the field you name
   yen.aspects.shells = {

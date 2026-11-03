@@ -113,7 +113,7 @@ yen.aspects.nginx = {
 };
 ```
 
-A predicate is a function `scope: bool`. A kind ref, an instance ref, an aspect ref and a list are predicates too. Combine them with `yen.lib.all`, `not`, `within` (a proper ancestor holds) and `has` (a child holds).
+A predicate is a function `scope: bool`. A kind ref, an instance ref, an aspect ref and a list are predicates too. Combine them with `yen.lib.all`, `not`, `within` (a proper ancestor holds) and `below` (a child holds).
 
 `at` from several files is a union. To replace an aspect at one scope, put `not` in its `at` and write your own aspect ([features/motd.nix](modules/features/motd.nix)). A value in `at` that is not a predicate (a string, a number) is an error record, not a silent `false`.
 
@@ -461,7 +461,7 @@ Three families of Den bugs cannot happen in yen:
 | `inventory.instances.<i>`, `module.name` | the data kind `assembly`; its field `kit` is a ref to a `kit` | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | role members: named machines and tagged machines | `roles.<r>.at`, a predicate; each machine spawns one `member` scope per (assembly, role) | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | `perInstance` | an aspect at a member scope | [kits/kits.nix](modules/kits/kits.nix) |
-| `perMachine` | an aspect at a machine that `has` a member | [kits/kits.nix](modules/kits/kits.nix) |
+| `perMachine` | an aspect at a machine that has a member | [kits/kits.nix](modules/kits/kits.nix) |
 | role settings, then machine settings, typed by the role interface | interface defaults, then the role's settings (attrs, or a function of the machine); a wrong type is an error record | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | exports, `selectExports`, scope rules | a fleet sink; the engine sets the writer; a kit lists its keys; a reader filters by refs (`yen.lib.same`); the owner overrides from the fleet scope | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | a service from another flake (`module.input`) | a module file that declares a kit, imported | [lib/kits/borg.nix](../../lib/kits/borg.nix) |

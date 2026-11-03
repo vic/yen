@@ -44,7 +44,7 @@
   yen.aspects.docker = {
     at = yen.lib.all [
       yen.helpers.linux
-      (yen.lib.has yen.user.bob)
+      (yen.lib.below yen.user.bob)
     ];
     nixos.virtualisation.docker.enable = true;
     persist = "/var/lib/docker";

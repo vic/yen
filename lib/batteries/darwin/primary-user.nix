@@ -1,19 +1,15 @@
-#: lib.batteries.darwin.primary-user :: { user; } -> key value -- system.primaryUser from the user that user reads (null: root)
-# system.primaryUser (the user that user-level options such as the dock apply to): `user` reads a ref or a name
-# from the scope; null falls back to root.
+#: lib.batteries.darwin.primary-user :: { user ? ; } -> key value -- system.primaryUser is the user that user reads (null: root)
+# system.primaryUser (the user that user-level options such as the dock apply to): `user` reads a ref (its name) or a
+# name from the scope; null falls back to root. By default the user is the scope itself, as in `nixos.primary-user`.
 #   darwin = darwin.primary-user { user = m: m.system-owner; };
-_:
-{ user }:
+self:
+{
+  user ? (s: s),
+}:
 { scope, ... }:
 let
-  u = user scope;
+  name = self._core.helpers.nameOf (user scope);
 in
 {
-  system.primaryUser =
-    if u == null then
-      "root"
-    else if builtins.isAttrs u then
-      u.name
-    else
-      u;
+  system.primaryUser = if name == null then "root" else name;
 }

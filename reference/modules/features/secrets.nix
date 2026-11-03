@@ -14,7 +14,7 @@
   yen.aspects.vm-host = {
     at = yen.lib.all [
       yen.kinds.host
-      (yen.lib.has yen.kinds.guest)
+      (yen.lib.below yen.kinds.guest)
     ];
     nixos.imports = [ inputs.microvm.nixosModules.host ];
   };

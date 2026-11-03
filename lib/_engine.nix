@@ -1206,8 +1206,8 @@ let
           )
         else if p ? __within then
           or3 (map (eval3 stack p.__within) (above s))
-        else if p ? __has then
-          or3 (map (eval3 stack p.__has) (below s))
+        else if p ? __below then
+          or3 (map (eval3 stack p.__below) (below s))
         else if p ? __functor then
           p s
         else if p ? __kind then
@@ -2387,7 +2387,7 @@ let
         #: yen.lib.all :: [ predicate ] -> predicate -- every predicate holds
         #: yen.lib.not :: predicate -> predicate -- the predicate does not hold
         #: yen.lib.within :: predicate -> predicate -- the predicate holds at a scope above
-        #: yen.lib.has :: predicate -> predicate -- the predicate holds at a child scope
+        #: yen.lib.below :: predicate -> predicate -- the predicate holds at a child scope
         // genAttrs combinators (
           c: p: {
             "__${c}" = p;
@@ -2558,8 +2558,8 @@ let
           node "not" (sub [ p.__not ])
         else if p ? __within then
           node "within" (at (above s) p.__within)
-        else if p ? __has then
-          node "has" (at (below s) p.__has)
+        else if p ? __below then
+          node "below" (at (below s) p.__below)
         else if p ? __functor then
           node "function" { }
         else if p ? __kind then

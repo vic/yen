@@ -100,7 +100,7 @@ let
         };
         yen.aspects.admin = {
           at = yen.person.p;
-          sys = nixos.primary-user;
+          sys = nixos.primary-user { };
         };
       }
     )
@@ -1210,6 +1210,15 @@ let
       t2 = eq ((bat.darwin.primary-user { user = _: null; } { scope = { }; }).system.primaryUser) (
         "root"
       );
+      # the twins take the same `user`, and by default the scope itself
+      t3 = eq ((bat.darwin.primary-user { } { scope.name = "ana"; }).system.primaryUser) "ana";
+      nixos-default = eq (b.attrNames (bat.nixos.primary-user { } { scope.name = "ana"; }).users.users) [
+        "ana"
+      ];
+      nixos-ref = eq (b.attrNames
+        (bat.nixos.primary-user { user = m: m.o; } { scope.o.name = "bo"; }).users.users
+      ) [ "bo" ];
+      nixos-null = eq (bat.nixos.primary-user { user = _: null; } { scope = { }; }) { };
     };
     darwin-homebrew =
       eq

@@ -44,7 +44,7 @@ in
   };
   # once per machine that takes part in any role of the assembly
   yen.aspects.backup-tools = {
-    at = yen.lib.has (s: yen.lib.holds yen.kinds.member s && same s.assembly yen.assembly.backup);
+    at = yen.lib.below (s: yen.lib.holds yen.kinds.member s && same s.assembly yen.assembly.backup);
     config.packages = [ "borgbackup" ];
   };
 }
