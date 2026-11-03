@@ -1,0 +1,256 @@
+---
+{"description":"A kind declared inside another kind. Its instances live under the parent, and only the parent reaches them.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/nested-kinds/page.nix","title":"Nested kinds"}
+---
+
+import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
+
+A [kind](/model/kinds-fields/) can declare kinds inside it. A user of a host is a good example: it exists only
+under its host. The nested kind `user` has no name of its own. There is no `yen.kinds.user`, and a second kind
+may use the same name under another parent.
+
+You write the nested kind in the key `kinds` of the parent:
+
+
+```nix title="modules/host.nix"
+# A kind declared inside a kind. `user` exists only under `host`: there is no `yen.kinds.user`.
+{ yen, lib, ... }:
+{
+  yen.kinds.host = {
+    fields.addr = lib.types.str;
+    kinds.user.fields.shell = lib.types.str;
+  };
+}
+```
+
+## Instances
+
+The instances of a nested kind are written inside the instance of the parent: `yen.host.laptop.user.vic` is the
+user `vic` of the host `laptop`. The host `server` has its own user `vic`. They are two instances.
+
+
+```nix title="modules/hosts.nix"
+# The users of a host are written inside that host. Two hosts can have a user with the same name.
+{ yen, ... }:
+{
+  yen.host.laptop = {
+    addr = "10.0.0.1";
+    user.vic.shell = "fish";
+    user.ann.shell = "bash";
+  };
+  yen.host.server = {
+    addr = "10.0.0.2";
+    user.vic.shell = "zsh";
+  };
+}
+```
+
+## Refs
+
+A ref of a nested kind has the same path as its declaration: `yen.kinds.host.kinds.user`. The aspect below
+gives one line per user. It reads the current [scope](/model/scopes/) with the arg `scope`. The `id` of a scope shows
+the parent: the scope of a user is a child of the scope of its host.
+
+
+```nix title="modules/report.nix"
+# The ref of a nested kind is the path of its declaration: `yen.kinds.host.kinds.user`.
+{ yen, ... }:
+{
+  yen.aspects.report = {
+    at = yen.kinds.host.kinds.user;
+    report = { scope, ... }: "${scope.id} ${scope.shell}";
+  };
+}
+```
+
+```nix title="result"
+[
+  "fleet:main/host:laptop/user:ann bash"
+  "fleet:main/host:laptop/user:vic fish"
+  "fleet:main/host:server/user:vic zsh"
+]
+```
+
+## Spawns
+
+A kind spawns its nested kinds by default, from the key with the same name. Here `host` spawns the users that
+are written in it. You do not write `spawns.user`.
+
+An explicit `spawns.user` replaces the default. This one keeps only `vic`:
+
+
+```nix title="variants/explicit-spawns.nix"
+# An explicit `spawns.user` replaces the default. This host spawns only the user `vic`.
+{ yen, ... }:
+{
+  yen.kinds.host.spawns.user = s: { inherit (s.user) vic; };
+}
+```
+
+```nix title="result"
+[
+  "fleet:main/host:laptop/user:vic fish"
+  "fleet:main/host:server/user:vic zsh"
+]
+```
+
+Use a nested kind for children that exist under one parent. A kind that nothing spawns, such as a type for
+data, stays a flat kind at the top.
+
+## Same result as flat kinds
+
+The check of this page evaluates the same fleet with flat kinds. There `user` is a top kind, and `host` spawns
+it by hand. The scopes and the report are equal. Only the nested form keeps `user` out of the top names:
+
+
+```nix title="flat/host.nix"
+# The same fleet with flat kinds: `user` is a top kind and host spawns it by hand.
+{ yen, lib, ... }:
+{
+  yen.kinds.host = {
+    fields.addr = lib.types.str;
+    fields.user = yen.lib.is builtins.isAttrs;
+    spawns.user = s: s.user;
+  };
+  yen.kinds.user.fields.shell = lib.types.str;
+}
+```
+
+## Errors
+
+A field of a kind cannot have the name of a nested kind, because both use the same path in an instance:
+
+
+```nix title="variants/reserved.nix"
+# A field named like a nested kind shares its path in the instance.
+{ yen, lib, ... }:
+{
+  yen.kinds.host.fields.user = lib.types.str;
+}
+```
+
+```nix title="result"
+[
+  {
+    class = "fixable";
+    code = "reserved";
+    error = "nested kind `user` of kind host: the kind has a field of that name";
+    fix = "rename the nested kind";
+    from = "declarations";
+    path = [
+      "yen"
+      "kinds"
+      "host"
+      "kinds"
+      "user"
+    ];
+  }
+]
+```
+
+A key that a nested kind does not have is an unknown key, with the path of the nested kind:
+
+
+```nix title="variants/not-a-kind.nix"
+# `yen.kinds.host.kinds.user.feilds` is not a key of a kind.
+{ yen, ... }:
+{
+  yen.kinds.host.kinds.user.feilds.shell = "x";
+}
+```
+
+```nix title="result"
+[
+  {
+    class = "fixable";
+    code = "unknown-key";
+    error = "`feilds` is not a key yen reads here";
+    fix = "use one of the keys in `want`; yen modules are not NixOS modules";
+    from = "variants/not-a-kind.nix";
+    near = [
+      "fields"
+    ];
+    path = [
+      "yen"
+      "kinds"
+      "host"
+      "kinds"
+      "user"
+      "feilds"
+    ];
+    want = [
+      "fields"
+      "spawns"
+      "sinks"
+      "kinds"
+    ];
+  }
+]
+```
+
+The instances of a nested kind are a set of names. A value that is not a set fails its type:
+
+
+```nix title="variants/bad-group.nix"
+# The users of a host are an attrset of instances. A string is not.
+{ yen, ... }:
+{
+  yen.host.desk = {
+    addr = "10.0.0.3";
+    user = "vic";
+  };
+}
+```
+
+```nix title="result"
+[
+  {
+    class = "fixable";
+    code = "check";
+    error = "user is not an attrset";
+    fix = "write user.<name> = { ... }";
+    from = "host:desk";
+    got = "string";
+    path = [
+      "host"
+      "desk"
+      "user"
+    ];
+    want = "attrset";
+  }
+]
+```
+
+:::note[Limits today]
+The name of a nested kind is not an arg yet: `{ user, ... }` is not resolved (issue #83). Read the current scope with `{ scope, ... }`, as above.
+A ref to a nested instance by name alone is not supported: reach it through its parent.
+A callback such as `keep = s: s.kind == "host"` drops nested scopes without a warning. The kind of a nested scope is a list, so the test never matches.
+The kinds diagram draws top kinds only as nodes. A nested kind is not a node there.
+:::
+
+:::tip[Run this example]
+Every block on this page is a file of the template `nested-kinds`. Copy it and run it:
+
+```sh frame="terminal"
+nix flake init -t github:vic/yen#nested-kinds
+```
+
+<FileTree>
+
+- flake.nix
+- flat/
+  - host.nix
+  - hosts.nix
+  - report.nix
+- modules/
+  - fleet.nix
+  - host.nix
+  - hosts.nix
+  - report.nix
+- variants/
+  - bad-group.nix
+  - explicit-spawns.nix
+  - not-a-kind.nix
+  - reserved.nix
+
+</FileTree>
+:::
