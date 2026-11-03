@@ -67,7 +67,7 @@ in
   };
 
   # The guest states its passthrough devices; the parent host binds them to vfio.
-  yen.kinds.guest.fields.passthrough = opt (yen.helpers.listOf yen.lib.str) [ ];
+  yen.kinds.guest.fields.passthrough = opt (yen.lib.listOf yen.lib.str) [ ];
   yen.guest.ci.passthrough = [ "10de:2203" ];
   yen.aspects.vfio = {
     at = all [

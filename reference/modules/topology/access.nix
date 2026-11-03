@@ -4,12 +4,12 @@
 { yen, ... }:
 let
   inherit (yen.lib) opt;
-  groups = opt (yen.helpers.listOf yen.kinds.group) [ ];
+  groups = opt (yen.lib.listOf yen.kinds.group) [ ];
 in
 {
   yen.kinds.group.fields = {
     members = groups;
-    label = opt (yen.helpers.enum [
+    label = opt (yen.lib.enum [
       "posix"
       "oauth"
     ]) "posix";

@@ -9,7 +9,7 @@ let
   byName = hs: f: lib.listToAttrs (map (h: lib.nameValuePair h.name (names (f h))) hs);
 in
 {
-  yen.kinds.machine.fields.dependsOn = yen.lib.opt (yen.helpers.listOf yen.kinds.host) [ ];
+  yen.kinds.machine.fields.dependsOn = yen.lib.opt (yen.lib.listOf yen.kinds.host) [ ];
   yen.host.web-1.dependsOn = [ yen.host.lb ];
   yen.host.web-2.dependsOn = [ yen.host.lb ];
   yen.host.stage.dependsOn = [ yen.host.web-1 ];

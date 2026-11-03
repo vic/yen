@@ -6,7 +6,7 @@
   ...
 }:
 {
-  yen.kinds.machine.fields.unpersist = yen.lib.opt (yen.helpers.listOf yen.lib.str) [ ];
+  yen.kinds.machine.fields.unpersist = yen.lib.opt (yen.lib.listOf yen.lib.str) [ ];
   yen.host.web-2.unpersist = [ "/var/lib/nginx" ];
   yen.kinds.host.sinks.persist = {
     of = yen.lib.str;

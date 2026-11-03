@@ -7,7 +7,7 @@ in
 {
   yen.kinds.machine.fields.settings.zfs.arcMax = maybe yen.lib.int;
   yen.kinds.environment.fields.settings.zfs.arcMax = maybe yen.lib.int;
-  yen.kinds.environment.fields.delegates = opt (yen.helpers.listOf yen.kinds.environment) [ ];
+  yen.kinds.environment.fields.delegates = opt (yen.lib.listOf yen.kinds.environment) [ ];
   yen.environment.prod.settings.zfs.arcMax = 4294967296;
   yen.environment.staging.delegates = [ yen.environment.prod ];
   yen.host.web-1.settings.zfs.arcMax = 8589934592;

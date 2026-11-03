@@ -13,7 +13,7 @@ in
     sharedPkgs = yen.lib.opt yen.lib.bool false; # reuse one pkgs per (channel, system): platforms/nixos.nix
     trimmedModules = yen.lib.opt yen.lib.bool false; # a smaller NixOS base module list: platforms/_modlists.nix
     settings.kernel.channel = maybe (
-      yen.helpers.enum [
+      yen.lib.enum [
         "lts"
         "latest"
       ]

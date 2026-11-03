@@ -37,14 +37,14 @@ let
         };
       };
       yen.kinds.user = {
-        fields.on = yen.helpers.listOf yen.kinds.host;
+        fields.on = yen.lib.listOf yen.kinds.host;
         sinks.settings.reduce = layers;
       };
       yen.kinds.cluster = {
-        fields.hosts = yen.helpers.listOf yen.kinds.host;
+        fields.hosts = yen.lib.listOf yen.kinds.host;
         spawns = { };
       }; # a link: refs, not containment
-      yen.helpers.listOf = yen.lib.listOf;
+      yen.lib.listOf = yen.lib.listOf;
       yen.fleet.main = { };
       yen.env.prod = { };
       yen.host = {
