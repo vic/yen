@@ -5,6 +5,7 @@ let
   b = builtins;
   # a fastest test: { expr; expected; }
   eq = expr: expected: { inherit expr expected; };
+  inherit (self._core.types) checkOf;
   yes = x: eq x true;
   no = x: eq x false;
   msgs = r: map (e: e.error) r.errors;
@@ -1480,10 +1481,10 @@ let
     type-attrsOf =
       eq
         [
-          ((yen.attrsOf (yen.is b.isInt)).check { x = 1; })
-          ((yen.attrsOf (yen.is b.isInt)).check { x = "1"; })
-          ((yen.attrsOf (yen.is b.isInt)).check { })
-          ((yen.attrsOf (yen.is b.isInt)).check [ 1 ])
+          (checkOf (yen.attrsOf (yen.is b.isInt)) { x = 1; })
+          (checkOf (yen.attrsOf (yen.is b.isInt)) { x = "1"; })
+          (checkOf (yen.attrsOf (yen.is b.isInt)) { })
+          (checkOf (yen.attrsOf (yen.is b.isInt)) [ 1 ])
         ]
         [
           true
@@ -2980,8 +2981,15 @@ let
             path = [ "yen" ] ++ path;
           }
         ];
+        typesKind = n: errs { yen.kinds.${n} = { }; };
       in
       {
+        # `types` is the yen.types arg: a top kind of that name is refused; a near name is fine
+        types-kind = eq (typesKind "types") (reserved [
+          "kinds"
+          "types"
+        ]);
+        types-kind-control = eq (typesKind "typeset") [ ];
         scope-key = eq (errs { yen.kinds.x.kinds.y.kinds.__here = { }; }) (reserved [
           "kinds"
           "x"
@@ -4536,6 +4544,201 @@ let
         }
       ];
     };
+    # combinators describe, the frontier checks: a bad element fails the whole field; a nested listOf flattens;
+    # `parse` of a combinator is the outer shape only, so it never forces an element
+    listOf-frontier =
+      let
+        fleet =
+          ty: v:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.top.spawns.host = _: yen.host;
+              yen.kinds.host.fields.p = ty yen;
+              yen.top.t = { };
+              yen.host.h.p = v;
+              yen.flake =
+                { ... }:
+                {
+                  p = yen.host.h.p;
+                };
+            }
+          );
+        flat = yen: yen.lib.listOf yen.types.int;
+        nested = yen: yen.lib.listOf (yen.lib.listOf yen.types.int);
+        lazyList = (yen.listOf (yen.is b.isInt)).parse [ (throw "x") ];
+      in
+      {
+        good =
+          eq
+            (fleet flat [
+              1
+              2
+            ]).flake.p
+            [
+              1
+              2
+            ];
+        bad =
+          eq
+            (map (e: { inherit (e) code from path; })
+              (fleet flat [
+                1
+                "x"
+              ]).errors
+            )
+            [
+              {
+                code = "check";
+                from = "host:h";
+                path = [
+                  "p"
+                  1
+                ];
+              }
+            ];
+        nested =
+          eq
+            (fleet nested [
+              [ 1 ]
+              [
+                2
+                3
+              ]
+            ]).flake.p
+            [
+              1
+              2
+              3
+            ];
+        attrs-bad =
+          eq
+            (map (e: { inherit (e) code from path; })
+              (fleet (y: y.lib.attrsOf y.types.int) {
+                a = 1;
+                b = "x";
+              }).errors
+            )
+            [
+              {
+                code = "check";
+                from = "host:h";
+                path = [
+                  "p"
+                  "b"
+                ];
+              }
+            ];
+        lazy-outer = eq (lazyList ? right && b.length lazyList.right == 1) true;
+        lazy-element = eq (b.tryEval (b.head lazyList.right)).success false;
+      };
+    # a typed kind sink: an element that fails `of` is an error at the receiver; good elements give none
+    sink-element-of =
+      let
+        fleet =
+          bad:
+          yen.eval (
+            { yen, ... }:
+            {
+              # a kind with no spawns gives no scope, so it receives nothing: spawns makes top:t a scope
+              yen.kinds.top = {
+                spawns.host = _: { };
+                sinks.ports.of = yen.types.int;
+              };
+              yen.kinds.host = { };
+              yen.top.t = { };
+              yen.aspects.good = {
+                at = yen.kinds.top;
+                ports = 1;
+              };
+              yen.aspects.bad = {
+                at = yen.kinds.top;
+                ports = if bad then "x" else 2;
+              };
+            }
+          );
+      in
+      {
+        bad = eq (map (e: { inherit (e) code from path; }) (fleet true).errors) [
+          {
+            code = "of";
+            from = "top:t";
+            path = [ ];
+          }
+        ];
+        good = eq (fleet false).errors [ ];
+      };
+    # a function-typed module sink: a string fails `of`, a function passes
+    sink-function-of =
+      let
+        fleet =
+          v:
+          yen.eval {
+            imports = [
+              (
+                { yen, ... }:
+                {
+                  # `list`: the dropped value leaves no `one` error behind
+                  yen.sinks.f = {
+                    of = yen.lib.typed "function" b.isFunction;
+                    reduce = yen.lib.reduce.list;
+                  };
+                }
+              )
+              { f = v; }
+              ({ f, ... }: { })
+            ];
+          };
+      in
+      {
+        bad = eq (map (e: { inherit (e) code from path; }) (fleet "x").errors) [
+          {
+            code = "of";
+            from = "root/1";
+            path = [ "f" ];
+          }
+        ];
+        good = eq (fleet (x: x)).errors [ ];
+      };
+    # a tagged type with `parse` and no `check` is a field type: `left` fails the field, `right` passes it
+    parse-only-type =
+      let
+        int = {
+          __type = true;
+          name = "int";
+          parse =
+            v:
+            if b.isInt v then
+              { right = v; }
+            else
+              {
+                left = {
+                  path = [ ];
+                  got = b.typeOf v;
+                  want = "int";
+                };
+              };
+        };
+        fleet =
+          v:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.host.fields.n = int;
+              yen.host.a.n = v;
+            }
+          );
+      in
+      {
+        bad = eq (map (e: { inherit (e) code path want; }) (fleet "x").errors) [
+          {
+            code = "check";
+            path = [ "n" ];
+            want = "int";
+          }
+        ];
+        good = eq (fleet 1).errors [ ];
+      };
     args-unread =
       eq
         (map (e: { inherit (e) code from near; })

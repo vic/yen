@@ -9,7 +9,7 @@
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.types.attrs;
   # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
   added =
     a:
@@ -61,7 +61,7 @@ in
     };
   };
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.types.string;
     spawns.member = kits.members { inherit assemblies holds; };
     # the NixOS keys of a host, as data
     sinks.disks.reduce = yen.lib.reduce.merge; # kit disko gives disks here
@@ -95,8 +95,8 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
-    adds = opt (yen.lib.is lib.isFunction) (_: { });
+    exports = opt (yen.lib.listOf yen.types.string) [ ];
+    adds = opt (yen.lib.is builtins.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;

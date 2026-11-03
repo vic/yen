@@ -30,7 +30,7 @@ A file in `modules/` looks like this:
 ```nix
 { yen, lib, ... }:
 {
-  yen.kinds.host.fields.addr = lib.types.str;
+  yen.kinds.host.fields.addr = yen.types.string;
   yen.host.lb.addr = "10.0.1.1";
   yen.aspects.motd = {
     at = yen.kinds.host;
@@ -47,9 +47,9 @@ A kind is a type of thing: `host`, `user`, `environment`. Its `fields` are the d
 
 ```nix
 yen.kinds.host.fields = {
-  addr = lib.types.str;                      # any value with `check` is a type
+  addr = yen.types.string;                      # any value with `check` is a type
   environment = yen.kinds.environment;      # a kind is a type too: a ref to an instance
-  buildHost = yen.lib.maybe lib.types.str;  # null by default
+  buildHost = yen.lib.maybe yen.types.string;  # null by default
   settings.kernel.channel = yen.lib.maybe (yen.helpers.enum [ "lts" "latest" ]);
 };
 yen.host.lb = { addr = "10.0.1.1"; environment = yen.environment.prod; };
@@ -58,7 +58,7 @@ yen.host.lb = { addr = "10.0.1.1"; environment = yen.environment.prod; };
 A type is anything with `check = value: bool`. `lib.types`, your own `yen.lib.is builtins.isString`, and kinds all work. yen has no type system of its own. `yen.lib.opt type default` and `yen.lib.maybe type` add a default. `yen.lib.derive type (self: …)` computes the default from the instance itself:
 
 ```nix
-yen.kinds.host.fields.vpn = yen.lib.derive lib.types.str (self: "vpn-${self.name}");
+yen.kinds.host.fields.vpn = yen.lib.derive yen.types.string (self: "vpn-${self.name}");
 ```
 
 Fields are strict. A missing field, an unknown field, a failed check, or a string where a ref goes is an error record. The read gives `null`, and evaluation continues.
@@ -69,9 +69,9 @@ Two files can declare types at two paths of one field. yen does not merge them. 
 
 ```nix
 # features/zfs.nix
-yen.kinds.machine.fields.settings.zfs.arcMax = yen.lib.maybe lib.types.int;
+yen.kinds.machine.fields.settings.zfs.arcMax = yen.lib.maybe yen.types.int;
 # features/k3s.nix
-yen.kinds.machine.fields.settings.k3s.role = yen.lib.opt lib.types.str "agent";
+yen.kinds.machine.fields.settings.k3s.role = yen.lib.opt yen.types.string "agent";
 ```
 
 A read of `host.settings.k3s.role` looks at the instance first, then at the type defaults, then checks the value. It never touches `zfs.nix`. Compare: a nixpkgs `submodule` runs one more `evalModules` for each value.
@@ -130,7 +130,7 @@ Each scope computes each aspect ref once, so aspects that read aspects cost line
 A sink on a kind collects elements and reduces them:
 
 ```nix
-yen.kinds.host.sinks.persist = { reduce = yen.lib.reduce.set; of = lib.types.str; };
+yen.kinds.host.sinks.persist = { reduce = yen.lib.reduce.set; of = yen.types.string; };
 ```
 
 | Reduce | Value | Error |

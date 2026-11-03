@@ -2,6 +2,7 @@
 self: {
   inherit (self._core.static)
     is
+    typed
     opt
     derive
     maybe

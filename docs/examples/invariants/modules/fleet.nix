@@ -5,8 +5,8 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host.fields = {
-    addr = lib.types.str;
-    form = lib.types.enum [
+    addr = yen.types.string;
+    form = yen.lib.enum [
       "server"
       "laptop"
     ];

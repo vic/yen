@@ -46,7 +46,7 @@ in
       };
   };
   yen.kinds.user = {
-    fields.hosts = is lib.isList;
+    fields.hosts = is builtins.isList;
     sinks.homeManager.nixos =
       { user, homeManager, ... }:
       {
@@ -56,7 +56,7 @@ in
   yen.kinds.home = {
     fields = {
       user = yen.kinds.user;
-      system = lib.types.str;
+      system = yen.types.string;
     };
     sinks.homeManager.out =
       { home, homeManager, ... }:

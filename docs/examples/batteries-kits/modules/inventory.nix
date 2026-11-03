@@ -3,7 +3,7 @@
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds same;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.types.attrs;
   assemblies = lib.attrValues yen.assembly; # spawns read data
   # tree requests: every assembly and machine, with their data
   allAssemblies.instances = yen.kinds.assembly;
@@ -15,7 +15,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.machine = {
-    fields.storage = opt lib.types.bool false;
+    fields.storage = opt yen.types.bool false;
     # one member scope per (assembly, role) the machine takes
     spawns.member = kits.members { inherit assemblies holds; };
     sinks.config = {
@@ -31,7 +31,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    exports = opt (yen.lib.listOf yen.types.string) [ ];
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;
@@ -56,7 +56,7 @@ in
   yen.kit.borg = {
     roles.server = { };
     roles.client.interface.dir = {
-      type = lib.types.str;
+      type = yen.types.string;
       default = "/var/backup";
     };
     constraints.roles.server.max = 1;

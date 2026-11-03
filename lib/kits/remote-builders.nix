@@ -24,11 +24,11 @@ in
     roles = {
       builder.interface = {
         systems = {
-          type = yen.lib.listOf lib.types.str;
+          type = yen.lib.listOf yen.types.string;
           default = [ "x86_64-linux" ];
         };
         speedFactor = {
-          type = lib.types.int;
+          type = yen.types.int;
           default = 1;
         };
       };

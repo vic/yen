@@ -12,17 +12,17 @@ let
     let
       s = a.roles.default.settings or { };
     in
-    m: lib.intersectAttrs (lib.genAttrs names (_: null)) (if lib.isFunction s then s m else s);
+    m: lib.intersectAttrs (lib.genAttrs names (_: null)) (if builtins.isFunction s then s m else s);
 in
 {
   yen.kit.base = {
     roles.default.interface = {
-      device.type = lib.types.str;
+      device.type = yen.types.string;
       layout.type = yen.kinds.layout // {
         description = "layout ref";
       };
-      authorizedKeys.type = yen.lib.listOf lib.types.str;
-      hardware.type = lib.types.path;
+      authorizedKeys.type = yen.lib.listOf yen.types.string;
+      hardware.type = yen.types.path;
     };
     # a kit that needs others: one assembly of each, on the machines of the base's role
     adds = a: {

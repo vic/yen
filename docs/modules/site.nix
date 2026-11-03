@@ -8,8 +8,8 @@
 let
   inherit (yen.lib) is;
   inherit (yen.lib.reduce) merge list;
-  str = lib.types.str;
-  int = lib.types.int;
+  str = yen.types.string;
+  int = yen.types.int;
 in
 {
   yen.kinds.section.fields = {

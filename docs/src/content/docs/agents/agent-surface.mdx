@@ -78,10 +78,10 @@ so a tool, a script or a model reads it the same way.
       host = {
         fields = {
           addr = {
-            type = "str";
+            type = "string";
           };
           form = {
-            type = "enum";
+            type = "one of \"server\", \"laptop\"";
           };
         };
         instances = 3;

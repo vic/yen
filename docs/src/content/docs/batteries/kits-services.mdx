@@ -121,7 +121,7 @@ The sinks and the contract are the fleet's words, the same as in the kits batter
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.types.attrs;
   # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
   added =
     a:
@@ -157,7 +157,7 @@ in
     };
   };
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.types.string;
     spawns.member = kits.members { inherit assemblies holds; };
     # the NixOS keys of a host, as data
     sinks.nixos = {
@@ -173,7 +173,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    exports = opt (yen.lib.listOf yen.types.string) [ ];
     adds = opt (yen.lib.is builtins.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {
@@ -435,7 +435,7 @@ A setting of the wrong type, and a port that is no port:
   "merge conflict at services.postgresql.ensureDatabases"
   "merge conflict at services.postgresql.ensureUsers"
   "nix-cache: nas has no nix-cache-cache3/cache-key.pub public key"
-  "kits: cache3.server: setting port is not a 16 bit unsigned integer; between 0 and 65535 (both inclusive)"
+  "kits: cache3.server: setting port is not a a value its check accepts"
   "kits: db3.client: setting user is not a string"
 ]
 ```

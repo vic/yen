@@ -23,7 +23,7 @@ in
   yen.kit.nix-cache = {
     roles = {
       server.interface.port = {
-        type = lib.types.port;
+        type = (yen.lib.is (v: builtins.isInt v && v >= 0 && v <= 65535));
         default = 5000;
       };
       client = { };

@@ -71,7 +71,7 @@ let
   };
 in
 {
-  yen.kinds.machine.fields.maintenance = yen.lib.opt lib.types.bool false;
+  yen.kinds.machine.fields.maintenance = yen.lib.opt yen.types.bool false;
   # for agents: why a host does not serve, and whether the db primary is decided (judge: supported, refuted, both, neither, unknown)
   yen.aspects.serving-explain = {
     at = yen.fleet.main;

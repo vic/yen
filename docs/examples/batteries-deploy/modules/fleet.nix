@@ -38,7 +38,7 @@ in
     };
   };
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.types.string;
     sinks.nixos.out = b.nixos.system {
       from = yen.kinds.host.sinks.nixos;
       inherit (inputs) nixpkgs;

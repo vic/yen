@@ -20,12 +20,12 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host.fields = {
-    form = lib.types.enum [
+    form = yen.lib.enum [
       "server"
       "laptop"
       "desktop"
     ];
-    gpu = opt (lib.types.enum [
+    gpu = opt (yen.lib.enum [
       "none"
       "nvidia"
       "amd"

@@ -10,8 +10,8 @@ let
 in
 {
   yen.kinds.environment.fields = {
-    dns.publicIPv4 = maybe lib.types.str;
-    unifi = maybe lib.types.attrs;
+    dns.publicIPv4 = maybe yen.types.string;
+    unifi = maybe yen.types.attrs;
   };
   yen.environment.prod = {
     dns.publicIPv4 = "203.0.113.1";

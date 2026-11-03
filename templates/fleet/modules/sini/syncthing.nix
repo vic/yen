@@ -8,7 +8,7 @@ in
     syncthing-peers.reduce = yen.lib.reduce.entries;
     replicate-home.reduce = yen.lib.reduce.entries;
   };
-  yen.kinds.machine.fields.settings.syncthing.isHub = yen.lib.opt lib.types.bool false;
+  yen.kinds.machine.fields.settings.syncthing.isHub = yen.lib.opt yen.types.bool false;
   yen.host.stage.settings.syncthing.isHub = true;
   yen.aspects.syncthing-peer = {
     at = all [

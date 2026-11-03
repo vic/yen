@@ -8,14 +8,14 @@ in
   yen.kinds.domain = {
     fields = {
       under = maybe yen.kinds.domain;
-      mail.dkim = opt (yen.helpers.listOf lib.types.str) [ ];
-      mail.enable = opt lib.types.bool false;
+      mail.dkim = opt (yen.helpers.listOf yen.types.string) [ ];
+      mail.enable = opt yen.types.bool false;
     };
     spawns.domain = s: lib.filterAttrs (_: d: d.under != null && yen.lib.same d.under s) yen.domain;
   };
   yen.kinds.fleet.sinks = {
     dns-records.reduce = yen.lib.reduce.entries;
-    certificate-domains.of = lib.types.str;
+    certificate-domains.of = yen.types.string;
   };
   yen.domain."example.org".mail.enable = true;
   yen.domain."api.example.org".under = yen.domain."example.org";

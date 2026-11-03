@@ -35,13 +35,13 @@ in
   };
   yen.kinds.member = { };
   yen.kinds.kit.fields = {
-    roles = opt (yen.lib.is lib.isAttrs) { };
-    constraints = opt (yen.lib.is lib.isAttrs) { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    roles = opt yen.types.attrs { };
+    constraints = opt yen.types.attrs { };
+    exports = opt (yen.lib.listOf yen.types.string) [ ];
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;
-    roles = opt (yen.lib.is lib.isAttrs) { };
+    roles = opt yen.types.attrs { };
   };
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

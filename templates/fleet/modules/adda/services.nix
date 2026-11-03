@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 {
   yen.kinds.host.sinks.service-domains = {
-    of = lib.types.str;
+    of = yen.types.string;
     reduce = yen.lib.reduce.set;
   };
   yen.aspects.grafana = {

@@ -10,7 +10,7 @@ in
     fields.environment = yen.kinds.environment;
     spawns.user = s: lib.filterAttrs (_: u: lib.any (same s) u.hosts) yen.user;
   };
-  yen.kinds.user.fields.hosts = is lib.isList; # refs to the hosts the user logs in to
+  yen.kinds.user.fields.hosts = is builtins.isList; # refs to the hosts the user logs in to
 
   yen.fleet.main = { };
 }

@@ -11,7 +11,7 @@ _:
 let
   inherit (yen.lib) holds;
   iface = {
-    prefix.type = lib.types.str;
+    prefix.type = yen.types.string;
   }
   // yen.kit.base.roles.default.interface;
   # the settings of the role that holds the machine, restricted to names
@@ -21,7 +21,7 @@ let
       r = if holds a.roles.server.at m then a.roles.server else a.roles.node;
       s = r.settings or { };
     in
-    lib.intersectAttrs (lib.genAttrs names (_: null)) (if lib.isFunction s then s m else s);
+    lib.intersectAttrs (lib.genAttrs names (_: null)) (if builtins.isFunction s then s m else s);
   # an assembly of kit k, and the assemblies that k adds for it (the engine adds one level)
   put =
     k: name: asm:

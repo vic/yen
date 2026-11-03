@@ -25,7 +25,7 @@ in
   yen.kinds.vim = {
     fields = {
       features = yen.lib.opt (listOf (enum features)) [ ];
-      theme = yen.lib.maybe lib.types.str;
+      theme = yen.lib.maybe yen.types.string;
     };
     sinks.vimrc = {
       # not `vim`: a sink named like its kind loses the `vim` arg to the kind (design §15 SQ18)

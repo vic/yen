@@ -7,7 +7,7 @@
 }:
 {
   yen.kinds.host = {
-    fields.system = lib.types.str; # (1)
+    fields.system = yen.types.string; # (1)
     sinks.nixos.out =
       { host, nixos, ... }: # (2)
       {

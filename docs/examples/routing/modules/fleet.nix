@@ -17,7 +17,7 @@ in
       }; # the fallback receiver
   };
   yen.kinds.environment = {
-    fields.public = opt lib.types.bool false;
+    fields.public = opt yen.types.bool false;
     spawns.host = under "environment" yen.host;
     sinks.dns = {
       at = s: s.public; # a conditional receiver: only public environments

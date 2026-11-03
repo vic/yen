@@ -46,7 +46,7 @@ in
 
         ## Four words
 
-        - **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = lib.types.str;`
+        - **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = yen.types.string;`
         - **[Scopes](/model/scopes/)**: where things live. `spawns` builds a tree from your data: a user under each host it is on.
         - **[Aspects](/behavior/aspects/)**: behavior, active where a predicate holds: a kind, an instance, another aspect, or any fact.
         - **[Sinks](/behavior/sinks/)**: where elements go. An element goes up to the nearest scope that collects it, and the sink reduces them.

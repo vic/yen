@@ -22,7 +22,7 @@
       };
   };
   yen.kinds.host.sinks.unfree = {
-    of = lib.types.str;
+    of = yen.types.string;
     reduce = yen.lib.reduce.set;
     os =
       { unfree, ... }:

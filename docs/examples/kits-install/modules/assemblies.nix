@@ -3,12 +3,12 @@
 {
   yen.kinds.member = { };
   yen.kinds.kit.fields = {
-    roles = yen.lib.opt (yen.lib.is lib.isAttrs) { };
-    constraints = yen.lib.opt (yen.lib.is lib.isAttrs) { };
+    roles = yen.lib.opt yen.types.attrs { };
+    constraints = yen.lib.opt yen.types.attrs { };
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;
-    roles = yen.lib.opt (yen.lib.is lib.isAttrs) { };
+    roles = yen.lib.opt yen.types.attrs { };
   };
   yen.aspects.settings-typed = {
     at = yen.kinds.member;

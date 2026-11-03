@@ -34,7 +34,7 @@ let
     in
     {
       value = {
-        value = lib.mapAttrs (_: v: if lib.isAttrs v && v ? ref then raw.${v.ref} else v) raw;
+        value = lib.mapAttrs (_: v: if builtins.isAttrs v && v ? ref then raw.${v.ref} else v) raw;
         provenance = lib.genAttrs keys (
           k:
           map (e: {
@@ -109,7 +109,7 @@ in
   };
 
   # H71: two claimants of one token give one node with sorted sharers
-  yen.kinds.machine.fields.tokens = opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.machine.fields.tokens = opt (yen.helpers.listOf yen.types.string) [ ];
   yen.host.web-2.tokens = [ "apitoken" ];
   yen.host.web-1.tokens = [
     "apitoken"
@@ -193,7 +193,7 @@ in
   };
 
   # H74: a demand cascades into structure: one database per demand, each with a secret and a connect below it
-  yen.kinds.machine.fields.demands = opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.machine.fields.demands = opt (yen.helpers.listOf yen.types.string) [ ];
   yen.host.web-1.demands = [
     "orders"
     "users"
@@ -215,7 +215,7 @@ in
   # H76: a query with shadowing: the nearer path wins, the label order breaks ties
   yen.kinds.machine.fields = {
     via = opt (yen.helpers.listOf yen.kinds.host) [ ];
-    motd = yen.lib.maybe lib.types.str;
+    motd = yen.lib.maybe yen.types.string;
   };
   yen.host.stage.via = [
     yen.host.web-1

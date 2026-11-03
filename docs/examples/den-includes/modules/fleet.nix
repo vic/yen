@@ -7,7 +7,7 @@
 }:
 let
   inherit (yen.lib) opt is;
-  strs = yen.lib.listOf lib.types.str;
+  strs = yen.lib.listOf yen.types.string;
 in
 {
   yen.kinds.fleet = {
@@ -16,7 +16,7 @@ in
   };
   yen.kinds.host = {
     fields = {
-      system = opt lib.types.str "x86_64-linux";
+      system = opt yen.types.string "x86_64-linux";
       shares = opt strs [ ]; # parameters of a parametric aspect
     };
     spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
@@ -27,8 +27,8 @@ in
       };
   };
   yen.kinds.user.fields = {
-    hosts = is lib.isList;
-    fullname = lib.types.str;
+    hosts = is builtins.isList;
+    fullname = yen.types.string;
     authorizedKeys = opt strs [ ];
   };
 

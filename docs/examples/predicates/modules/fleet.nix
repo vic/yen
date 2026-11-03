@@ -6,8 +6,8 @@
   };
   yen.kinds.host = {
     fields = {
-      cores = lib.types.int;
-      gpu = yen.lib.opt lib.types.bool false;
+      cores = yen.types.int;
+      gpu = yen.lib.opt yen.types.bool false;
     };
     spawns.guest = s: lib.filterAttrs (_: g: yen.lib.same g.on s) yen.guest;
   };

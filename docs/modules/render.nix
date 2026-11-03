@@ -332,7 +332,9 @@ in
         routes = map (p: if p.route == "index" then "/" else "/${p.route}/") pages;
         linksIn =
           t:
-          lib.concatMap (x: if lib.isList x then x else [ ]) (builtins.split ''([]][(]|href=")(/[^)"#]*)'' t);
+          lib.concatMap (x: if builtins.isList x then x else [ ]) (
+            builtins.split ''([]][(]|href=")(/[^)"#]*)'' t
+          );
         found = lib.unique (
           lib.filter (l: lib.hasPrefix "/" l) (lib.concatMap (p: linksIn (render cmds pages p)) instances)
         );

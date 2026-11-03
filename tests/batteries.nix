@@ -2096,6 +2096,29 @@ let
         # the shell quoting is the battery's own (no nixpkgs lib): a quote in a value is closed, escaped, reopened
         t4 = yes (b.match ".*--build-host 'a'.''b' .*" (text (host // { buildHost = "a'b"; })) != null);
       };
+    # a tagged type with `parse` and no `check` in a kit interface: a bad setting is an error, a good one none
+    settings-typed-parse =
+      let
+        int = {
+          __type = true;
+          name = "int";
+          parse = v: if b.isInt v then { right = v; } else { left = { }; };
+        };
+        errs =
+          v:
+          bat.kits.settings-typed {
+            scope = {
+              role = "server";
+              assembly.name = "db";
+              kit.roles.server.interface.port.type = int;
+              settings.port = v;
+            };
+          };
+      in
+      {
+        bad = eq (errs "x") [ "kits: db.server: setting port is not a int" ];
+        good = eq (errs 1) [ ];
+      };
   };
 in
 checks

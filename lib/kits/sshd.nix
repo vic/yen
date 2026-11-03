@@ -36,7 +36,7 @@ in
   yen.kit.sshd = {
     roles = {
       server = { };
-      client.interface.root.type = lib.types.path;
+      client.interface.root.type = yen.lib.typed "absolute path" builtins.isPath;
     };
     constraints.roles.server.min = 1;
     exports = [ "hostKey" ];

@@ -4,7 +4,7 @@
     spawns.host = _: yen.host;
     sinks.out.reduce = yen.lib.reduce.merge;
   };
-  yen.kinds.host.fields.dependsOn = yen.lib.opt (yen.lib.is lib.isList) [ ]; # host refs
+  yen.kinds.host.fields.dependsOn = yen.lib.opt (yen.lib.listOf yen.kinds.host) [ ]; # host refs
 
   yen.fleet.main = { };
   yen.host.db = { };

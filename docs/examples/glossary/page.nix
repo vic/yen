@@ -27,7 +27,7 @@
           ]
           [
             "type"
-            "any value with `check = value: bool`"
+            "a value with the `__type` tag and `parse`; a `check = value: bool` type still works"
             "[Types and defaults](/model/types/)"
           ]
           [

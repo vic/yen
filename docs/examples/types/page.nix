@@ -13,7 +13,8 @@
     }:
     [
       ''
-        yen has no type system of its own. A type is any value with `check = value: bool`.
+        yen has no type system of its own. A type is a value with the `__type` tag and a `parse` function.
+        `parse v` returns `{ right; }` or `{ left = { path; got; want; }; }`. A value with only `check = value: bool` still works.
         `lib.types` from nixpkgs works, a [kind](/model/kinds-fields/) works (see [Instances and refs](/model/instances-refs/)),
         and `yen.lib.is` makes a type from any function.
       ''
@@ -21,7 +22,7 @@
         [ "Constructor" "Default" ]
         [
           [
-            "`lib.types.str`, any type"
+            "`yen.types.string`, any type"
             "none: the field is required"
           ]
           [
@@ -93,7 +94,10 @@
     }:
     {
       bad-values = eq (map (e: e.path) (variant "variants/bad-values.nix").errors) ([
-        [ "labels" ]
+        [
+          "labels"
+          "owner"
+        ]
         [
           "settings"
           "kernel"

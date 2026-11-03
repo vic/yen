@@ -8,7 +8,7 @@
 let
   inherit (yen.lib) opt holds;
   kits = yen.lib.batteries.kits;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.types.attrs;
   # a kit that needs another kit adds assemblies of it, per assembly of its own
   added =
     a:
@@ -32,8 +32,8 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.helpers.listOf lib.types.str) [ ];
-    adds = opt (yen.lib.is lib.isFunction) (_: { });
+    exports = opt (yen.helpers.listOf yen.types.string) [ ];
+    adds = opt (yen.lib.is builtins.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;

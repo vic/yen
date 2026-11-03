@@ -8,11 +8,11 @@ let
   layouts = self._layouts { inherit lib; };
 in
 {
-  yen.kinds.layout.fields.devices = yen.lib.is lib.isFunction;
+  yen.kinds.layout.fields.devices = yen.lib.is builtins.isFunction;
   yen.layout = layouts;
 
   yen.kit.disko.roles.default.interface = {
-    device.type = lib.types.str;
+    device.type = yen.types.string;
     layout.type = yen.kinds.layout // {
       description = "layout ref";
     }; # the kind checks; settings-typed names the type

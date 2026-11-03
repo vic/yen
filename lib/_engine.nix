@@ -78,6 +78,7 @@ let
     refKind
     hide
     isSecret
+    parseOf
     checkOf
     boolCheck
     get
@@ -271,8 +272,15 @@ let
       reduceWith =
         c: d: es:
         let
-          okOf = e: !(d ? of) || checkOf d.of e.value;
-          red = (d.reduce or reduce.one) (filter okOf es);
+          # the sink stores what `of` parses: `right` reduces, `left` is an error below
+          parsed = map (e: e // { p = if d ? of then parseOf d.of e.value else { right = e.value; }; }) es;
+          okOf = e: e.p ? right;
+          red = (d.reduce or reduce.one) (
+            map (e: {
+              inherit (e) from;
+              value = e.p.right;
+            }) (filter okOf parsed)
+          );
         in
         {
           inherit (red) value;
@@ -281,9 +289,9 @@ let
               e:
               errWith e.from "sink ${c}: the value of ${e.from} fails `of`" {
                 code = "of";
-                path = [ c ];
+                path = [ c ] ++ (e.p.left.path or [ ]);
               }
-            ) (filter (e: !okOf e) es)
+            ) (filter (e: !okOf e) parsed)
             ++ map (
               e:
               e
@@ -679,7 +687,20 @@ let
               { };
           id = idAt at;
           p = concatStringsSep "." path;
-          bad = first (t: !checkOf t r.ok) tys;
+          # the field stores what its types parse, in order; `bad` is the first type whose parse fails
+          parsed = foldl' (
+            x: t:
+            if x ? right then
+              (
+                let
+                  p = parseOf t x.right;
+                in
+                if p ? right then p else p // { bad = t; }
+              )
+            else
+              x
+          ) { right = r.ok; } tys;
+          bad = parsed.bad or null;
           notBool = first (t: !boolCheck t r.ok) tys;
           kr = first (t: refKind t != null) tys;
           fail = e: {
@@ -687,7 +708,13 @@ let
             # a nested instance is named by its whole data path; a top instance keeps the field path
             errors = [
               (errWith id e.error (
-                removeAttrs e [ "error" ] // { path = (if length at > 2 then at else [ ]) ++ path; }
+                removeAttrs e [
+                  "error"
+                  "elemPath"
+                ]
+                // {
+                  path = (if length at > 2 then at else [ ]) ++ path ++ (e.elemPath or [ ]);
+                }
               ))
             ];
           };
@@ -762,6 +789,7 @@ let
         else if tys != [ ] && bad != null then
           fail {
             error = if kr != null then "${p} wants a ${refKind kr} ref" else "${p} fails its check";
+            elemPath = parsed.left.path or [ ]; # where inside the value the failing element sits
             code = if kr != null then "ref" else "check";
             got =
               if any isSecret tys then
@@ -778,7 +806,7 @@ let
                 "give ${p} a value of type ${typeName bad}";
           }
         else if tys != [ ] then
-          pure r.ok
+          pure parsed.right
         else if path != [ ] && ts == [ ] then
           fail {
             error = "unknown field ${p}";
@@ -810,6 +838,14 @@ let
       ) kinds;
       yen = instances // {
         inherit kinds aspects lib;
+        # named scalar types: an error states `yen.types.string` as "string"
+        types = mapAttrs static.typed {
+          string = b.isString;
+          int = b.isInt;
+          bool = b.isBool;
+          path = b.isPath;
+          attrs = b.isAttrs;
+        };
         helpers = top.helpers or { };
         queries = top.queries or { };
         invariants = top.invariants or { };
@@ -1363,23 +1399,51 @@ let
         let
           d = sinkOf r k;
           es = uniqueBy (e: "${idOf e}@${r.id}") (byTo."${k}@${r.id}" or [ ]);
-          filled = map (e: fill e.from e.value // { inherit e; }) es;
-          okOf = x: x ? ok && (!(d ? of) || checkOf d.of x.ok);
+          # each element stores what `of` parses: `right` reduces, `left` is an error below
+          filled = map (
+            e:
+            let
+              x = fill e.from e.value;
+            in
+            x
+            // {
+              inherit e;
+              p =
+                if !(x ? ok) then
+                  { }
+                else if d ? of then
+                  parseOf d.of x.ok
+                else
+                  { right = x.ok; };
+            }
+          ) es;
+          okOf = x: x.p ? right;
           # a sink `of` a kind gets refs; it reduces their instances (an element holds a ref, never instance data)
           resolve =
             v: if d ? of && isType d.of && d.of ? __kind && isRef v then instances.${v.kind}.${v.name} else v;
           red = (d.reduce or reduce.list) (
             map (x: {
               from = x.e.from;
-              value = resolve x.ok;
+              value = resolve x.p.right;
             }) (filter okOf filled)
           );
           bad = map (
             x:
             if x ? error then
-              removeAttrs x [ "e" ] // { error = "${x.e.origin}: ${x.error}"; } # the fill record keeps its code
+              removeAttrs x [
+                "e"
+                "p"
+              ]
+              // {
+                error = "${x.e.origin}: ${x.error}";
+              } # the fill record keeps its code
             else
-              errWith r.id "sink ${k}: element of ${x.e.origin} from ${x.e.from.id} fails `of`" { code = "of"; }
+              errWith r.id "sink ${k}: element of ${x.e.origin} from ${x.e.from.id} fails `of`" (
+                {
+                  code = "of";
+                }
+                // (if (x.p.left.path or [ ]) == [ ] then { } else { path = [ k ] ++ x.p.left.path; })
+              )
           ) (filter (x: !okOf x) filled);
         in
         {
@@ -1867,7 +1931,9 @@ let
                 )
                 (
                   filter (
-                    a: yen.relations.${head a}.check or null != null && !checkOf yen.relations.${head a} (tail a)
+                    a:
+                    (yen.relations.${head a}.check or null != null || yen.relations.${head a}.__type or false)
+                    && !checkOf yen.relations.${head a} (tail a)
                   ) m.true
                 )
             # an external whose function gave no bool: the verdict cannot rest on it
@@ -2561,6 +2627,19 @@ let
               "sinks"
             ]
           )
+        # `types` is the built-in yen.types set: a top kind of that name could never be read
+        ++ map (
+          n:
+          errWith "declarations" "kind `${n}`: the name is the yen.types arg" {
+            code = "reserved";
+            path = [
+              "yen"
+              "kinds"
+              n
+            ];
+            fix = "rename the kind; `types` is the yen.types arg";
+          }
+        ) (filter (n: n == "types") kindNames)
         # a field named like a key of the scope record would read as that key, never as the field
         ++ concatMap (
           k:
@@ -2749,7 +2828,9 @@ let
                 ++ map (p: refKind ps.${p}) (attrNames ps)
               );
               lost = first (p: isRef args.${p} && vals.${p} == null) (attrNames args);
-              bad = first (p: !checkOf ps.${p} vals.${p}) (attrNames ps);
+              # each parameter stores what its type parses; the answer reads `right`
+              parsed = mapAttrs (p: t: parseOf t vals.${p}) ps;
+              bad = first (p: !(parsed.${p} ? right)) (attrNames ps);
             in
             if missing != [ ] then
               errWith "ask" "query ${n}: missing ${head missing}" {
@@ -2767,17 +2848,25 @@ let
             else if lost != null then
               unknown "ask" args.${lost}.name (instNames args.${lost}.kind) { code = "unknown-instance"; }
             else if bad != null then
-              errWith "ask" "query ${n}: ${bad} wants ${q.types.${bad}}" {
-                code = if refKind ps.${bad} != null then "ref" else "check";
-                want = q.types.${bad};
-                fix =
-                  if refKind ps.${bad} != null then
-                    "give ${bad} a ${refKind ps.${bad}} ref: yen.${refKind ps.${bad}}.<name>, or { kind; name; } from JSON"
+              errWith "ask" "query ${n}: ${bad} wants ${q.types.${bad}}" (
+                {
+                  code = if refKind ps.${bad} != null then "ref" else "check";
+                  want = q.types.${bad};
+                  fix =
+                    if refKind ps.${bad} != null then
+                      "give ${bad} a ${refKind ps.${bad}} ref: yen.${refKind ps.${bad}}.<name>, or { kind; name; } from JSON"
+                    else
+                      "give ${bad} ${q.types.${bad}}";
+                }
+                // (
+                  if (parsed.${bad}.left.path or [ ]) == [ ] then
+                    { }
                   else
-                    "give ${bad} ${q.types.${bad}}";
-              }
+                    { path = [ bad ] ++ parsed.${bad}.left.path; }
+                )
+              )
             else
-              static.jsonSafe (yen.queries.${n}.answer (vals // { result = self; }));
+              static.jsonSafe (yen.queries.${n}.answer (mapAttrs (_: x: x.right) parsed // { result = self; }));
       };
     in
     self;

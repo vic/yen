@@ -70,7 +70,8 @@
 
         ## Types: anything with `check`
 
-        A field type is any value with `check = v: bool`. yen does not ship its own type library, and it needs no
+        A field type is a value with the `__type` tag and `parse`. `parse v` returns `{ right; }` or
+        `{ left = { path; got; want; }; }`. A type with only `check = v: bool` still works. yen does not ship its own type library, and it needs no
         nixpkgs. Use what you have:
 
         - `yen.lib.is f`: any predicate, for example `yen.lib.is builtins.isString`.

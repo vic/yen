@@ -1,8 +1,8 @@
 # A relation kind: a replica is a (db, region) pair; the fleet spawns only matching pairs.
 { yen, lib, ... }:
 {
-  yen.kinds.db.fields.zone = lib.types.str;
-  yen.kinds.region.fields.zone = lib.types.str;
+  yen.kinds.db.fields.zone = yen.types.string;
+  yen.kinds.region.fields.zone = yen.types.string;
   yen.kinds.replica.fields = {
     db = yen.kinds.db;
     region = yen.kinds.region;

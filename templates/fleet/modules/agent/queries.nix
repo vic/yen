@@ -61,7 +61,7 @@
     };
   };
 
-  yen.kinds.machine.fields.validTo = yen.lib.opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.machine.fields.validTo = yen.lib.opt (yen.helpers.listOf yen.types.string) [ ];
   yen.host.web-2.validTo = [ "2026-11-01" ];
   yen.aspects.retire-notice = {
     at = yen.lib.all [

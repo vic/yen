@@ -35,7 +35,7 @@ in
     "age"
     "password-store"
   ]) "sops";
-  yen.kinds.fleet.fields.recipients = opt (yen.lib.is lib.isAttrs) {
+  yen.kinds.fleet.fields.recipients = opt yen.types.attrs {
     default = [ ];
     hosts = { };
   };
@@ -46,7 +46,7 @@ in
       "age1admin"
     ];
   };
-  yen.kinds.machine.fields.fromDir = opt lib.types.bool false; # a host from a directory under machines/
+  yen.kinds.machine.fields.fromDir = opt yen.types.bool false; # a host from a directory under machines/
   yen.kinds.machine.fields.secretStore = maybe (
     yen.helpers.enum [
       "sops"

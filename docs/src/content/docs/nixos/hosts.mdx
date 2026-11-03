@@ -57,11 +57,11 @@ in
   yen.kinds.host = {
     # what a vars.nix file held: typed, with defaults
     fields = {
-      system = opt (lib.types.enum [
+      system = opt (yen.lib.enum [
         "x86_64-linux"
         "aarch64-linux"
       ]) "x86_64-linux";
-      laptop = opt lib.types.bool false;
+      laptop = opt yen.types.bool false;
     };
     sinks.nixos.out =
       { host, nixos, ... }:
@@ -85,13 +85,13 @@ A wrong value fails at the instance that sets it, not deep in `nixpkgs.hostPlatf
     class = "fixable";
     code = "check";
     error = "system fails its check";
-    fix = "give system a value of type enum";
+    fix = "give system a value of type one of \"x86_64-linux\", \"aarch64-linux\"";
     from = "host:tower";
     got = "x86-64-linux";
     path = [
       "system"
     ];
-    want = "enum";
+    want = "one of \"x86_64-linux\", \"aarch64-linux\"";
   }
 ]
 ```

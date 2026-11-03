@@ -13,7 +13,7 @@
         packages.${host.name} = packages;
       };
   };
-  yen.kinds.user.fields.hosts = yen.lib.is lib.isList;
+  yen.kinds.user.fields.hosts = yen.lib.is builtins.isList;
 
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

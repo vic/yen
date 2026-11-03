@@ -1,10 +1,30 @@
 # The static lib: type constructors, reduce strategies by name, JSON-safe values.
 self:
 let
-  inherit (self._core.types) checkOf;
+  inherit (self._core.types) parseOf;
+  # the outer shape only: the elements are walked by the frontier, never here
+  outer =
+    ok: want: v:
+    if ok v then
+      { right = v; }
+    else
+      {
+        left = {
+          path = [ ];
+          got = builtins.typeOf v;
+          inherit want;
+        };
+      };
+  # a type record: tagged, with `parse` beside its `check`
+  tagged =
+    t:
+    t
+    // {
+      __type = true;
+      parse = parseOf t;
+    };
   inherit (self._core.reduce) reduceNamed;
   inherit (builtins)
-    all
     concatStringsSep
     elem
     isAttrs
@@ -33,20 +53,24 @@ in
 {
   reduce = reduceNamed;
   #: lib.is :: (v -> bool) -> type -- a type from a check
-  is = check: { inherit check; }; # any check is a type: `yen.lib.is builtins.isString`
+  is = check: tagged { inherit check; }; # any check is a type: `yen.lib.is builtins.isString`
+  #: lib.typed :: name -> (v -> bool) -> type -- a named type from a check: `yen.lib.typed "string" builtins.isString`
+  typed = name: check: tagged { inherit name check; }; # the name is what an error states
   #: lib.opt :: type -> default -> type -- the type, with a default when the field has no answer
   opt = t: d: t // { default = d; };
   #: lib.derive :: type -> (instance -> value) -> type -- the type, with a default computed from the instance itself
   derive = t: f: t // { defaultFrom = f; }; # a default computed from the instance itself (Den schema defaults)
   #: lib.maybe :: type -> type -- the type, or null (a maybe-ref is still a ref field)
   maybe = t: {
-    check = v: v == null || checkOf t v;
+    __type = true;
+    parse = v: if v == null then { right = null; } else parseOf t v; # the element type is checked at the frontier
     default = null;
     __maybe = t; # the type it wraps: a maybe-ref is still a ref (refKind)
   };
   #: lib.listOf :: type -> type -- a list whose elements pass the type; a list of refs is still a ref field
   listOf = t: {
-    check = v: isList v && all (checkOf t) v;
+    __type = true;
+    parse = outer isList "a list";
     __of = t; # a list of refs is still a ref field: one fact per element (refKind)
   };
   #: lib.kind :: type -- a kind: yen.kinds.<kind>
@@ -66,8 +90,10 @@ in
   };
   #: lib.attrsOf :: type -> type -- an attrset whose values pass the type
   attrsOf = t: {
-    check = v: isAttrs v && all (checkOf t) (builtins.attrValues v);
+    __type = true;
+    parse = outer isAttrs "an attrset";
     description = "an attrset of values its check accepts";
+    __values = t; # the value type; the frontier parses each value (parseOf)
   };
   # a secret: checked like t, but no answer (facts, data, scopes, errors, exports) ever states its value, only its
   # sha256; an aspect still reads it

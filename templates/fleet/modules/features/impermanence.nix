@@ -6,10 +6,10 @@
   ...
 }:
 {
-  yen.kinds.machine.fields.unpersist = yen.lib.opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.machine.fields.unpersist = yen.lib.opt (yen.helpers.listOf yen.types.string) [ ];
   yen.host.web-2.unpersist = [ "/var/lib/nginx" ];
   yen.kinds.host.sinks.persist = {
-    of = lib.types.str;
+    of = yen.types.string;
     reduce = yen.lib.reduce.set;
     nixos =
       { scope, persist, ... }:

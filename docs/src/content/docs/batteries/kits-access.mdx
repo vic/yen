@@ -31,13 +31,13 @@ The fleet: machines, the sinks and the contract.
 let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
-  attrs = yen.lib.is lib.isAttrs;
+  attrs = yen.types.attrs;
   assemblies = lib.attrValues yen.assembly;
   # tree requests: every assembly and machine, with their data
   own.instances = yen.kinds.assembly;
   hosts.instances = yen.kinds.machine;
   # what a machine gets, the NixOS values of its modules merged for the page
-  merged = ms: lib.foldl' lib.recursiveUpdate { } (lib.filter lib.isAttrs ms);
+  merged = ms: lib.foldl' lib.recursiveUpdate { } (lib.filter builtins.isAttrs ms);
 in
 {
   imports = [
@@ -70,7 +70,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.lib.is lib.isList) [ ];
+    exports = opt (yen.lib.listOf yen.types.string) [ ];
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;

@@ -18,11 +18,11 @@ in
   yen.kinds.host.sinks = {
     motd = {
       reduce = list;
-      of = lib.types.str;
+      of = yen.types.string;
     };
     ports = {
       reduce = set;
-      of = lib.types.port;
+      of = (yen.lib.is (v: builtins.isInt v && v >= 0 && v <= 65535));
     };
     packages.reduce = flat;
     admin.reduce = one;

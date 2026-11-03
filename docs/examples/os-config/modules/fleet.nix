@@ -26,7 +26,7 @@ in
     sinks.osConfig.reduce = yen.lib.reduce.one; # the host's realized NixOS config
   };
   yen.kinds.user = {
-    fields.hosts = is lib.isList;
+    fields.hosts = is builtins.isList;
     sinks.homeManager.nixos =
       { user, homeManager, ... }:
       {
@@ -37,7 +37,7 @@ in
     fields = {
       user = yen.kinds.user;
       on = yen.kinds.host;
-      system = lib.types.str;
+      system = yen.types.string;
     };
     sinks.homeManager.out =
       { home, homeManager, ... }:

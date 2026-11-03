@@ -10,12 +10,12 @@ let
 in
 {
   yen.kinds.host.fields = {
-    addr = lib.types.str; # required
-    port = opt lib.types.port 22; # a default
-    jump = maybe lib.types.str; # null by default
-    vpn = derive lib.types.str (self: "vpn-${self.name}"); # a default computed from the instance
+    addr = yen.types.string; # required
+    port = opt (yen.lib.is (v: builtins.isInt v && v >= 0 && v <= 65535)) 22; # a default
+    jump = maybe yen.types.string; # null by default
+    vpn = derive yen.types.string (self: "vpn-${self.name}"); # a default computed from the instance
     tags = opt (is (v: builtins.isList v && builtins.all builtins.isString v)) [ ]; # your own check
-    labels = opt (yen.lib.attrsOf lib.types.str) { }; # an attrset whose values are strings
+    labels = opt (yen.lib.attrsOf yen.types.string) { }; # an attrset whose values are strings
     settings.kernel.channel = opt (yen.lib.enum [
       "lts"
       "latest"

@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 {
   yen.kinds.host.sinks.tags = {
-    of = lib.types.str;
+    of = yen.types.string;
     reduce = yen.lib.reduce.set;
   };
   yen.aspects.role-server.at = [

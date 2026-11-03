@@ -17,7 +17,7 @@ such as `yen.lib.batteries.nixos`, fill those roles with one domain's options.
 
 ## Four words
 
-- **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = lib.types.str;`
+- **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = yen.types.string;`
 - **[Scopes](/model/scopes/)**: where things live. `spawns` builds a tree from your data: a user under each host it is on.
 - **[Aspects](/behavior/aspects/)**: behavior, active where a predicate holds: a kind, an instance, another aspect, or any fact.
 - **[Sinks](/behavior/sinks/)**: where elements go. An element goes up to the nearest scope that collects it, and the sink reduces them.
@@ -46,7 +46,7 @@ in
 {
   yen.kinds.fleet.spawns.env = _: yen.env;
   yen.kinds.fleet.sinks.out.reduce = yen.lib.reduce.merge;
-  yen.kinds.env.fields.domain = lib.types.str;
+  yen.kinds.env.fields.domain = yen.types.string;
   yen.kinds.env.spawns.host = s: lib.filterAttrs (_: h: same h.env s) yen.host;
   yen.kinds.host.fields = {
     env = yen.kinds.env;
@@ -63,7 +63,7 @@ in
     {
       nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
     };
-  yen.kinds.user.fields.on = is lib.isList;
+  yen.kinds.user.fields.on = is builtins.isList;
   yen.flake = { out, ... }: out;
 }
 ```

@@ -16,11 +16,11 @@ in
   yen.kinds.host = {
     # what a vars.nix file held: typed, with defaults
     fields = {
-      system = opt (lib.types.enum [
+      system = opt (yen.lib.enum [
         "x86_64-linux"
         "aarch64-linux"
       ]) "x86_64-linux";
-      laptop = opt lib.types.bool false;
+      laptop = opt yen.types.bool false;
     };
     sinks.nixos.out =
       { host, nixos, ... }:

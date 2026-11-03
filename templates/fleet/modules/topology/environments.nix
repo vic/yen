@@ -13,7 +13,7 @@ in
   yen.kinds.environment = {
     fields = {
       grants = listOf yen.kinds.group;
-      edge = opt lib.types.bool false;
+      edge = opt yen.types.bool false;
       base = maybe yen.kinds.environment;
       settings.kernel.channel = maybe (enum [
         "lts"
@@ -25,7 +25,7 @@ in
       mac = inEnv yen.mac;
       phone = inEnv yen.phone;
     };
-    sinks.backends.of = lib.types.str; # lb reads it
+    sinks.backends.of = yen.types.string; # lb reads it
     sinks.terraform = {
       # a conditional receiver
       at = s: s.edge;

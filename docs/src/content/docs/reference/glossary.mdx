@@ -9,7 +9,7 @@ import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Ta
 | kind | a type of thing, with fields, [spawns](/model/scopes/) and [sinks](/behavior/sinks/) | [Kinds and fields](/model/kinds-fields/) |
 | instance | `yen.<kind>.<name>`: one thing of a kind | [Kinds and fields](/model/kinds-fields/) |
 | field | a typed datum of each instance | [Types and defaults](/model/types/) |
-| type | any value with `check = value: bool` | [Types and defaults](/model/types/) |
+| type | a value with the `__type` tag and `parse`; a `check = value: bool` type still works | [Types and defaults](/model/types/) |
 | ref | a field value that is another instance | [Instances and refs](/model/instances-refs/) |
 | data kind | a kind that no kind spawns: instances with no [scope](/model/scopes/) | [Instances and refs](/model/instances-refs/#data-kinds) |
 | root kind | the kind that nothing spawns, and that spawns others | [Scopes and spawns](/model/scopes/) |

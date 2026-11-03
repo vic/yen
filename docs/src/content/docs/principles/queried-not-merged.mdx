@@ -17,8 +17,8 @@ Here two feature files declare settings at two paths of one field. Neither file 
 # Each feature declares its own setting, at its own path, in its own file.
 { yen, lib, ... }:
 {
-  yen.kinds.host.fields.settings.zfs.arcMax = yen.lib.maybe lib.types.int;
-  yen.kinds.environment.fields.settings.zfs.arcMax = yen.lib.maybe lib.types.int;
+  yen.kinds.host.fields.settings.zfs.arcMax = yen.lib.maybe yen.types.int;
+  yen.kinds.environment.fields.settings.zfs.arcMax = yen.lib.maybe yen.types.int;
 }
 ```
 
@@ -28,7 +28,7 @@ Here two feature files declare settings at two paths of one field. Neither file 
 ```nix title="modules/features/k3s.nix"
 { yen, lib, ... }:
 {
-  yen.kinds.host.fields.settings.k3s.role = yen.lib.opt lib.types.str "agent";
+  yen.kinds.host.fields.settings.k3s.role = yen.lib.opt yen.types.string "agent";
 }
 ```
 

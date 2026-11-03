@@ -13,7 +13,7 @@ let
     let
       got = lib.attrByPath f.path null cfg;
     in
-    if f ? has then lib.isList got && lib.elem f.has (map (f.via or (x: x)) got) else got == f.eq;
+    if f ? has then builtins.isList got && lib.elem f.has (map (f.via or (x: x)) got) else got == f.eq;
   check =
     h: cfg: facts:
     let

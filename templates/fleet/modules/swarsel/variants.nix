@@ -3,7 +3,7 @@
 # Aspects at `yen.host.lb` (haproxy, monitoring) do not hold at lb-minimal: an instance ref names one instance.
 { yen, lib, ... }:
 {
-  yen.kinds.machine.fields.minimal = yen.lib.opt lib.types.bool false;
+  yen.kinds.machine.fields.minimal = yen.lib.opt yen.types.bool false;
   yen.kinds.host.spawns.host =
     s:
     lib.optionalAttrs (s.name == "lb") {

@@ -9,7 +9,7 @@ _:
 { yen, lib, ... }:
 let
   inherit (yen.lib) all same;
-  str = lib.types.str;
+  str = yen.types.string;
   member =
     role:
     all [
@@ -24,7 +24,7 @@ in
   yen.kit.postgres = {
     roles = {
       server.interface.port = {
-        type = lib.types.port;
+        type = (yen.lib.is (v: builtins.isInt v && v >= 0 && v <= 65535));
         default = 5432;
       };
       client.interface = {

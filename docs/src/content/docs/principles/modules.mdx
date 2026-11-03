@@ -118,7 +118,8 @@ modules inside sink elements. nixpkgs also has `mkIf` on `config`, where yen has
 
 ## Types: anything with `check`
 
-A field type is any value with `check = v: bool`. yen does not ship its own type library, and it needs no
+A field type is a value with the `__type` tag and `parse`. `parse v` returns `{ right; }` or
+`{ left = { path; got; want; }; }`. A type with only `check = v: bool` still works. yen does not ship its own type library, and it needs no
 nixpkgs. Use what you have:
 
 - `yen.lib.is f`: any predicate, for example `yen.lib.is builtins.isString`.
@@ -191,9 +192,11 @@ The kinds hold what NixOS `options` hold. The instances hold what `config` holds
   };
   yen.kinds.host = {
     fields = {
-      addr = lib.types.str;
-      firewall.enable = yen.lib.opt lib.types.bool false; # mkEnableOption: a nested field with a default
-      firewall.ports = yen.lib.opt (yen.lib.listOf lib.types.port) [ ]; # checks every item
+      addr = yen.types.string;
+      firewall.enable = yen.lib.opt yen.types.bool false; # mkEnableOption: a nested field with a default
+      firewall.ports = yen.lib.opt (yen.lib.listOf (
+        yen.lib.is (v: builtins.isInt v && v >= 0 && v <= 65535)
+      )) [ ]; # checks every item
     };
     spawns.user = h: lib.filterAttrs (_: u: yen.lib.same u.on h) yen.user;
     sinks.nixos.reduce = yen.lib.reduce.merge;
@@ -201,7 +204,7 @@ The kinds hold what NixOS `options` hold. The instances hold what `config` holds
   # attrsOf (submodule { … }) in NixOS: here a kind, whose instances have names, refs and their own errors
   yen.kinds.user.fields = {
     on = yen.kinds.host;
-    shell = yen.lib.opt lib.types.str "bash";
+    shell = yen.lib.opt yen.types.string "bash";
   };
 }
 ```

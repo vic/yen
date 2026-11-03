@@ -14,7 +14,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    fields.lan = lib.types.str; # the name of the LAN interface
+    fields.lan = yen.types.string; # the name of the LAN interface
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -22,7 +22,7 @@
       };
   };
   yen.kinds.home = {
-    fields.system = lib.types.str;
+    fields.system = yen.types.string;
     sinks.homeManager.out =
       { home, homeManager, ... }:
       {

@@ -24,8 +24,8 @@ in
     sinks.insecure.nixos = nixos.insecure { from = yen.kinds.host.sinks.insecure; };
   };
   yen.kinds.user.fields = {
-    hosts = yen.lib.is lib.isList;
-    shell = yen.lib.opt (lib.types.enum [
+    hosts = yen.lib.is builtins.isList;
+    shell = yen.lib.opt (yen.lib.enum [
       "bash"
       "fish"
       "zsh"

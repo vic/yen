@@ -55,7 +55,7 @@ in
         yen.helpers.meets gs (s.environment.grants ++ s.grants)
         && (s.gates == [ ] || yen.helpers.meets gs s.gates)
       ) yen.user;
-    flatten = a: ms: lib.mkMerge (map (m: if lib.isFunction m then m a else m) ms); # config-only submodules (users.users.<n>)
+    flatten = a: ms: lib.mkMerge (map (m: if builtins.isFunction m then m a else m) ms); # config-only submodules (users.users.<n>)
     noGui =
       system: h: cfg: bad:
       let

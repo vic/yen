@@ -6,8 +6,8 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.secret.fields = {
-    file = lib.types.str; # the encrypted file in the repo
-    owners = yen.lib.is lib.isList; # host refs
+    file = yen.types.string; # the encrypted file in the repo
+    owners = yen.lib.is builtins.isList; # host refs
   };
   yen.kinds.host.sinks.secrets = {
     reduce = yen.lib.reduce.set;

@@ -137,7 +137,7 @@ A user's `homeManager` sink forwards to `nixos` on each host the user lives unde
       };
   };
   yen.kinds.user = {
-    fields.hosts = yen.lib.is lib.isList;
+    fields.hosts = yen.lib.is builtins.isList;
     sinks.homeManager.nixos =
       { user, homeManager, ... }:
       {

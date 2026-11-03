@@ -17,13 +17,13 @@ let
   # the shared-pkgs comparison hosts (environment lab) stay out of checks that list the original fleet
   noApps =
     xs:
-    if lib.isAttrs xs then
+    if builtins.isAttrs xs then
       lib.filterAttrs (n: _: !lib.hasPrefix "app-" n && !lib.hasPrefix "infra-app-" n) xs
     else
       lib.filter (
         n:
         let
-          s = if lib.isString n then n else "";
+          s = if builtins.isString n then n else "";
         in
         !(lib.hasInfix "app-" s)
       ) xs;
@@ -51,14 +51,14 @@ let
   studio = "${S}/mac:studio";
   laptop = "fleet:main/home:alice-laptop";
   red = sink: id: r.reduced.${sink}.${id} or null;
-  list = v: if lib.isList v then v else [ ];
+  list = v: if builtins.isList v then v else [ ];
   first = xs: if xs == [ ] then null else lib.head xs;
   names =
     xs:
     let
       v = first xs;
     in
-    if lib.isAttrs v then lib.attrNames v else [ ];
+    if builtins.isAttrs v then lib.attrNames v else [ ];
   on = a: lib.filter (id: r.active.${a}.${id}) (lib.attrNames r.active.${a});
   edge =
     sink: from: to:
@@ -735,7 +735,7 @@ let
       ]) ([ [ 2208 ] ]); # app-1..4 sort first
     };
     den-module-outside = {
-      t1 = yes (lib.isList (red "nixos" lb));
+      t1 = yes (builtins.isList (red "nixos" lb));
       t2 = yes (lib.length (red "nixos" lb) > 10); # moduleOf: a query gives the module list
     };
     den-nested-groups = eq (lib.length (
@@ -3053,7 +3053,7 @@ let
     };
     vars-autoinclude = {
       t1 = yes (
-        lib.any (m: lib.isAttrs m && lib.elem ./machines/web-2/configuration.nix (m.imports or [ ])) (
+        lib.any (m: builtins.isAttrs m && lib.elem ./machines/web-2/configuration.nix (m.imports or [ ])) (
           list (red "nixos" web2)
         )
       );
