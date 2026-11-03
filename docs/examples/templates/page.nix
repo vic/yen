@@ -49,6 +49,7 @@ let
     multi-platform = (inputsOf inputs "multi-platform" { }).self.outputs;
     basic-fleet = (inputsOf inputs "basic-fleet" { }).self.outputs;
     neovim = (inputsOf inputs "neovim" { nixpkgs = inputs.nixpkgs-unstable; }).self.outputs;
+    agent-containers = (inputsOf inputs "agent-containers" { }).self.outputs;
     kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
@@ -79,6 +80,34 @@ let
     ];
     basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
     basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
+    # agent containers: one per agent, each with its tools and the shared login, read-only
+    agents =
+      let
+        c = (hosts t.agent-containers).dev.containers;
+      in
+      eq
+        {
+          names = builtins.attrNames c;
+          creds = c.go.bindMounts."/home/dev/.claude/.credentials.json".isReadOnly;
+          # the common tools, then the agent's own; NixOS adds its base packages after them
+          tools = builtins.genList (i: (builtins.elemAt c.go.config.environment.systemPackages i).pname) 6;
+        }
+        {
+          names = [
+            "go"
+            "rust"
+            "web"
+          ];
+          creds = true;
+          tools = [
+            "claude-code"
+            "git"
+            "jujutsu"
+            "nodejs"
+            "go"
+            "gopls"
+          ];
+        };
     # neovim: a terminal editor and a neovide one per variant, each a derivation
     neovim-variants = eq (builtins.attrNames t.neovim.packages.x86_64-linux) [
       "go"
