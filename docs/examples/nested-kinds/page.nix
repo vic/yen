@@ -14,8 +14,8 @@
     [
       ''
         A [kind](/model/kinds-fields/) can declare kinds inside it. A user of a host is a good example: it exists only
-        under its host. The nested kind `user` has no name of its own. There is no `yen.kinds.user`, and a second kind
-        may use the same name under another parent.
+        under its host. The nested kind `user` has no name of its own. There is no `yen.kinds.user`. Two hosts can each
+        have a user `vic`: they are two instances.
 
         You write the nested kind in the key `kinds` of the parent:
       ''
@@ -23,7 +23,7 @@
       ''
         ## Instances
 
-        The instances of a nested kind are written inside the instance of the parent: `yen.host.laptop.user.vic` is the
+        You write the instances of a nested kind inside the instance of the parent: `yen.host.laptop.user.vic` is the
         user `vic` of the host `laptop`. The host `server` has its own user `vic`. They are two instances.
       ''
       (docs.file "modules/hosts.nix")
@@ -31,7 +31,7 @@
         ## Refs
 
         A ref of a nested kind has the same path as its declaration: `yen.kinds.host.kinds.user`. The aspect below
-        gives one line per user. It reads the current [scope](/model/scopes/) with the arg `scope`. The `id` of a scope shows
+        gives one line per user. It reads the current [scope](/model/scopes/) with the arg `scope`. The arg `{ user, ... }` also works: a function arg may name a nested kind by its leaf name. The name is resolved up the ancestors only, never a sibling. The `id` of a scope shows
         the parent: the scope of a user is a child of the scope of its host.
       ''
       (docs.file "modules/report.nix")
@@ -40,7 +40,7 @@
         ## Spawns
 
         A kind spawns its nested kinds by default, from the key with the same name. Here `host` spawns the users that
-        are written in it. You do not write `spawns.user`.
+        you write in it. You do not write `spawns.user`.
 
         An explicit `spawns.user` replaces the default. This one keeps only `vic`:
       ''
@@ -74,10 +74,10 @@
       (docs.file "variants/bad-group.nix")
       (docs.value (variant "variants/bad-group.nix").errors)
       (docs.note "Limits today" ''
-        The name of a nested kind is not an arg yet: `{ user, ... }` is not resolved (issue #83). Read the current scope with `{ scope, ... }`, as above.
-        A ref to a nested instance by name alone is not supported: reach it through its parent.
-        A callback such as `keep = s: s.kind == "host"` drops nested scopes without a warning. The kind of a nested scope is a list, so the test never matches.
-        The kinds diagram draws top kinds only as nodes. A nested kind is not a node there.
+        - A nested kind named `scope` or `sinks` cannot be an arg. These names are not reserved, but the arg always means the scope or the sinks.
+        - A ref to a nested instance by name alone is not supported: reach it through its parent.
+        - A callback such as `keep = s: s.kind == "host"` drops nested scopes without a warning. The kind of a nested scope is a list, so the test never matches.
+        - The kinds diagram draws top kinds only. A nested kind is not a node there.
       '')
     ];
 
