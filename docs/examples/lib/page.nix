@@ -34,6 +34,7 @@ let
             i: l:
             let
               m = b.match " *#: ([^ ]+(, [^ ]+)*) :: (.*) -- (.*)" l;
+              names = b.filter b.isString (b.split ", " (b.elemAt m 0));
             in
             if m == null then
               [ ]
@@ -41,11 +42,12 @@ let
               map (n: {
                 name = n;
                 value = {
+                  inherit names;
                   sig = b.elemAt m 2;
                   does = b.elemAt m 3;
                   url = "${githubBase}${rel}#L${toString (defAt i + 1)}";
                 };
-              }) (b.filter b.isString (b.split ", " (b.elemAt m 0)));
+              }) names;
         in
         b.concatLists (b.genList (i: entries i (b.elemAt ls i)) (b.length ls));
     in
@@ -118,12 +120,17 @@ in
         names:
         docs.table [ "API" "Takes and returns" "Purpose" ] (
           map (n: [
-            "[`${n}`](${d.${n}.url})"
+            (b.concatStringsSep ", " (
+              [ "[`${n}`](${d.${n}.url})" ] ++ map (t: "`${t}`") (under "result." (twins n))
+            ))
             "`${cell d.${n}.sig}`"
             (prose d.${n}.does)
           ]) (b.filter (n: d ? ${n}) names)
         );
       under = p: b.filter (n: b.substring 0 (b.stringLength p) n == p);
+      # the other names of one `#:` line: a fleet query is also a result query, so it is listed once, under `yen.lib`
+      twins = n: b.filter (t: t != n) d.${n}.names;
+      once = b.filter (n: under "yen.lib." (twins n) == [ ]);
       subs = b.filter (n: b.isAttrs engine.${n} && !(engine.${n} ? __functor)) (b.attrNames engine);
     in
     [
@@ -150,7 +157,8 @@ in
         ## Inside a fleet: `yen.lib`
 
         Modules get the same lib, plus these predicates and queries bound to the fleet. They have no `result`: see
-        [Inside the fleet](/query/queries/#inside-the-fleet).
+        [Inside the fleet](/query/queries/#inside-the-fleet). A query that an eval result also has is listed here
+        once, with its `result` name next to it.
       ''
       (table apis.fleet)
       ''
@@ -163,7 +171,7 @@ in
       ''
         ## Queries of an eval result: `result = yen.lib.eval module`
       ''
-      (table apis.result)
+      (table (once apis.result))
       (docs.links [
         {
           title = "Queries";
