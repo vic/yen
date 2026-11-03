@@ -1066,7 +1066,7 @@ let
       ) scopes;
       direct = concatMap (e: map (to: e // { inherit to; }) (orNull (receiverIn e.key e.from.rup))) (
         filter (e: e.key != "errors") given
-      ); # nobody reads it: nothing happens
+      ); # no receiver above: dropped. A static key no kind declares as a sink is an error in keyErrors; keys a cycle function returns are not checked
       fire = sink: r: {
         key = "${sink}@${r.id}";
         inherit sink r;
