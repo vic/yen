@@ -925,10 +925,13 @@ let
 
   checks = {
     # #59: a kit or a template module has one top-level `let` (its bindings), never a nested one
-    # and so has every module of a docs example (#59)
+    # and so has every module of a docs example and of the reference fleet (#59)
     one-let = eq (map toString (
       b.filter (f: letsIn f > 1) (
-        nixUnder ../lib/kits ++ modulesIn ../templates ++ modulesIn ../docs/examples
+        nixUnder ../lib/kits
+        ++ modulesIn ../templates
+        ++ modulesIn ../docs/examples
+        ++ nixUnder ../reference/modules
       )
     )) [ ];
     # #97: a sink at a system scope as flake.<group>.<system>, and the inputs read at one system
