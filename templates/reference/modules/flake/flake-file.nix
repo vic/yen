@@ -22,7 +22,7 @@ in
       modules = [ { flake-file.formatter = p: p.nixfmt-rfc-style; } ]; # the formatter of fmt-check: one layout for every nix file
     };
   };
-  yen.aspects.fleet-flake = {
+  yen.aspects.reference-flake = {
     at = yen.fleet.main;
     flake-file = {
       description = "A yen fleet: Ren's fleet, sini's and Den's patterns, as queries";

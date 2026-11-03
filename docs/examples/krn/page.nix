@@ -65,7 +65,7 @@
         `complete = false` means "bounded", never "no answer". `appendo` with two unknown lists enumerates without end.
       '')
       (docs.tip "More" ''
-        The reference fleet's ${
+        The reference template's ${
           docs.fleet "modules/query/krn.nix" null "query/krn.nix"
         } also sums guest memory under a host's RAM
         and joins host records to place a database.

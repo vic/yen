@@ -4,7 +4,7 @@
 
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-yen's own part of a host's evaluation is small: 1.4% on the reference fleet's `lb`. Most of the time goes to
+yen's own part of a host's evaluation is small: 1.4% on the reference template's `lb`. Most of the time goes to
 nixpkgs `pkgs` (56%) and the NixOS module system (36%). By default every host imports nixpkgs again.
 
 With `sharedPkgs = true`, a host reuses the `pkgs` of the first sharing host on its system (the leader),
@@ -122,13 +122,13 @@ A follower must build exactly what it builds alone. `ownPkgs` is each host built
 The docs check that every host's toplevel `drvPath` is the same both ways.
 
 
-| Reference fleet: lb, web-1, web-2 toplevel | CPU | Thunks | GC total |
+| Reference template: lb, web-1, web-2 toplevel | CPU | Thunks | GC total |
 |---|---|---|---|
 | each its own pkgs | 35.3 s | 36.6 M | 2.71 GB |
 | shared pkgs | 24.8 s | 29.3 M | 1.96 GB |
 
-Measured on the reference fleet, with the same `drvPath`s both ways
-([README](https://github.com/vic/yen/tree/main/templates/fleet#shared-pkgs-one-nixpkgs-per-channel-and-system)).
+Measured on the reference template, with the same `drvPath`s both ways
+([README](https://github.com/vic/yen/tree/main/templates/reference#shared-pkgs-one-nixpkgs-per-channel-and-system)).
 
 
 :::caution[Two rules]

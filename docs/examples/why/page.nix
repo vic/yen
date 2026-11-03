@@ -33,7 +33,7 @@ in
         or anything else you can model as Nix values. You define your own domain language, and Yen uses it.
 
 
-        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · [Reference fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · [Reference template](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
 
         It is written for two kinds of fleet. In a home lab, a few hosts live in one flake and a mistake fails at evaluation, before a deploy.

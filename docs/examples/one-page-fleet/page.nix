@@ -42,7 +42,7 @@ in
         For reuse, `yen.lib.batteries` are functions from roles to a yen module: you give every name. Domain batteries,
         such as `yen.lib.batteries.nixos`, fill those roles with one domain's options.
 
-        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · [Reference fully-featured fleet](https://github.com/vic/yen/tree/main/templates/fleet) · [vic/vix on yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · [Reference fully-featured fleet](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix on yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
         ## Four words
 
@@ -89,7 +89,7 @@ in
         - **Fast where it counts**: one nixpkgs per system across hosts, and trimmed NixOS module lists, with drvPath oracles
           that prove the systems are the same. ${link "Performance" "/perf/shared-pkgs/"}
         - **Every capability of Den, den-hoag and clan**, and the patterns of real fleets, each with a check, in the
-          [reference fleet](https://github.com/vic/yen/tree/main/templates/fleet). ${link "From Den" "/migrate/from-den/"}
+          [reference template](https://github.com/vic/yen/tree/main/templates/reference). ${link "From Den" "/migrate/from-den/"}
 
         ## Start
       ''

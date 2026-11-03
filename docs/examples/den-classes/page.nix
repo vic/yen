@@ -64,7 +64,7 @@
         }
       ])
       (docs.tip "More classes" ''
-        The reference fleet has a `git` user sink that forwards into `homeManager`, and a `maid` sink that writes
+        The reference template has a `git` user sink that forwards into `homeManager`, and a `maid` sink that writes
         dotfiles with no home-manager: ${
           docs.fleet "modules/den/custom-classes.nix" null "den/custom-classes.nix"
         }.
