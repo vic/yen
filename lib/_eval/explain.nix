@@ -38,11 +38,10 @@ let
   #: result.pathOf :: scope -> [ { kind; name; } ] -- the scope as a path of identities, from the root: what an answer prints and a question takes
   pathOf = s: (if s.parent == null then [ ] else pathOf s.parent) ++ [ { inherit (s) kind name; } ];
   idOfPath = p: concatStringsSep "/" (map (x: "${leafOf x.kind}:${x.name}") p); # the scope key, as mkScope
-  scopeIn =
-    from: t:
-    let
-      ss = filter (s: s.kind == t.kind && s.name == t.name) unsorted;
-    in
+  scopeIn = from: t: scopeOf from t (filter (s: s.kind == t.kind && s.name == t.name) unsorted);
+  # ss: the scopes of instance t
+  scopeOf =
+    from: t: ss:
     if isAttrs t && t ? id && byId ? ${t.id} then
       { ok = byId.${t.id}; }
     else if isList t && t != [ ] && all isRef t then
@@ -78,23 +77,21 @@ let
         fix = "pass one of these paths";
       };
   # a check term: a scope by reference is its id; a constant is itself
-  termIn =
-    t:
-    let
-      r = scopeIn "check" t;
-    in
+  termIn = t: termOf t (scopeIn "check" t);
+  termOf =
+    t: r:
     if !(isAttrs t && (t ? id || isRef t) || isList t) then
       { ok = t; }
     else if r ? ok then
       { ok = r.ok.id; }
     else
       r;
-  question =
-    f: l:
-    let
-      ts = map termIn l.atom;
-      bad = first (x: !(x ? ok)) ts;
-    in
+  question = f: l: questionOf f l (map termIn l.atom);
+  questionOf =
+    f: l: ts:
+    questionBad f l ts (first (x: !(x ? ok)) ts);
+  questionBad =
+    f: l: ts: bad:
     if !(isAttrs l && isList (l.atom or null)) then
       errWith "check" "a check question is a literal, not a list" {
         code = "not-a-literal";
@@ -107,31 +104,33 @@ let
   noScope = from: id: unknown from id (attrNames byId) { code = "unknown-scope"; };
   trace =
     d: p: s:
-    let
-      v = eval3 [ ] p s;
-      node =
-        op: x:
-        {
-          inherit op;
-          value = v;
-        }
-        // x;
-      kids = f: if d == 0 then "cut" else f (d - 1);
-      sub = ps: { kids = kids (d': map (q: trace d' q s) ps); }; # the same scope
-      at = ss: q: { kids = kids (d': map (x: { scope = pathOf x; } // trace d' q x) ss); }; # other scopes
-    in
+    traceWith d p s (traceNode (eval3 [ ] p s));
+  traceNode =
+    v: op: x:
+    {
+      inherit op;
+      value = v;
+    }
+    // x;
+  traceKids = d: f: if d == 0 then "cut" else f (d - 1);
+  traceSub = d: s: ps: { kids = traceKids d (d': map (q: trace d' q s) ps); }; # the same scope
+  traceAt = d: ss: q: {
+    kids = traceKids d (d': map (x: { scope = pathOf x; } // trace d' q x) ss);
+  }; # other scopes
+  traceWith =
+    d: p: s: node:
     if isFunction p then
       node "function" { }
     else if isList p then
-      node "any" (sub p)
+      node "any" (traceSub d s p)
     else if p ? __all then
-      node "all" (sub p.__all)
+      node "all" (traceSub d s p.__all)
     else if p ? __not then
-      node "not" (sub [ p.__not ])
+      node "not" (traceSub d s [ p.__not ])
     else if p ? __within then
-      node "within" (at (above s) p.__within)
+      node "within" (traceAt d (above s) p.__within)
     else if p ? __below then
-      node "below" (at (below s) p.__below)
+      node "below" (traceAt d (below s) p.__below)
     else if p ? __functor then
       node "function" { }
     else if p ? __kind then
@@ -147,7 +146,7 @@ let
             aspect = p.__aspect;
           };
         }
-        // sub [ (aspects.${p.__aspect}.at or [ ]) ]
+        // traceSub d s [ (aspects.${p.__aspect}.at or [ ]) ]
       )
     else if isRef p then
       node "instance" { instance = { inherit (p) kind name; }; }
@@ -158,41 +157,39 @@ let
   #: result.explain :: aspect -> scope -> depth -> tree -- why an aspect is active or not at a scope, as a three-valued trace of its at; refs in, identities out
   explain =
     a: t: depth:
-    let
-      n = aspectIn "explain" a;
-      sc = scopeIn "explain" t;
-      s = sc.ok;
-      v = s.__here.${n.ok};
-    in
+    explainAt (aspectIn "explain" a) (scopeIn "explain" t) depth;
+  explainAt =
+    n: sc: depth:
     if !(n ? ok) then
       n
     else if !(sc ? ok) then
       sc
     else
-      {
-        aspect.aspect = n.ok;
-        scope = pathOf s;
-        active = if v == null then "undefined" else v;
-        at = trace depth (aspects.${n.ok}.at or [ ]) s;
-        gives = map (e: { inherit (edgeOut e) sink to; }) (
-          filter (e: e.origin == "aspect ${n.ok}" && e.from == s.id) graph.edges
-        );
-        files = filesOf n.ok;
-      };
+      explainOf n.ok sc.ok depth;
+  explainOf = n: s: depth: {
+    aspect.aspect = n;
+    scope = pathOf s;
+    active = if s.__here.${n} == null then "undefined" else s.__here.${n};
+    at = trace depth (aspects.${n}.at or [ ]) s;
+    gives = map (e: { inherit (edgeOut e) sink to; }) (
+      filter (e: e.origin == "aspect ${n}" && e.from == s.id) graph.edges
+    );
+    files = filesOf n;
+  };
   # an aspect by reference: yen.aspects.<name>, or { aspect; } from outside the fleet
-  aspectIn =
-    from: a:
-    let
-      n = if isAttrs a then a.__aspect or a.aspect or null else null;
-      x = if isString n then n else "";
-    in
+  aspectIn = from: a: aspectNamed from (if isAttrs a then a.__aspect or a.aspect or null else null);
+  aspectNamed =
+    from: n:
     if n != null && aspects ? ${n} then
       { ok = n; }
     else
-      unknown from x aspectNames { code = "unknown-aspect"; }
-      // {
-        near = map (y: { aspect = y; }) (near x aspectNames);
-      };
+      unknownAspect from (if isString n then n else "");
+  unknownAspect =
+    from: x:
+    unknown from x aspectNames { code = "unknown-aspect"; }
+    // {
+      near = map (y: { aspect = y; }) (near x aspectNames);
+    };
   # a routed element as an answer prints it: its sink and both ends by reference
   edgeOut =
     e:
