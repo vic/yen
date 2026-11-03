@@ -79,6 +79,8 @@ let
     hide
     isSecret
     checkOf
+    parseOf
+    discharge
     boolCheck
     get
     attrsIn
@@ -274,11 +276,28 @@ let
       reduceWith =
         c: d: es:
         let
-          okOf = e: !(d ? of) || checkOf d.of e.value;
+          # the frontier decides the shape only; the parts it owes are checked by `result.deep`
+          okOf = e: !(d ? of) || parseOf d.of e.value ? right;
           red = (d.reduce or reduce.one) (filter okOf es);
         in
         {
           inherit (red) value;
+          # the parts `of` did not force, for `result.deep`
+          owe =
+            if d ? of then
+              concatMap (
+                e:
+                map (
+                  o:
+                  o
+                  // {
+                    path = [ c ] ++ o.path;
+                    inherit (e) from;
+                  }
+                ) ((parseOf d.of e.value).owe or [ ])
+              ) (filter okOf es)
+            else
+              [ ];
           errors =
             map (
               e:
@@ -682,7 +701,7 @@ let
               { };
           id = idAt at;
           p = concatStringsSep "." path;
-          bad = first (t: !checkOf t r.ok) tys;
+          bad = first (t: parseOf t r.ok ? left) tys;
           notBool = first (t: !boolCheck t r.ok) tys;
           kr = first (t: refKind t != null) tys;
           fail = e: {
@@ -1367,7 +1386,7 @@ let
           d = sinkOf r k;
           es = uniqueBy (e: "${idOf e}@${r.id}") (byTo."${k}@${r.id}" or [ ]);
           filled = map (e: fill e.from e.value // { inherit e; }) es;
-          okOf = x: x ? ok && (!(d ? of) || checkOf d.of x.ok);
+          okOf = x: x ? ok && (!(d ? of) || parseOf d.of x.ok ? right);
           # a sink `of` a kind gets refs; it reduces their instances (an element holds a ref, never instance data)
           resolve =
             v: if d ? of && isType d.of && d.of ? __kind && isRef v then instances.${v.kind}.${v.name} else v;
@@ -1387,6 +1406,22 @@ let
         in
         {
           value = red.value;
+          # the parts `of` did not force, for `result.deep`
+          owe =
+            if d ? of then
+              concatMap (
+                x:
+                map (
+                  o:
+                  o
+                  // {
+                    path = [ k ] ++ o.path;
+                    from = r.id;
+                  }
+                ) ((parseOf d.of x.ok).owe or [ ])
+              ) (filter okOf filled)
+            else
+              [ ];
           errors =
             bad
             ++ map (
@@ -1422,6 +1457,61 @@ let
       memo = genAttrs sinkNames (k: byScope (reduceAt k) (receivers k));
       reduced = mapAttrs (_: mapAttrs (_: x: x.value)) memo;
       reduceErrors = concatMap (k: concatMap (r: memo.${k}.${r.id}.errors) (receivers k)) sinkNames;
+      # ── the deep check: the parts a type owes at a frontier, checked after evaluation, so a value is forced only when
+      # verified, never while the fleet evaluates (lazy contracts: a check forces only what it is asked to) ──
+      fieldLeaves =
+        pre: fs:
+        concatMap (
+          f:
+          if isType fs.${f} then
+            [
+              {
+                path = pre ++ [ f ];
+                type = fs.${f};
+              }
+            ]
+          else if isAttrs fs.${f} then
+            fieldLeaves (pre ++ [ f ]) fs.${f}
+          else
+            [ ]
+        ) (attrNames fs);
+      valueAt = path: v: foldl' (a: s: if isAttrs a then a.${s} or null else null) v path;
+      oweOf =
+        k: n: l:
+        map
+          (
+            o:
+            o
+            // {
+              path = l.path ++ o.path;
+              from = "${renderId k}:${n}";
+            }
+          )
+          (
+            if valueAt l.path instances.${k}.${n} == null then
+              [ ]
+            else
+              (parseOf l.type (valueAt l.path instances.${k}.${n})).owe or [ ]
+          );
+      fieldOwe = concatMap (
+        k:
+        concatMap (n: concatMap (oweOf k n) (fieldLeaves [ ] ((kindAt k).fields or { }))) (
+          attrNames instances.${k}
+        )
+      ) (attrNames instances);
+      sinkOwe =
+        concatMap (k: concatMap (r: memo.${k}.${r.id}.owe) (receivers k)) sinkNames
+        ++ concatMap (c: (reduceModules c).owe) (
+          filter (c: c != "yen" && used ? ${c}) (attrNames moduleSinks)
+        );
+      deep = map (
+        o:
+        errWith o.from "${concatStringsSep "." (map toString o.path)}: a part is not ${o.want}" {
+          code = "deep";
+          path = map toString o.path;
+          inherit (o) want;
+        }
+      ) (discharge (fieldOwe ++ sinkOwe));
       #: result.graph, yen.lib.graph :: { scopes; edges; } -- the scope tree and the routed elements: who gives what to whom
       graph = {
         scopes = map (s: { inherit (s) id kind name; }) scopes;
@@ -2709,7 +2799,7 @@ let
                     pkgs = nixpkgsIn.legacyPackages.${s};
                     result = {
                       inherit check;
-                      errors = errorsAll;
+                      errors = errorsAll ++ deep;
                     };
                   };
                 }
@@ -2757,6 +2847,8 @@ let
         ) kinds;
         #: result.errors :: [ error ] -- every error record: where, what was expected, how to fix it
         errors = errorsAll;
+        #: result.deep :: [ error ] -- the parts of typed values no frontier forced (list elements, attrset values), checked now, so it forces them; `checks.<system>.yen-lean` fails on them
+        inherit deep;
         # L0: a fleet with an error, a violation, an undefined invariant or a forged rule head gives no outputs, and no
         # reduced sink values to build them from by hand (D13)
         #: result.reduced :: { sink = { scope id = value; }; } or null -- each sink reduced at each receiver; null when the fleet is not clean

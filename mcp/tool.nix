@@ -27,28 +27,31 @@ let
     )) args;
   tools = {
     schema = r.agent.schema;
-    check =
-      (removeAttrs r.check [
-        "why"
-        "bad"
-        "facts"
-        "relations"
-      ])
-      // {
-        why = builtins.listToAttrs (
-          map (v: {
-            name = builtins.toJSON v; # a violation is a tuple: its JSON names it
-            # asked back by reference: each scope id of the answer as its scope record
-            value = r.check.why (
-              r.check.bad.${builtins.elemAt v 1} (
-                map (t: builtins.head (builtins.filter (s: s.id == t) r.scopes ++ [ t ])) (
-                  builtins.tail (builtins.tail v)
-                )
+    # `deep`: the parts no frontier forced, checked now
+    check = {
+      inherit (r) deep;
+    }
+    // (removeAttrs r.check [
+      "why"
+      "bad"
+      "facts"
+      "relations"
+    ])
+    // {
+      why = builtins.listToAttrs (
+        map (v: {
+          name = builtins.toJSON v; # a violation is a tuple: its JSON names it
+          # asked back by reference: each scope id of the answer as its scope record
+          value = r.check.why (
+            r.check.bad.${builtins.elemAt v 1} (
+              map (t: builtins.head (builtins.filter (s: s.id == t) r.scopes ++ [ t ])) (
+                builtins.tail (builtins.tail v)
               )
-            );
-          }) r.check.violations
-        );
-      };
+            )
+          );
+        }) r.check.violations
+      );
+    };
     context = r.context args.scope (opt [
       "maxEdges"
       "maxAspects"

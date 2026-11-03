@@ -6,7 +6,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.machine = {
-    fields.owner = lib.types.str;
+    fields.owner = yen.lib.str;
     sinks.packages.reduce = yen.lib.reduce.set; # sinks: where elements go
     sinks.packages.out =
       { machine, packages, ... }:

@@ -16,8 +16,8 @@ An invariant is a rule about the whole fleet: "no server runs a desktop", "no tw
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host.fields = {
-    addr = lib.types.str;
-    form = lib.types.enum [
+    addr = yen.lib.str;
+    form = yen.lib.enum [
       "server"
       "laptop"
     ];

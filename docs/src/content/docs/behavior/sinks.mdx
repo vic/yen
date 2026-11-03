@@ -39,11 +39,11 @@ in
   yen.kinds.host.sinks = {
     motd = {
       reduce = list;
-      of = lib.types.str;
+      of = yen.lib.str;
     };
     ports = {
       reduce = set;
-      of = lib.types.port;
+      of = yen.lib.port;
     };
     packages.reduce = flat;
     admin.reduce = one;

@@ -8,9 +8,9 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host.fields = {
-    web = opt lib.types.bool false;
-    maintenance = opt lib.types.bool false;
-    dependsOn = opt (is lib.isList) [ ];
+    web = opt yen.lib.bool false;
+    maintenance = opt yen.lib.bool false;
+    dependsOn = opt (yen.lib.listOf yen.kinds.host) [ ];
   };
 
   yen.fleet.main = { };

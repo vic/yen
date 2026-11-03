@@ -37,7 +37,7 @@ in
   yen.aspects.disko-option = {
     at = yen.kinds.host;
     nixos.options.disko.devices = lib.mkOption {
-      type = lib.types.attrs;
+      type = yen.lib.attrs;
       default = { };
     };
   };

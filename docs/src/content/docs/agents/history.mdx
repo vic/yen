@@ -16,7 +16,7 @@ let
 in
 {
   yen.kinds.fleet = {
-    fields.today = lib.types.str;
+    fields.today = yen.lib.str;
     spawns.environment = _: yen.environment;
     sinks.out.reduce = yen.lib.reduce.merge;
     sinks.dns.out =
@@ -36,8 +36,8 @@ in
   };
   yen.kinds.host.fields = {
     environment = yen.kinds.environment;
-    validFrom = maybe lib.types.str; # null: open, valid since always
-    validTo = maybe lib.types.str; # null: open, valid until always
+    validFrom = maybe yen.lib.str; # null: open, valid since always
+    validTo = maybe yen.lib.str; # null: open, valid until always
   };
 
   yen.fleet.main.today = "2026-11-15";

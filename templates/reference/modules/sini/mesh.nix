@@ -6,7 +6,7 @@ let
 in
 {
   yen.kinds.environment.sinks.mesh-peers.reduce = yen.lib.reduce.entries;
-  yen.kinds.machine.fields.builder = yen.lib.opt lib.types.bool false;
+  yen.kinds.machine.fields.builder = yen.lib.opt yen.lib.bool false;
   yen.host.web-1.builder = true;
   yen.aspects.mesh = {
     at = yen.lib.all [

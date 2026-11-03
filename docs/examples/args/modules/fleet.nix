@@ -14,7 +14,7 @@ in
   yen.kinds.host = {
     fields = {
       environment = yen.kinds.environment;
-      addr = lib.types.str;
+      addr = yen.lib.str;
     };
     sinks.proxy.out =
       { host, proxy, ... }:

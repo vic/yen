@@ -28,7 +28,7 @@ so the packages of a user go up to its host.
         packages.${host.name} = packages;
       };
   };
-  yen.kinds.user.fields.hosts = yen.lib.is lib.isList;
+  yen.kinds.user.fields.hosts = yen.lib.listOf yen.kinds.host;
 
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

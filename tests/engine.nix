@@ -3906,6 +3906,97 @@ let
         t4 = yes (c.incomplete != [ ]);
         t5 = no ((b.elem [ "bad" "cycle" ] (map (e: e.atom) (c.certificate.true ++ c.certificate.false))));
       };
+    # a field reads only the shape of a typed value; `result.deep` checks the parts after evaluation (lazy contracts)
+    deep =
+      let
+        host =
+          ports: run:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.host.fields = {
+                ports = yen.lib.listOf (yen.lib.is b.isInt);
+                run = yen.lib.functionTo (yen.lib.is b.isInt);
+              };
+              yen.host.web = { inherit ports run; };
+            }
+          );
+        paths = r: map (e: e.path) r.deep;
+        good = host [ 1 2 ] (x: x);
+        bad = host [ 1 "x" 3 ] (x: x);
+        # an element that throws when forced, and a function that throws when called
+        throws = host [ 1 (throw "forced") ] (_: throw "called");
+      in
+      {
+        good = eq (good.errors ++ good.deep) [ ];
+        bad-errors = eq bad.errors [ ];
+        bad-deep = eq (paths bad) [
+          [
+            "ports"
+            "1"
+          ]
+        ];
+        bad-code = eq (map (e: e.code) bad.deep) [ "deep" ];
+        # nothing forces the element or calls the function while the fleet evaluates
+        lazy = yes ((b.tryEval (b.deepSeq throws.errors true)).success);
+        # the deep check forces the element: a throw is an error record, never a crash
+        throw-data = eq (paths throws) [
+          [
+            "ports"
+            "1"
+          ]
+        ];
+        not-a-list = eq (map (e: e.code) (host "x" (x: x)).errors) [ "check" ];
+        not-a-function = eq (map (e: e.code) (host [ ] 1).errors) [ "check" ];
+        nested = eq (paths (host [ [ 1 ] ] (x: x))) [
+          [
+            "ports"
+            "0"
+          ]
+        ];
+        # a sink `of` a list: the module's value is a list, its elements are parts
+        sink =
+          eq
+            (paths (
+              yen.eval {
+                imports = [
+                  { yen.sinks.nums.of = yen.listOf (yen.is b.isInt); }
+                  {
+                    nums = [
+                      1
+                      "x"
+                    ];
+                  }
+                ];
+              }
+            ))
+            [
+              [
+                "nums"
+                "1"
+              ]
+            ];
+      };
+    # a value one of the types accepts: a string or an int pass, a bool is neither
+    one-of =
+      let
+        t = yen.listOf (
+          yen.oneOf [
+            yen.str
+            yen.int
+          ]
+        );
+        inherit (self._core.types) checkOf;
+      in
+      {
+        both = yes (
+          checkOf t [
+            "a"
+            1
+          ]
+        );
+        neither = no (checkOf t [ true ]);
+      };
     # the verdict as the Lean checker reads it (lean/Main.lean): JSON, every atom its key, one entry per certificate entry
     lean-export =
       let

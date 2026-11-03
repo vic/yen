@@ -2,9 +2,9 @@
 { yen, lib, ... }:
 {
   yen.kinds.host = {
-    fields.addr = lib.types.str;
-    fields.user = yen.lib.is builtins.isAttrs;
+    fields.addr = yen.lib.str;
+    fields.user = yen.lib.attrs;
     spawns.user = s: s.user;
   };
-  yen.kinds.user.fields.shell = lib.types.str;
+  yen.kinds.user.fields.shell = yen.lib.str;
 }

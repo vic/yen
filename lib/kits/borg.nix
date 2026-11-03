@@ -18,7 +18,7 @@ in
   yen.kit.borg = {
     roles = {
       client.interface.startAt = {
-        type = lib.types.str;
+        type = yen.lib.str;
         default = "daily";
       };
       server = { };

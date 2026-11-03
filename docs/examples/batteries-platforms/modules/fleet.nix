@@ -23,7 +23,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = machine // {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     spawns = machine.spawns // {
       guest = s: lib.filterAttrs (_: g: yen.lib.same g.on s) yen.guest;
     };
@@ -36,7 +36,7 @@ in
   yen.kinds.guest = {
     fields = {
       on = yen.kinds.host;
-      system = lib.types.str;
+      system = yen.lib.str;
     };
     # a guest's NixOS goes into its host as microvm.vms.<guest>
     sinks.nixos.nixos = b.microvm.guest {
@@ -45,7 +45,7 @@ in
     };
   };
   yen.kinds.mac = machine // {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     sinks.darwin.out = b.darwin.system {
       from = yen.kinds.mac.sinks.darwin;
       darwinSystem = _: inputs.nix-darwin.lib.darwinSystem;
@@ -54,7 +54,7 @@ in
     sinks.os.darwin = b.imports { from = yen.kinds.mac.sinks.os; };
   };
   yen.kinds.phone = {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     sinks.droid.out = b.droid.system {
       from = yen.kinds.phone.sinks.droid;
       inherit (inputs.nix-on-droid.lib) nixOnDroidConfiguration;
@@ -66,7 +66,7 @@ in
   yen.kinds.home = {
     fields = {
       user = yen.kinds.user;
-      system = lib.types.str;
+      system = yen.lib.str;
     };
     sinks.homeManager.out = b.home-manager.system {
       from = yen.kinds.home.sinks.homeManager;
@@ -75,7 +75,12 @@ in
     };
   };
   yen.kinds.user = {
-    fields.on = yen.lib.is lib.isList;
+    fields.on = yen.lib.listOf (
+      yen.lib.oneOf [
+        yen.kinds.host
+        yen.kinds.mac
+      ]
+    );
     # a user's home goes into the machine it is on
     sinks.homeManager.os = b.home-manager.into-host { from = yen.kinds.user.sinks.homeManager; };
   };

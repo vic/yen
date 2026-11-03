@@ -37,7 +37,7 @@ in
 
   # ninfer: the provider admits named hosts (by the fleet address pool) and every host whose aspects include the client.
   # A named host with no address is an error, not a silent gap.
-  yen.kinds.machine.fields.settings.inference.clients = opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.machine.fields.settings.inference.clients = opt (yen.helpers.listOf yen.lib.str) [ ];
   yen.host.lb.settings.inference.clients = [ "web-1" ];
   yen.kinds.fleet.sinks = {
     host-addrs.reduce = entries;

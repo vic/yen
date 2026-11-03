@@ -23,7 +23,7 @@ in
   yen.kit.nix-cache = {
     roles = {
       server.interface.port = {
-        type = lib.types.port;
+        type = yen.lib.port;
         default = 5000;
       };
       client = { };

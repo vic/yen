@@ -11,7 +11,7 @@ _:
 let
   inherit (yen.lib) holds;
   iface = {
-    prefix.type = lib.types.str;
+    prefix.type = yen.lib.str;
   }
   // yen.kit.base.roles.default.interface;
   # the settings of the role that holds the machine, restricted to names

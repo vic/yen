@@ -58,8 +58,8 @@ in
   };
   yen.kinds.host = {
     fields = {
-      addr = lib.types.str;
-      buildHost = maybe lib.types.str;
+      addr = yen.lib.str;
+      buildHost = maybe yen.lib.str;
     };
     spawns.member = yen.lib.batteries.kits.members {
       assemblies = lib.attrValues yen.assembly;
@@ -134,12 +134,12 @@ in
 {
   yen.kinds.member = { };
   yen.kinds.kit.fields = {
-    roles = yen.lib.opt (yen.lib.is lib.isAttrs) { };
-    constraints = yen.lib.opt (yen.lib.is lib.isAttrs) { };
+    roles = yen.lib.opt yen.lib.attrs { };
+    constraints = yen.lib.opt yen.lib.attrs { };
   };
   yen.kinds.assembly.fields = {
     kit = yen.kinds.kit;
-    roles = yen.lib.opt (yen.lib.is lib.isAttrs) { };
+    roles = yen.lib.opt yen.lib.attrs { };
   };
   yen.aspects.settings-typed = {
     at = yen.kinds.member;

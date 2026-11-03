@@ -23,8 +23,8 @@ in
   };
   yen.kinds.host = {
     fields = {
-      addr = lib.types.str;
-      buildHost = maybe lib.types.str;
+      addr = yen.lib.str;
+      buildHost = maybe yen.lib.str;
     };
     spawns.member = yen.lib.batteries.kits.members {
       assemblies = lib.attrValues yen.assembly;

@@ -39,7 +39,7 @@ in
     };
     no-gui = {
       # reads the realized lb from `out`, writes `out.checks`: laziness, not strata
-      of = yen.lib.attrsOf (yen.lib.listOf lib.types.str);
+      of = yen.lib.attrsOf (yen.lib.listOf yen.lib.str);
       reduce = merge;
       out =
         {

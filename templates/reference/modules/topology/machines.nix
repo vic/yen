@@ -8,10 +8,10 @@ in
     environment = yen.kinds.environment;
     channel = yen.kinds.channel;
     system = yen.kinds.system;
-    addr = lib.types.str;
-    buildHost = maybe lib.types.str;
-    sharedPkgs = yen.lib.opt lib.types.bool false; # reuse one pkgs per (channel, system): platforms/nixos.nix
-    trimmedModules = yen.lib.opt lib.types.bool false; # a smaller NixOS base module list: platforms/_modlists.nix
+    addr = yen.lib.str;
+    buildHost = maybe yen.lib.str;
+    sharedPkgs = yen.lib.opt yen.lib.bool false; # reuse one pkgs per (channel, system): platforms/nixos.nix
+    trimmedModules = yen.lib.opt yen.lib.bool false; # a smaller NixOS base module list: platforms/_modlists.nix
     settings.kernel.channel = maybe (
       yen.helpers.enum [
         "lts"

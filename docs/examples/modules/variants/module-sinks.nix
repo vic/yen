@@ -3,7 +3,7 @@
 { yen, ... }:
 {
   yen.sinks.admins = {
-    of = yen.lib.is builtins.isList;
+    of = yen.lib.listOf yen.lib.str;
     reduce = yen.lib.reduce.flat;
   };
   imports = [

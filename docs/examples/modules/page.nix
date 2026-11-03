@@ -70,11 +70,12 @@
 
         ## Types: anything with `check`
 
-        A field type is any value with `check = v: bool`. yen does not ship its own type library, and it needs no
-        nixpkgs. Use what you have:
+        A field type is any value with `check = v: bool`. yen ships the common ones, and needs no nixpkgs:
 
+        - `yen.lib.str`, `int`, `bool`, `port`, `path`, `attrs`, `any`, and `enum`, `maybe`, `listOf`, `attrsOf`,
+          `functionTo`. A field checks the shape of a list, an attrset or a function; `result.deep` checks the parts.
         - `yen.lib.is f`: any predicate, for example `yen.lib.is builtins.isString`.
-        - nixpkgs types, if you have `lib`: `lib.types.str`, `lib.types.port`. Read the warning below.
+        - nixpkgs types work as a predicate, but not for composites. Read the warning below.
         - [nix-effects](https://github.com/kleisli-io/nix-effects) types: `Int`, `ListOf`, `Record`, refinements.
         - [gen-types](https://github.com/sini/gen) checkers, through their `verify`.
 
@@ -153,7 +154,7 @@
           ]
           [
             "`mkEnableOption`"
-            "a nested field: `fields.firewall.enable = yen.lib.opt lib.types.bool false`"
+            "a nested field: `fields.firewall.enable = yen.lib.opt yen.lib.bool false`"
           ]
           [
             "`default = f config`"

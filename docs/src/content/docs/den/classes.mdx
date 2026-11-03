@@ -133,7 +133,7 @@ interface that the host names, with `lib.mkMerge`, so two features never overwri
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    fields.lan = lib.types.str; # the name of the LAN interface
+    fields.lan = yen.lib.str; # the name of the LAN interface
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -141,7 +141,7 @@ interface that the host names, with `lib.mkMerge`, so two features never overwri
       };
   };
   yen.kinds.home = {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     sinks.homeManager.out =
       { home, homeManager, ... }:
       {

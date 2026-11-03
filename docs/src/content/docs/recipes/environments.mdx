@@ -34,17 +34,17 @@ in
   yen.kinds.group = { };
   yen.kinds.environment = {
     fields = {
-      domain = lib.types.str;
+      domain = yen.lib.str;
       base = maybe yen.kinds.environment; # settings it does not set come from here
       grants = opt (listOf yen.kinds.group) [ ];
-      settings.timeZone = maybe lib.types.str;
+      settings.timeZone = maybe yen.lib.str;
     };
     spawns.host = s: lib.filterAttrs (_: h: same h.environment s) yen.host;
   };
   yen.kinds.host = {
     fields = {
       environment = yen.kinds.environment;
-      settings.timeZone = maybe lib.types.str;
+      settings.timeZone = maybe yen.lib.str;
     };
     spawns.user = s: lib.filterAttrs (_: u: meets u.groups s.environment.grants) yen.user; # access from data
     sinks.nixos.out =

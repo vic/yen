@@ -52,8 +52,8 @@ in
     sinks.insecure.nixos = nixos.insecure { from = yen.kinds.host.sinks.insecure; };
   };
   yen.kinds.user.fields = {
-    hosts = yen.lib.is lib.isList;
-    shell = yen.lib.opt (lib.types.enum [
+    hosts = yen.lib.listOf yen.kinds.host;
+    shell = yen.lib.opt (yen.lib.enum [
       "bash"
       "fish"
       "zsh"
@@ -150,7 +150,7 @@ in
 { yen, lib, ... }:
 let
   nixos = yen.lib.batteries.nixos;
-  str = lib.types.str;
+  str = yen.lib.str;
 in
 {
   yen.kinds.host = {

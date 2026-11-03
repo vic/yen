@@ -18,7 +18,7 @@ in
     roles = {
       server = { };
       exporter.interface.port = {
-        type = lib.types.port;
+        type = yen.lib.port;
         default = 9100;
       };
     };

@@ -1,7 +1,7 @@
 # vix: secrets are a data kind (no scopes). Features give the secrets they need on the user's `secrets` sink.
 { yen, lib, ... }:
 {
-  yen.kinds.secret.fields.sopsKey = lib.types.str;
+  yen.kinds.secret.fields.sopsKey = yen.lib.str;
   yen.secret.gh-token.sopsKey = "github_token";
   yen.secret.gpg-key.sopsKey = "gpg_key";
   yen.kinds.user.sinks.secrets = {

@@ -11,7 +11,7 @@ in
 {
   yen.kinds.fleet.spawns.env = _: yen.env;
   yen.kinds.fleet.sinks.out.reduce = yen.lib.reduce.merge;
-  yen.kinds.env.fields.domain = lib.types.str;
+  yen.kinds.env.fields.domain = yen.lib.str;
   yen.kinds.env.spawns.host = s: lib.filterAttrs (_: h: same h.env s) yen.host;
   yen.kinds.host.fields = {
     env = yen.kinds.env;
@@ -28,6 +28,6 @@ in
     {
       nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
     };
-  yen.kinds.user.fields.on = is lib.isList;
+  yen.kinds.user.fields.on = yen.lib.listOf yen.kinds.host;
   yen.flake = { out, ... }: out;
 }

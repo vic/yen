@@ -5,8 +5,8 @@ let
   setting = path: h: yen.lib.cascade path ([ h ] ++ h.environment.delegates ++ [ h.environment ]); # local > delegated > parent
 in
 {
-  yen.kinds.machine.fields.settings.zfs.arcMax = maybe lib.types.int;
-  yen.kinds.environment.fields.settings.zfs.arcMax = maybe lib.types.int;
+  yen.kinds.machine.fields.settings.zfs.arcMax = maybe yen.lib.int;
+  yen.kinds.environment.fields.settings.zfs.arcMax = maybe yen.lib.int;
   yen.kinds.environment.fields.delegates = opt (yen.helpers.listOf yen.kinds.environment) [ ];
   yen.environment.prod.settings.zfs.arcMax = 4294967296;
   yen.environment.staging.delegates = [ yen.environment.prod ];

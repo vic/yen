@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 {
   yen.kinds.host.fields = {
-    addr = lib.types.str;
-    cores = lib.types.int;
+    addr = yen.lib.str;
+    cores = yen.lib.int;
   };
 }

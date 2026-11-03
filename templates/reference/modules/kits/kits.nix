@@ -19,7 +19,7 @@ let
       yen.kinds.member
       (memberOf k role)
     ];
-  str = lib.types.str;
+  str = yen.lib.str;
 in
 {
   imports = [

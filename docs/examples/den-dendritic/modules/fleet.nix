@@ -10,12 +10,12 @@ let
 in
 {
   yen.kinds.fleet = {
-    fields.adminEmail = lib.types.str;
+    fields.adminEmail = yen.lib.str;
     spawns.host = _: yen.host;
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    fields.gpu = opt (lib.types.enum [
+    fields.gpu = opt (yen.lib.enum [
       "none"
       "nvidia"
     ]) "none";
@@ -27,8 +27,8 @@ in
       };
   };
   yen.kinds.user.fields = {
-    hosts = is lib.isList;
-    admin = opt lib.types.bool false;
+    hosts = yen.lib.listOf yen.kinds.host;
+    admin = opt yen.lib.bool false;
   };
 
   yen.fleet.main.adminEmail = "admin@example.org";
