@@ -14,7 +14,7 @@
     [
       ''
         yen never calls `throw`. When something is wrong, the read gives `null`, evaluation continues,
-        and the `errors` query lists a record. An empty list means the fleet is valid.
+        and the `errors` [query](/query/queries/) lists a record. An empty list means the fleet is valid.
 
         ## Error records
 

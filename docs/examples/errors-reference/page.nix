@@ -48,9 +48,9 @@ let
     arg = "an element asks for an arg that has no answer";
     at = "`at` holds a value that is not a predicate";
     bare-function = "an element is a function without named args (`x: …`): wrap it as `{ ... }:`";
-    check = "a field value or a stored query parameter fails its type";
-    cycle = "an instance appears twice on its own scope path: `spawns` loops";
-    error = "a message from an aspect's `errors` key";
+    check = "a field value or a stored [query](/query/queries/) parameter fails its type";
+    cycle = "an instance appears twice on its own [scope](/model/scopes/) path: `spawns` loops";
+    error = "a message from an [aspect](/behavior/aspects/)'s `errors` key";
     module = "a module asks for an arg no module gives or declares, or its `imports` or key names read an arg";
     of = "a sink element, or a module's value for a `yen.sinks` sink, fails the sink's `of` type";
     order = "an `order` answer is not a number";
@@ -59,7 +59,7 @@ let
     check-not-bool = "a field type's check gives no bool (a curried check, such as a gen-types one, needs its other argument)";
     external-not-bool = "a relation's `holds` function answers a tuple with something other than a bool";
     relation-check = "a rule derives a tuple that fails the `check` of its relation in `yen.relations`";
-    invariant-data = "an invariant is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference";
+    invariant-data = "an [invariant](/query/invariants/) is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference";
     law-change = "a staged change declares `invariants`, `relations`, `labels` or `flake`: the law is the owner's, never a change's";
     bad-atom = "a rule literal is not a reference from `yen.facts` or `yen.relations`, or a term is not a variable, a string, an int or a bool";
     edb-head = "a rule derives a fact yen extracts (`scope`, `instance`, `parent`, `kind`, `has`, `edge`, `error`, `ref`, `val`, or a comparison)";
@@ -87,7 +87,7 @@ let
     unknown-aspect = "a query names an aspect that does not exist";
     unknown-key = "`yen`, a kind or a `yen.sinks` declaration has a key yen does not read (yen modules are not NixOS modules)";
     unread-sink = "a module gives a sink that no module reads or declares in `yen.sinks`";
-    import-loop = "the `imports` of a module asks a sink that a module below it gives: a cycle in `result.modules`";
+    import-loop = "the `imports` of a [module](/principles/modules/) asks a [sink](/behavior/sinks/) that a module below it gives: a cycle in `result.modules`";
     unknown-field = "an instance sets a field its kind does not declare";
     unknown-instance = "a ref from JSON names an instance that does not exist";
     unknown-param = "a stored query is asked with a parameter it does not take";

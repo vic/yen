@@ -14,8 +14,8 @@
     }:
     [
       ''
-        Three kits ship with yen, in `yen.lib.kits`. You import one as a module, then write assemblies of it.
-        Each kit needs the fleet's `exports` sink (`kits.exports`) and `generators` sink (`vars.generators`), as below.
+        Three kits ship with yen, in `yen.lib.kits`. You import one as a [module](/principles/modules/), then write assemblies of it.
+        Each kit needs the fleet's `exports` [sink](/behavior/sinks/) (`kits.exports`) and `generators` sink (`vars.generators`), as below.
 
         | Kit | Roles | Does |
         |---|---|---|

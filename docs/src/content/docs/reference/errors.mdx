@@ -16,15 +16,15 @@ The codes below are read from the engine source when the docs are written.
 | `at` | `at` holds a value that is not a predicate |
 | `bad-atom` | a rule literal is not a reference from `yen.facts` or `yen.relations`, or a term is not a variable, a string, an int or a bool |
 | `bare-function` | an element is a function without named args (`x: …`): wrap it as `{ ... }:` |
-| `check` | a field value or a stored query parameter fails its type |
+| `check` | a field value or a stored [query](/query/queries/) parameter fails its type |
 | `check-not-bool` | a field type's check gives no bool (a curried check, such as a gen-types one, needs its other argument) |
 | `claim` | a claimed key has more than one owner |
-| `cycle` | an instance appears twice on its own scope path: `spawns` loops |
+| `cycle` | an instance appears twice on its own [scope](/model/scopes/) path: `spawns` loops |
 | `edb-head` | a rule derives a fact yen extracts (`scope`, `instance`, `parent`, `kind`, `has`, `edge`, `error`, `ref`, `val`, or a comparison) |
-| `error` | a message from an aspect's `errors` key |
+| `error` | a message from an [aspect](/behavior/aspects/)'s `errors` key |
 | `external-not-bool` | a relation's `holds` function answers a tuple with something other than a bool |
-| `import-loop` | the `imports` of a module asks a sink that a module below it gives: a cycle in `result.modules` |
-| `invariant-data` | an invariant is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference |
+| `import-loop` | the `imports` of a [module](/principles/modules/) asks a [sink](/behavior/sinks/) that a module below it gives: a cycle in `result.modules` |
+| `invariant-data` | an [invariant](/query/invariants/) is data: write each rule as a function of its variables, `{ H }: { bad = H; pos = [ … ]; }`, its literals by reference |
 | `law-change` | a staged change declares `invariants`, `relations`, `labels` or `flake`: the law is the owner's, never a change's |
 | `link-gone` | a doc link's needle is not found in its file |
 | `merge` | `merge`: two different leaves at one path |

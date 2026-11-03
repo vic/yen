@@ -23,7 +23,7 @@
 
         | Battery | Value of | Does |
         |---|---|---|
-        | `mesh { from; build; }` | any key of an [aspect](/behavior/aspects/) | the records of sink `from`, except the ones that this scope or a scope under it gave; `build` makes content of them |
+        | `mesh { from; build; }` | any key of an [aspect](/behavior/aspects/) | the records of sink `from`, except the ones that this [scope](/model/scopes/) or a scope under it gave; `build` makes content of them |
         | `claim { key; rank ? ; }` | `reduce` of a sink | each key has one owner; two owners is an error, unless `rank` picks one |
         | `ordered` | `reduce` of a sink | elements `{ name; value; before; after; }` in an order that meets all of them |
       ''
