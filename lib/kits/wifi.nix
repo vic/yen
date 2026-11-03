@@ -16,7 +16,7 @@ in
     type = yen.lib.attrs;
     default = { };
   };
-  yen.aspects.kit-wifi = {
+  yen.kit.wifi.aspects.default = {
     inherit at;
     nixos =
       { member, ... }:
@@ -24,7 +24,7 @@ in
         environment.etc."wifi/networks".text = toString (lib.attrNames member.settings.networks);
       };
   };
-  yen.aspects.kit-wifi-psk = {
+  yen.kit.wifi.aspects.psk = {
     inherit at;
     generators =
       { member, ... }:

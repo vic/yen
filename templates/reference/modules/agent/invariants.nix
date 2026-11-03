@@ -62,7 +62,7 @@ in
             head = runsSshd H;
             pos = [
               (parent M H)
-              (has yen.aspects.kit-sshd-server M)
+              (has yen.kit.sshd.aspects.server M)
             ];
           }
         )

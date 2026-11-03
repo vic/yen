@@ -38,7 +38,7 @@ in
       "generators"
     ];
   };
-  yen.aspects.zerotier-ids = {
+  yen.kit.zerotier.aspects.ids = {
     at = members;
     exports =
       { member, scope, ... }:
@@ -55,7 +55,7 @@ in
         };
       };
   };
-  yen.aspects.zerotier-check = {
+  yen.kit.zerotier.aspects.check = {
     at = yen.kinds.fleet;
     errors =
       { exports, ... }:
@@ -63,7 +63,7 @@ in
         lib.filter (x: same x.kit yen.kit.zerotier && x ? value.public && pk x == null) exports
       );
   };
-  yen.aspects.zerotier-net = {
+  yen.kit.zerotier.aspects.net = {
     at = members;
     nixos =
       {

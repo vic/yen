@@ -19,11 +19,16 @@
         machines where its `at` predicate holds, the same predicates an [aspect](/behavior/aspects/) uses. `yen.lib.batteries.kits` gives
         the rules. You keep the words: here the machine [kind](/model/kinds-fields/) is `machine` and the member kind is `member`.
 
+        A kit adds no name outside itself: its data are values of the kit (`yen.kit.disko.layouts`), its aspects live
+        in the kit ([`yen.kit.sshd.aspects.server`](/behavior/aspects/#aspects-an-instance-owns)), and the
+        assemblies it adds are parts of the assembly that adds them (`kits.assemblies`).
+
         | Battery | Value of | Does |
         |---|---|---|
         | `members { assemblies; holds; }` | `spawns.<member kind>` of a machine kind | one member per (assembly, role), with refs to its assembly and kit; settings layered: interface default, then the role's (attrs, or a function of the machine) |
         | `exports { isMember; }` | `reduce` of the exports [sink](/behavior/sinks/) | members write their own entry; another [scope](/model/scopes/) overrides an entry by refs; an unlisted export is an error |
-        | `contract { assemblies; machines; holds; }` | `errors` | a kit that is no kit, an unknown role, an `at` that is no predicate, no roles, min and max machines per role, `maxAssemblies` |
+        | `contract { assemblies; machines; holds; }` | `errors` | a kit that is no kit, an unknown role, an `at` that is no predicate, no roles, min and max machines per role, `maxAssemblies`, two assemblies with one name |
+        | `assemblies own` | a list of assemblies | the assemblies and every part their kits add, at every depth: each part has a `path` and a `name` (the path joined by `-`) |
         | `settings-typed` | `errors` at a member | every interface setting is set and has its type |
 
         `yen.lib.batteries.vars` gives the secrets that kits generate:

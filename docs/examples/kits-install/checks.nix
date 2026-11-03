@@ -33,6 +33,6 @@
     )) ([ "rebuild-web" ]);
   };
   layout-string = eq (map (e: e.error) (variant "variants/layout-string.nix").errors) [
-    "kits: disk-bad.default: setting layout is not a layout ref"
+    "kits: disk-bad.default: setting layout is not a layout of kit disko (yen.kit.disko.layouts.<name>)"
   ];
 }

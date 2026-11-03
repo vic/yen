@@ -31,7 +31,7 @@ in
   };
 
   # the shell is its own aspect: it needs `pkgs`, which only the NixOS module system answers
-  yen.aspects.kit-users-shell = {
+  yen.kit.users.aspects.shell = {
     inherit at;
     nixos =
       { member, pkgs, ... }:
@@ -39,7 +39,7 @@ in
         users.users.${member.settings.user}.shell = member.settings.shell pkgs;
       };
   };
-  yen.aspects.kit-users = {
+  yen.kit.users.aspects.default = {
     inherit at;
     nixos =
       { member, ... }:

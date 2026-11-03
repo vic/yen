@@ -91,6 +91,13 @@ so the packages of a user go up to its host.
 }
 ```
 
+## Aspects an instance owns
+
+A self-contained part, such as a [kit](/batteries/kits/), keeps its aspects in its own instance, not in
+`yen.aspects`: `yen.kit.disko.aspects.default = { at = …; … };`. Its id is `kit:disko/default`, written as a
+scope id is, and its ref is `yen.kit.disko.aspects.default`. A `:` in an aspect that `yen.aspects` names is
+the error `reserved`, so no aspect of the fleet can take the id of an aspect an instance owns.
+
 ## Static content lands once
 
 Static content counts once per receiver. `zsh` is active at `web` and at its two users, and `web` gets one `zsh`.

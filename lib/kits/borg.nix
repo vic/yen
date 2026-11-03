@@ -33,13 +33,13 @@ in
     ];
     # a kit that needs another: every borg assembly adds an sshd assembly on its servers
     adds = a: {
-      "${a.name}-sshd" = {
+      sshd = {
         kit = yen.kit.sshd;
         roles.server.at = a.roles.server.at;
       };
     };
   };
-  yen.aspects.borg-server = {
+  yen.kit.borg.aspects.server = {
     at = member "server";
     exports =
       { scope, ... }:
@@ -51,7 +51,7 @@ in
         };
       };
   };
-  yen.aspects.borg-client = {
+  yen.kit.borg.aspects.client = {
     at = member "client";
     nixos =
       {

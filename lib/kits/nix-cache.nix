@@ -37,7 +37,7 @@ in
       "key"
     ];
   };
-  yen.aspects.nix-cache-server = {
+  yen.kit.nix-cache.aspects.server = {
     at = member "server";
     exports =
       { scope, member, ... }:
@@ -72,7 +72,7 @@ in
         };
       };
   };
-  yen.aspects.nix-cache-client = {
+  yen.kit.nix-cache.aspects.client = {
     at = member "client";
     nixos =
       { member, exports, ... }:

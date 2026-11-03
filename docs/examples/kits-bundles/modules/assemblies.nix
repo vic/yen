@@ -31,7 +31,7 @@ in
         at = host.nas;
         settings = shared // {
           device = "/dev/sda /dev/sdb";
-          layout = yen.layout.zfs-mirror;
+          layout = yen.kit.disko.layouts.zfs-mirror;
         };
       };
       node = {

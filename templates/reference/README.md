@@ -551,7 +551,7 @@ All of them at once, in parallel: `fastest-tests` in the devshell (`nix develop 
 GitHub Actions run all of these on each push and pull request ([.github/workflows/test.yml](https://github.com/vic/yen/blob/main/.github/workflows/test.yml)): the engine and cost oracles, the fleet checks and e2e evaluations, the fleet cost oracle, the MCP tests, `nix flake check` (with KVM for the VM test) and one job per `ci.json` target that must evaluate to a derivation.
 
 ## This fleet, live
-Generated from the fleet's queries: 141 scopes, 30 kinds, 219 aspects, 1137 routed elements.
+Generated from the fleet's queries: 141 scopes, 29 kinds, 219 aspects, 1137 routed elements.
 | Kind | Fields | Spawns | Sinks | Scopes |
 |---|---|---|---|---|
 | `assembly` | `kit`, `roles` |  |  | 0 |
@@ -569,8 +569,7 @@ Generated from the fleet's queries: 141 scopes, 30 kinds, 219 aspects, 1137 rout
 | `hive` | `environment` |  | `meta` | 2 |
 | `home` | `channel`, `on`, `system`, `user` | `user` | `homeManager`, `os` | 2 |
 | `host` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` | `backup`, `guest`, `home`, `host`, `member`, `pet`, `user`, `variant` | `age-secrets`, `aspect-settings`, `deploy`, `dev`, `disks`, `fw`, `fw-tcp`, `isNixos`, `monitor`, `nixos`, `os`, `osConfig`, `pairs`, `persist`, `platform`, `service-domains`, `tags`, `tuning`, `unfree` | 9 |
-| `kit` | `adds`, `constraints`, `exports`, `roles` |  |  | 0 |
-| `layout` | `devices` |  |  | 0 |
+| `kit` | `adds`, `constraints`, `exports`, `layouts`, `roles` |  |  | 0 |
 | `mac` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` | `member`, `user` | `darwin`, `os` | 1 |
 | `machine` | `addr`, `apps`, `buildHost`, `builder`, `channel`, `dbOn`, `dbRole`, `demands`, `dependsOn`, `environment`, `fromDir`, `gates`, `grants`, `maintenance`, `minimal`, `motd`, `portBefore`, `portRange`, `ram`, `ramFuel`, `ramRange`, `ramReserve`, `secretStore`, `settings`, `sharedPkgs`, `system`, `system-owner`, `tokens`, `trimmedModules`, `unpersist`, `validTo`, `via` |  |  | 0 |
 | `member` |  |  |  | 80 |
@@ -886,7 +885,6 @@ flowchart LR
   nd265c5f895["home"]
   n91a43a88c2["host"]
   n969fdcbc29["kit"]
-  n227773463f["layout"]
   n25061baf77["mac"]
   n5e4f590e9f["machine"]
   nf384c24853["member"]
@@ -1235,6 +1233,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   nf0331b9733{{"backup (borg)"}}
+  nb360d61bee{{"backup-sshd (sshd)"}}
   n91dab8a035{{"banner (banner)"}}
   n620cb8b2de{{"builders (remote-builders)"}}
   n3513c5af5d{{"cache (nix-cache)"}}
@@ -1244,17 +1243,6 @@ flowchart LR
   n978357e468{{"docs (site)"}}
   ne42cc7d401{{"emergency (emergency-access)"}}
   n10952543dd{{"lab (homelab)"}}
-  n5f25f39301{{"metrics (monitoring)"}}
-  n88b91e7901{{"ops (users)"}}
-  nc86a802a24{{"overlay (zerotier)"}}
-  n7bbf26e7a2{{"pg (postgres)"}}
-  n2c6b3a4085{{"ssh-trust (sshd)"}}
-  nc28872f0f3{{"sshd (sshd)"}}
-  n1e618804c1{{"svc-a (users)"}}
-  nb45a9ed3ff{{"svc-b (users)"}}
-  n203ffbe069{{"vpn (wireguard)"}}
-  nf8c77851a0{{"wifi (wifi)"}}
-  nb360d61bee{{"backup-sshd (sshd)"}}
   nd7abd0e46d{{"lab-base (base)"}}
   n23793bb8db{{"lab-base-disko (disko)"}}
   n630db1377e{{"lab-base-emergency (emergency-access)"}}
@@ -1265,6 +1253,16 @@ flowchart LR
   n60dce87e93{{"lab-dns (dns)"}}
   na082e14a7a{{"lab-monitoring (monitoring)"}}
   nff13d0549b{{"lab-wg (wireguard)"}}
+  n5f25f39301{{"metrics (monitoring)"}}
+  n88b91e7901{{"ops (users)"}}
+  nc86a802a24{{"overlay (zerotier)"}}
+  n7bbf26e7a2{{"pg (postgres)"}}
+  n2c6b3a4085{{"ssh-trust (sshd)"}}
+  nc28872f0f3{{"sshd (sshd)"}}
+  n1e618804c1{{"svc-a (users)"}}
+  nb45a9ed3ff{{"svc-b (users)"}}
+  n203ffbe069{{"vpn (wireguard)"}}
+  nf8c77851a0{{"wifi (wifi)"}}
   n6f22ef9133["app-1"]
   n0300c386fd["app-2"]
   n5358012523["app-3"]
@@ -1285,6 +1283,7 @@ flowchart LR
   nf0331b9733 -->|"client"| n83e8ed4efa
   nf0331b9733 -->|"client"| n6d0ac6bdcf
   nf0331b9733 -->|"server"| nc1312ce7ae
+  nb360d61bee -->|"server"| nc1312ce7ae
   n91dab8a035 -->|"default"| n2ed910d1a2
   n620cb8b2de -->|"builder"| nc1312ce7ae
   n620cb8b2de -->|"client"| n348d430633
@@ -1300,6 +1299,32 @@ flowchart LR
   n10952543dd -->|"node"| n0300c386fd
   n10952543dd -->|"node"| n5358012523
   n10952543dd -->|"server"| n6f22ef9133
+  nd7abd0e46d -->|"default"| n6f22ef9133
+  nd7abd0e46d -->|"default"| n0300c386fd
+  nd7abd0e46d -->|"default"| n5358012523
+  n23793bb8db -->|"default"| n6f22ef9133
+  n23793bb8db -->|"default"| n0300c386fd
+  n23793bb8db -->|"default"| n5358012523
+  n630db1377e -->|"default"| n6f22ef9133
+  n630db1377e -->|"default"| n0300c386fd
+  n630db1377e -->|"default"| n5358012523
+  ne4f0d5da64 -->|"default"| n6f22ef9133
+  ne4f0d5da64 -->|"default"| n0300c386fd
+  ne4f0d5da64 -->|"default"| n5358012523
+  na5f81ab433 -->|"server"| n6f22ef9133
+  na5f81ab433 -->|"server"| n0300c386fd
+  na5f81ab433 -->|"server"| n5358012523
+  nb5df968172 -->|"client"| n0300c386fd
+  nb5df968172 -->|"client"| n5358012523
+  nb5df968172 -->|"server"| n6f22ef9133
+  n83335b0395 -->|"server"| n6f22ef9133
+  n60dce87e93 -->|"default"| n6f22ef9133
+  na082e14a7a -->|"exporter"| n0300c386fd
+  na082e14a7a -->|"exporter"| n5358012523
+  na082e14a7a -->|"server"| n6f22ef9133
+  nff13d0549b -->|"controller"| n6f22ef9133
+  nff13d0549b -->|"peer"| n0300c386fd
+  nff13d0549b -->|"peer"| n5358012523
   n5f25f39301 -->|"exporter"| n348d430633
   n5f25f39301 -->|"exporter"| n83e8ed4efa
   n5f25f39301 -->|"server"| nc1312ce7ae
@@ -1328,33 +1353,6 @@ flowchart LR
   n203ffbe069 -->|"peer"| n348d430633
   n203ffbe069 -->|"peer"| n83e8ed4efa
   nf8c77851a0 -->|"default"| n6d0ac6bdcf
-  nb360d61bee -->|"server"| nc1312ce7ae
-  nd7abd0e46d -->|"default"| n6f22ef9133
-  nd7abd0e46d -->|"default"| n0300c386fd
-  nd7abd0e46d -->|"default"| n5358012523
-  n23793bb8db -->|"default"| n6f22ef9133
-  n23793bb8db -->|"default"| n0300c386fd
-  n23793bb8db -->|"default"| n5358012523
-  n630db1377e -->|"default"| n6f22ef9133
-  n630db1377e -->|"default"| n0300c386fd
-  n630db1377e -->|"default"| n5358012523
-  ne4f0d5da64 -->|"default"| n6f22ef9133
-  ne4f0d5da64 -->|"default"| n0300c386fd
-  ne4f0d5da64 -->|"default"| n5358012523
-  na5f81ab433 -->|"server"| n6f22ef9133
-  na5f81ab433 -->|"server"| n0300c386fd
-  na5f81ab433 -->|"server"| n5358012523
-  nb5df968172 -->|"client"| n0300c386fd
-  nb5df968172 -->|"client"| n5358012523
-  nb5df968172 -->|"server"| n6f22ef9133
-  n83335b0395 -->|"server"| n6f22ef9133
-  n60dce87e93 -->|"default"| n6f22ef9133
-  na082e14a7a -->|"exporter"| n0300c386fd
-  na082e14a7a -->|"exporter"| n5358012523
-  na082e14a7a -->|"server"| n6f22ef9133
-  nff13d0549b -->|"controller"| n6f22ef9133
-  nff13d0549b -->|"peer"| n0300c386fd
-  nff13d0549b -->|"peer"| n5358012523
 ```
 
 **vars generators**: an edge is a dependency. A hexagon is shared by every machine that uses it.

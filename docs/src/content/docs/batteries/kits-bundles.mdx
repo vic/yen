@@ -4,14 +4,16 @@
 
 import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-A bundle is a kit whose `adds` make several assemblies, each on machines taken from the bundle's own roles.
+A bundle is a kit whose `adds` make several assemblies, each on machines taken from the bundle's own roles. They
+are parts of the bundle's assembly, keyed by a short name (`base`, `wg`), not names in the fleet: the battery
+`kits.assemblies` expands them at every depth, and `kits.contract` refuses two assemblies with one name.
 
 | Bundle | Roles | Adds |
 |---|---|---|
-| `base` | `default` with `device`, `layout` (a ref), `authorizedKeys`, `hardware` | disko, facter, emergency-access, and sshd as server, on the same machines. No users: a user needs a name per machine |
+| `base` | `default` with `device`, `layout` (one of `yen.kit.disko.layouts`), `authorizedKeys`, `hardware` | disko, facter, emergency-access, and sshd as server, on the same machines. No users: a user needs a name per machine |
 | `homelab` | `server` (exactly 1), `node`; the settings of `base` and `prefix` | base on both roles; wireguard (server controller, nodes peers); borg (server backs up); monitoring (server scrapes); dns on the server |
 
-The engine adds one level, so `homelab` also lists what `base` and `borg` add. A role's `settings` may be a
+The parts of `base` and `borg` come with them: `homelab` lists only its own. A role's `settings` may be a
 function of the machine, for a device per machine. You import the kits a bundle uses, then write one assembly:
 
 
@@ -49,7 +51,7 @@ in
         at = host.nas;
         settings = shared // {
           device = "/dev/sda /dev/sdb";
-          layout = yen.layout.zfs-mirror;
+          layout = yen.kit.disko.layouts.zfs-mirror;
         };
       };
       node = {
@@ -71,19 +73,8 @@ let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
   attrs = yen.lib.attrs;
-  # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
-  added =
-    a:
-    lib.mapAttrsToList (
-      name: v:
-      v
-      // {
-        kind = "assembly";
-        inherit name;
-      }
-    ) (a.kit.adds a);
-  own = lib.attrValues yen.assembly;
-  assemblies = own ++ lib.concatMap added own;
+  # the fleet's assemblies and the parts their kits add (a part lives under its assembly)
+  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly);
   # tree requests: every assembly and host, with their data
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
@@ -151,7 +142,7 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = get assemblyTree ++ lib.concatMap added (get assemblyTree);
+            assemblies = yen.lib.batteries.kits.assemblies (get assemblyTree);
             machines = get hostTree;
             inherit holds;
           })
@@ -187,7 +178,7 @@ in
 
 ## The result
 
-The members of each machine (the assemblies the bundle added are named `lab-...`):
+The members of each machine (a part is named by its path joined by `-`: `lab-base-disko` is part `disko` of part `base` of `lab`):
 
 
 ```nix title="result"

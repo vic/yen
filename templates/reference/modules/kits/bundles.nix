@@ -6,7 +6,7 @@ let
   k = inputs.yen.lib.kits;
   shared = {
     device = "/dev/sda";
-    layout = yen.layout.single-ext4;
+    layout = yen.kit.disko.layouts.single-ext4;
     authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBLabKeyNotReal admin" ];
     hardware = ../../hardware;
     prefix = "10.9.0.0/24";

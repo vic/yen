@@ -42,7 +42,7 @@ in
       "user"
     ];
   };
-  yen.aspects.postgres-server = {
+  yen.kit.postgres.aspects.server = {
     at = member "server";
     exports =
       { scope, member, ... }:
@@ -70,7 +70,7 @@ in
         };
       };
   };
-  yen.aspects.postgres-client = {
+  yen.kit.postgres.aspects.client = {
     at = member "client";
     exports =
       { member, ... }:

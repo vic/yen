@@ -1,7 +1,7 @@
 #: lib.batteries.kits.contract :: { assemblies; machines; holds; } -> [ error ] -- the assembly contract: roles, machine counts, assemblies per kit
 # the assembly contract, the value of an `errors` key: the kit is a kit, every role is the kit's and its `at` is a
 # predicate, the machine count per role is within the kit's `constraints.roles.<role>.{min,max}`, and at most
-# `constraints.maxAssemblies` assemblies use one kit.
+# `constraints.maxAssemblies` assemblies use one kit, and no two assemblies share a name (a part a kit adds included).
 #   errors = kits.contract { assemblies = attrValues yen.assembly; machines = attrValues yen.host; inherit (yen.lib) holds; };
 self:
 {
@@ -51,5 +51,12 @@ let
       ++ when (
         c ? maxAssemblies && b.length (b.filter (x: same x.kit k) assemblies) > c.maxAssemblies
       ) "kits: assembly ${a.name}: kit ${k.name} allows ${toString c.maxAssemblies} assemblies";
+  # two assemblies with one name: a part a kit adds and an assembly the fleet writes, or two parts
+  byName = b.groupBy (a: a.name) assemblies;
+  clashes = b.filter (n: b.length byName.${n} > 1) (b.attrNames byName);
+  pathOf = a: b.concatStringsSep "/" (a.path or [ a.name ]);
 in
 b.concatMap check assemblies
+++ map (
+  n: "kits: assemblies ${b.concatStringsSep " and " (map pathOf byName.${n})} have one name: ${n}"
+) clashes
