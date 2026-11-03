@@ -56,6 +56,8 @@ let
         ]
       )) (builtins.readFile (dir + "/${p}"));
     file = fileWith "";
+    # a file of the repository, titled by its repository path: `repoFile "templates/minimal/flake.nix"`
+    repoFile = p: fence (langOf p) ''title="${p}"'' (builtins.readFile (dir + "/../../../${p}"));
     # a file with `# (1)` notes in its comments: each `(n)` is marked, so the prose can say "(1)" and the reader finds the line
     fileNoted =
       meta: p:
@@ -297,15 +299,17 @@ in
         tree = [ allPages ];
         files = [
           {
-            files.file = {
-              "src/content/docs/${page.route}.mdx".text = render cmds pages page;
-            }
-            // lib.optionalAttrs ((yen.helpers.example page.dir).page ? alsoAt) {
-              ${(yen.helpers.example page.dir).page.alsoAt}.text = plain cmds pages page;
-            };
+            # a `readmeOnly` page is its repo file only (the README), never a site page
+            files.file =
+              lib.optionalAttrs (!((yen.helpers.example page.dir).page.readmeOnly or false)) {
+                "src/content/docs/${page.route}.mdx".text = render cmds pages page;
+              }
+              // lib.optionalAttrs ((yen.helpers.example page.dir).page ? alsoAt) {
+                ${(yen.helpers.example page.dir).page.alsoAt}.text = plain cmds pages page;
+              };
           }
         ];
-        sidebar = [
+        sidebar = lib.optionals (!((yen.helpers.example page.dir).page.readmeOnly or false)) [
           {
             section = page.section;
             inherit (page) order;

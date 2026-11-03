@@ -17,7 +17,8 @@ in
   description = "Yen is a cycle.js based language for Nix configurations";
   section = "start";
   order = 1;
-  alsoAt = "../README.md"; # the same text is the repository README: plain markdown only
+  alsoAt = "../README.md"; # the repository README: plain markdown only
+  readmeOnly = true; # for people who find the project on GitHub; the site starts at its own pages (#56)
 
   body =
     { docs, variant, ... }:
@@ -96,32 +97,33 @@ in
         - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
         - **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the contributions.
 
-        Yen is built only on Nix `builtins`. This is the most basic flake that takes a single Yen module.
+        Yen is built only on Nix `builtins`. This is the most basic NixOS host, the whole `minimal` template
+        (`nix flake init -t github:vic/yen#minimal`). The flake takes the modules of a directory:
 
       ''
 
-      (docs.file "flake.nix")
+      (docs.repoFile "templates/minimal/flake.nix")
 
       ''
 
-        Yen imposes no domain language, so you can define the nouns of your own world, how they relate to each other,
-        and how they contribute to the final Nix configuration.
+        The fleet is the root, and its `out` sink is the flake. A host builds NixOS from its `nixos` sink:
 
       ''
 
-      (docs.file "modules/hello.nix")
+      (docs.repoFile "templates/minimal/modules/fleet.nix")
 
       ''
 
-        The output of this flake looks like this:
+        The host is data. The aspect `base` is active at every host and gives it one NixOS module:
 
       ''
 
-      (docs.file "result.nix")
+      (docs.repoFile "templates/minimal/modules/laptop.nix")
 
       ''
 
-        To start with a NixOS host instead, run `nix flake init -t github:vic/yen#minimal`.
+        Yen imposes no domain language: `fleet`, `host` and `nixos` are words this fleet chose. The
+        [templates](https://yen.oeiuwq.com/start/templates/) page lists the other templates.
 
         </details>
 
