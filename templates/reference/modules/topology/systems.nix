@@ -13,11 +13,10 @@ in
   yen.kinds.system.sinks = {
     packages = {
       reduce = merge;
-      out =
-        { system, packages, ... }:
-        {
-          packages.${system.name} = packages;
-        };
+      out = yen.lib.batteries.perSystem.out {
+        from = yen.kinds.system.sinks.packages;
+        group = "packages";
+      };
     };
     checks = {
       reduce = merge;
