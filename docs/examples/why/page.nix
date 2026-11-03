@@ -235,7 +235,7 @@ in
 
         ## How agents check a change
 
-        An agent works on a Yen fleet through the MCP server in `mcp/`. The skill in `.claude/skills/yen-mcp/SKILL.md` gives the
+        An agent works on a Yen fleet through the MCP server in `mcp/`. The skill in `skills/yen-mcp/SKILL.md` gives the
         order of calls. The agent reads with `yen_schema` and `yen_check`, asks with `yen_why_not` and `yen_explain`, and stages a
         change with `yen_stage` before any file is written. A fleet passes `yen_check` only when `ok` is true, with no violations,
         no `incomplete` or `opaque` atoms, and `certified` true. `yen_verify` runs the Lean checker on the same verdict.
@@ -359,7 +359,7 @@ in
       ]);
       mcp-run-line = {
         flake = eq (lib.hasInfix cmd (builtins.readFile ../../../mcp/flake.nix)) true;
-        skill = eq (lib.hasInfix cmd (builtins.readFile ../../../.claude/skills/yen-mcp/SKILL.md)) true;
+        skill = eq (lib.hasInfix cmd (builtins.readFile ../../../skills/yen-mcp/SKILL.md)) true;
       };
       ports = {
         first = eq (p.first) ([

@@ -12,6 +12,8 @@
         | Battery | Value of | Gives |
         |---|---|---|
         | `lean.verify { pkgs; result; checker ? ; }` | a flake check, next to `yen.lib.eval` | a derivation that builds only when Lean verifies `result` |
+        | `lean.waves { pkgs; succ; checker ? ; }` | a flake check | a derivation that builds only when Lean verifies the deploy waves of `succ` (`lib.graphs.layers`) |
+        | `lean.systems` | the systems list | the systems of `checks.<system>.yen-lean` |
 
         `result` is the fleet, `yen.lib.eval module`. The battery writes `result.check.lean` to a file and runs
         `yen-cert-check` on it in the build. The build fails when a violation is true or undefined, when the

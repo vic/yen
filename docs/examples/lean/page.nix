@@ -58,15 +58,37 @@
         | `sound` (Certificate.lean) | an accepted certificate is true in every interpretation closed under the well-founded operator of any ground program its rules cover |
         | `not_both` (Certificate.lean) | no atom of an accepted certificate is both proved and refuted |
         | `covers` (Ground.lean) | the program Lean grounds covers the full ground program of the rules and facts |
-        | `verify_sound` (Ground.lean) | on a verified verdict, every violation is false in the well-founded model of the full program |
+        | `verify_sound` (Ground.lean) | on a verified verdict, every violation is false in every interpretation closed under the operator |
+        | `wfm_fixpoint`, `wfm_least` (Wfm.lean) | the well-founded model, defined in Lean, is the least fixpoint of the well-founded operator |
+        | `verify_wfm` (Wfm.lean) | on a verified verdict, every violation is false in the well-founded model of the full program |
+        | `shape_no_cycle` (Facts.lean) | on facts that pass the shape check, no scope is its own ancestor |
+        | `waves_respect`, `waves_acyclic` (Waves.lean) | verified deploy waves put every dependency in an earlier wave, so the graph has no cycle |
 
-        CI runs `lean-check` on every change: the proofs compile, and none uses `sorry`.
+        CI runs `lean-check` on every change: the proofs compile, and none uses `sorry`. The consistency of the
+        well-founded model (no atom both true and false) is cited, from Van Gelder, Ross and Schlipf 1991, Theorem 5.4.
+
+        The checker also checks the shape of the facts: every id a fact names is a scope, each scope has one kind and
+        at most one parent, and every scope reaches the root. Facts that fail are rejected before any rule is read.
+
+        ## Deploy waves
+
+        `lib.graphs.layers` orders a graph into waves: each node comes after everything it depends on. The battery
+        `lean.waves` checks the waves in Lean. A cycle leaves nodes out of every wave, so the check fails and names them:
+      ''
+      (docs.nix ''
+        checks.x86_64-linux.waves = yen.lib.batteries.lean.waves {
+          inherit pkgs;
+          succ = { web = [ "db" ]; db = [ "net" ]; net = [ ]; };
+        };
+      '')
+      ''
 
         Run the checker on any fleet without the battery: `nix run github:vic/yen#yen-cert-check -- verdict.json`,
         where `verdict.json` is `builtins.toJSON result.check.lean`. The [MCP server](/agents/agent-surface/) gives the
         same check to agents as the tool `yen_verify`.
 
-        What stays trusted: Nix, which evaluates the fleet into facts, and the Lean kernel. An external relation
+        What stays trusted: Nix, which evaluates the fleet into facts (Lean checks only their shape), and the Lean
+        kernel. An external relation
         decided by a Nix function (`yen.relations.<name>.holds` or `.type`) is not decided by Lean: the checker
         exits 2 on it. `lt` and `neq` are decided by Lean.
 

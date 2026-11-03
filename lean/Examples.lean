@@ -1,4 +1,6 @@
-import Ground
+import Wfm
+import Facts
+import Waves
 
 /-!
 The checker on a small program, with a mutant certificate for each condition it checks.
@@ -34,3 +36,7 @@ example : check program ⟨[⟨0, 0, r0⟩, ⟨1, 1, r1⟩], [⟨2, 1⟩]⟩ = f
 #print axioms Yen.not_both
 #print axioms Yen.clean_sound
 #print axioms Yen.verify_sound
+#print axioms Yen.wfm_fixpoint
+#print axioms Yen.verify_wfm
+#print axioms Yen.shape_no_cycle
+#print axioms Yen.waves_acyclic

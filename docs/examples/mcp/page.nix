@@ -35,7 +35,7 @@
       ''
         Each answer is `{ complete; result }`, or `{ complete = false; error }`. A timeout is never an empty answer.
         The repository ships a skill that teaches agents the order of calls, the answer shapes and the refusals:
-        `.claude/skills/yen-mcp/SKILL.md`, at the top of the repository. This page checks that it names every tool,
+        `skills/yen-mcp/SKILL.md`, at the top of the repository. This page checks that it names every tool,
         and no other.
         Arguments reach Nix through a file and `builtins.fromJSON`, never through string interpolation.
 
@@ -85,7 +85,7 @@
       # the agent skill names every tool the server serves, and no tool it does not
       skill =
         let
-          skill = builtins.readFile (inputs.yen + "/.claude/skills/yen-mcp/SKILL.md");
+          skill = builtins.readFile (inputs.yen + "/skills/yen-mcp/SKILL.md");
           tools = map (t: t.name) (
             builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"))
           );

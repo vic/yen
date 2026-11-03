@@ -1,4 +1,7 @@
 import Ground
+import Facts
+import Waves
+import Wfm
 import Lean.Data.Json
 
 /-!
@@ -16,6 +19,23 @@ instance : FromJson Yen.Term where
     | .error _ => return .var (← j.getObjValAs? String "var")
 
 deriving instance FromJson for RuleData, Rule, Proved, Refuted, Certificate
+
+structure WavesInput where
+  edges : List (String × String)
+  layers : List (List String)
+deriving FromJson
+
+-- yen-cert-check --waves FILE: { edges = [ [ from to ] ]; layers; } from lib.batteries.lean.waves
+def checkWaves (path : String) : IO UInt32 := do
+  match Json.parse (← IO.FS.readFile path) >>= fromJson? (α := WavesInput) with
+  | .error e => IO.eprintln s!"yen-cert-check: {path}: {e}"; return 2
+  | .ok w =>
+    let summary := s!"{w.edges.length} edges, {w.layers.length} waves"
+    if wavesOk w.edges w.layers then
+      IO.println s!"verified: every node deploys after what it depends on, and the graph has no cycle ({summary})"; return 0
+    let missing := (nodesOf w.edges).eraseDups.filter fun n => (waveOf w.layers n).isNone
+    IO.eprintln s!"rejected: the waves do not respect the edges ({summary}); nodes in no wave (on a cycle?): {missing}"
+    return 1
 
 structure Verdict where
   rules : List RuleData
@@ -54,7 +74,8 @@ def relOf : List Yen.Term → Option String
   | _ => none
 
 def main (args : List String) : IO UInt32 := do
-  let [path] := args | IO.eprintln "usage: yen-cert-check FILE.json"; return 2
+  if let ["--waves", path] := args then return (← checkWaves path)
+  let [path] := args | IO.eprintln "usage: yen-cert-check FILE.json | --waves FILE.json"; return 2
   match Json.parse (← IO.FS.readFile path) >>= fromJson? (α := Verdict) with
   | .error e => IO.eprintln s!"yen-cert-check: {path}: {e}"; return 2
   | .ok v =>
@@ -66,6 +87,8 @@ def main (args : List String) : IO UInt32 := do
     let G := build ext v.rules v.facts poss
     let c := v.certificate
     let summary := s!"{v.rules.length} rules, {v.facts.length} facts, {G.length} ground rules, {c.proved.length} proved, {c.refuted.length} refuted"
+    if !shapeOk v.facts then
+      IO.eprintln s!"rejected: the facts are not well formed: an id that is no scope, a scope without one kind, two parents, or a parent cycle ({summary})"; return 1
     if verify ext isBad v.rules v.facts poss c then
       IO.println s!"verified: no violation is true or undefined ({summary})"; return 0
     if !v.rules.all (safe ext) then

@@ -113,6 +113,7 @@ in
           out=$(mktemp -d)
           lean -o "$out/Certificate.olean" lean/Certificate.lean
           LEAN_PATH="$out" lean -o "$out/Ground.olean" lean/Ground.lean
+          for m in Wfm Facts Waves; do LEAN_PATH="$out" lean -o "$out/$m.olean" "lean/$m.lean"; done
           LEAN_PATH="$out" lean lean/Main.lean
           axioms=$(LEAN_PATH="$out" lean lean/Examples.lean)
           echo "$axioms"
