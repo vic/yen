@@ -1,7 +1,6 @@
 # .github/workflows/test.yml is generated: each area is an aspect that gives jobs to the `workflow` sink.
-# A PR reports its fast checks first: fmt, engine-test, docs-test and reference-test start at once. Every other job
-# (costs, e2e, site build, flake check, one eval per system of templates/reference/ci.json) needs fmt and the fast test of
-# its area, so a deep evaluation runs only on a change that passed the cheap checks. Check `ci.order` holds this.
+# Every job starts at once: a PR waits only for its slowest job, never for a chain. Each job tests one thing, so no
+# two jobs do the same work. Check `ci.order` holds this.
 {
   yen,
   lib,
@@ -47,17 +46,6 @@ let
     inherit name;
     run = "nix develop ./docs -c ${command}";
   };
-  # the jobs with no `needs`; a job of an area is `<area>-test` when fast, else it waits for fmt and that test
-  fast = [
-    "fmt"
-    "engine-test"
-    "docs-test"
-    "reference-test"
-  ];
-  after = area: [
-    "fmt"
-    "${area}-test"
-  ];
   # one devshell command per job, named as the command
   one =
     area: args: name: command:
@@ -66,7 +54,6 @@ let
       // {
         steps = [ (dev name command) ];
       }
-      // lib.optionalAttrs (!lib.elem command fast) { needs = after area; }
     );
   # diagnostic: on a failed job, show memory and the kernel log, so an OOM kill is visible (exit 143 on reference-e2e)
   memoryAtFailure =
@@ -81,19 +68,8 @@ let
         }
       ];
     };
-  # jobs that break the order: a fast job with `needs`, or another job without exactly fmt and a fast test
-  disordered = lib.filterAttrs (
-    n: j:
-    if lib.elem n fast then
-      j ? needs
-    else
-      !(
-        j ? needs
-        && lib.length j.needs == 2
-        && lib.all (x: lib.elem x fast) j.needs
-        && lib.elem "fmt" j.needs
-      )
-  );
+  # jobs that break the order: a job that waits for another
+  disordered = lib.filterAttrs (_: j: j ? needs);
   # the fleet's CI targets, grouped by system: one job per system, its targets one after another
   targets = lib.groupBy (t: t.system) (
     builtins.fromJSON (builtins.readFile (inputs.yen + "/templates/reference/ci.json"))
@@ -193,7 +169,6 @@ in
     workflow = {
       engine-test = one "engine" { timeout = 20; } "engine and library oracles" "engine-test";
       engine-cost = one "engine" { timeout = 20; } "cost oracles (memos)" "engine-cost";
-      lean-check = one "engine" { timeout = 20; } "Lean proofs of the certificate checker" "lean-check";
     };
   };
   yen.aspects.ci-docs = {
@@ -226,7 +201,7 @@ in
       )
     ) targets;
   };
-  # the order is data: check it, so a new job cannot skip the fast checks or block them
+  # the order is data: check it, so a new job cannot wait for another
   yen.aspects.ci-order = {
     at = yen.kinds.site;
     tests =

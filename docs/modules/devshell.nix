@@ -108,17 +108,8 @@ in
       (cmd "engine" "engine-test" "the engine and library suites" (fastest "" ""))
       (cmd "engine" "engine-cost" "the memo cost oracles" "bash tests/cost.sh")
       (cmd "engine" "lean-check"
-        "the Lean proofs of the certificate checker, its examples, and no sorry in them"
-        ''
-          out=$(mktemp -d)
-          lean -o "$out/Certificate.olean" lean/Certificate.lean
-          LEAN_PATH="$out" lean -o "$out/Ground.olean" lean/Ground.lean
-          for m in Wfm Facts Waves; do LEAN_PATH="$out" lean -o "$out/$m.olean" "lean/$m.lean"; done
-          LEAN_PATH="$out" lean lean/Main.lean
-          axioms=$(LEAN_PATH="$out" lean lean/Examples.lean)
-          echo "$axioms"
-          ! grep -q sorryAx <<<"$axioms"
-        ''
+        "build the Lean checker: its build checks the proofs, the examples, and no sorry (CI builds it in docs-check)"
+        "nix build --no-link -L .#yen-cert-check"
       )
     ];
   };
