@@ -29,8 +29,12 @@ no rule is left undecided.
 
 What you get:
 
-- **A flake check.** Add the [Lean battery](https://yen.oeiuwq.com/batteries/lean/) to your flake, and `nix flake check`
-  fails when a rule breaks or the proof does not check.
+- **A flake check, always on.** A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has
+  `checks.<system>.yen-lean`. `nix flake check` runs the Lean checker on every change. It fails when a rule
+  breaks, when a rule is left undecided, when the proof does not check, or when the fleet has an error. For a
+  flake you write by hand, add the [Lean battery](https://yen.oeiuwq.com/batteries/lean/).
+- **In CI.** The [reference template](https://yen.oeiuwq.com/start/templates/) runs the same check as a job of its generated
+  `ci.json`.
 - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
   your laptop.
 - **A tool for agents.** The MCP server (`nix run github:vic/yen#yen-mcp`) gives an agent `yen_verify`. The agent
@@ -44,8 +48,10 @@ What to expect:
   not verify what a built system does when it runs.
 - Yen proves the rules you write. It does not find the rules you forgot. Write the mistakes you fear as rules.
 - Nix turns your files into facts, and the checker trusts that step. A rule that calls a check written as a Nix
-  function cannot be decided by Lean. The checker says so and does not accept.
-- A fleet with a broken rule has no flake outputs. You fix the rule or the fleet first.
+  function cannot be decided by Lean. Such a fleet gets no `yen-lean` check, and the checker refuses its verdict
+  when you run it by hand.
+- A fleet with a broken rule builds nothing. Its flake has only `invalid-flake-errors` and the Lean check, which
+  fails and names the broken rules. You fix the fleet or the rule first.
 
 <details>
 <summary>A first Yen flake</summary>

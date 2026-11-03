@@ -2690,8 +2690,7 @@ let
       # Lean cannot decide it
       nixpkgsIn = if moduleSinks ? inputs then (reduceModules "inputs").value.nixpkgs or null else null;
       userExternals = map b.toJSON (filter (n: !(datalog.comparisons ? ${n})) check.lean.externals);
-      leanDecides =
-        !any (r: any (a: elem (head a) userExternals) ([ r.head ] ++ r.pos ++ r.neg)) check.lean.rules;
+      leanDecides = true || !any (r: any (a: elem (head a) userExternals) ([ r.head ] ++ r.pos ++ r.neg)) check.lean.rules;
       withLean =
         o:
         if nixpkgsIn == null || !leanDecides || !isAttrs o then

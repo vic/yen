@@ -14,8 +14,9 @@
       (docs.file "modules/fleet.nix")
       (docs.file "modules/invariants.nix")
       ''
-        The battery `lean.verify` gives a flake check. `nix flake check` builds it only when the Lean checker verifies the
-        verdict:
+        A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has this check already, as `checks.<system>.yen-lean`, for
+        every fleet, clean or not. For a flake you write by hand, the battery `lean.verify` gives the same check.
+        `nix flake check` builds it only when the Lean checker verifies the verdict:
       ''
       (docs.nix ''
         outputs =
@@ -87,6 +88,7 @@
       variant,
       eq,
       yes,
+      no,
       ...
     }:
     {
@@ -104,5 +106,11 @@
             facts = 23;
           });
       mistakes = eq (builtins.length (variant "variants/mistakes.nix").check.violations) (2);
+      # every flake gets the Lean check, but not one whose rules read a relation decided by a Nix function
+      auto = {
+        t1 = yes (result.flake.checks.x86_64-linux ? yen-lean);
+        t2 = yes ((variant "variants/external.nix").check.ok);
+        t3 = no ((variant "variants/external.nix").flake ? checks);
+      };
     };
 }

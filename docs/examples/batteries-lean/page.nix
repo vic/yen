@@ -16,7 +16,11 @@
         `result` is the fleet, `yen.lib.eval module`. The battery writes `result.check.lean` to a file and runs
         `yen-cert-check` on it in the build. The build fails when a violation is true or undefined, when the
         certificate does not check, or when a rule uses an external relation that Lean cannot decide. Its output is
-        the checker's message. `checker` defaults to the checker built from `pkgs`.
+        the checker's message. `checker` defaults to the checker built from `pkgs`. A fleet error fails it too.
+
+        You need it only for a flake you write by hand. A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has it
+        already, as `checks.<system>.yen-lean` on x86_64-linux, aarch64-linux and aarch64-darwin
+        (`yen.lib.batteries.lean.systems`), for every fleet, clean or not.
       ''
       (docs.nix ''
         checks.x86_64-linux.lean = yen.lib.batteries.lean.verify {

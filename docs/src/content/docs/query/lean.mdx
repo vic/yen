@@ -82,8 +82,9 @@ in
 }
 ```
 
-The battery `lean.verify` gives a flake check. `nix flake check` builds it only when the Lean checker verifies the
-verdict:
+A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has this check already, as `checks.<system>.yen-lean`, for
+every fleet, clean or not. For a flake you write by hand, the battery `lean.verify` gives the same check.
+`nix flake check` builds it only when the Lean checker verifies the verdict:
 
 
 ```nix

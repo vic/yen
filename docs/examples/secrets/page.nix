@@ -69,7 +69,10 @@
         t1 = eq (map (e: e.error) (variant "variants/orphan.nix").errors) ([
           "secret old-token (secrets/old-token.age) has no owner"
         ]);
-        t2 = eq (builtins.attrNames (variant "variants/orphan.nix").flake) ([ "invalid-flake-errors" ]);
+        t2 = eq (builtins.attrNames (variant "variants/orphan.nix").flake) ([
+          "checks"
+          "invalid-flake-errors"
+        ]);
       };
       by-name = eq (map (e: e.code) (variant "variants/by-name.nix").errors) ([ "of" ]);
     };

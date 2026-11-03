@@ -265,7 +265,10 @@ let
         }
         // lib.optionalAttrs x.template {
           inputs-known = yes x.inputsKnown;
-          flake-is-eval = eq (lib.attrNames x.flake) (lib.attrNames x.result.flake);
+          # `checks` aside: yen-lean comes from the inputs a flake gives mkFlake, and the harness gives every one
+          flake-is-eval = eq (lib.attrNames (removeAttrs x.flake [ "checks" ])) (
+            lib.attrNames (removeAttrs x.result.flake [ "checks" ])
+          );
         };
     in
     {

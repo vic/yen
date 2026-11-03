@@ -58,6 +58,17 @@ The `out` arg is the flake itself, read lazily. An element can build on other ou
 
 ```nix title="result"
 {
+  checks = {
+    aarch64-darwin = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+    aarch64-linux = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+    x86_64-linux = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+  };
   inventory = [
     "postgres"
     "nginx"
@@ -72,6 +83,9 @@ The `out` arg is the flake itself, read lazily. An element can build on other ou
   };
 }
 ```
+
+`checks.<system>.yen-lean` is in every flake whose `inputs` has `nixpkgs`: the [Lean checker](/query/lean/) on the
+fleet's verdict, so `nix flake check` always checks the rules.
 
 ## With or without flakes
 

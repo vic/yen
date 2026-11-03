@@ -85,7 +85,9 @@
               class = "fixable";
             }
           ]);
+      # only the reason, and the Lean check that fails on it
       no-outputs = eq (builtins.attrNames (variant "variants/duplicate.nix").flake) ([
+        "checks"
         "invalid-flake-errors"
       ]);
       warnings = eq (result.flake.warnings) ([ "scratch has no backup" ]);
