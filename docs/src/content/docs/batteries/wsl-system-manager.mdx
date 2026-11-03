@@ -1,0 +1,167 @@
+---
+{"description":"One fleet for NixOS, NixOS on WSL, and other Linux distributions with system-manager: shared aspects, one output per kind.","editUrl":"https://github.com/vic/yen/blob/main/docs/examples/batteries-wsl-system-manager/page.nix","title":"WSL and system-manager"}
+---
+
+import { Aside, Badge, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
+
+A fleet can mix machines that run NixOS, machines that run NixOS inside WSL on Windows, and machines of another
+Linux distribution that [system-manager](https://github.com/numtide/system-manager) configures. Each is a
+[kind](/model/kinds-fields/) with its own [sink](/behavior/sinks/), and each sink builds its own flake output.
+An [aspect](/behavior/aspects/) at several kinds shares one piece of configuration between them.
+
+| Machine | Kind | Sink | Battery | Output |
+|---|---|---|---|---|
+| NixOS | `host` | `nixos` | `nixos.system` | `nixosConfigurations.<name>` |
+| NixOS on WSL | `wsl` | `nixos` | `nixos.system`, plus the [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) module | `nixosConfigurations.<name>` |
+| Other Linux | `machine` | `system` | `configurations` with `system-manager.lib.makeSystemConfig` | `systemConfigs.<name>` |
+
+The kinds, their sinks and the batteries that build them:
+
+
+```nix title="modules/fleet.nix"
+# Three kinds of machine: a NixOS host, a NixOS host that runs in WSL, and a machine of another Linux distribution
+# that system-manager configures. Each kind has its own sink and builds its own flake output.
+{
+  yen,
+  lib,
+  inputs,
+  ...
+}:
+let
+  inherit (yen.lib.batteries) configurations nixos;
+in
+{
+  yen.kinds.fleet = {
+    spawns = {
+      host = _: yen.host;
+      wsl = _: yen.wsl;
+      machine = _: yen.machine;
+    };
+    sinks.out.reduce = yen.lib.reduce.merge;
+  };
+  yen.fleet.main = { };
+
+  yen.kinds.host.sinks.nixos.out = nixos.system {
+    from = yen.kinds.host.sinks.nixos;
+    inherit (inputs) nixpkgs;
+  };
+  # WSL is NixOS with the NixOS-WSL module: the same battery, one more module
+  yen.kinds.wsl.sinks.nixos.out = nixos.system {
+    from = yen.kinds.wsl.sinks.nixos;
+    inherit (inputs) nixpkgs;
+  };
+  yen.aspects.wsl = {
+    at = yen.kinds.wsl;
+    nixos = {
+      imports = [ inputs.nixos-wsl.nixosModules.default ];
+      wsl.enable = true;
+    };
+  };
+  # system-manager: `systemConfigs.<name>` from the modules of the machine's sink
+  yen.kinds.machine.sinks.system.out = configurations {
+    from = yen.kinds.machine.sinks.system;
+    output = "systemConfigs";
+    build = _: modules: inputs.system-manager.lib.makeSystemConfig { inherit modules; };
+  };
+
+  yen.flake = { out, ... }: out;
+}
+```
+
+WSL needs no battery of its own: it is NixOS with one more module, so the aspect `wsl` adds
+`nixos-wsl.nixosModules.default` and `wsl.enable` at the kind `wsl`. The machines, and the aspect `tools`, which
+gives the same packages to all three through the key of each kind:
+
+
+```nix title="modules/machines.nix"
+# The machines, and one aspect that every one of them gets: it gives the same packages to NixOS, WSL and
+# system-manager, each through the key of its own kind.
+{ yen, ... }:
+let
+  tools = pkgs: [
+    pkgs.git
+    pkgs.htop
+  ];
+in
+{
+  yen.host.desk = { };
+  yen.wsl.laptop = { };
+  yen.machine.vps = { };
+
+  yen.aspects.base = {
+    at = [
+      yen.kinds.host
+      yen.kinds.wsl
+    ];
+    nixos =
+      { scope, ... }:
+      {
+        networking.hostName = scope.name;
+        nixpkgs.hostPlatform = "x86_64-linux";
+        system.stateVersion = "25.05";
+        fileSystems."/".device = "/dev/disk/by-label/nixos";
+        boot.loader.grub.devices = [ "nodev" ];
+      };
+  };
+  yen.aspects.tools = {
+    at = [
+      yen.kinds.host
+      yen.kinds.wsl
+      yen.kinds.machine
+    ];
+    nixos =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = tools pkgs;
+      };
+    system =
+      { pkgs, ... }:
+      {
+        nixpkgs.hostPlatform = "x86_64-linux";
+        environment.systemPackages = tools pkgs;
+      };
+  };
+}
+```
+
+The flake outputs, with the [Lean check](/query/lean/) every flake gets:
+
+
+```nix title="result"
+{
+  checks = [
+    "aarch64-darwin"
+    "aarch64-linux"
+    "x86_64-linux"
+  ];
+  nixosConfigurations = [
+    "desk"
+    "laptop"
+  ];
+  systemConfigs = [
+    "vps"
+  ];
+}
+```
+
+nix-darwin works the same way: a kind with a `darwin` sink and the battery `darwin.system` (see
+[Platform batteries](/batteries/platforms/)). An aspect at `host`, `wsl`, `machine` and the darwin kind shares
+its configuration with all four.
+
+
+:::tip[Run this example]
+Every block on this page is a file of the template `batteries-wsl-system-manager`. Copy it and run it:
+
+```sh frame="terminal"
+nix flake init -t github:vic/yen#batteries-wsl-system-manager
+```
+
+<FileTree>
+
+- flake.nix
+- modules/
+  - fleet.nix
+  - machines.nix
+
+</FileTree>
+:::
