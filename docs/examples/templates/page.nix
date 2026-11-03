@@ -48,6 +48,7 @@ let
       (inputsOf inputs "flake-parts" { inherit (inputs.terranix.inputs) flake-parts; }).self.outputs;
     multi-platform = (inputsOf inputs "multi-platform" { }).self.outputs;
     basic-fleet = (inputsOf inputs "basic-fleet" { }).self.outputs;
+    neovim = (inputsOf inputs "neovim" { nixpkgs = inputs.nixpkgs-unstable; }).self.outputs;
     kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
@@ -78,6 +79,18 @@ let
     ];
     basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
     basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
+    # neovim: a terminal editor and a neovide one per variant, each a derivation
+    neovim-variants = eq (builtins.attrNames t.neovim.packages.x86_64-linux) [
+      "go"
+      "go-gui"
+      "web"
+      "web-gui"
+      "writer"
+      "writer-gui"
+    ];
+    neovim-builds = eq (builtins.all (p: builtins.isString p.drvPath) (
+      builtins.attrValues t.neovim.packages.x86_64-linux
+    )) true;
     basic-fleet-shells = eq (builtins.attrNames t.basic-fleet.devShells.x86_64-linux) [
       "dev"
       "prod"
