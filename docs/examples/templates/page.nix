@@ -47,6 +47,8 @@ let
     flake-parts =
       (inputsOf inputs "flake-parts" { inherit (inputs.terranix.inputs) flake-parts; }).self.outputs;
     multi-platform = (inputsOf inputs "multi-platform" { }).self.outputs;
+    basic-fleet = (inputsOf inputs "basic-fleet" { }).self.outputs;
+    neovim = (inputsOf inputs "neovim" { nixpkgs = inputs.nixpkgs-unstable; }).self.outputs;
     kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
@@ -61,6 +63,38 @@ let
     multi-nixos = eq t.multi-platform.nixosConfigurations.server.config.home-manager.users.alice.home.stateVersion "25.05";
     multi-darwin = eq t.multi-platform.darwinConfigurations.studio.config.networking.hostName "studio";
     multi-home = eq t.multi-platform.homeConfigurations."alice@work".config.home.username "alice";
+    # basic fleet: each host in the domain of its environment, a deploy-rs node per host, a dev shell per environment
+    basic-fleet-fqdn =
+      eq (builtins.mapAttrs (_: c: c.networking.fqdnOrHostName) (hosts t.basic-fleet))
+        {
+          lab = "lab.dev.example.org";
+          web = "web.prod.example.org";
+        };
+    basic-fleet-deploy = eq (builtins.mapAttrs (_: n: n.hostname) t.basic-fleet.deploy.nodes) {
+      lab = "lab.dev.example.org";
+      web = "web.prod.example.org";
+    };
+    basic-fleet-users = eq (builtins.attrNames (hosts t.basic-fleet).web.home-manager.users) [
+      "alice"
+    ];
+    basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
+    basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
+    # neovim: a terminal editor and a neovide one per variant, each a derivation
+    neovim-variants = eq (builtins.attrNames t.neovim.packages.x86_64-linux) [
+      "go"
+      "go-gui"
+      "web"
+      "web-gui"
+      "writer"
+      "writer-gui"
+    ];
+    neovim-builds = eq (builtins.all (p: builtins.isString p.drvPath) (
+      builtins.attrValues t.neovim.packages.x86_64-linux
+    )) true;
+    basic-fleet-shells = eq (builtins.attrNames t.basic-fleet.devShells.x86_64-linux) [
+      "dev"
+      "prod"
+    ];
     # bundle base: every machine gets its disk layout and an ssh server
     kits-base = eq (sshd t.kits-base) {
       db = true;
