@@ -1429,6 +1429,35 @@ let
             "q"
           ]);
     };
+    # a dependency cycle on one machine has no generation order: an error with the code `ordered` gives (GH #68)
+    vars-generators-cycle =
+      eq
+        (map (e: { inherit (e) code got; }) (
+          (gen [
+            {
+              m = "a";
+              v = [
+                {
+                  name = "x";
+                  dependencies = [ "y" ];
+                }
+                {
+                  name = "y";
+                  dependencies = [ "x" ];
+                }
+              ];
+            }
+          ]).errors
+        ))
+        ([
+          {
+            code = "ordered-cycle";
+            got = [
+              "x"
+              "y"
+            ];
+          }
+        ]);
     vars-generators-dependency = eq (map (e: e.error) badDeps.errors) ([
       "vars: generator borg@c depends on nope, which c has not"
     ]);

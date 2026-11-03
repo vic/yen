@@ -69,6 +69,7 @@ let
     unencodable = "a field holds a float, a function or a derivation: no fact can state it";
     claim = "a claimed key has more than one owner";
     link-gone = "a doc link's needle is not found in its file";
+    ordered-cycle = "a dependency cycle among the generators of a machine: they have no generation order";
     merge = "`merge`: two different leaves at one path";
     missing = "a required field has no value";
     missing-param = "a stored query is asked without a required parameter";
