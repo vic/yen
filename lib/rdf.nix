@@ -1,4 +1,4 @@
-_:
+self:
 # rdf.nix: an eval result as sorted, de-duplicated N-Triples, and its content hash. Builtins only.
 let
   b = builtins;
@@ -58,17 +58,6 @@ let
   triples =
     r:
     let
-      engineKeys = [
-        "kind"
-        "name"
-        "key"
-        "parent"
-        "path"
-        "id"
-        "up"
-        "rup"
-        "__here"
-      ];
       fieldObj =
         v:
         if b.isString v then
@@ -89,7 +78,7 @@ let
             o = fieldObj s.${k};
           in
           if o == null then [ ] else [ (triple n (fpred k) o) ]
-        ) (b.filter (k: !b.elem k engineKeys) (b.attrNames s));
+        ) (b.attrNames (removeAttrs s self._core.keys.scopeMeta));
       scope =
         s:
         let
@@ -156,7 +145,8 @@ let
     b.sort b.lessThan uniq;
 
   #: lib.rdf.ntriples :: result -> string -- the eval result as one N-Triples document
-  ntriples = r: b.concatStringsSep "\n" (triples r) + "\n";
+  textOf = ts: b.concatStringsSep "\n" ts + "\n"; # one N-Triples document
+  ntriples = r: textOf (triples r);
 
   # SHACL shapes (Turtle) from r.schema; a leaf field is an attrset with a string `type`.
   #: lib.rdf.shacl :: result -> string -- SHACL shapes (Turtle) from the result schema
@@ -209,18 +199,16 @@ let
       ]
       ++ map (k: shape k + "\n") names
     );
+  # the N-Triples of the lines ts, with their content hash and count: the triples are computed once
+  shareOf = ts: shareText ts (textOf ts);
+  shareText = ts: nt: {
+    ntriples = nt;
+    sha256 = b.hashString "sha256" nt;
+    count = b.length ts;
+  };
 in
 {
   inherit triples ntriples shacl;
   #: lib.rdf.share :: result -> { ntriples; sha256; count; } -- the N-Triples with their content hash and triple count
-  share =
-    r:
-    let
-      nt = ntriples r;
-    in
-    {
-      ntriples = nt;
-      sha256 = b.hashString "sha256" nt;
-      count = b.length (triples r);
-    };
+  share = r: shareOf (triples r);
 }

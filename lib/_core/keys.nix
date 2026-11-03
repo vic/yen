@@ -2,14 +2,15 @@
 self:
 let
   inherit (self._core.helpers) words;
+  scopeKeys = words "kind name key parent path id up rup"; # a scope sets these over the instance fields
 in
 {
   # keys the engine reads; the other keys of a sink, an aspect, a cycle output or a scope are data
   sinkMeta = words "at reduce of __sink";
-  scopeKeys = words "kind name key parent path id up rup"; # a scope sets these over the instance fields
   aspectMeta = words "at cycle order __aspect";
   outMeta = words "tree order";
-  scopeMeta = words "kind name key parent path id up rup __here";
+  inherit scopeKeys;
+  scopeMeta = scopeKeys ++ [ "__here" ]; # the scope keys and its memo
   requestKinds = words "nearest parent children scopesOf holds instances graph";
   # the facts yen extracts, with their arity: no rule derives them
   edbArity = {
