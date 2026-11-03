@@ -98,7 +98,8 @@ The best pull request changes or adds an example under `docs/examples/`. An exam
 4. Run `docs-write` to regenerate the pages, then `ci` for every stage.
 
 A change to the engine also needs a test in the suite of its topic: `tests/model.nix`, `behavior.nix`, `query.nix`,
-`agents.nix` or `logic.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
+`agents.nix` or `logic.nix`; a battery change, in `platforms`, `kits`, `vars`, `docs` or `sinks`. Keep the engine to Nix
+builtins: no nixpkgs, no `throw`.
 
 ## Coding standards
 
@@ -110,8 +111,9 @@ What works:
 - One `let` per file, at the top. A binding that needs a value is a function of that value.
 - A leaf file is `self: value`. If the file does not use `self`, write `_: value`. Read other leaves from `self`.
 - `default.nix` loads every file under `lib/` into one fixpoint, `self`, each at the path of its file. `tests.nix`
-  adds every file under `tests/`: a file directly in `tests/` is a suite, and `tests/_shared.nix` holds the fixtures
-  the engine suites share. A new file is loaded with no list to edit.
+  adds every file under `tests/`: a file directly in `tests/` is a suite, and the `_` files (`_shared.nix` for the
+  engine suites, `_batteries.nix` for the battery suites) hold the fixtures they share. A new file is loaded with no
+  list to edit.
 - `b = builtins;` in the `let`, then `b.map`, `b.filter`. Name each attribute you use.
 - One `#:` line above each API: `#: <where> :: <takes> -> <returns> -- <purpose>`. The [API page](/reference/lib/)
   is read from these lines, and a check fails when an API has none.
@@ -150,7 +152,7 @@ in
 }
 ```
 
-The test `batteries.one-let` holds every kit, template module, docs example module and reference fleet module to one `let`.
+The test `style.one-let` holds every kit, template module, docs example module and reference fleet module to one `let`.
 
 ## Set up
 
