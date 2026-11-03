@@ -19,3 +19,7 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# generated from docs/examples by `nix run .#write-files` (#91): built, never committed
+src/content/docs/
+src/sidebar.json
