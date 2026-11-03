@@ -3,7 +3,7 @@
 # 1. Ports: each app on a host gets a port from the host's range, no two apps share one (`distinctfd`), and an app
 #    may ask to come before another (`ltfd`). Run backward, the same relation answers "which apps can take 8081".
 # 2. Memory: a host's guests share its memory; each guest asks for a range; the host keeps a reserve (`plusfd`).
-# 3. Placement: each host gets the database hosts of its own environment, a join over host records by unification.
+# 3. Placement: each host gets the database hosts of its own environment, a join over host rows by unification.
 { yen, lib, ... }:
 let
   K = yen.lib.krn;

@@ -6,7 +6,7 @@ in
 {
   # keys the engine reads; the other keys of a sink, an aspect, a cycle output or a scope are data
   sinkMeta = words "at reduce of __sink";
-  scopeKeys = words "kind name key parent path id up rup"; # the scope record sets these over the instance fields
+  scopeKeys = words "kind name key parent path id up rup"; # a scope sets these over the instance fields
   aspectMeta = words "at cycle order __aspect";
   outMeta = words "tree order";
   scopeMeta = words "kind name key parent path id up rup __here";

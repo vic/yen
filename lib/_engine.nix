@@ -1803,7 +1803,7 @@ let
             fp.__scope = v.id;
             refs = [ (dataT v.id) ];
             opaque = false;
-          } # a scope record: its data is that scope's token (its `up` holds itself)
+          } # a scope: its data is that scope's token (its `up` holds itself)
         else if isFunction v || isAttrs v && (isLeaf v || v ? outPath) then
           {
             fp = null;
@@ -2356,7 +2356,7 @@ let
           #: result.check.facts, result.check.relations :: … -> literal -- yen.facts and yen.relations; a kind, aspect or sink may be its identity { kind; }, { aspect; }, { sink; }
           facts = factLits;
           inherit relations;
-          #: result.check.bad :: { invariant = term or [ term ] -> literal; } -- the violation of an invariant, by reference: a scope record, or an instance with one scope
+          #: result.check.bad :: { invariant = term or [ term ] -> literal; } -- the violation of an invariant, by reference: a scope, or an instance with one scope
           bad = mapAttrs (
             n: _: t:
             lit (
@@ -2461,8 +2461,8 @@ let
       };
       # ── explain: why an aspect is (not) active at a scope, as a three-valued trace of its `at`, cut at a depth ──
       byId = byScope (s: s) unsorted;
-      # a scope by reference: its record, its path of identities, or an instance (a ref or { kind; name; }) with one
-      # scope. The id string stays inside, a key: two scope records compare by sharing, never by value
+      # a scope by reference: the scope itself, its path of identities, or an instance (a ref or { kind; name; }) with one
+      # scope. The id string stays inside, a key: two scopes compare by sharing, never by value
       #: result.pathOf :: scope -> [ { kind; name; } ] -- the scope as a path of identities, from the root: what an answer prints and a question takes
       pathOf = s: (if s.parent == null then [ ] else pathOf s.parent) ++ [ { inherit (s) kind name; } ];
       idOfPath = p: concatStringsSep "/" (map (x: "${leafOf x.kind}:${x.name}") p); # the scope key, as mkScope
@@ -2484,7 +2484,7 @@ let
               fix = "pass the path of a scope of result.scopes (result.pathOf s)";
             }
         else if !isRef t then
-          errWith from "a scope is a scope record, its path, or an instance" {
+          errWith from "a scope is a scope (an arg, an element of result.scopes), its path, or an instance" {
             code = "not-a-scope";
             fix = "pass yen.<kind>.<name> or { kind; name; } (one scope), or a path [ { kind; name; } … ]";
           }
@@ -2928,7 +2928,7 @@ let
                 "sinks"
               ]
             )
-        # a field named like a key of the scope record would read as that key, never as the field
+        # a field named like a key of a scope would read as that key, never as the field
         ++ concatMap (
           k:
           map (
@@ -3055,7 +3055,7 @@ let
               );
           };
       self = {
-        # the scope records as answers state a secret field by its hash; the elements read the values
+        # the scopes as answers state a secret field by its hash; the elements read the values
         #: result.scopes :: [ scope ] -- every scope, a secret field stated by its hash
         scopes = map (
           s:
