@@ -56,9 +56,11 @@ let
     b.listToAttrs (b.concatMap (fileDocs root) ([ (root + "/default.nix") ] ++ files (root + "/lib")));
   # the APIs: every function and type of `(import yen).lib`, nested sets walked; the fleet-bound extras of `yen.lib`; the
   # queries of an eval result, and those of `result.check`
+  # a namespace: a set that is no function, no type (a type has `check`) and not empty
+  isSet = v: b.isAttrs v && !(v ? __functor) && !(v ? check) && b.attrNames v != [ ];
   leaves =
     p: v:
-    if b.isAttrs v && !(v ? __functor) && !(v ? check) && b.attrNames v != [ ] then
+    if isSet v then
       b.concatMap (n: leaves (p ++ [ n ]) v.${n}) (b.attrNames v)
     else
       [ (b.concatStringsSep "." p) ];
@@ -115,9 +117,9 @@ let
         (prose d.${n}.does)
       ]) (b.filter (n: d ? ${n}) names)
     );
-  # the namespaces of the engine lib: `lib.<s>` sets that are no function
+  # the namespaces of the engine lib: `lib.<s>` sets that are no function and no type
   subsOf =
-    engine: b.filter (n: b.isAttrs engine.${n} && !(engine.${n} ? __functor)) (b.attrNames engine);
+    engine: b.filter (n: isSet engine.${n}) (b.attrNames engine);
   # the page, from the `#:` docs d and the apis
   pageOf =
     docs: engine: d: apis:
