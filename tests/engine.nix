@@ -3353,6 +3353,100 @@ let
         ask-list = eq (errs { errors = [ (ask "many" (r: [ r ])) ]; }) (err "ref");
         ask-type = eq (errs { errors = [ (ask "typed" (r: r // { kind = "x"; })) ]; }) (err "ref");
       };
+    # #83: an aspect at a nested kind asks for a kind arg by the leaf name; it reads the nearest ancestor scope of that kind
+    nested-kind-args =
+      let
+        fns = {
+          hu =
+            { host, user, ... }:
+            {
+              "${host.name}/${user.name}" = "x";
+            };
+          u =
+            { user, ... }:
+            {
+              "${user.name}" = "x";
+            };
+          h =
+            { host, ... }:
+            {
+              "${host.name}" = "x";
+            };
+        };
+        run =
+          nested: fn:
+          yen.eval {
+            imports = [
+              (
+                { yen, ... }:
+                {
+                  yen.kinds.fleet = {
+                    spawns.host = _: yen.host;
+                    sinks.report = {
+                      reduce = yen.lib.reduce.merge;
+                      out =
+                        { report, ... }:
+                        {
+                          inherit report;
+                        };
+                    };
+                  };
+                  yen.fleet.main = { };
+                  yen.aspects.report = {
+                    at = if nested then yen.kinds.host.kinds.user else yen.kinds.user;
+                    report = fns.${fn};
+                  };
+                }
+              )
+              (
+                if nested then
+                  {
+                    yen.kinds.host.kinds.user = { };
+                    yen.host.laptop.user.vic = { };
+                    yen.host.laptop.user.ann = { };
+                    yen.host.server.user.vic = { };
+                  }
+                else
+                  (
+                    { yen, ... }:
+                    {
+                      yen.kinds.host.spawns.user = _: yen.user;
+                      yen.kinds.user = { };
+                      yen.host.laptop = { };
+                      yen.user.vic = { };
+                      yen.user.ann = { };
+                    }
+                  )
+              )
+            ];
+          };
+        rep = r: r.reduced.report."fleet:main" or null;
+      in
+      {
+        hu-clean = eq (msgs (run true "hu")) [ ];
+        hu = eq (rep (run true "hu")) {
+          "laptop/ann" = "x";
+          "laptop/vic" = "x";
+          "server/vic" = "x";
+        };
+        u-clean = eq (msgs (run true "u")) [ ];
+        u = eq (rep (run true "u")) {
+          ann = "x";
+          vic = "x";
+        };
+        h-clean = eq (msgs (run true "h")) [ ];
+        h = eq (rep (run true "h")) {
+          laptop = "x";
+          server = "x";
+        };
+        # the flat twin (user a top kind the host spawns) gives the same rows for its one host
+        flat-clean = eq (msgs (run false "hu")) [ ];
+        flat-hu = eq (rep (run false "hu")) {
+          "laptop/ann" = "x";
+          "laptop/vic" = "x";
+        };
+        flat-u = eq (rep (run false "u")) (rep (run true "u"));
+      };
     # c47: a sink declared on a nested kind is a key an aspect at that kind gives; an undeclared key stays an error
     nested-kinds-sinks =
       let
