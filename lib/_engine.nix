@@ -41,6 +41,7 @@ let
     optional
     words
     isRef
+    renderId
     lit
     curried
     combinators
@@ -434,20 +435,62 @@ let
           ];
       top = declIn answers [ ];
       topRefs = declIn answersRefs [ ];
-      kinds = mapAttrs (
-        k: d:
-        d
+      # a kind id is its declaration path: the name for a top kind, a list for a nested one, never a joined string
+      kindDecl =
+        id: refs: d:
+        (if isAttrs d then d else { }) # not an attrset: a `not-a-kind` error, read as an empty kind
         // {
-          __kind = k;
-          check = checkOf { __kind = k; };
+          __kind = id;
+          check = checkOf { __kind = id; };
         }
         // (
           if d ? sinks then
-            { sinks = mapAttrs (n: v: withAt d.sinks.${n} (v // { __sink = n; })) topRefs.kinds.${k}.sinks; }
+            { sinks = mapAttrs (n: v: withAt d.sinks.${n} (v // { __sink = n; })) refs.sinks; }
           else
             { }
         ) # a sink is a ref: it carries its name
-      ) (top.kinds or { }); # a kind is a type: its instances pass
+        // (
+          if d ? kinds then
+            {
+              kinds =
+                if isAttrs d.kinds then
+                  mapAttrs (c: kindDecl (toList id ++ [ c ]) refs.kinds.${c}) d.kinds
+                else
+                  { };
+            }
+          else
+            { }
+        ); # a nested kind lives only under its parent
+      kinds = mapAttrs (k: kindDecl k topRefs.kinds.${k}) (top.kinds or { }); # a kind is a type: its instances pass
+      # a kind is found by its id, through its parents; `declPath` is where it is declared under `yen`
+      kindAt = id: foldl' (d: c: d.kinds.${c} or { }) { inherit kinds; } (toList id); # an undeclared kind reads as { }, as before
+      declPath =
+        id:
+        concatMap (c: [
+          "kinds"
+          c
+        ]) (toList id);
+      leafOf = id: b.elemAt (toList id) (length (toList id) - 1);
+      # the scope id of a data path of kind, name pairs; a trailing kind alone names its parent
+      idAt =
+        at:
+        concatStringsSep "/" (
+          b.genList (i: "${b.elemAt at (2 * i)}:${b.elemAt at (2 * i + 1)}") (length at / 2)
+        );
+      # a spawned child of kind k: its nested kind when k declares one by that name, else the top kind
+      childId = k: c: if (kindAt k).kinds or { } ? ${c} then toList k ++ [ c ] else c;
+      # what an aspect sees of a kind: a ref, with its nested kinds as refs under it
+      kindRef =
+        d:
+        {
+          inherit (d) __kind check;
+        }
+        // (if d ? sinks then { sinks = mapAttrs (n: _: { __sink = n; }) d.sinks; } else { })
+        // (if d ? kinds then { kinds = mapAttrs (_: kindRef) d.kinds; } else { })
+        // mapAttrs (
+          f: _:
+          throw "yen.kinds.${renderId d.__kind}.${f}: an aspect reads a kind only as a ref (a type, a request)"
+        ) (removeAttrs d (words "__kind check sinks kinds"));
       # values come from the refs load; `at` reads data: stage diffs where aspects are active and where sinks receive
       withAt = d: v: v // (if d ? at then { inherit (d) at; } else { });
       aspects = mapAttrs (n: a: withAt top.aspects.${n} (a // { __aspect = n; })) (
@@ -588,21 +631,16 @@ let
             );
         };
       kindNames = attrNames kinds;
+      # every kind id, top and nested, by walking the tree
+      kindIds = concatMap idsFrom kindNames;
+      idsFrom =
+        id: [ id ] ++ concatMap (c: idsFrom (toList id ++ [ c ])) (attrNames ((kindAt id).kinds or { }));
       aspectNames = attrNames aspects;
 
       # ── instance data: typed paths. Answers first, then the type defaults; a failed check reads as null ──
-      typesAt =
-        k: path:
-        answers (
-          [
-            "kinds"
-            k
-            "fields"
-          ]
-          ++ path
-        );
+      typesAt = k: path: answers (declPath k ++ [ "fields" ] ++ path);
       # the fields of a kind whose type is secret, and a field value as an answer may state it
-      secretFields = k: filter (f: any isSecret (typesAt k [ f ])) (attrNames (kinds.${k}.fields or { }));
+      secretFields = k: filter (f: any isSecret (typesAt k [ f ])) (attrNames ((kindAt k).fields or { }));
       shown =
         k: f: v:
         if !(elem f (secretFields k)) || v == null then
@@ -611,37 +649,99 @@ let
           map hide v
         else
           hide v;
-      # one walk per instance path gives its value and its errors
+      # one walk per instance path gives its value and its errors; `at` is the data path of the instance,
+      # [ k n ] at the top, the parent's `at` ++ [ c n ] for an instance of the nested kind c
       inst =
-        k: n: path:
+        k: at: path:
         let
           ts = typesAt k path;
           tys = filter isType ts;
-          hits = answers (
-            [
-              k
-              n
-            ]
-            ++ path
-          );
+          hits = answers (at ++ path);
           d = first (t: isAttrs t && (t ? default || t ? defaultFrom)) ts;
           r =
             if hits != [ ] then
               { ok = head hits; }
             else if d != null then
-              { ok = if d ? defaultFrom then d.defaultFrom instances.${k}.${n} else d.default; }
+              {
+                ok =
+                  if d ? defaultFrom then
+                    d.defaultFrom (
+                      foldl' (v: s: v.${s}) instances at
+                      // {
+                        kind = k;
+                        name = b.elemAt at (length at - 1);
+                      }
+                    )
+                  else
+                    d.default;
+              }
             else
               { };
-          id = "${k}:${n}";
+          id = idAt at;
           p = concatStringsSep "." path;
           bad = first (t: !checkOf t r.ok) tys;
           notBool = first (t: !boolCheck t r.ok) tys;
           kr = first (t: refKind t != null) tys;
           fail = e: {
             value = null;
-            errors = [ (errWith id e.error (removeAttrs e [ "error" ] // { inherit path; })) ];
+            # a nested instance is named by its whole data path; a top instance keeps the field path
+            errors = [
+              (errWith id e.error (
+                removeAttrs e [ "error" ] // { path = (if length at > 2 then at else [ ]) ++ path; }
+              ))
+            ];
           };
-          sub = genAttrs (names (attrsIn (hits ++ ts))) (f: inst k n (path ++ [ f ]));
+          # a key that names a nested kind holds its instances, keyed by name, each typed by that kind
+          sub = genAttrs (names (attrsIn (hits ++ ts))) (
+            f:
+            if path == [ ] && (kindAt k).kinds or { } ? ${f} then
+              setOr [ f ] "write ${f}.<name> = { ... }" (
+                collect (
+                  genAttrs (names (attrsIn (answers (at ++ [ f ])))) (
+                    m:
+                    setOr
+                      [
+                        f
+                        m
+                      ]
+                      "write ${f}.${m} = { ... }"
+                      (
+                        inst (toList k ++ [ f ]) (
+                          at
+                          ++ [
+                            f
+                            m
+                          ]
+                        ) [ ]
+                      )
+                  )
+                )
+              )
+            else
+              inst k at (path ++ [ f ])
+          );
+          # a nested group or member that is not an attrset is an error, never a lost value
+          setOr =
+            ps: fix: x:
+            if all (v: isAttrs v && !isLeaf v) (answers (at ++ ps)) then
+              x
+            else
+              {
+                value = { };
+                errors = [
+                  (errWith (idAt (at ++ ps)) "${concatStringsSep "." ps} is not an attrset" {
+                    code = "check";
+                    path = at ++ ps;
+                    got = b.typeOf (first (v: !isAttrs v || isLeaf v) (answers (at ++ ps)));
+                    want = "attrset";
+                    inherit fix;
+                  })
+                ];
+              };
+          collect = xs: {
+            value = mapAttrs (_: x: x.value) xs;
+            errors = concatMap (x: x.errors) (b.attrValues xs);
+          };
         in
         if tys != [ ] && !(r ? ok) then
           fail {
@@ -657,6 +757,8 @@ let
             want = typeName notBool;
             fix = "make the check `v: bool`; a curried check needs its other argument first";
           }
+        else if kr != null && isList (refKind kr) then
+          fail (nestedRef id "ref" (refKind kr))
         else if tys != [ ] && bad != null then
           fail {
             error = if kr != null then "${p} wants a ${refKind kr} ref" else "${p} fails its check";
@@ -684,19 +786,22 @@ let
             near = near (b.elemAt path (length path - 1)) (
               names (attrsIn (typesAt k (b.genList (b.elemAt path) (length path - 1))))
             );
-            fix = "declare yen.kinds.${k}.fields.${p}, or use a declared field";
+            fix = "declare yen.kinds.${renderId k}.fields.${p}, or use a declared field";
           }
         else
-          {
-            value = mapAttrs (_: x: x.value) sub;
-            errors = concatMap (x: x.errors) (b.attrValues sub);
-          };
+          collect sub;
       instNames = k: attrNames (top.${k} or { });
       instances = mapAttrs (
         k: _:
         genAttrs (instNames k) (
           n:
-          (inst k n [ ]).value
+          (inst k
+            [
+              k
+              n
+            ]
+            [ ]
+          ).value
           // {
             kind = k;
             name = n;
@@ -739,16 +844,7 @@ let
             );
           helpers = topRefs.helpers or { };
           # a kind, a sink and an aspect are refs here: another declaration's content is no read an edge can record
-          kinds = mapAttrs (
-            k: d:
-            {
-              inherit (d) __kind check;
-            }
-            // (if d ? sinks then { sinks = mapAttrs (n: _: { __sink = n; }) d.sinks; } else { })
-            // mapAttrs (
-              f: _: throw "yen.kinds.${k}.${f}: an aspect reads a kind only as a ref (a type, a request)"
-            ) (removeAttrs d (words "__kind check sinks"))
-          ) kinds;
+          kinds = mapAttrs (_: kindRef) kinds;
           aspects = mapAttrs (
             n: a:
             {
@@ -765,7 +861,7 @@ let
       mkScope =
         parent: kind: name: inst:
         let
-          key = "${kind}:${name}";
+          key = "${leafOf kind}:${name}"; # the parent in `path` keeps a nested key unique
           path = (if parent == null then [ ] else parent.path) ++ [ key ];
           s = inst // {
             inherit
@@ -782,10 +878,17 @@ let
           }; # rup: nearest first, built once
         in
         s;
-      spawnsOf = k: kinds.${k}.spawns or { };
-      spawned = concatMap (k: attrNames (spawnsOf k)) kindNames;
+      # a nested kind is spawned from its parent's data by default; an explicit `spawns.<c>` replaces the default
+      spawnsOf =
+        k:
+        mapAttrs (
+          c: _: s:
+          s.${c} or { }
+        ) ((kindAt k).kinds or { })
+        // (kindAt k).spawns or { };
+      spawned = concatMap (k: filter (c: isString (childId k c)) (attrNames (spawnsOf k))) kindIds;
       roots = concatMap (k: map (n: mkScope null k n instances.${k}.${n}) (instNames k)) (
-        filter (k: kinds.${k} ? spawns && !elem k spawned) kindNames
+        filter (k: (kinds.${k} ? spawns || kinds.${k} ? kinds) && !elem k spawned) kindNames
       );
       childrenOf =
         s:
@@ -807,7 +910,7 @@ let
               else if !isAttrs made.${n} then
                 errWith s.id "spawns.${c}.${n} is no attrset" { code = "spawns"; }
               else
-                mkScope s c n made.${n}
+                mkScope s (childId s.kind c) n made.${n}
             ) (attrNames made)
         ) (attrNames (spawnsOf s.kind));
       item =
@@ -1013,7 +1116,7 @@ let
       childrenAt = groupBy parentId scopes;
 
       # ── routing: nearest ancestor-or-self receiver (Cycle isolateSink tags the identity) ──
-      sinkOf = s: k: (kinds.${s.kind}.sinks or { }).${k} or null;
+      sinkOf = s: k: ((kindAt s.kind).sinks or { }).${k} or null;
       sinkKeys = d: attrNames (removeAttrs d sinkMeta);
       sinkNames = uniq (concatMap (k: attrNames (k.sinks or { })) (b.attrValues kinds));
       above = s: if s.parent == null then [ ] else s.parent.rup;
@@ -1149,17 +1252,21 @@ let
           in
           if r == null then [ ] else [ (memo.${n}.${r.id} or (reduceAt n r)).value ]
         ); # a receiver with no element yet reduces to its empty value
-      known = q: !(q ? category) && any (k: q ? ${k}) requestKinds; # no category: a request is selected by itself
+      known = q: !(q ? category) && any (k: q ? ${k}) requestKinds && !nestedAsk q; # no category: a request is selected by itself
+      nestedAsk = q: isList (q.instances.__kind or null); # instances live in a table of top kinds only
       requestErrors = concatMap (
         s:
         concatMap (
           n:
           map (
-            _:
-            errWith s.id "aspect ${n}: unknown tree request" {
-              code = "tree-request";
-              fix = "ask one of ${concatStringsSep ", " requestKinds}, with no category, and select it by itself: tree.select request";
-            }
+            q:
+            if nestedAsk q then
+              nestedRef s.id "tree-request" q.instances.__kind
+            else
+              errWith s.id "aspect ${n}: unknown tree request" {
+                code = "tree-request";
+                fix = "ask one of ${concatStringsSep ", " requestKinds}, with no category, and select it by itself: tree.select request";
+              }
           ) (filter (q: !known q) (toList ((outAt n s).tree or [ ])))
         ) (attrNames cycleOuts)
       ) unsorted;
@@ -1460,7 +1567,7 @@ let
               let
                 d = sinkOf r n;
               in
-              optional (d ? of && isType d.of && d.of ? __kind) {
+              optional (d ? of && isType d.of && isString (d.of.__kind or null)) {
                 out = sinkT n r.id;
                 reads = map (instT d.of.__kind) (instNames d.of.__kind);
               }
@@ -2041,7 +2148,7 @@ let
       # scope. The id string stays inside, a key: two scope records compare by sharing, never by value
       #: result.pathOf :: scope -> [ { kind; name; } ] -- the scope as a path of identities, from the root: what an answer prints and a question takes
       pathOf = s: (if s.parent == null then [ ] else pathOf s.parent) ++ [ { inherit (s) kind name; } ];
-      idOfPath = p: concatStringsSep "/" (map (x: "${x.kind}:${x.name}") p);
+      idOfPath = p: concatStringsSep "/" (map (x: "${leafOf x.kind}:${x.name}") p); # the scope key, as mkScope
       scopeIn =
         from: t:
         let
@@ -2067,15 +2174,15 @@ let
         else if length ss == 1 then
           { ok = head ss; }
         else if ss == [ ] then
-          errWith from "no scope holds ${t.kind} ${t.name}" {
+          errWith from "no scope holds ${renderId t.kind} ${t.name}" {
             code = "unknown-scope";
             near = map pathOf (
-              filter (s: elem s.key (near "${t.kind}:${t.name}" (map (s: s.key) unsorted))) unsorted
+              filter (s: elem s.key (near "${leafOf t.kind}:${t.name}" (map (s: s.key) unsorted))) unsorted
             );
             fix = "pass an instance that has a scope, or a path of result.scopes";
           }
         else
-          errWith from "${t.kind} ${t.name} has ${toString (length ss)} scopes, not one" {
+          errWith from "${renderId t.kind} ${t.name} has ${toString (length ss)} scopes, not one" {
             code = "scope-ambiguous";
             want = "one scope";
             scopes = map pathOf ss;
@@ -2373,6 +2480,36 @@ let
               }
             ) (filter (k: !elem k known) xs);
           files = path: k: concatStringsSep ", " (declaredIn (path ++ [ k ]));
+          # a kind and every kind nested in it read only kindKeys; `decl` is the path under `yen`
+          kindKeyErrors =
+            decl: d:
+            if !isAttrs d then
+              [ (notKind decl "a kind, an attrset of kind keys") ]
+            else
+              bad (files decl) ([ "yen" ] ++ decl) kindKeys (attrNames d)
+              ++ (
+                if !isAttrs (d.kinds or { }) then
+                  [ (notKind (decl ++ [ "kinds" ]) "an attrset of nested kinds") ]
+                else
+                  concatMap (
+                    c:
+                    kindKeyErrors (
+                      decl
+                      ++ [
+                        "kinds"
+                        c
+                      ]
+                    ) d.kinds.${c}
+                  ) (attrNames (d.kinds or { }))
+              );
+          notKind =
+            decl: what:
+            errWith (concatStringsSep ", " (declaredIn decl)) "yen.${concatStringsSep "." decl} is not ${what}"
+              {
+                code = "not-a-kind";
+                path = [ "yen" ] ++ decl;
+                fix = "write yen.${concatStringsSep "." decl} as ${what}";
+              };
         in
         concatMap (
           n:
@@ -2390,13 +2527,7 @@ let
           filter (c: c != "yen" && used ? ${c}) (attrNames moduleSinks)
         )
         ++ bad (files [ ]) [ "yen" ] (yenKeys ++ kindNames) (attrNames top)
-        ++ concatMap (
-          k:
-          bad (files [
-            "kinds"
-            k
-          ]) [ "yen" "kinds" k ] kindKeys (attrNames top.kinds.${k})
-        ) kindNames
+        ++ concatMap (k: kindKeyErrors [ "kinds" k ] top.kinds.${k}) kindNames
         ++ concatMap (
           n:
           bad (files [
@@ -2442,14 +2573,42 @@ let
               fix = "rename the field; a scope already has ${concatStringsSep ", " scopeKeys}";
             }
           ) (filter (n: elem n scopeKeys) (attrNames (kinds.${k}.fields or { })))
-        ) kindNames;
+        ) kindNames
+        # an instance reads a nested kind's data at the key of its name: a scope key or a field there would shadow it
+        ++ concatMap (
+          id:
+          concatMap (
+            c:
+            map
+              (
+                why:
+                errWith "declarations" "nested kind `${c}` of kind ${renderId id}: ${why}" {
+                  code = "reserved";
+                  path = [ "yen" ] ++ declPath (toList id ++ [ c ]);
+                  fix = "rename the nested kind";
+                }
+              )
+              (
+                optional (elem c scopeMeta) "the name is a key of every scope"
+                ++ optional ((kindAt id).fields or { } ? ${c}) "the kind has a field of that name"
+                ++ optional (kinds ? ${c}) "a top kind has that name" # PROPOSED (c47 3a), not ruled by vic
+              )
+          ) (attrNames ((kindAt id).kinds or { }))
+        ) kindIds
+        # a sink `of` a nested kind would resolve refs in a table of top kinds only
+        ++ concatMap (
+          id:
+          concatMap (d: map (nestedRef "declarations" "of") (filter isList [ (refKind (d.of or { })) ])) (
+            b.attrValues ((kindAt id).sinks or { })
+          )
+        ) kindIds;
       # every error but the invariants': the `error` facts read these, so a rule never reads its own errors
       errorsFleet =
         loadErrors
         ++ reservedErrors
         ++ keyErrors
         ++ declErrors [ ]
-        ++ concatMap (k: concatMap (n: (inst k n [ ]).errors) (instNames k)) kindNames
+        ++ concatMap (k: concatMap (n: (inst k [ k n ] [ ]).errors) (instNames k)) kindNames
         ++ treeErrors
         ++ atErrors
         ++ orderErrors
@@ -2462,6 +2621,15 @@ let
       errorsAll = errorsFleet ++ check.errors;
       # a query is { params; answer; }: a bare function has untyped parameters, so `ask` could not check them; no answer, nothing to ask
       untypedQueries = filter (n: !isFunction (yen.queries.${n}.answer or null)) (attrNames yen.queries);
+      # c47 (GH #61): a ref to a nested kind is not supported yet; each use says so instead of a Nix throw
+      nestedRef =
+        from: code: id:
+        errWith from
+          "`yen.kinds.${renderId id}` is a nested kind: refs to nested kinds are not supported here yet"
+          {
+            inherit code;
+            fix = "use a top kind here: a nested kind is reached only through its parent";
+          };
       queryUntyped =
         n:
         errWith "queries" "query ${n} is not { params; answer; }: ask cannot check its parameters" {
@@ -2520,7 +2688,7 @@ let
           mapAttrs (
             n: i:
             static.jsonSafe (
-              mapAttrs (f: v: if isRef v then "${v.kind}:${v.name}" else shown k f v) (
+              mapAttrs (f: v: if isRef v then "${renderId v.kind}:${v.name}" else shown k f v) (
                 removeAttrs i (words "kind name")
               )
             )
@@ -2573,6 +2741,10 @@ let
               missing = filter (a: !(args ? ${a})) q.required;
               extra = filter (a: !elem a (q.required ++ q.optional)) (attrNames args);
               vals = mapAttrs (p: t: if args ? ${p} then fromEdge args.${p} else t.default) ps;
+              nested = filter isList (
+                concatMap (p: map (v: v.kind or null) (toList args.${p})) (attrNames args)
+                ++ map (p: refKind ps.${p}) (attrNames ps)
+              );
               lost = first (p: isRef args.${p} && vals.${p} == null) (attrNames args);
               bad = first (p: !checkOf ps.${p} vals.${p}) (attrNames ps);
             in
@@ -2587,6 +2759,8 @@ let
                 code = "unknown-param";
                 near = near (head extra) (q.required ++ q.optional);
               }
+            else if nested != [ ] then
+              nestedRef "ask" "ref" (head nested)
             else if lost != null then
               unknown "ask" args.${lost}.name (instNames args.${lost}.kind) { code = "unknown-instance"; }
             else if bad != null then
@@ -2895,7 +3069,7 @@ let
         id:
         errWith "stage"
           "the change can reach ${
-            concatStringsSep "/" (map (x: "${x.kind} ${x.name}") pathById.${id})
+            concatStringsSep "/" (map (x: "${renderId x.kind} ${x.name}") pathById.${id})
           }, outside the grant"
           {
             code = "outside-grant";
