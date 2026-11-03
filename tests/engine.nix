@@ -3977,9 +3977,78 @@ let
               ]
             ];
       };
-    # #87: an instance owns aspects, `yen.<kind>.<name>.aspects.<a>`, under id `<kind>:<name>/<a>`; no fleet name can take it
+    # a kind owns aspects: by default on every scope of the kind, as nested kinds are spawned by default; an explicit
+    # `at` replaces that default; nested kinds own theirs; a ref goes through the kind
+    kind-aspects =
+      let
+        fleet =
+          extra:
+          yen.eval {
+            imports = [
+              (
+                { yen, ... }:
+                {
+                  yen.kinds.fleet = {
+                    spawns.host = _: yen.host;
+                    sinks.out.reduce = yen.lib.reduce.list;
+                  };
+                  yen.fleet.main = { };
+                  yen.kinds.host = {
+                    fields.role = yen.lib.str;
+                    aspects.ssh.out = { scope, ... }: [ "ssh@${scope.name}" ];
+                    aspects.web = {
+                      at = s: (s.role or null) == "web";
+                      out = { scope, ... }: [ "web@${scope.name}" ];
+                    };
+                    kinds.user.aspects.shell.out = { scope, ... }: [ "shell@${scope.name}" ];
+                  };
+                  yen.host.a = {
+                    role = "web";
+                    user.vic = { };
+                  };
+                  yen.host.b.role = "db";
+                  yen.aspects.after = {
+                    at = yen.kinds.host.aspects.web;
+                    out = { scope, ... }: [ "after@${scope.name}" ];
+                  };
+                  yen.flake =
+                    { out, ... }:
+                    {
+                      inherit out;
+                    };
+                }
+              )
+              extra
+            ];
+          };
+        r = fleet { };
+        out = b.concatLists r.flake.out;
+        has = x: b.elem x out;
+      in
+      {
+        errors = eq r.errors [ ];
+        # default `at`: every host, and no other scope (the fleet scope has no `ssh`)
+        default = eq (b.filter (x: b.substring 0 4 x == "ssh@") out) [
+          "ssh@a"
+          "ssh@b"
+        ];
+        explicit = yes (has "web@a" && !(has "web@b"));
+        nested = eq (b.filter (x: b.substring 0 6 x == "shell@") out) [ "shell@vic" ];
+        ref = yes (has "after@a" && !(has "after@b"));
+        not-attrs = eq (map (e: e.code) (fleet { yen.kinds.host.aspects = 5; }).errors) [ "not-a-kind" ];
+        aspect-not-attrs = eq (map (e: e.code) (fleet { yen.kinds.host.aspects.x = 5; }).errors) [
+          "not-a-kind"
+        ];
+      };
+    # #87: an instance owns aspects, `yen.<kind>.<name>.aspects.<a>`, keyed by its declaration path; no fleet name can take it
     owned-aspects =
       let
+        key = b.toJSON [
+          "kit"
+          "disko"
+          "aspects"
+          "default"
+        ];
         fleet =
           extra:
           yen.eval {
@@ -4012,17 +4081,17 @@ let
         r = fleet { };
       in
       {
-        id = yes (r.agent.schema.aspects ? "kit:disko/default");
+        id = yes (r.agent.schema.aspects ? ${key});
         ref = eq r.flake.out [ [ "disko" ] ];
         data = eq r.data.kit.disko { };
         errors = eq r.errors [ ];
         file = yes (
           r.declaredIn [
             "aspects"
-            "kit:disko/default"
+            key
           ] != [ ]
         );
-        reserved = eq (map (e: e.code) (fleet { yen.aspects."kit:disko/x" = { }; }).errors) [ "reserved" ];
+        reserved = eq (map (e: e.code) (fleet { yen.aspects.${key} = { }; }).errors) [ "reserved" ];
       };
     # #80: a `sinks` or a sink that is no attrset is an error record, never a Nix throw
     kind-sinks-not-attrs =

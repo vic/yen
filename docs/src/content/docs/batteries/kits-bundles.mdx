@@ -270,13 +270,13 @@ What the members export:
 ```nix title="result"
 [
   "merge conflict at services.prometheus.scrapeConfigs"
+  "wireguard: lb has no wg-lab2-wg.pub public key"
+  "wireguard: nas has no wg-lab2-wg.pub public key"
+  "wireguard: web has no wg-lab2-wg.pub public key"
   "kits: assembly lab2 role server: 2 machines, at most 1"
   "kits: assembly lab2-borg role server: 2 machines, at most 1"
   "kits: assembly lab2-monitoring role server: 2 machines, at most 1"
   "kits: assembly lab2-wg role controller: 2 machines, at most 1"
-  "wireguard: lb has no wg-lab2-wg.pub public key"
-  "wireguard: nas has no wg-lab2-wg.pub public key"
-  "wireguard: web has no wg-lab2-wg.pub public key"
 ]
 ```
 
@@ -305,12 +305,12 @@ And none:
 
 ```nix title="result"
 [
+  "wireguard: web has no wg-lab0-wg.pub public key"
   "kits: assembly lab0 role server: 0 machines, at least 1"
   "kits: assembly lab0-borg role server: 0 machines, at least 1"
   "kits: assembly lab0-borg-sshd role server: 0 machines, at least 1"
   "kits: assembly lab0-monitoring role server: 0 machines, at least 1"
   "kits: assembly lab0-wg role controller: 0 machines, at least 1"
-  "wireguard: web has no wg-lab0-wg.pub public key"
 ]
 ```
 

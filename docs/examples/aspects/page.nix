@@ -36,12 +36,19 @@
       ''
       (docs.value result.active.nginx)
       ''
-        ## Aspects an instance owns
+        ## Aspects a kind or an instance owns
 
-        A self-contained part, such as a [kit](/batteries/kits/), keeps its aspects in its own instance, not in
-        `yen.aspects`: `yen.kit.disko.aspects.default = { at = …; … };`. Its id is `kit:disko/default`, written as a
-        scope id is, and its ref is `yen.kit.disko.aspects.default`. A `:` in an aspect that `yen.aspects` names is
-        the error `reserved`, so no aspect of the fleet can take the id of an aspect an instance owns.
+        A kind can own aspects, as it owns nested kinds: `yen.kinds.host.aspects.ssh = { … };`. By default the aspect
+        runs on every scope of its kind, the way a nested kind is spawned by default; an explicit `at` replaces that
+        default. A nested kind owns its own: `yen.kinds.host.kinds.user.aspects.shell`.
+
+        A self-contained part, such as a [kit](/batteries/kits/), keeps its aspects in its own instance:
+        `yen.kit.disko.aspects.default = { at = …; … };`.
+
+        An owned aspect is named by its declaration path, as a nested kind is: `[ "kinds" "host" "aspects" "ssh" ]`,
+        `[ "kit" "disko" "aspects" "default" ]`. Its ref follows the same path: `yen.kinds.host.aspects.ssh`,
+        `yen.kit.disko.aspects.default`. An aspect that `yen.aspects` names cannot start with `[` (the error
+        `reserved`), so no aspect of the fleet can take the name of an owned one.
 
         ## Static content lands once
 

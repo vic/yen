@@ -1298,7 +1298,18 @@ let
       t2 = yes (
         (
           let
-            es = lib.filter (e: e.origin == "aspect kit:sshd/server" && e.sink == "os") r.graph.edges;
+            es = lib.filter (
+              e:
+              e.origin == "aspect ${
+                builtins.toJSON [
+                  "kit"
+                  "sshd"
+                  "aspects"
+                  "server"
+                ]
+              }"
+              && e.sink == "os"
+            ) r.graph.edges;
           in
           es != [ ]
           && lib.all (e: (scope e.from).parent.id == e.to) es
@@ -2425,7 +2436,16 @@ let
       t1 = eq (r.schema.kinds.host.sinks.deploy.reduce) ("one");
       t2 = eq (r.schema.kinds.environment.sinks.k3s-nodes.reduce) ("entries");
       t3 = eq (b.elem "sshd" (lib.attrNames r.schema.aspects)) (false);
-      t4 = yes (r.schema.aspects."kit:sshd/server".activeAt > 0);
+      t4 = yes (
+        r.schema.aspects.${
+          builtins.toJSON [
+            "kit"
+            "sshd"
+            "aspects"
+            "server"
+          ]
+        }.activeAt > 0
+      );
       t5 = eq (b.fromJSON (b.toJSON r.agent)) (r.agent);
     };
     agent-whynot =
