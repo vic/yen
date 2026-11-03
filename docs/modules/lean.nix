@@ -25,11 +25,7 @@ let
       inherit (inputs.nixpkgs) lib;
     };
   checkerOf = system: inputs.nixpkgs.legacyPackages.${system}.callPackage ../../lean/package.nix { };
-  systems = [
-    "x86_64-linux"
-    "aarch64-linux"
-    "aarch64-darwin"
-  ];
+  inherit (inputs.yen.lib.batteries.lean) systems;
 in
 {
   yen.aspects.lean = {

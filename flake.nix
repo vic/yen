@@ -3,11 +3,7 @@
     _:
     let
       yen = import ./.;
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "aarch64-darwin"
-      ];
+      inherit (yen.lib.batteries.lean) systems;
       # no flake input: the tools build from the nixpkgs docs/flake.lock pins, fetched only when a tool is used
       nixpkgs = builtins.fetchTree (builtins.fromJSON (builtins.readFile ./docs/flake.lock))
         .nodes.nixpkgs.locked;

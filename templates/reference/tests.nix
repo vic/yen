@@ -339,6 +339,7 @@ let
         "infra-web-2"
         "lb-no-gui"
         "pre-commit"
+        "yen-lean"
       ]);
       t2 = no ((out.checks.x86_64-linux ? web));
       t3 = yes (out.vmTests.x86_64-linux ? web);
@@ -861,6 +862,7 @@ let
       "studio"
       "web-1"
       "web-2"
+      "yen-lean"
     ]);
     infra-facts = {
       t1 = eq (lib.attrNames (red "infra" "fleet:main").lb) ([

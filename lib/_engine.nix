@@ -85,6 +85,9 @@ let
     ;
   inherit (self._core.reduce) pure reduce;
   inherit (self._core) static;
+  # the Lean check every flake gets (result.flake), and its systems
+  leanVerify = self.batteries.lean.verify;
+  leanSystems = self.batteries.lean.systems;
 
   #: lib.eval :: module -> result -- evaluate a fleet module; the result answers every query
   eval =
@@ -2682,6 +2685,36 @@ let
           v;
       flakeFill = if top ? flake && scopes != [ ] then fill (head scopes) top.flake else { ok = null; };
       clean = errorsAll == [ ] && check.ok;
+      # `checks.<system>.yen-lean` in every flake, clean or not, when `inputs.nixpkgs` is a module sink: the Lean checker
+      # on the verdict, failing on a violation or an error. Not when a rule reads a relation decided by a Nix function:
+      # Lean cannot decide it
+      nixpkgsIn = if moduleSinks ? inputs then (reduceModules "inputs").value.nixpkgs or null else null;
+      userExternals = map b.toJSON (filter (n: !(datalog.comparisons ? ${n})) check.lean.externals);
+      leanDecides =
+        !any (r: any (a: elem (head a) userExternals) ([ r.head ] ++ r.pos ++ r.neg)) check.lean.rules;
+      withLean =
+        o:
+        if nixpkgsIn == null || !leanDecides || !isAttrs o then
+          o
+        else
+          o
+          // {
+            checks =
+              (o.checks or { })
+              // genAttrs leanSystems (
+                s:
+                (o.checks.${s} or { })
+                // {
+                  yen-lean = leanVerify {
+                    pkgs = nixpkgsIn.legacyPackages.${s};
+                    result = {
+                      inherit check;
+                      errors = errorsAll;
+                    };
+                  };
+                }
+              );
+          };
       self = {
         # the scope records as answers state a secret field by its hash; the elements read the values
         #: result.scopes :: [ scope ] -- every scope, a secret field stated by its hash
@@ -2728,9 +2761,9 @@ let
         # reduced sink values to build them from by hand (D13)
         #: result.reduced :: { sink = { scope id = value; }; } or null -- each sink reduced at each receiver; null when the fleet is not clean
         reduced = if clean then reduced else null;
-        #: result.flake :: flake or { invalid-flake-errors = { errors; violations; incomplete; }; } -- the flake outputs; the reason instead when the fleet is not clean
+        #: result.flake :: flake or { invalid-flake-errors = { errors; violations; incomplete; }; } -- the flake outputs; the reason instead when the fleet is not clean; with inputs.nixpkgs, always checks.<system>.yen-lean (lib.batteries.lean.verify)
         # its flake is the reason instead: a build finds no output, and `nix eval .#invalid-flake-errors` says why
-        flake =
+        flake = withLean (
           if clean then
             flakeFill.ok
           else
@@ -2739,7 +2772,8 @@ let
                 errors = errorsAll;
                 inherit (check) violations incomplete;
               };
-            };
+            }
+        );
         # stored queries: `yen.queries.<name> = { params = { host = yen.kinds.host; }; answer = { host, result }: …; }`.
         # `result` is this eval result; each param has a type, and is optional when the type has a default. `ask name args`
         # never throws: an unknown query, a missing, unknown or ill-typed parameter is an error record.
