@@ -17,7 +17,7 @@
         (JSON-RPC 2.0, one message per line) by running yen [queries](/query/queries/) on the fleet. It serves the fleet in its directory.
       ''
       (docs.sh ''
-        cd templates/reference
+        cd reference
         nix run github:vic/yen?dir=mcp
       '')
       ''

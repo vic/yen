@@ -4,7 +4,7 @@
 set -u
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
 ROOT=$(git -C "$HERE" rev-parse --show-toplevel)
-export YEN_FLEET=${YEN_FLEET:-$ROOT/templates/reference}
+export YEN_FLEET=${YEN_FLEET:-$ROOT/reference}
 SRV=${YEN_MCP_SERVER:-$(timeout 900 nix build --no-link --print-out-paths "path:$ROOT?dir=mcp#yen-mcp")/bin/yen-mcp}
 fails=0
 

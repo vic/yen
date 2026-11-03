@@ -14,7 +14,7 @@
         Den code and the yen form, and its checks evaluate the real NixOS and home-manager configurations.
 
         Start with [From Den](/migrate/from-den/) for the default template, hosts, users and quirks. The
-        [reference template](https://github.com/vic/yen/tree/main/templates/reference) shows every capability that Den's CI tests.
+        [reference fleet](https://github.com/vic/yen/tree/main/reference) shows every capability that Den's CI tests.
       ''
       (docs.links (
         map (p: {

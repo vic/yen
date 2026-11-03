@@ -1,14 +1,14 @@
 {
-  title = "The reference template";
-  description = "Every module of templates/reference, the running specification of yen, with what it shows.";
+  title = "The reference fleet";
+  description = "Every module of reference, the running specification of yen, with what it shows.";
   section = "reference";
   order = 4;
 
   body =
     { docs, inputs, ... }:
     let
-      root = inputs.yen + "/templates/reference/modules";
-      repo = "https://github.com/vic/yen/blob/main/templates/reference/modules";
+      root = inputs.yen + "/reference/modules";
+      repo = "https://github.com/vic/yen/blob/main/reference/modules";
       # the first comment line of a file: what it shows
       about =
         f:
@@ -32,14 +32,14 @@
     in
     [
       ''
-        [`templates/reference`](https://github.com/vic/yen/tree/main/templates/reference) is a complete running specification of yen.
+        [`reference`](https://github.com/vic/yen/tree/main/reference) is a complete running specification of yen.
         It models every capability of Den, den-hoag and clan, and the advanced cases of several real fleets. Each pattern has a check.
         It is big on purpose: read these docs first, then use the fleet to look up how a pattern looks at scale.
 
         This index is read from the fleet's files: each row is a [module](/principles/modules/) and its first comment line.
       ''
       (docs.sh ''
-        git clone https://github.com/vic/yen && cd yen/templates/reference
+        git clone https://github.com/vic/yen && cd yen/reference
         nix eval --impure --file tests.nix failed   # [ ]: a check for each pattern
       '')
     ]
@@ -56,8 +56,6 @@
       ...
     }:
     {
-      has-modules = yes (
-        builtins.pathExists (inputs.yen + "/templates/reference/modules/topology/fleet.nix")
-      );
+      has-modules = yes (builtins.pathExists (inputs.yen + "/reference/modules/topology/fleet.nix"));
     };
 }

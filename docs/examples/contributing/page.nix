@@ -112,12 +112,12 @@
             "`docs-write`"
           ]
           [
-            "`templates/reference/README.md`, `templates/reference/ci.json`"
-            "`templates/reference/modules/docs/`"
+            "`reference/README.md`, `reference/ci.json`"
+            "`reference/modules/docs/`"
             "`reference-write`"
           ]
           [
-            "`templates/reference/flake.nix`"
+            "`reference/flake.nix`"
             "the `flake-file` sink of the fleet"
             "`reference-flake`"
           ]
@@ -144,7 +144,7 @@
             "`engine-test`, and the `docs-example` of the page that shows it"
           ]
           [
-            "the reference template (`templates/reference/`)"
+            "the reference fleet (`reference/`)"
             "`reference-test`"
           ]
           [
@@ -158,7 +158,7 @@
         A red CI job that says a file is stale means you did not run its generator. The two that are easy to forget:
 
         - `docs-write` writes `README.md`, `CONTRIBUTING.md` and the workflows (and the site pages, which are not committed).
-        - `reference-write` writes the reference template's README, which lists engine names such as the reduce strategies and the
+        - `reference-write` writes the reference fleet's README, which lists engine names such as the reduce strategies and the
           library functions. A change to the engine often changes both, so run both.
 
         Heavy, leave them to CI:
@@ -198,9 +198,9 @@
 
         ## Maintenance
 
-        - **Update inputs.** Run `nix flake update` in `docs/` and in `templates/reference/`, then `ci`. nixpkgs comes from the
+        - **Update inputs.** Run `nix flake update` in `docs/` and in `reference/`, then `ci`. nixpkgs comes from the
           nixos.org channel tarballs, not from GitHub.
-        - **After a nixpkgs update**, the reference template's trimmed module lists belong to the old revision: `reference-e2e` fails on
+        - **After a nixpkgs update**, the reference fleet's trimmed module lists belong to the old revision: `reference-e2e` fails on
           `modlist-same-drv` until they are computed again.
         - **Format** with `fmt`; CI checks it with `fmt-check`.
         - **A new error code** in the engine fails the docs until the Error codes page (`docs/examples/errors-reference`) explains it.

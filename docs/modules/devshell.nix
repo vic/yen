@@ -20,7 +20,7 @@ let
   }; # from any directory of the rep
   # every suite runs on github:denful/fastest: tests.<suite>.<test> = { expr; expected; }, in parallel
   fastest = dir: suite: ''fastest --flake "path:$PWD${dir}#tests" ${suite}'';
-  reference = "path:$PWD?dir=templates/reference";
+  reference = "path:$PWD?dir=reference";
 in
 {
   yen.kinds.site.sinks.commands.out = yen.lib.batteries.devshell.numtide {
@@ -116,15 +116,15 @@ in
   yen.aspects.reference-commands = {
     at = yen.kinds.site;
     commands = [
-      (cmd "reference" "reference-test" "the reference template's checks" (
-        fastest "?dir=templates/reference" "reference"
+      (cmd "reference" "reference-test" "the reference fleet's checks" (
+        fastest "?dir=reference" "reference"
       ))
       # 4 eval workers: 8 x 2 GiB filled a 16 GB runner, and the step got SIGTERM (exit 143) mid-eval
-      (cmd "reference" "reference-e2e" "the reference template's real evaluations" (
-        "FASTEST_WORKERS=4 " + fastest "?dir=templates/reference" "e2e"
+      (cmd "reference" "reference-e2e" "the reference fleet's real evaluations" (
+        "FASTEST_WORKERS=4 " + fastest "?dir=reference" "e2e"
       ))
       (cmd "reference" "reference-cost" "the trimmed-module-list cost oracle"
-        "cd templates/reference && bash cost.sh"
+        "cd reference && bash cost.sh"
       )
       (cmd "reference" "reference-mcp" "the MCP server tests" "bash mcp/test.sh")
       (cmd "reference" "reference-check" "nix flake check of the fleet (VM tests are vmTests, not checks)"
@@ -134,18 +134,18 @@ in
         "reference-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation"
         ''
           system=''${1:?usage: reference-eval SYSTEM}
-          jq -r --arg s "$system" '.[] | select(.system == $s) | .attr' templates/reference/ci.json | while read -r attr; do
+          jq -r --arg s "$system" '.[] | select(.system == $s) | .attr' reference/ci.json | while read -r attr; do
             drv=$(nix eval --raw "${reference}#$attr.drvPath")
             echo "$attr $drv"
             case "$drv" in /nix/store/*.drv) ;; *) exit 1 ;; esac
           done
         ''
       )
-      (cmd "reference" "reference-write" "regenerate the reference template's README.md and ci.json"
-        "cd templates/reference && nix run .#write-files"
+      (cmd "reference" "reference-write" "regenerate the reference fleet's README.md and ci.json"
+        "cd reference && nix run .#write-files"
       )
-      (cmd "reference" "reference-flake" "regenerate the reference template's flake.nix"
-        "cd templates/reference && nix run .#write-flake"
+      (cmd "reference" "reference-flake" "regenerate the reference fleet's flake.nix"
+        "cd reference && nix run .#write-flake"
       )
     ];
   };
@@ -165,7 +165,7 @@ in
         ''
           export FASTEST_WORKERS=''${FASTEST_WORKERS:-4}
           pids=()
-          for t in "|" "?dir=docs|fast" "?dir=docs|e2e" "?dir=templates/reference|reference" "?dir=templates/reference|e2e"; do
+          for t in "|" "?dir=docs|fast" "?dir=docs|e2e" "?dir=reference|reference" "?dir=reference|e2e"; do
             ${fastest "\${t%%|*}" "\${t#*|}"} & pids+=("$!")
           done
           rc=0

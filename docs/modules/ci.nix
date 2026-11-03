@@ -72,7 +72,7 @@ let
   disordered = lib.filterAttrs (_: j: j ? needs);
   # the fleet's CI targets, grouped by system: one job per system, its targets one after another
   targets = lib.groupBy (t: t.system) (
-    builtins.fromJSON (builtins.readFile (inputs.yen + "/templates/reference/ci.json"))
+    builtins.fromJSON (builtins.readFile (inputs.yen + "/reference/ci.json"))
   );
   runner = {
     x86_64-linux = "ubuntu-latest";

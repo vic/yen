@@ -38,7 +38,7 @@ in
         # Regenerate: nix run .#write-flake
       '';
       inputs = {
-        yen.url = "path:../..";
+        yen.url = "path:..";
         import-tree.url = "github:denful/import-tree";
         flake-file.url = "github:vic/flake-file";
         nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";

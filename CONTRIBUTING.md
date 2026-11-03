@@ -136,14 +136,14 @@ Follow these rules in new code under `lib/` and `tests/`:
 | `fmt` | fmt | format every tracked nix file (nixfmt) |
 | `issue-eval` | issue | issue-eval BODY DIR: an issue's nix blocks as one fleet, restricted; writes DIR/comment.md |
 | `issue-comment` | issue | issue-comment NUMBER FILE: post FILE on issue NUMBER, replacing yen's last comment (needs GH_TOKEN) |
-| `reference-test` | reference | the reference template's checks |
-| `reference-e2e` | reference | the reference template's real evaluations |
+| `reference-test` | reference | the reference fleet's checks |
+| `reference-e2e` | reference | the reference fleet's real evaluations |
 | `reference-cost` | reference | the trimmed-module-list cost oracle |
 | `reference-mcp` | reference | the MCP server tests |
 | `reference-check` | reference | nix flake check of the fleet (VM tests are vmTests, not checks) |
 | `reference-eval` | reference | reference-eval SYSTEM: every ci.json target of SYSTEM evaluates to a derivation |
-| `reference-write` | reference | regenerate the reference template's README.md and ci.json |
-| `reference-flake` | reference | regenerate the reference template's flake.nix |
+| `reference-write` | reference | regenerate the reference fleet's README.md and ci.json |
+| `reference-flake` | reference | regenerate the reference fleet's flake.nix |
 
 ## Generated files
 
@@ -159,8 +159,8 @@ committed, because GitHub reads them from the repository:
 | `.github/workflows/test.yml` | `docs/modules/ci.nix` | `docs-write` |
 | `.github/workflows/issue.yml`, `.github/ISSUE_TEMPLATE/*` | `docs/modules/issues.nix` | `docs-write` |
 | `CONTRIBUTING.md` | `docs/examples/contributing/page.nix` | `docs-write` |
-| `templates/reference/README.md`, `templates/reference/ci.json` | `templates/reference/modules/docs/` | `reference-write` |
-| `templates/reference/flake.nix` | the `flake-file` sink of the fleet | `reference-flake` |
+| `reference/README.md`, `reference/ci.json` | `reference/modules/docs/` | `reference-write` |
+| `reference/flake.nix` | the `flake-file` sink of the fleet | `reference-flake` |
 
 ## Which task to run, and when
 
@@ -175,14 +175,14 @@ Fast, run them often:
 |---|---|
 | an example under `docs/examples/` | `docs-example NAME` for that example, then `docs-test` |
 | the engine (`default.nix`, `lib/`) or a battery | `engine-test`, and the `docs-example` of the page that shows it |
-| the reference template (`templates/reference/`) | `reference-test` |
+| the reference fleet (`reference/`) | `reference-test` |
 | any Nix file | `fmt`, last |
 
 Before every push, run the generator of every generated file whose source you changed (see the table above).
 A red CI job that says a file is stale means you did not run its generator. The two that are easy to forget:
 
 - `docs-write` writes `README.md`, `CONTRIBUTING.md` and the workflows (and the site pages, which are not committed).
-- `reference-write` writes the reference template's README, which lists engine names such as the reduce strategies and the
+- `reference-write` writes the reference fleet's README, which lists engine names such as the reduce strategies and the
   library functions. A change to the engine often changes both, so run both.
 
 Heavy, leave them to CI:
@@ -205,9 +205,9 @@ then `flake-check` and one evaluation job per system. `ci` in the devshell runs 
 
 ## Maintenance
 
-- **Update inputs.** Run `nix flake update` in `docs/` and in `templates/reference/`, then `ci`. nixpkgs comes from the
+- **Update inputs.** Run `nix flake update` in `docs/` and in `reference/`, then `ci`. nixpkgs comes from the
   nixos.org channel tarballs, not from GitHub.
-- **After a nixpkgs update**, the reference template's trimmed module lists belong to the old revision: `reference-e2e` fails on
+- **After a nixpkgs update**, the reference fleet's trimmed module lists belong to the old revision: `reference-e2e` fails on
   `modlist-same-drv` until they are computed again.
 - **Format** with `fmt`; CI checks it with `fmt-check`.
 - **A new error code** in the engine fails the docs until the Error codes page (`docs/examples/errors-reference`) explains it.

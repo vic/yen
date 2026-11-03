@@ -30,7 +30,7 @@
       (docs.tip "The full model" ''
         [Kits batteries](/batteries/kits/) add kits as data with typed role settings and errors, `at` predicates as
         role members, exports with owner overrides, and vars generators. The
-        [reference template](https://github.com/vic/yen/blob/main/templates/reference/modules/kits/assemblies.nix) uses them.
+        [reference fleet](https://github.com/vic/yen/blob/main/reference/modules/kits/assemblies.nix) uses them.
       '')
     ];
 

@@ -106,7 +106,7 @@ in
       ))
       ''
         Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
-        `templates/reference` is the showcase template. Read it, but do not start from it: its `yen` input is this repository.
+        `reference` is the showcase template. Read it, but do not start from it: its `yen` input is this repository.
       ''
     ];
 
