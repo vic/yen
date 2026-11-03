@@ -3818,14 +3818,14 @@ let
       t3 = eq ((b.elemAt codesFix.errors 7).error) ("aspect treeArg: arg `tree` is a cycle source");
       t4 = eq ((b.elemAt codesFix.errors 5).error) ("aspect bare: bare function: wrap it as `{ ... }:`");
     };
-    unread-sink-no-error = eq (msgs (
+    aspect-key-no-sink = eq (msgs (
       yen.eval {
         imports = [
           (fleet { addr = "a"; })
           { yen.aspects.motd.nixso = { }; }
         ];
       }
-    )) ([ ]);
+    )) [ "`nixso` is not a key yen reads here" ];
     args-source = {
       addr = eq (hostOf argsDown).addr "hi";
       errors = eq (msgs argsDown) [ ];

@@ -2398,6 +2398,13 @@ let
           ]) [ "yen" "kinds" k ] kindKeys (attrNames top.kinds.${k})
         ) kindNames
         ++ concatMap (
+          n:
+          bad (files [
+            "aspects"
+            n
+          ]) [ "yen" "aspects" n ] (aspectMeta ++ sinkNames ++ [ "errors" ]) (attrNames aspects.${n})
+        ) aspectNames
+        ++ concatMap (
           c:
           bad (files [
             "sinks"
