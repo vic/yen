@@ -75,78 +75,88 @@ home-manager, clusters, terraform, k8s, or anything else you can model as Nix va
 - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
 - **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the contributions.
 
-Yen is built only on Nix `builtins`. This is the most basic flake that takes a single Yen module.
+Yen is built only on Nix `builtins`. This is the most basic NixOS host, the whole `minimal` template
+(`nix flake init -t github:vic/yen#minimal`). The flake takes the modules of a directory:
 
 
 
-```nix title="flake.nix"
+```nix title="templates/minimal/flake.nix"
 {
-  inputs.yen.url = "github:vic/yen";
-  outputs = inputs: inputs.yen.lib.mkFlake { } ./modules/hello.nix;
+  # build: nixos-rebuild build --flake .#laptop
+  description = "One NixOS host";
+
+  outputs =
+    inputs:
+    inputs.yen.lib.mkFlake {
+      inherit inputs;
+      inherit (inputs.nixpkgs) lib;
+    } (inputs.import-tree ./modules);
+
+  inputs = {
+    yen.url = "github:vic/yen";
+    import-tree.url = "github:denful/import-tree";
+    nixpkgs.url = "https://nixos.org/channels/nixos-25.05/nixexprs.tar.xz";
+  };
 }
 ```
 
 
-Yen imposes no domain language, so you can define the nouns of your own world, how they relate to each other,
-and how they contribute to the final Nix configuration.
+The fleet is the root, and its `out` sink is the flake. A host builds NixOS from its `nixos` sink:
 
 
 
-```nix title="modules/hello.nix"
+```nix title="templates/minimal/modules/fleet.nix"
+# The fleet is the root. Its `out` sink is the flake. A host builds NixOS from its `nixos` sink.
+{ yen, inputs, ... }:
+{
+  yen.kinds.fleet = {
+    spawns.host = _: yen.host;
+    sinks.out.reduce = yen.lib.reduce.merge;
+  };
+  yen.kinds.host.sinks.nixos.out =
+    { host, nixos, ... }:
+    {
+      nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
+    };
+
+  yen.fleet.main = { };
+  yen.flake = { out, ... }: out;
+}
+```
+
+
+The host is data. The aspect `base` is active at every host and gives it one NixOS module:
+
+
+
+```nix title="templates/minimal/modules/laptop.nix"
+# The host is data. The aspect is active at every host and gives it one NixOS module.
 { yen, ... }:
 {
-  # `inputs.yen.lib.mkFlake` expects this function to exist.
-  # Here we ask for a **greetings** sink that will be used
-  # for teaching purposes, as the output of our flake.
-  yen.flake = { greetings, ... }: greetings;
+  yen.host.laptop = { };
 
-  # In this flake we model translations of diffent human languages
-  yen.kinds.language.fields.hello = yen.lib.is builtins.isString;
-
-  # World is the container of all our human languages
-  yen.kinds.world = {
-    spawns.language = world: yen.language;
-    # all greetings contributions get merged as attrsets
-    sinks.greetings.reduce = yen.lib.reduce.merge;
-  };
-
-  # An aspect is configuration behaviour
-  yen.aspects.hello = {
-    # This predicate indicates where is `hello` active.
-    # this can be a kind a particular instance of a kind or any predicate.
-    at = yen.kinds.language;
-
-    # This aspect contributes an element to the `greetings` sink.
-    # Since `hello` is active for each language, it produces two entries.
-    greetings =
-      { language, ... }:
+  yen.aspects.base = {
+    at = yen.kinds.host;
+    nixos =
+      { host, ... }:
       {
-        ${language.name} = language.hello;
+        networking.hostName = host.name;
+        nixpkgs.hostPlatform = "x86_64-linux";
+        # placeholder: change fileSystems and boot for your hardware (see your hardware-configuration.nix)
+        boot.loader.grub.device = "nodev";
+        fileSystems."/" = {
+          device = "/dev/disk/by-label/nixos";
+          fsType = "ext4";
+        };
+        system.stateVersion = "25.05";
       };
   };
-
-  # define an instance of our world kind
-  yen.world.earth = { };
-  # and two languages with their respective field set.
-  yen.language.en.hello = "Hello";
-  yen.language.es.hello = "Hola";
 }
 ```
 
 
-The output of this flake looks like this:
-
-
-
-```nix title="result.nix"
-{
-  en = "Hello";
-  es = "Hola";
-}
-```
-
-
-To start with a NixOS host instead, run `nix flake init -t github:vic/yen#minimal`.
+Yen imposes no domain language: `fleet`, `host` and `nixos` are words this fleet chose. The
+[templates](https://yen.oeiuwq.com/start/templates/) page lists the other templates.
 
 </details>
 

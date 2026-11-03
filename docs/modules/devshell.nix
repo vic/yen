@@ -73,10 +73,10 @@ in
         "cd docs && nix flake check -L"
       )
       (cmd "docs" "docs-dev" "the site at localhost:4321, live"
-        "cd docs && CI=true pnpm install --config.confirmModulesPurge=false && pnpm dev"
+        "cd docs && nix run .#write-files && CI=true pnpm install --config.confirmModulesPurge=false && pnpm dev"
       )
       (cmd "docs" "docs-build" "build the site to docs/dist"
-        "cd docs && CI=true pnpm install --frozen-lockfile --config.confirmModulesPurge=false && pnpm build"
+        "cd docs && nix run .#write-files && CI=true pnpm install --frozen-lockfile --config.confirmModulesPurge=false && pnpm build"
       )
     ];
   };

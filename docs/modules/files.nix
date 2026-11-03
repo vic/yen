@@ -1,4 +1,5 @@
-# The pages and the sidebar are repo files, written by github:sini/files. Each file gets a check: the committed file must match.
+# The pages and the sidebar are built from docs/examples (write-files), never committed (#91): docs-build and docs-dev write
+# them first. README, CONTRIBUTING and the workflows are committed, and each gets a check: the committed file must match.
 {
   yen,
   lib,
@@ -13,5 +14,7 @@
     pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
     root = inputs.self;
     relativeRoot = "docs";
+    # the site pages and sidebar: a build output, not a source
+    unchecked = p: lib.hasPrefix "src/content/docs/" p || p == "src/sidebar.json";
   };
 }

@@ -899,6 +899,47 @@ let
   ];
 
   checks = {
+    # #97: a sink at a system scope as flake.<group>.<system>, and the inputs read at one system
+    per-system =
+      let
+        p = bat.perSystem;
+        ins = {
+          a = {
+            packages.x.hello = 1;
+            legacyPackages.x = {
+              hello = 0;
+              vim = 2;
+            };
+          };
+          b.packages.y.z = 3;
+        };
+      in
+      {
+        out = eq (p.out
+          {
+            from.__sink = "packages";
+            group = "packages";
+          }
+          {
+            scope.name = "x";
+            sinks.packages.hello = 1;
+          }
+        ) { packages.x.hello = 1; };
+        # packages wins over legacyPackages; an input without the system gives { }
+        inputs =
+          eq
+            (p.inputs {
+              inputs = ins;
+              system = "x";
+            })
+            {
+              a = {
+                hello = 1;
+                vim = 2;
+              };
+              b = { };
+            };
+      };
     # a kit's parts live under their assembly, at every depth; a name two assemblies share is an error
     kit-parts =
       let

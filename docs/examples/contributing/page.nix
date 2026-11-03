@@ -88,15 +88,14 @@
         ## Generated files
 
         Do not edit generated files. Edit their source, then run the generator. A check fails when a committed file is stale.
+
+        The site pages (`docs/src/content/docs/**`) and `docs/src/sidebar.json` are not committed: `docs-build`
+        and `docs-dev` write them from `docs/examples/*/page.nix` first. The table lists the generated files that are
+        committed, because GitHub reads them from the repository:
       ''
       (docs.table
         [ "Files" "Source" "Generator" ]
         [
-          [
-            "`docs/src/content/docs/**`, `docs/src/sidebar.json`"
-            "`docs/examples/*/page.nix`"
-            "`docs-write`"
-          ]
           [
             "`.github/workflows/test.yml`"
             "`docs/modules/ci.nix`"
@@ -158,7 +157,7 @@
         Before every push, run the generator of every generated file whose source you changed (see the table above).
         A red CI job that says a file is stale means you did not run its generator. The two that are easy to forget:
 
-        - `docs-write` writes the docs pages, the library reference and `CONTRIBUTING.md`.
+        - `docs-write` writes `README.md`, `CONTRIBUTING.md` and the workflows (and the site pages, which are not committed).
         - `reference-write` writes the reference template's README, which lists engine names such as the reduce strategies and the
           library functions. A change to the engine often changes both, so run both.
 
