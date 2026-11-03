@@ -14,7 +14,7 @@
       (docs.file "modules/inventory.nix")
       ''
         Each machine spawns one `member` scope per (assembly, role) it takes part in. The member holds a ref to its
-        assembly. An aspect at a member scope runs once per assembly and role. An aspect at a machine that `has` a
+        assembly. An aspect at a member scope runs once per assembly and role. An aspect at a machine that has a
         member runs once per machine.
       ''
       (docs.fileWith "{12-15,33}" "modules/kinds.nix")

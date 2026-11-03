@@ -11,7 +11,7 @@
         A person uses several machines. Some run NixOS, some only home-manager. In yen the person is data,
         and their home is one [aspect](/behavior/aspects/) that is active in both places.
       ''
-      (docs.fileWith "{15,20}" "modules/fleet.nix")
+      (docs.fileWith "{11,16}" "modules/fleet.nix")
       ''
         - A `user` lives under each host in its `hosts`. Its `homeManager` sink forwards into the host's NixOS.
         - A `home` lives under the fleet. Its `homeManager` sink builds `homeConfigurations.<name>`.

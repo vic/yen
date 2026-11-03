@@ -87,7 +87,7 @@ setting = path: h: yen.lib.cascade path ([ h ] ++ h.environment.delegates ++ [ h
 A scope is one instance at one place in a tree. The root kind has `spawns` and no kind spawns it. `spawns.<kind>` gives the children of a scope:
 
 ```nix
-yen.kinds.environment.spawns.host = s: lib.filterAttrs (_: h: yen.lib.same h.environment s) yen.host;
+yen.kinds.environment.spawns.host = yen.lib.pointing "environment" yen.host;
 ```
 
 The identity of a scope is its path: `fleet:main/environment:prod/host:lb`. One name can live in two places. In this fleet, `host:lb-minimal` lives under `host:lb` ([swarsel/variants.nix](modules/swarsel/variants.nix)). Names need not be unique.
@@ -109,7 +109,7 @@ yen.aspects.nginx = {
 };
 ```
 
-A predicate is a function `scope: bool`. A kind ref, an instance ref, an aspect ref and a list are predicates too. Combine them with `yen.lib.all`, `not`, `within` (a proper ancestor holds) and `has` (a child holds).
+A predicate is a function `scope: bool`. A kind ref, an instance ref, an aspect ref and a list are predicates too. Combine them with `yen.lib.all`, `not`, `within` (a proper ancestor holds) and `below` (a child holds).
 
 `at` from several files is a union. To replace an aspect at one scope, put `not` in its `at` and write your own aspect ([features/motd.nix](modules/features/motd.nix)). A value in `at` that is not a predicate (a string, a number) is an error record, not a silent `false`.
 
@@ -408,7 +408,7 @@ In [den#739](https://github.com/denful/den/discussions/739), a Den user wants ho
 In yen, where a scope lives (`spawns`) and what it builds (`out`) are separate. The home `alice@stage` lives under host `stage`:
 
 ```nix
-yen.kinds.host.spawns.home = s: lib.filterAttrs (_: h: yen.lib.same h.on s) yen.home;
+yen.kinds.host.spawns.home = yen.lib.pointing "on" yen.home;
 yen.home."alice@stage" = { user = yen.user.alice; on = yen.host.stage; /* … */ };
 yen.aspects.monitor-env.homeManager = { monitor ? null, ... }: { home.sessionVariables.MONITORRES = monitor.resolution; };
 ```
@@ -457,7 +457,7 @@ Three families of Den bugs cannot happen in yen:
 | `inventory.instances.<i>`, `module.name` | the data kind `assembly`; its field `kit` is a ref to a `kit` | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | role members: named machines and tagged machines | `roles.<r>.at`, a predicate; each machine spawns one `member` scope per (assembly, role) | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | `perInstance` | an aspect at a member scope | [kits/kits.nix](modules/kits/kits.nix) |
-| `perMachine` | an aspect at a machine that `has` a member | [kits/kits.nix](modules/kits/kits.nix) |
+| `perMachine` | an aspect at a machine that has a member | [kits/kits.nix](modules/kits/kits.nix) |
 | role settings, then machine settings, typed by the role interface | interface defaults, then the role's settings (attrs, or a function of the machine); a wrong type is an error record | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | exports, `selectExports`, scope rules | a fleet sink; the engine sets the writer; a kit lists its keys; a reader filters by refs (`yen.lib.same`); the owner overrides from the fleet scope | [kits/assemblies.nix](modules/kits/assemblies.nix) |
 | a service from another flake (`module.input`) | a module file that declares a kit, imported | [lib/kits/borg.nix](../../lib/kits/borg.nix) |

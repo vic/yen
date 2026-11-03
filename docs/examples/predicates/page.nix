@@ -1,6 +1,6 @@
 {
   title = "Predicates";
-  description = "`at` takes a predicate: a function, a kind, an instance, an aspect, a list, and `all`, `not`, `within`, `has`.";
+  description = "`at` takes a predicate: a function, a kind, an instance, an aspect, a list, and `all`, `not`, `within`, `below`.";
   section = "behavior";
   order = 3;
 
@@ -51,7 +51,7 @@
             "`p` holds at a proper ancestor"
           ]
           [
-            "`has p`"
+            "`below p`"
             "`p` holds at a child"
           ]
         ]

@@ -31,7 +31,7 @@ in
     fields = yen.kinds.machine.fields;
     spawns = {
       user = yen.helpers.usersOn;
-      guest = s: lib.filterAttrs (_: g: same g.on s) yen.guest;
+      guest = yen.lib.pointing "on" yen.guest;
     };
     sinks = {
       nixos = {

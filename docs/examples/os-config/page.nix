@@ -12,7 +12,7 @@
         In yen, `osConfig` is a [sink](/behavior/sinks/). Each host gives its realized config to it, and a module names it like any sink arg.
         `pkgs` stays open, so home-manager fills its own `pkgs`.
       ''
-      (docs.fileWith "{16-28,58-61}" "modules/fleet.nix")
+      (docs.fileWith "{12-24,54-57}" "modules/fleet.nix")
       ''
         - The `os-config` aspect gives `out.nixosConfigurations.<host>.config`. It is lazy: Nix reads it only when a module asks.
         - A home has `on`, so it lives under that host. It reads the host's sinks like any child, and still builds `homeConfigurations`.

@@ -11,7 +11,7 @@
         An environment owns its hosts. It gives them a domain and default settings, and it decides which people
         may log in. staging inherits from prod what it does not set.
       ''
-      (docs.fileWith "{23,28}" "modules/kinds.nix")
+      (docs.fileWith "{22,27}" "modules/kinds.nix")
       (docs.file "modules/data.nix")
       ''
         Users are not listed per host. A user lives on a host when one of their groups is in the environment's `grants`:

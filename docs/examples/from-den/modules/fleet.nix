@@ -1,7 +1,6 @@
 # What Den gives you built in, declared: hosts build NixOS, users live on hosts, a user's home goes into its host.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
@@ -12,7 +11,7 @@
   };
   yen.kinds.host = {
     fields.system = yen.lib.str;
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -31,7 +30,7 @@
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.has yen.kinds.user;
+    at = yen.lib.below yen.kinds.user;
     nixos.imports = [ inputs.home-manager.nixosModules.home-manager ];
   };
 

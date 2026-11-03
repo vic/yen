@@ -17,7 +17,7 @@
         | `configurations { from; output; build; }` | `out` of any module sink | `<output>.<scope name> = build scope modules` |
         | `nixos.system { from; nixpkgs; }` | `out` of the NixOS sink | `nixosConfigurations.<name>` |
         | `darwin.system { from; darwinSystem; system; }` | `out` of the darwin sink | `darwinConfigurations.<name>` |
-        | `darwin.primary-user { user; }`, `darwin.homebrew { from; }` | darwin keys | `system.primaryUser`; homebrew from a sink of casks, brews, masApps |
+        | `darwin.primary-user { user ? ; }`, `darwin.homebrew { from; }` | darwin keys | `system.primaryUser`; homebrew from a sink of casks, brews, masApps |
         | `home-manager.system { from; homeManagerConfiguration; pkgs; }` | `out` of a home's sink | `homeConfigurations.<name>` |
         | `home-manager.into-host { from; }` | a user sink's key that gives to the machine | `home-manager.users.<user>.imports` |
         | `home-manager.module module` | a machine key | home-manager with the machine's pkgs |

@@ -1,7 +1,7 @@
 # Den specialisations: a variant scope under a host; its nixos forwards into the host's specialisation.
-{ yen, lib, ... }:
+{ yen, ... }:
 {
-  yen.kinds.host.spawns.variant = s: lib.filterAttrs (_: v: yen.lib.same v.of s) yen.variant;
+  yen.kinds.host.spawns.variant = yen.lib.pointing "of" yen.variant;
   yen.kinds.variant = {
     fields.of = yen.kinds.host;
     sinks.nixos.nixos =

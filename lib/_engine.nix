@@ -1206,8 +1206,8 @@ let
           )
         else if p ? __within then
           or3 (map (eval3 stack p.__within) (above s))
-        else if p ? __has then
-          or3 (map (eval3 stack p.__has) (below s))
+        else if p ? __below then
+          or3 (map (eval3 stack p.__below) (below s))
         else if p ? __functor then
           p s
         else if p ? __kind then
@@ -2376,12 +2376,18 @@ let
           #: result.check.invariants :: [ name ] -- the names of the invariants
           invariants = attrNames invs;
         };
+      #: yen.lib.same :: x -> y -> bool -- x and y are the same instance; a non-instance is never the same
+      same = x: y: isRef x && isRef y && x.kind == y.kind && x.name == y.name; # total: a non-instance is never the same
+      #: yen.lib.pointing :: name -> { name = instance; } -> scope -> { name = instance; } -- the instances whose field points at the scope: one ref, or a list that holds it (a `spawns` by a ref field)
+      pointing =
+        f: xs: s:
+        b.removeAttrs xs (filter (n: !any (same s) (toList (xs.${n}.${f} or [ ]))) (attrNames xs));
       lib =
         tools
         #: yen.lib.all :: [ predicate ] -> predicate -- every predicate holds
         #: yen.lib.not :: predicate -> predicate -- the predicate does not hold
         #: yen.lib.within :: predicate -> predicate -- the predicate holds at a scope above
-        #: yen.lib.has :: predicate -> predicate -- the predicate holds at a child scope
+        #: yen.lib.below :: predicate -> predicate -- the predicate holds at a child scope
         // genAttrs combinators (
           c: p: {
             "__${c}" = p;
@@ -2397,8 +2403,7 @@ let
             floor
             schema
             ; # queries readable inside the fleet (docs); `check` and `context` read errors, so not here
-          #: yen.lib.same :: x -> y -> bool -- x and y are the same instance; a non-instance is never the same
-          same = x: y: isRef x && isRef y && x.kind == y.kind && x.name == y.name; # total: a non-instance is never the same
+          inherit same pointing;
           #: yen.lib.scopesOf :: instance -> [ scope ] -- the scopes of an instance
           scopesOf = x: filter (s: s.kind == x.kind && s.name == x.name) scopes;
           #: yen.lib.children :: predicate -> scope -> [ scope ] -- the children of the scope where the predicate holds, sorted
@@ -2553,8 +2558,8 @@ let
           node "not" (sub [ p.__not ])
         else if p ? __within then
           node "within" (at (above s) p.__within)
-        else if p ? __has then
-          node "has" (at (below s) p.__has)
+        else if p ? __below then
+          node "below" (at (below s) p.__below)
         else if p ? __functor then
           node "function" { }
         else if p ? __kind then

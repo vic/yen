@@ -6,16 +6,16 @@
   ...
 }:
 let
-  inherit (yen.lib) all within same;
+  inherit (yen.lib) all within;
   pkgs = s: inputs.nixpkgs.legacyPackages.${s};
 in
 {
   # #22 #23 pets and toys under hosts. A host-level cycle pairs every user with every pet (cartesian);
   # a toy-scope element reads its pet (nearest) and lands at the host (transitive).
-  yen.kinds.host.spawns.pet = s: lib.filterAttrs (_: p: same p.of s) yen.pet;
+  yen.kinds.host.spawns.pet = yen.lib.pointing "of" yen.pet;
   yen.kinds.pet = {
     fields.of = yen.kinds.host;
-    spawns.toy = s: lib.filterAttrs (_: t: same t.of s) yen.toy;
+    spawns.toy = yen.lib.pointing "of" yen.toy;
   };
   yen.kinds.toy.fields.of = yen.kinds.pet;
   yen.pet = {

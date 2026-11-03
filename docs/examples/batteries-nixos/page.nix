@@ -18,7 +18,7 @@
         | `system { from; nixpkgs; }` | the `out` key of the sink that collects NixOS modules | the `den.hosts` schema |
         | `hostname` | a NixOS key of an aspect | `den.batteries.hostname` |
         | `define-user` | a NixOS key of an aspect | `den.batteries.define-user` |
-        | `primary-user` | a NixOS key of an aspect | `den.batteries.primary-user` |
+        | `primary-user { user ? ; }` | a NixOS key; `user` reads a ref or a name, by default the scope | `den.batteries.primary-user` |
         | `unfree { from; }` | the NixOS key of a sink of package names | `den.batteries.unfree` |
         | `insecure { from; }` | the NixOS key of a sink of package names | `den.batteries.insecure` |
         | `user-shell { shell; }` | a NixOS key; `shell` reads the [scope](/model/scopes/) | `den.batteries.user-shell` |

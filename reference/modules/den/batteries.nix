@@ -1,7 +1,7 @@
 # Den batteries are ordinary aspects here: hostname is in features/base.nix, define-user in user-account, primary-user in sini/users.nix.
 { yen, lib, ... }:
 let
-  inherit (yen.lib) all within has;
+  inherit (yen.lib) all within below;
 in
 {
   yen.kinds.user.fields.shell = yen.lib.opt (yen.lib.enum [
@@ -42,7 +42,7 @@ in
     # use-global-pkgs: only where home-manager has users
     at = all [
       yen.helpers.machines
-      (has yen.kinds.user)
+      (below yen.kinds.user)
     ];
     os.home-manager = {
       useGlobalPkgs = true;

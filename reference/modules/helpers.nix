@@ -20,7 +20,6 @@ in
       yen.kinds.guest
     ];
     pkgsOf = m: m.channel.nixpkgs.legacyPackages.${m.system.name};
-    inEnv = xs: s: lib.filterAttrs (_: x: same x.environment s) xs;
     upTo = p: s: lib.findFirst (holds p) null (lib.reverseList s.up); # nearest ancestor-or-self where p holds
     # nested groups: every group that contains one of gs, transitively
     closure =

@@ -1,13 +1,9 @@
 # Hosts build NixOS. Users live under hosts; a standalone home lives under a host too, and builds its own config.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
-let
-  inherit (yen.lib) same is;
-in
 {
   yen.kinds.fleet = {
     spawns.host = _: yen.host;
@@ -15,8 +11,8 @@ in
   };
   yen.kinds.host = {
     spawns = {
-      user = s: lib.filterAttrs (_: u: lib.any (same s) u.hosts) yen.user;
-      home = s: lib.filterAttrs (_: h: same h.on s) yen.home;
+      user = yen.lib.pointing "hosts" yen.user;
+      home = yen.lib.pointing "on" yen.home;
     };
     sinks.nixos.out =
       { host, nixos, ... }:
@@ -49,7 +45,7 @@ in
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.has yen.kinds.user;
+    at = yen.lib.below yen.kinds.user;
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;

@@ -15,7 +15,7 @@
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.has yen.kinds.user; # only hosts with users
+    at = yen.lib.below yen.kinds.user; # only hosts with users
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;

@@ -1,12 +1,11 @@
 # Two hosts and two users. The fleet carries constants; a user's `admin` field replaces a user factory's argument.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.lib) opt is;
+  inherit (yen.lib) opt;
 in
 {
   yen.kinds.fleet = {
@@ -19,7 +18,7 @@ in
       "none"
       "nvidia"
     ]) "none";
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

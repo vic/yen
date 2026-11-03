@@ -1,13 +1,9 @@
 # NixOS hosts hold users. A home is a standalone home-manager configuration, for a machine without NixOS.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
-let
-  inherit (yen.lib) same is;
-in
 {
   yen.kinds.fleet = {
     spawns = {
@@ -17,7 +13,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -48,7 +44,7 @@ in
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.has yen.kinds.user;
+    at = yen.lib.below yen.kinds.user;
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;

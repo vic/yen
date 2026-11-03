@@ -1,5 +1,5 @@
 # Hosts with facts, guests (VMs) under hosts. An `active` output lists each aspect's scopes.
-{ yen, lib, ... }:
+{ yen, ... }:
 {
   yen.kinds.fleet = {
     spawns.host = _: yen.host;
@@ -9,7 +9,7 @@
       cores = yen.lib.int;
       gpu = yen.lib.opt yen.lib.bool false;
     };
-    spawns.guest = s: lib.filterAttrs (_: g: yen.lib.same g.on s) yen.guest;
+    spawns.guest = yen.lib.pointing "on" yen.guest;
   };
   yen.kinds.guest.fields.on = yen.kinds.host;
 

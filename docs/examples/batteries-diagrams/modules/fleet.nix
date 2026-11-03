@@ -1,5 +1,5 @@
 # A small fleet to draw: environments hold hosts; a host may refer to its database host.
-{ yen, lib, ... }:
+{ yen, ... }:
 let
   inherit (yen.lib) all not maybe;
 in
@@ -9,7 +9,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.environment = {
-    spawns.host = s: lib.filterAttrs (_: h: yen.lib.same h.environment s) yen.host;
+    spawns.host = yen.lib.pointing "environment" yen.host;
     # hosts report to their environment
     sinks.inventory.out =
       { scope, sinks, ... }:

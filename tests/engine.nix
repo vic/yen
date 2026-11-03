@@ -765,7 +765,7 @@ let
               all
               not
               within
-              has
+              below
               ;
           in
           {
@@ -793,7 +793,7 @@ let
             ]; # within crosses scopes: no cycle
             v.at = all [
               yen.kinds.host
-              (has yen.aspects.w)
+              (below yen.aspects.w)
             ];
           };
       }
@@ -2654,7 +2654,7 @@ let
           "c@${h}"
           "v@${h}"
           "w@${h}/user:u"
-        ]); # within and has carry it across scopes
+        ]); # within and below carry it across scopes
         t2 = no (r.active.a.${h});
         t3 = no (r.active.b.${h});
         t4 = no (r.active.c.${h});
@@ -2679,7 +2679,7 @@ let
         t1 = no (r.active.p."top:t/host:h");
         t2 = no (b.any (x: x.aspect == "p" || x.aspect == "q") r.undefined);
       };
-    within-has-no-cycle =
+    within-below-no-cycle =
       let
         r = logic false;
       in
@@ -4682,6 +4682,43 @@ let
             "b"
           ]
         ]);
+    # a spawn by a ref field: one ref or a list that holds the scope; a missing field or another scope is no child
+    lib-pointing =
+      eq
+        (map (s: s.id)
+          (yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.host = {
+                spawns.user = yen.lib.pointing "hosts" yen.user;
+                spawns.guest = yen.lib.pointing "on" yen.guest;
+              };
+              yen.kinds.user.fields.hosts = yen.lib.listOf yen.kinds.host;
+              yen.kinds.guest.fields.on = yen.kinds.host;
+              yen.host = {
+                a = { };
+                b = { };
+              };
+              yen.user = {
+                both.hosts = [
+                  yen.host.a
+                  yen.host.b
+                ];
+                onlyB.hosts = [ yen.host.b ];
+                none = { };
+              };
+              yen.guest.g.on = yen.host.a;
+            }
+          )).scopes
+        )
+        [
+          "host:a"
+          "host:a/guest:g"
+          "host:a/user:both"
+          "host:b"
+          "host:b/user:both"
+          "host:b/user:onlyB"
+        ];
     lib-children-refused =
       eq
         (b.tryEval (

@@ -32,6 +32,7 @@ let
   optional = c: x: if c then [ x ] else [ ];
   words = s: filter isString (builtins.split " " s); # "a b" is [ "a" "b" ]
   isRef = v: isAttrs v && v ? kind && v ? name; # an instance, or a ref to one
+  nameOf = u: if isAttrs u then u.name else u; # a ref gives its name; a name or null stays
   # a kind id as text, for messages only: the path a user writes, `x.kinds.y`
   renderId = id: builtins.concatStringsSep ".kinds." (toList id);
   lit = atom: {
@@ -41,7 +42,7 @@ let
   curried =
     n: f: acc:
     if length acc == n then f acc else x: curried n f (acc ++ [ x ]); # n arguments, one at a time
-  combinators = words "all not within has"; # `lib.all ps` is { __all = ps; }, and so on
+  combinators = words "all not within below"; # `lib.all ps` is { __all = ps; }, and so on
 in
 {
   inherit
@@ -56,6 +57,7 @@ in
     optional
     words
     isRef
+    nameOf
     renderId
     lit
     curried

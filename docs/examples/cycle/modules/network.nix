@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.vm-network = {
-    at = yen.lib.has yen.kinds.guest; # every host with a guest
+    at = yen.lib.below yen.kinds.guest; # every host with a guest
     cycle =
       { tree, ... }:
       let

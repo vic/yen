@@ -1,10 +1,7 @@
 # fleet > environment > host > user and home. Who receives an element depends on where the sinks are.
-{ yen, lib, ... }:
+{ yen, ... }:
 let
-  inherit (yen.lib) same opt;
-  under =
-    field: kind: s:
-    lib.filterAttrs (_: x: same x.${field} s) kind;
+  inherit (yen.lib) opt;
 in
 {
   yen.kinds.fleet = {
@@ -18,7 +15,7 @@ in
   };
   yen.kinds.environment = {
     fields.public = opt yen.lib.bool false;
-    spawns.host = under "environment" yen.host;
+    spawns.host = yen.lib.pointing "environment" yen.host;
     sinks.dns = {
       at = s: s.public; # a conditional receiver: only public environments
       out =
@@ -31,8 +28,8 @@ in
   yen.kinds.host = {
     fields.environment = yen.kinds.environment;
     spawns = {
-      user = under "on" yen.user;
-      home = under "on" yen.home;
+      user = yen.lib.pointing "on" yen.user;
+      home = yen.lib.pointing "on" yen.home;
     };
     sinks.os.out =
       { host, os, ... }:

@@ -12,7 +12,7 @@
         [reference fleet](https://github.com/vic/yen/blob/main/reference/modules/platforms/microvm.nix).
         It is a [scope](/model/scopes/) under its host, with its own `nixos` [sink](/behavior/sinks/). That sink forwards its modules up, into the host.
       ''
-      (docs.fileWith "{23-24}" "modules/kinds.nix")
+      (docs.fileWith "{22-23}" "modules/kinds.nix")
       (docs.file "modules/machines.nix")
       (docs.file "modules/services.nix")
       (docs.routes result)

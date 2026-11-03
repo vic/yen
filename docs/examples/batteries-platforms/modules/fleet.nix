@@ -1,7 +1,6 @@
 # Four kinds of machine and standalone homes. Each kind's sink builds its output with a battery.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
@@ -9,7 +8,7 @@ let
   b = yen.lib.batteries;
   pkgsOf = s: inputs.nixpkgs.legacyPackages.${s.system};
   machine = {
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.on) yen.user;
+    spawns.user = yen.lib.pointing "on" yen.user;
   };
 in
 {
@@ -25,7 +24,7 @@ in
   yen.kinds.host = machine // {
     fields.system = yen.lib.str;
     spawns = machine.spawns // {
-      guest = s: lib.filterAttrs (_: g: yen.lib.same g.on s) yen.guest;
+      guest = yen.lib.pointing "on" yen.guest;
     };
     sinks.nixos.out = b.nixos.system {
       from = yen.kinds.host.sinks.nixos;

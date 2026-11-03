@@ -1,7 +1,6 @@
 # Your words: hosts build NixOS and hold users. The batteries fill values; every key here is yours.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
@@ -14,7 +13,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out = nixos.system {
       from = yen.kinds.host.sinks.nixos;
       inherit (inputs) nixpkgs;

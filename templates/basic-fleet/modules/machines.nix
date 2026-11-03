@@ -40,7 +40,7 @@
   };
   # a host with users gets home-manager, and each user an account
   yen.aspects.users = {
-    at = yen.lib.has yen.kinds.user;
+    at = yen.lib.below yen.kinds.user;
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;
