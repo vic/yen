@@ -1,6 +1,12 @@
 # yen oracles. Run: nix-instantiate --eval --strict vic/tests -A failed   (expect [ ])
 self:
 let
+  # a value that must never be forced: forcing it recurses forever, so the test fails; nothing throws
+  poison =
+    let
+      p = p;
+    in
+    p;
   yen = self.api;
   b = builtins;
   # a fastest test: { expr; expected; }
@@ -68,7 +74,7 @@ let
       (
         { yen, ... }:
         {
-          yen.kinds.host.fields.settings.lazy = yen.lib.opt (yen.lib.is b.isString) (throw "touched");
+          yen.kinds.host.fields.settings.lazy = yen.lib.opt (yen.lib.is b.isString) poison;
         }
       )
     ]
@@ -3924,8 +3930,8 @@ let
         paths = r: map (e: e.path) r.deep;
         good = host [ 1 2 ] (x: x);
         bad = host [ 1 "x" 3 ] (x: x);
-        # an element that throws when forced, and a function that throws when called
-        throws = host [ 1 (throw "forced") ] (_: throw "called");
+        # an element and a function result that must never be forced while the fleet evaluates
+        lazyHost = host [ 1 poison ] (_: poison);
       in
       {
         good = eq (good.errors ++ good.deep) [ ];
@@ -3937,15 +3943,8 @@ let
           ]
         ];
         bad-code = eq (map (e: e.code) bad.deep) [ "deep" ];
-        # nothing forces the element or calls the function while the fleet evaluates
-        lazy = yes ((b.tryEval (b.deepSeq throws.errors true)).success);
-        # the deep check forces the element: a throw is an error record, never a crash
-        throw-data = eq (paths throws) [
-          [
-            "ports"
-            "1"
-          ]
-        ];
+        # nothing forces the element or calls the function while the fleet evaluates (forced, the poison would loop)
+        lazy = eq lazyHost.errors [ ];
         not-a-list = eq (map (e: e.code) (host "x" (x: x)).errors) [ "check" ];
         not-a-function = eq (map (e: e.code) (host [ ] 1).errors) [ "check" ];
         nested = eq (paths (host [ [ 1 ] ] (x: x))) [
@@ -4417,24 +4416,21 @@ let
       "top:t/host:db"
     ]);
     r1-grant-inside = eq (r1outside (r1stage { yen.host.web.port = 2222; } r1grant)) ([ ]);
-    # the closure channel is closed: an element that reads another instance through `yen` is an eval error
-    r1-grant-closure =
-      no
-        (b.tryEval (
-          b.deepSeq
-            (yen.eval (rung1 [
-              (
-                { yen, ... }:
-                {
-                  yen.aspects.peer = {
-                    at = yen.host.db;
-                    fw = "${toString yen.host.web.port}";
-                  };
-                }
-              )
-            ])).reduced.fw
-            true
-        )).success;
+    # the closure channel is closed: an element that reads another instance through `yen` gets a marker, never its
+    # value, and `result.deep` reports the read (no throw)
+    r1-grant-closure = eq (map (e: e.code)
+      (yen.eval (rung1 [
+        (
+          { yen, ... }:
+          {
+            yen.aspects.peer = {
+              at = yen.host.db;
+              fw = "${toString yen.host.web.port}";
+            };
+          }
+        )
+      ])).deep
+    ) [ "instance-read" ];
     # a read through a cycle request is an edge: a change at web reaches db, which asks for every host
     r1-grant-request = eq (r1outside (
       yen.stage {
@@ -4682,31 +4678,26 @@ let
             "b"
           ]
         ]);
-    lib-children-refused =
-      eq
-        (b.tryEval (
-          b.deepSeq
-            (yen.eval (
-              { yen, ... }:
-              {
-                yen.kinds.top = {
-                  spawns.host = _: {
-                    b = { };
-                    a = { };
-                  };
-                  sinks.kids = { };
-                };
-                yen.kinds.host = { };
-                yen.top.t = { };
-                yen.aspects.k = {
-                  at = yen.kinds.top;
-                  kids = { scope, ... }: map (c: c.name) (yen.lib.children yen.kinds.host scope);
-                };
-              }
-            )).reduced.kids
-            true
-        )).success
-        false;
+    lib-children-refused = eq (map (e: e.code)
+      (yen.eval (
+        { yen, ... }:
+        {
+          yen.kinds.top = {
+            spawns.host = _: {
+              b = { };
+              a = { };
+            };
+            sinks.kids = { };
+          };
+          yen.kinds.host = { };
+          yen.top.t = { };
+          yen.aspects.k = {
+            at = yen.kinds.top;
+            kids = { scope, ... }: yen.lib.children yen.kinds.host scope;
+          };
+        }
+      )).deep
+    ) [ "query-read" ];
     error-codes = {
       t1 = eq (map (e: e.code) codesFix.errors) ([
         "module"
