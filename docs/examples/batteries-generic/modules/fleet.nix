@@ -1,7 +1,7 @@
 # Your words: a fleet of hosts. Each host has an ssh key and an address. The batteries know none of these names.
 { yen, lib, ... }:
 let
-  str = lib.types.str;
+  str = yen.lib.str;
 in
 {
   yen.kinds.fleet = {

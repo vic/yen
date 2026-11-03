@@ -10,8 +10,8 @@
       }; # messages that do not fail the fleet
   };
   yen.kinds.host.fields = {
-    addr = lib.types.str;
-    backup = yen.lib.opt lib.types.bool true;
+    addr = yen.lib.str;
+    backup = yen.lib.opt yen.lib.bool true;
   };
 
   yen.fleet.main = { };

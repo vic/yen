@@ -43,14 +43,55 @@ let
       )
     );
   isSecret = t: isAttrs t && (t ? __secret || t ? __maybe && isSecret t.__maybe);
+  # a type with `parse` decides its outer shape only: `{ right; owe ? [ ]; }` or `{ left; }`. Each obligation
+  # `{ path; type; value; }` is a part it did not force; `discharge` checks them later. A type with only `check`
+  # decides all at once and owes nothing. A frontier calls `parseOf`, so it forces no element and calls no function
+  parseOf =
+    t: v:
+    if t ? parse then
+      t.parse v
+    else if checkOf t v then
+      { right = v; }
+    else
+      {
+        left = {
+          want = typeName t;
+        };
+      };
+  # every obligation checked, its own obligations too: one record per part that fails, with the path to it. A part
+  # that throws when forced is a failed part too (`tryEval`): errors stay data
+  discharge = concatMap (
+    o:
+    let
+      r = builtins.tryEval (
+        let
+          p = parseOf o.type o.value;
+        in
+        builtins.seq (p ? left) p
+      );
+    in
+    if !r.success || r.value ? left then
+      [ (removeAttrs o [ "value" ] // { want = typeName o.type; }) ]
+    else
+      discharge (map (x: x // { path = o.path ++ x.path; }) (r.value.owe or [ ]))
+  );
+  # the whole check as a bool, parts included: it forces them (relation terms, query params: scalars)
   # a check that gives no bool (a curried gen-types check) fails, never throws; `boolCheck` names it in the error
   checkOf =
     t:
     if t ? __kind then
       (v: isAttrs v && (v.kind or null) == t.__kind)
+    else if t ? parse then
+      (
+        v:
+        let
+          p = t.parse v;
+        in
+        p ? right && discharge (map (o: o // { path = [ ]; }) (p.owe or [ ])) == [ ]
+      )
     else
       (v: isBool (t.check v) && t.check v);
-  boolCheck = t: v: t ? __kind || isBool (t.check v);
+  boolCheck = t: v: t ? __kind || t ? parse || isBool (t.check v);
   get =
     path: v:
     foldl' (
@@ -67,6 +108,8 @@ in
     hide
     isSecret
     checkOf
+    parseOf
+    discharge
     boolCheck
     get
     attrsIn

@@ -60,7 +60,7 @@ in
   };
   yen.kinds.assembly.fields.roles = is lib.isAttrs; # role name -> host refs
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.lib.str;
     spawns.member = membersOf;
     sinks.config = {
       reduce = yen.lib.reduce.merge;

@@ -32,7 +32,7 @@ in
   yen.kinds.kit.fields = {
     roles = opt attrs { };
     constraints = opt attrs { };
-    exports = opt (yen.helpers.listOf lib.types.str) [ ];
+    exports = opt (yen.helpers.listOf yen.lib.str) [ ];
     adds = opt (yen.lib.is lib.isFunction) (_: { });
   };
   yen.kinds.assembly.fields = {

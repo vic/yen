@@ -6,7 +6,7 @@
   ...
 }:
 let
-  str = lib.types.str;
+  str = yen.lib.str;
 in
 {
   yen.kinds.fleet = {

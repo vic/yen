@@ -17,13 +17,13 @@ in
 {
   yen.kit.users = {
     roles.default.interface = {
-      user.type = lib.types.str;
+      user.type = yen.lib.str;
       groups = {
-        type = yen.lib.listOf lib.types.str;
+        type = yen.lib.listOf yen.lib.str;
         default = [ ];
       };
       shell = {
-        type = lib.types.functionTo lib.types.package;
+        type = yen.lib.functionTo yen.lib.any;
         default = pkgs: pkgs.bashInteractive;
       };
     };

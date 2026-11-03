@@ -21,7 +21,7 @@
         [ "Constructor" "Default" ]
         [
           [
-            "`lib.types.str`, any type"
+            "`yen.lib.str`, any type"
             "none: the field is required"
           ]
           [
@@ -57,7 +57,8 @@
       (docs.caution "WARNING: use `yen.lib.listOf` and `yen.lib.attrsOf`, not nixpkgs" ''
         nixpkgs `listOf` and `attrsOf` check only the outer shape. Their items are checked in `merge`, which yen
         never calls. So `(nixpkgs.lib.listOf x).check [ "a" ]` is `true` when `x` is an int, and the same holds for
-        `attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item in `check`. See
+        `attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item: the shape when a field reads the value, the
+        items in `result.deep`. See
         [the caution on nixpkgs composite types](/principles/modules/#types-anything-with-check).
       '')
       (docs.fileWith "{13-14}" "modules/host.nix")
@@ -71,11 +72,14 @@
       ''
       (docs.value result.flake.report)
       ''
-        A value that fails its type is an error record that names the field. `listOf` and `attrsOf` check every item,
-        which the nixpkgs types of the same names do not (see [Modules](/principles/modules/)):
+        A value that fails its type is an error record that names the field. A field reads only the shape of its
+        value: a list, an attrset, a function. The parts are checked later, by `result.deep`, after the fleet
+        evaluated: so building one host never forces the list elements of another, and a part that throws is an
+        error record, not a crash. `nix flake check` fails on both (`checks.<system>.yen-lean`):
       ''
       (docs.file "variants/bad-values.nix")
       (docs.value (variant "variants/bad-values.nix").errors)
+      (docs.value (variant "variants/bad-values.nix").deep)
       (docs.note "Derived defaults" ''
         `derive` gets the instance as `self`, so a default can read other fields or the instance name.
         An explicit value always wins: `db` sets its own `vpn`.
@@ -93,11 +97,17 @@
     }:
     {
       bad-values = eq (map (e: e.path) (variant "variants/bad-values.nix").errors) ([
-        [ "labels" ]
         [
           "settings"
           "kernel"
           "channel"
+        ]
+      ]);
+      # the wrong label value is a part of `labels`: the deep check finds it, with its path
+      bad-parts = eq (map (e: e.path) (variant "variants/bad-values.nix").deep) ([
+        [
+          "labels"
+          "owner"
         ]
       ]);
       web = eq (result.flake.report.web) ({

@@ -6,6 +6,14 @@ self: {
     derive
     maybe
     listOf
+    functionTo
+    str
+    int
+    bool
+    port
+    path
+    attrs
+    any
     enum
     attrsOf
     secret

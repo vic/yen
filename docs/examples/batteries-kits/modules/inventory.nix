@@ -15,7 +15,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.machine = {
-    fields.storage = opt lib.types.bool false;
+    fields.storage = opt yen.lib.bool false;
     # one member scope per (assembly, role) the machine takes
     spawns.member = kits.members { inherit assemblies holds; };
     sinks.config = {
@@ -56,7 +56,7 @@ in
   yen.kit.borg = {
     roles.server = { };
     roles.client.interface.dir = {
-      type = lib.types.str;
+      type = yen.lib.str;
       default = "/var/backup";
     };
     constraints.roles.server.max = 1;

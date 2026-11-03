@@ -61,7 +61,7 @@ in
     };
   };
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.lib.str;
     spawns.member = kits.members { inherit assemblies holds; };
     # the NixOS keys of a host, as data
     sinks.disks.reduce = yen.lib.reduce.merge; # kit disko gives disks here

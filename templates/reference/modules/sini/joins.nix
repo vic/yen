@@ -67,7 +67,7 @@ in
   };
 
   # The guest states its passthrough devices; the parent host binds them to vfio.
-  yen.kinds.guest.fields.passthrough = opt (yen.helpers.listOf lib.types.str) [ ];
+  yen.kinds.guest.fields.passthrough = opt (yen.helpers.listOf yen.lib.str) [ ];
   yen.guest.ci.passthrough = [ "10de:2203" ];
   yen.aspects.vfio = {
     at = all [
@@ -92,7 +92,7 @@ in
   yen.aspects.cloudflare-api = cloudflare "api" yen.domain."api.example.org";
 
   # The aspect is a value: a check applies it to a stand-in cluster with the flag forced on, whatever axon sets.
-  yen.kinds.cluster.fields.settings.guard.enable = opt lib.types.bool false;
+  yen.kinds.cluster.fields.settings.guard.enable = opt yen.lib.bool false;
   yen.cluster.axon.settings.guard.enable = true;
   yen.kinds.fleet.sinks.unit-checks = {
     reduce = yen.lib.reduce.merge;

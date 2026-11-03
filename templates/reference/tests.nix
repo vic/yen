@@ -2924,7 +2924,7 @@ let
               };
             };
           }
-        )) ".*no-root.client: setting root is not a absolute path.*"
+        )) ".*no-root.client: setting root is not a path.*"
       );
     };
     kits-access-users = {

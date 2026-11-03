@@ -6,7 +6,7 @@
 _:
 { yen, lib, ... }:
 {
-  yen.kit.emergency-access.roles.default.interface.authorizedKeys.type = yen.lib.listOf lib.types.str;
+  yen.kit.emergency-access.roles.default.interface.authorizedKeys.type = yen.lib.listOf yen.lib.str;
 
   yen.aspects.kit-emergency-access = {
     at = yen.lib.all [

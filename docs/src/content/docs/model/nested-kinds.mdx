@@ -16,8 +16,8 @@ You write the nested kind in the key `kinds` of the parent:
 { yen, lib, ... }:
 {
   yen.kinds.host = {
-    fields.addr = lib.types.str;
-    kinds.user.fields.shell = lib.types.str;
+    fields.addr = yen.lib.str;
+    kinds.user.fields.shell = yen.lib.str;
   };
 }
 ```
@@ -107,11 +107,11 @@ it by hand. The scopes and the report are equal. Only the nested form keeps `use
 { yen, lib, ... }:
 {
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.lib.str;
     fields.user = yen.lib.is builtins.isAttrs;
     spawns.user = s: s.user;
   };
-  yen.kinds.user.fields.shell = lib.types.str;
+  yen.kinds.user.fields.shell = yen.lib.str;
 }
 ```
 
@@ -124,7 +124,7 @@ A field of a kind cannot have the name of a nested kind, because both use the sa
 # A field named like a nested kind shares its path in the instance.
 { yen, lib, ... }:
 {
-  yen.kinds.host.fields.user = lib.types.str;
+  yen.kinds.host.fields.user = yen.lib.str;
 }
 ```
 

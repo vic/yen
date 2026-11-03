@@ -7,9 +7,9 @@
 }:
 {
   yen.kinds.channel.fields = {
-    nixpkgs = lib.types.raw;
-    home-manager = lib.types.raw;
-    darwin = yen.lib.opt lib.types.raw null;
+    nixpkgs = yen.lib.any;
+    home-manager = yen.lib.any;
+    darwin = yen.lib.opt yen.lib.any null;
   };
   yen.channel.stable = {
     nixpkgs = inputs.nixpkgs-25; # nixos-25.05: the trimmed modlists (web-1, app-2) need it

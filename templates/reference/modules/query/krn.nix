@@ -85,14 +85,14 @@ let
 in
 {
   yen.kinds.machine.fields = {
-    apps = yen.lib.opt (yen.helpers.listOf lib.types.str) [ ];
-    portRange = yen.lib.opt (yen.helpers.listOf lib.types.int) [ ];
+    apps = yen.lib.opt (yen.helpers.listOf yen.lib.str) [ ];
+    portRange = yen.lib.opt (yen.helpers.listOf yen.lib.int) [ ];
     portBefore = yen.lib.opt (yen.lib.is lib.isAttrs) { };
-    dbRole = yen.lib.opt lib.types.bool false;
-    ram = yen.lib.opt lib.types.int 0;
-    ramReserve = yen.lib.opt lib.types.int 0;
-    ramRange = yen.lib.opt (yen.helpers.listOf lib.types.int) [ ];
-    ramFuel = yen.lib.opt lib.types.int 100000; # krn search steps for the memory allocation
+    dbRole = yen.lib.opt yen.lib.bool false;
+    ram = yen.lib.opt yen.lib.int 0;
+    ramReserve = yen.lib.opt yen.lib.int 0;
+    ramRange = yen.lib.opt (yen.helpers.listOf yen.lib.int) [ ];
+    ramFuel = yen.lib.opt yen.lib.int 100000; # krn search steps for the memory allocation
   };
   yen.host.lb = {
     apps = [

@@ -13,7 +13,7 @@ let
 in
 {
   yen.kit.wifi.roles.default.interface.networks = {
-    type = lib.types.attrs;
+    type = yen.lib.attrs;
     default = { };
   };
   yen.aspects.kit-wifi = {

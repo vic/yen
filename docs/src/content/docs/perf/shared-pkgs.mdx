@@ -38,8 +38,8 @@ in
   };
   yen.kinds.host = {
     fields = {
-      system = yen.lib.opt lib.types.str "x86_64-linux";
-      sharedPkgs = yen.lib.opt lib.types.bool false;
+      system = yen.lib.opt yen.lib.str "x86_64-linux";
+      sharedPkgs = yen.lib.opt yen.lib.bool false;
     };
     sinks.nixos.out =
       {

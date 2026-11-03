@@ -11,7 +11,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:

@@ -53,6 +53,7 @@ let
     error = "a message from an [aspect](/behavior/aspects/)'s `errors` key";
     module = "a module asks for an arg no module gives or declares, or its `imports` or key names read an arg";
     of = "a sink element, or a module's value for a `yen.sinks` sink, fails the sink's `of` type";
+    deep = "a part of a typed value (a list element, an attrset value) fails its type: `result.deep` checks the parts after evaluation";
     order = "an `order` answer is not a number";
     spawns = "a `spawns` function gives no attrset, or an instance in it is no attrset";
     tree-request = "a cycle asks the tree something it does not answer (want nearest, parent, children, scopesOf or holds)";

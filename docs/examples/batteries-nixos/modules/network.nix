@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 let
   nixos = yen.lib.batteries.nixos;
-  str = lib.types.str;
+  str = yen.lib.str;
 in
 {
   yen.kinds.host = {

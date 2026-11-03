@@ -12,7 +12,7 @@ in
   yen.layout = layouts;
 
   yen.kit.disko.roles.default.interface = {
-    device.type = lib.types.str;
+    device.type = yen.lib.str;
     layout.type = yen.kinds.layout // {
       description = "layout ref";
     }; # the kind checks; settings-typed names the type

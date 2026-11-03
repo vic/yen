@@ -118,11 +118,12 @@ modules inside sink elements. nixpkgs also has `mkIf` on `config`, where yen has
 
 ## Types: anything with `check`
 
-A field type is any value with `check = v: bool`. yen does not ship its own type library, and it needs no
-nixpkgs. Use what you have:
+A field type is any value with `check = v: bool`. yen ships the common ones, and needs no nixpkgs:
 
+- `yen.lib.str`, `int`, `bool`, `port`, `path`, `attrs`, `any`, and `enum`, `maybe`, `listOf`, `attrsOf`,
+  `functionTo`. A field checks the shape of a list, an attrset or a function; `result.deep` checks the parts.
 - `yen.lib.is f`: any predicate, for example `yen.lib.is builtins.isString`.
-- nixpkgs types, if you have `lib`: `lib.types.str`, `lib.types.port`. Read the warning below.
+- nixpkgs types work as a predicate, but not for composites. Read the warning below.
 - [nix-effects](https://github.com/kleisli-io/nix-effects) types: `Int`, `ListOf`, `Record`, refinements.
 - [gen-types](https://github.com/sini/gen) checkers, through their `verify`.
 
@@ -191,9 +192,9 @@ The kinds hold what NixOS `options` hold. The instances hold what `config` holds
   };
   yen.kinds.host = {
     fields = {
-      addr = lib.types.str;
-      firewall.enable = yen.lib.opt lib.types.bool false; # mkEnableOption: a nested field with a default
-      firewall.ports = yen.lib.opt (yen.lib.listOf lib.types.port) [ ]; # checks every item
+      addr = yen.lib.str;
+      firewall.enable = yen.lib.opt yen.lib.bool false; # mkEnableOption: a nested field with a default
+      firewall.ports = yen.lib.opt (yen.lib.listOf yen.lib.port) [ ]; # checks every item
     };
     spawns.user = h: lib.filterAttrs (_: u: yen.lib.same u.on h) yen.user;
     sinks.nixos.reduce = yen.lib.reduce.merge;
@@ -201,7 +202,7 @@ The kinds hold what NixOS `options` hold. The instances hold what `config` holds
   # attrsOf (submodule { … }) in NixOS: here a kind, whose instances have names, refs and their own errors
   yen.kinds.user.fields = {
     on = yen.kinds.host;
-    shell = yen.lib.opt lib.types.str "bash";
+    shell = yen.lib.opt yen.lib.str "bash";
   };
 }
 ```
@@ -240,7 +241,7 @@ The kinds hold what NixOS `options` hold. The instances hold what `config` holds
 |---|---|
 | `options.x = mkOption { type; default; }` | `yen.kinds.K.fields.x = yen.lib.opt type default` |
 | a top-level option that many modules set, such as `flake.lib` | a module sink: `yen.sinks.x = { of = type; reduce = …; }`, then `x = v;` in each module |
-| `mkEnableOption` | a nested field: `fields.firewall.enable = yen.lib.opt lib.types.bool false` |
+| `mkEnableOption` | a nested field: `fields.firewall.enable = yen.lib.opt yen.lib.bool false` |
 | `default = f config` | `yen.lib.derive type f`: see [Types](/model/types/) |
 | `config.x = v` | instance data: `yen.host.web.x = v` |
 | `mkIf config.firewall.enable` | `at = yen.lib.all [ yen.kinds.host (s: s.firewall.enable) ]` |

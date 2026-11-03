@@ -17,12 +17,12 @@ in
 {
   yen.kit.base = {
     roles.default.interface = {
-      device.type = lib.types.str;
+      device.type = yen.lib.str;
       layout.type = yen.kinds.layout // {
         description = "layout ref";
       };
-      authorizedKeys.type = yen.lib.listOf lib.types.str;
-      hardware.type = lib.types.path;
+      authorizedKeys.type = yen.lib.listOf yen.lib.str;
+      hardware.type = yen.lib.path;
     };
     # a kit that needs others: one assembly of each, on the machines of the base's role
     adds = a: {

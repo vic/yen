@@ -31,7 +31,7 @@ in
   yen.kinds.user = {
     fields = {
       groups = listOf yen.kinds.group;
-      phone = opt lib.types.bool false;
+      phone = opt yen.lib.bool false;
     };
     sinks = {
       homeManager = {

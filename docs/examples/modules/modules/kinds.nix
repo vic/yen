@@ -6,9 +6,9 @@
   };
   yen.kinds.host = {
     fields = {
-      addr = lib.types.str;
-      firewall.enable = yen.lib.opt lib.types.bool false; # mkEnableOption: a nested field with a default
-      firewall.ports = yen.lib.opt (yen.lib.listOf lib.types.port) [ ]; # checks every item
+      addr = yen.lib.str;
+      firewall.enable = yen.lib.opt yen.lib.bool false; # mkEnableOption: a nested field with a default
+      firewall.ports = yen.lib.opt (yen.lib.listOf yen.lib.port) [ ]; # checks every item
     };
     spawns.user = h: lib.filterAttrs (_: u: yen.lib.same u.on h) yen.user;
     sinks.nixos.reduce = yen.lib.reduce.merge;
@@ -16,6 +16,6 @@
   # attrsOf (submodule { … }) in NixOS: here a kind, whose instances have names, refs and their own errors
   yen.kinds.user.fields = {
     on = yen.kinds.host;
-    shell = yen.lib.opt lib.types.str "bash";
+    shell = yen.lib.opt yen.lib.str "bash";
   };
 }

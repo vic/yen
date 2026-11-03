@@ -157,7 +157,7 @@ in
     };
   };
   yen.kinds.host = {
-    fields.addr = lib.types.str;
+    fields.addr = yen.lib.str;
     spawns.member = kits.members { inherit assemblies holds; };
     # the NixOS keys of a host, as data
     sinks.nixos = {
@@ -435,7 +435,7 @@ A setting of the wrong type, and a port that is no port:
   "merge conflict at services.postgresql.ensureDatabases"
   "merge conflict at services.postgresql.ensureUsers"
   "nix-cache: nas has no nix-cache-cache3/cache-key.pub public key"
-  "kits: cache3.server: setting port is not a 16 bit unsigned integer; between 0 and 65535 (both inclusive)"
+  "kits: cache3.server: setting port is not a port (0 to 65535)"
   "kits: db3.client: setting user is not a string"
 ]
 ```

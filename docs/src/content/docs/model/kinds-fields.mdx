@@ -13,8 +13,8 @@ The `fields` of a kind are the data of each of its instances.
 { yen, lib, ... }:
 {
   yen.kinds.host.fields = {
-    addr = lib.types.str;
-    cores = lib.types.int;
+    addr = yen.lib.str;
+    cores = yen.lib.int;
   };
 }
 ```
@@ -95,7 +95,7 @@ Add this file to the example:
     path = [
       "addr"
     ];
-    want = "str";
+    want = "a string";
   }
   {
     class = "fixable";
@@ -114,13 +114,13 @@ Add this file to the example:
     class = "fixable";
     code = "check";
     error = "cores fails its check";
-    fix = "give cores a value of type int";
+    fix = "give cores a value of type an int";
     from = "host:cache";
     got = "8";
     path = [
       "cores"
     ];
-    want = "int";
+    want = "an int";
   }
 ]
 ```
@@ -133,10 +133,10 @@ Add this file to the example:
 ```nix title="result"
 {
   addr = {
-    type = "str";
+    type = "a string";
   };
   cores = {
-    type = "int";
+    type = "an int";
   };
 }
 ```

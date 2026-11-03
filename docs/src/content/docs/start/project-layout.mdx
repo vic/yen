@@ -107,7 +107,7 @@ and with a plain path, so one host file serves both entry points:
 }:
 {
   yen.kinds.host = {
-    fields.system = lib.types.str;
+    fields.system = yen.lib.str;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

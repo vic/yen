@@ -14,9 +14,9 @@ let
   ];
   key = a: "wg-${a.name}"; # a generator name
   iface = {
-    prefix.type = lib.types.str;
+    prefix.type = yen.lib.str;
     port = {
-      type = lib.types.port;
+      type = yen.lib.port;
       default = 51820;
     };
   };

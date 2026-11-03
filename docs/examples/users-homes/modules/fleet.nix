@@ -35,7 +35,7 @@ in
   yen.kinds.home = {
     fields = {
       user = yen.kinds.user;
-      system = lib.types.str;
+      system = yen.lib.str;
     };
     sinks.homeManager.out =
       { home, homeManager, ... }:
