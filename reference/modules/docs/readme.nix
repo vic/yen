@@ -310,7 +310,7 @@ let
         </details>
       '';
       # ── the agent surface and every capability, generated: nothing is listed by hand, so nothing goes missing ──
-      sv = import ../../../../default.nix; # the engine's own lib, for the index of library functions
+      sv = import ../../../default.nix; # the engine's own lib, for the index of library functions
       fnList = xs: lib.concatMapStringsSep ", " (n: "`${n}`") (sorted xs);
       hostsWith = f: lib.attrNames (lib.filterAttrs (_: h: h ? addr && (h.${f} or false)) yen.host);
       groupKey = h: "${h.channel.name}/${h.system.name}";

@@ -39,6 +39,6 @@
     nixpkgs-25.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     terranix.url = "github:terranix/terranix";
-    yen.url = "path:../..";
+    yen.url = "path:..";
   };
 }

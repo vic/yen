@@ -1,7 +1,7 @@
 # The fleet as yen queries, outside the flake: the same module flake.nix gives mkFlake.
 # Run: nix eval --impure --file query.nix errors
 let
-  inputs = (builtins.getFlake "path:${toString ../..}?dir=templates/reference").inputs; # in the yen tree: `../..` resolves
+  inputs = (builtins.getFlake "path:${toString ../.}?dir=reference").inputs; # in the yen tree: `../..` resolves
 in
 inputs.yen.lib.eval {
   imports = [ (inputs.import-tree ./modules) ];

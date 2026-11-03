@@ -2,7 +2,7 @@
 # `ci/tests/end-to-end.nix`. Copies: vic/ref/den-hoag/acceptance-fleet.nix, vic/ref/den-hoag/tests/end-to-end.nix.
 # Run: nix eval --offline --impure --file hoag-acceptance.nix failed        (expect [ ])
 let
-  inputs = (builtins.getFlake "path:${toString ../..}?dir=templates/reference").inputs;
+  inputs = (builtins.getFlake "path:${toString ../.}?dir=reference").inputs;
   inherit (inputs.nixpkgs) lib;
   yen = inputs.yen.lib;
 

@@ -31,7 +31,7 @@ in
         Yen checks every rule before anything is built, and a checker proved correct in [Lean](https://lean-lang.org)
         checks Yen's answer again.
 
-        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · ${link "Verified by Lean" "/query/lean/"} · [Reference template](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · ${link "Verified by Lean" "/query/lean/"} · [Reference fleet](https://github.com/vic/yen/tree/main/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
         ## Your fleet model, formally verified
 
@@ -55,7 +55,7 @@ in
           `checks.<system>.yen-lean`. `nix flake check` runs the Lean checker on every change. It fails when a rule
           breaks, when a rule is left undecided, when the proof does not check, or when the fleet has an error. For a
           flake you write by hand, add the ${link "Lean battery" "/batteries/lean/"}.
-        - **In CI.** The ${link "reference template" "/start/templates/"} runs the same check as a job of its generated
+        - **In CI.** The [reference fleet](https://github.com/vic/yen/tree/main/reference) runs the same check as a job of its generated
           `ci.json`.
         - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
           your laptop.

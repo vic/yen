@@ -1,4 +1,4 @@
-# The reference template's test suites as a flake output, for github:denful/fastest (parallel, pure):
+# The reference fleet's test suites as a flake output, for github:denful/fastest (parallel, pure):
 #   nix run github:denful/fastest#fastest -- --flake .#tests reference
 { yen, inputs, ... }:
 {

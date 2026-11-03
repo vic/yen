@@ -9,7 +9,7 @@ relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes/)</su
 Yen checks every rule before anything is built, and a checker proved correct in [Lean](https://lean-lang.org)
 checks Yen's answer again.
 
-[Documentation](https://yen.oeiuwq.com/) · [Getting started](https://yen.oeiuwq.com/start/getting-started/) · [A fleet on one page](https://yen.oeiuwq.com/start/one-page-fleet/) · [Verified by Lean](https://yen.oeiuwq.com/query/lean/) · [Reference template](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+[Documentation](https://yen.oeiuwq.com/) · [Getting started](https://yen.oeiuwq.com/start/getting-started/) · [A fleet on one page](https://yen.oeiuwq.com/start/one-page-fleet/) · [Verified by Lean](https://yen.oeiuwq.com/query/lean/) · [Reference fleet](https://github.com/vic/yen/tree/main/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
 ## Your fleet model, formally verified
 
@@ -33,7 +33,7 @@ What you get:
   `checks.<system>.yen-lean`. `nix flake check` runs the Lean checker on every change. It fails when a rule
   breaks, when a rule is left undecided, when the proof does not check, or when the fleet has an error. For a
   flake you write by hand, add the [Lean battery](https://yen.oeiuwq.com/batteries/lean/).
-- **In CI.** The [reference template](https://yen.oeiuwq.com/start/templates/) runs the same check as a job of its generated
+- **In CI.** The [reference fleet](https://github.com/vic/yen/tree/main/reference) runs the same check as a job of its generated
   `ci.json`.
 - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
   your laptop.

@@ -1,8 +1,8 @@
 # Fleet oracles: one check per row of Ren's expected-results table, sini's patterns and Den's.
-# Run (in parallel): nix run github:denful/fastest#fastest -- --flake "$PWD?dir=templates/reference#tests" fleet   (e2e: suite e2e)
+# Run (in parallel): nix run github:denful/fastest#fastest -- --flake "$PWD?dir=reference#tests" fleet   (e2e: suite e2e)
 # The fleet flake passes its own inputs (pure, for fastest); a plain file eval reads them from the flake.
 {
-  inputs ? (builtins.getFlake "path:${toString ../..}?dir=templates/reference").inputs,
+  inputs ? (builtins.getFlake "path:${toString ../.}?dir=reference").inputs,
 }:
 let
   inherit (inputs.nixpkgs) lib;
