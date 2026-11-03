@@ -3977,7 +3977,7 @@ let
               ]
             ];
       };
-    # a value one of the types accepts: a list of host or mac refs, and a string that is neither
+    # a value one of the types accepts: a string or an int pass, a bool is neither
     one-of =
       let
         t = yen.listOf (
