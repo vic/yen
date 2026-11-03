@@ -1729,8 +1729,12 @@ let
         ++ concatMap (c: (reduceModules c).owe) (
           filter (c: c != "yen" && used ? ${c}) (attrNames moduleSinks)
         );
-      # the markers of reads that break the read discipline, in the data an element gives (not in functions, which are
-      # applied later, nor in derivations): each is reported once, with its fix
+      # an instance, or a ref to one: a walk over data stops here (its fields are the instance's, and refs are cyclic)
+      isInstance =
+        v: isRef v && isString v.kind && isString v.name && (instances.${v.kind} or { }) ? ${v.name};
+      # the markers of reads that break the read discipline, in the data an element gives: each is reported once, with
+      # its fix. The walk stops at the frontier of foreign data: a function (applied later), a type, a derivation or
+      # other path-like value (a flake input), a value nixpkgs tags with `_type` (pkgs, an option), a scope, an instance
       markersIn =
         v:
         if isAttrs v && v ? __yenGuard then
@@ -1743,7 +1747,7 @@ let
           }) (filter isList (b.split "<yen-guard ([^\t>]*)\t([^\t>]*)\t([^>]*)>" v))
         else if isList v then
           concatMap markersIn v
-        else if isAttrs v && (v.type or null) != "derivation" then
+        else if isAttrs v && !(isLeaf v || v ? outPath || v ? _type || v ? __here || isInstance v) then
           concatMap markersIn (b.attrValues v)
         else
           [ ];
@@ -1851,7 +1855,7 @@ let
             opaque = any (w: w.opaque) ws;
           };
         in
-        if isRef v && isString v.kind && isString v.name && (instances.${v.kind} or { }) ? ${v.name} then
+        if isInstance v then
           {
             fp.__ref = [
               v.kind

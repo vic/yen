@@ -4431,6 +4431,35 @@ let
         )
       ])).deep
     ) [ "instance-read" ];
+    # the marker walk stops at foreign data (pkgs, a flake input: forced, the poison would loop), at a scope (cyclic) and at
+    # an instance ref (its fields are markers by design): only the bad read is reported
+    r1-grant-frontier = eq (map (e: e.code)
+      (yen.eval (rung1 [
+        (
+          { yen, ... }:
+          {
+            yen.aspects.peer = {
+              at = yen.host.db;
+              fw =
+                { scope, ... }:
+                {
+                  pkgs = {
+                    _type = "pkgs";
+                    x = poison;
+                  };
+                  input = {
+                    outPath = "/src";
+                    x = poison;
+                  };
+                  machine = scope.parent;
+                  ref = yen.host.web;
+                  bad = "${toString yen.host.web.port}";
+                };
+            };
+          }
+        )
+      ])).deep
+    ) [ "instance-read" ];
     # a read through a cycle request is an edge: a change at web reaches db, which asks for every host
     r1-grant-request = eq (r1outside (
       yen.stage {
