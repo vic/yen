@@ -50,6 +50,7 @@ let
     basic-fleet = (inputsOf inputs "basic-fleet" { }).self.outputs;
     neovim = (inputsOf inputs "neovim" { nixpkgs = inputs.nixpkgs-unstable; }).self.outputs;
     agent-containers = (inputsOf inputs "agent-containers" { }).self.outputs;
+    k8s-services = (inputsOf inputs "k8s-services" { }).self.outputs;
     kits-base = (inputsOf inputs "kits-base" { inherit disko; }).self.outputs;
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
@@ -80,6 +81,19 @@ let
     ];
     basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
     basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
+    # k8s services: two charts, two image apps, a ServiceMonitor for the app with metrics, and the apply list
+    k8s = eq (builtins.attrNames t.k8s-services.k8sManifests.lab) [
+      "api-deployment"
+      "api-ingress"
+      "api-monitor"
+      "api-service"
+      "conduit-deployment"
+      "conduit-ingress"
+      "conduit-service"
+      "gitea-chart"
+      "monitoring-chart"
+    ];
+    k8s-apply = eq (builtins.isString t.k8s-services.packages.x86_64-linux.lab.drvPath) true;
     # agent containers: one per agent, each with its tools and the shared login, read-only
     agents =
       let
