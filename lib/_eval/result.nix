@@ -60,6 +60,58 @@ let
     words
     yen
     ;
+  paramsOf = ps: {
+    required = filter (p: !(ps.${p} ? default)) (attrNames ps);
+    optional = filter (p: ps.${p} ? default) (attrNames ps);
+    types = mapAttrs (_: typeName) ps;
+  };
+  # q: the query's parameters (result.queries); ps: their types; vals: the args, refs resolved, defaults filled
+  askTyped =
+    n: args: q: ps:
+    askVals n args q ps (mapAttrs (p: t: if args ? ${p} then fromEdge args.${p} else t.default) ps);
+  askVals =
+    n: args: q: ps: vals:
+    askWith n args q ps vals (askChecks args q ps vals);
+  # the first failure of each check, or null
+  askChecks = args: q: ps: vals: {
+    missing = first (a: !(args ? ${a})) q.required;
+    extra = first (a: !elem a (q.required ++ q.optional)) (attrNames args);
+    nested = first isList (
+      concatMap (p: map (v: v.kind or null) (toList args.${p})) (attrNames args)
+      ++ map (p: refKind ps.${p}) (attrNames ps)
+    );
+    lost = first (p: isRef args.${p} && vals.${p} == null) (attrNames args);
+    bad = first (p: !checkOf ps.${p} vals.${p}) (attrNames ps);
+  };
+  askWith =
+    n: args: q: ps: vals: c:
+    if c.missing != null then
+      errWith "ask" "query ${n}: missing ${c.missing}" {
+        code = "missing-param";
+        want = q.required;
+        got = attrNames args;
+      }
+    else if c.extra != null then
+      errWith "ask" "query ${n}: unknown parameter ${c.extra}" {
+        code = "unknown-param";
+        near = near c.extra (q.required ++ q.optional);
+      }
+    else if c.nested != null then
+      nestedRef "ask" "ref" c.nested
+    else if c.lost != null then
+      unknown "ask" args.${c.lost}.name (instNames args.${c.lost}.kind) { code = "unknown-instance"; }
+    else if c.bad != null then
+      errWith "ask" "query ${n}: ${c.bad} wants ${q.types.${c.bad}}" {
+        code = if refKind ps.${c.bad} != null then "ref" else "check";
+        want = q.types.${c.bad};
+        fix =
+          if refKind ps.${c.bad} != null then
+            "give ${c.bad} a ${refKind ps.${c.bad}} ref: yen.${refKind ps.${c.bad}}.<name>, or { kind; name; } from JSON"
+          else
+            "give ${c.bad} ${q.types.${c.bad}}";
+      }
+    else
+      static.jsonSafe (yen.queries.${n}.answer (vals // { result = self; }));
   self = {
     # the scopes as answers state a secret field by its hash; the elements read the values
     #: result.scopes :: [ scope ] -- every scope, a secret field stated by its hash
@@ -125,17 +177,7 @@ let
     # `result` is this eval result; each param has a type, and is optional when the type has a default. `ask name args`
     # never throws: an unknown query, a missing, unknown or ill-typed parameter is an error record.
     #: result.queries :: { name = { required; optional; types; }; } -- the stored queries of yen.queries, each with its parameters and their types
-    queries = mapAttrs (
-      _: q:
-      let
-        ps = q.params or { };
-      in
-      {
-        required = filter (p: !(ps.${p} ? default)) (attrNames ps);
-        optional = filter (p: ps.${p} ? default) (attrNames ps);
-        types = mapAttrs (_: typeName) ps;
-      }
-    ) (b.removeAttrs yen.queries untypedQueries);
+    queries = mapAttrs (_: q: paramsOf (q.params or { })) (b.removeAttrs yen.queries untypedQueries);
     #: result.ask :: name -> args -> answer -- a stored query by name; a ref from JSON is { kind; name; }, { kind; } or { aspect; }
     ask =
       n: args:
@@ -144,46 +186,7 @@ let
       else if elem n untypedQueries then
         queryUntyped n
       else
-        let
-          q = self.queries.${n};
-          ps = yen.queries.${n}.params or { };
-          missing = filter (a: !(args ? ${a})) q.required;
-          extra = filter (a: !elem a (q.required ++ q.optional)) (attrNames args);
-          vals = mapAttrs (p: t: if args ? ${p} then fromEdge args.${p} else t.default) ps;
-          nested = filter isList (
-            concatMap (p: map (v: v.kind or null) (toList args.${p})) (attrNames args)
-            ++ map (p: refKind ps.${p}) (attrNames ps)
-          );
-          lost = first (p: isRef args.${p} && vals.${p} == null) (attrNames args);
-          bad = first (p: !checkOf ps.${p} vals.${p}) (attrNames ps);
-        in
-        if missing != [ ] then
-          errWith "ask" "query ${n}: missing ${head missing}" {
-            code = "missing-param";
-            want = q.required;
-            got = attrNames args;
-          }
-        else if extra != [ ] then
-          errWith "ask" "query ${n}: unknown parameter ${head extra}" {
-            code = "unknown-param";
-            near = near (head extra) (q.required ++ q.optional);
-          }
-        else if nested != [ ] then
-          nestedRef "ask" "ref" (head nested)
-        else if lost != null then
-          unknown "ask" args.${lost}.name (instNames args.${lost}.kind) { code = "unknown-instance"; }
-        else if bad != null then
-          errWith "ask" "query ${n}: ${bad} wants ${q.types.${bad}}" {
-            code = if refKind ps.${bad} != null then "ref" else "check";
-            want = q.types.${bad};
-            fix =
-              if refKind ps.${bad} != null then
-                "give ${bad} a ${refKind ps.${bad}} ref: yen.${refKind ps.${bad}}.<name>, or { kind; name; } from JSON"
-              else
-                "give ${bad} ${q.types.${bad}}";
-          }
-        else
-          static.jsonSafe (yen.queries.${n}.answer (vals // { result = self; }));
+        askTyped n args self.queries.${n} (yen.queries.${n}.params or { });
   };
 in
 {
