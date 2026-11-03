@@ -87,6 +87,13 @@ let
     ;
   inherit (self._core.reduce) pure reduce;
   inherit (self._core) static;
+  # a read that breaks the read discipline of aspects gives this marker, never a throw: it is inert data (a string
+  # where a string is needed, itself where it is called), and `result.deep` reports every marker that reaches an element
+  guard = code: error: fix: {
+    __yenGuard = { inherit code error fix; };
+    __toString = _: "<yen-guard ${code}\t${error}\t${fix}>"; # read back by `result.deep` from any string it lands in
+    __functor = self: _: self;
+  };
   # the Lean check every flake gets (result.flake), and its systems
   leanVerify = self.batteries.lean.verify;
   leanSystems = self.batteries.lean.systems;
@@ -640,7 +647,9 @@ let
         // ownedBy refsYen.aspects (declPath d.__kind)
         // mapAttrs (
           f: _:
-          throw "yen.kinds.${renderId d.__kind}.${f}: an aspect reads a kind only as a ref (a type, a request)"
+          guard "kind-read"
+            "yen.kinds.${renderId d.__kind}.${f}: an aspect reads a kind only as a ref (a type, a request)"
+            "use the kind as a type or a predicate; read a field of an instance through an arg"
         ) (removeAttrs d (words "__kind check sinks kinds aspects"));
       # values come from the refs load; `at` reads data: stage diffs where aspects are active and where sinks receive
       withAt = d: v: v // (if d ? at then { inherit (d) at; } else { });
@@ -1044,7 +1053,8 @@ let
             ]
             // mapAttrs (
               f: _:
-              throw "yen.${k}.${n}.${f}: an aspect reads instance data only through its args: take `${k}` as an arg, or follow a ref field of an arg"
+              guard "instance-read" "yen.${k}.${n}.${f}: an aspect reads instance data only through its args"
+                "take `${k}` as an arg, or follow a ref field of an arg"
             ) (kinds.${k}.fields or { })
           )
         ) kinds
@@ -1053,7 +1063,8 @@ let
             lib
             // genAttrs (words "graph scopesOf children declaredIn labels floor") (
               q:
-              throw "yen.lib.${q}: an aspect reads the fleet only through its args: ask the cycle `tree` for it"
+              guard "query-read" "yen.lib.${q}: an aspect reads the fleet only through its args"
+                "ask the cycle `tree` for it"
             );
           helpers = topRefs.helpers or { };
           # a kind, a sink and an aspect are refs here: another declaration's content is no read an edge can record
@@ -1065,7 +1076,8 @@ let
             }
             // mapAttrs (
               k: _:
-              throw "yen.aspects.${n}.${k}: an aspect reads another aspect only as a ref: put shared code in yen.helpers"
+              guard "aspect-read" "yen.aspects.${n}.${k}: an aspect reads another aspect only as a ref"
+                "put shared code in yen.helpers"
             ) (removeAttrs a [ "__aspect" ])
           ) aspects;
         };
@@ -1449,7 +1461,7 @@ let
         else if isList v then
           map refKey v
         else if isFunction v then
-          throw "tree request: a function predicate has no identity: use a kind, an aspect, an instance, or yen.lib combinators of them"
+          { __function = true; } # no identity: `requestErrors` refuses the request
         else if isAttrs v then
           mapAttrs (_: refKey) (b.removeAttrs v [ "__functor" ])
         else
@@ -1468,7 +1480,19 @@ let
           in
           if r == null then [ ] else [ (memo.${n}.${r.id} or (reduceAt n r)).value ]
         ); # a receiver with no element yet reduces to its empty value
-      known = q: !(q ? category) && any (k: q ? ${k}) requestKinds && !nestedAsk q; # no category: a request is selected by itself
+      # a raw function in a request has no identity (a combinator of yen.lib has one)
+      fnIn =
+        v:
+        if isAttrs v && (v ? __kind || v ? __sink || v ? __aspect || v ? __functor || isRef v) then
+          false # a ref has an identity, whatever functions it carries
+        else if isFunction v then
+          true
+        else if isList v then
+          any fnIn v
+        else
+          isAttrs v && any fnIn (b.attrValues v);
+      hasFn = q: any fnIn (b.attrValues (intersectAttrs (genAttrs requestKinds (_: null)) q));
+      known = q: !(q ? category) && any (k: q ? ${k}) requestKinds && !nestedAsk q && !hasFn q; # no category: a request is selected by itself
       nestedAsk = q: isList (q.instances.__kind or null); # instances live in a table of top kinds only
       requestErrors = concatMap (
         s:
@@ -1478,6 +1502,11 @@ let
             q:
             if nestedAsk q then
               nestedRef s.id "tree-request" q.instances.__kind
+            else if hasFn q then
+              errWith s.id "aspect ${n}: a tree request with a function predicate has no identity" {
+                code = "tree-request";
+                fix = "use a kind, an aspect, an instance, or yen.lib combinators of them";
+              }
             else
               errWith s.id "aspect ${n}: unknown tree request" {
                 code = "tree-request";
@@ -1597,6 +1626,11 @@ let
         in
         {
           value = red.value;
+          # the elements, for the read-discipline markers `result.deep` reports
+          elements = map (x: {
+            from = x.e.origin;
+            value = x.ok;
+          }) (filter (x: x ? ok) filled);
           # the parts `of` did not force, for `result.deep`
           owe =
             if d ? of then
@@ -1695,14 +1729,46 @@ let
         ++ concatMap (c: (reduceModules c).owe) (
           filter (c: c != "yen" && used ? ${c}) (attrNames moduleSinks)
         );
-      deep = map (
-        o:
-        errWith o.from "${concatStringsSep "." (map toString o.path)}: a part is not ${o.want}" {
-          code = "deep";
-          path = map toString o.path;
-          inherit (o) want;
-        }
-      ) (discharge (fieldOwe ++ sinkOwe));
+      # an instance, or a ref to one: a walk over data stops here (its fields are the instance's, and refs are cyclic)
+      isInstance =
+        v: isRef v && isString v.kind && isString v.name && (instances.${v.kind} or { }) ? ${v.name};
+      # the markers of reads that break the read discipline, in the data an element gives: each is reported once, with
+      # its fix. The walk stops at the frontier of foreign data: a function (applied later), a type, a derivation or
+      # other path-like value (a flake input), a value nixpkgs tags with `_type` (pkgs, an option), a scope, an instance
+      markersIn =
+        v:
+        if isAttrs v && v ? __yenGuard then
+          [ v.__yenGuard ]
+        else if isString v then
+          map (m: {
+            code = b.elemAt m 0;
+            error = b.elemAt m 1;
+            fix = b.elemAt m 2;
+          }) (filter isList (b.split "<yen-guard ([^\t>]*)\t([^\t>]*)\t([^>]*)>" v))
+        else if isList v then
+          concatMap markersIn v
+        else if isAttrs v && !(isLeaf v || v ? outPath || v ? _type || v ? __here || isInstance v) then
+          concatMap markersIn (b.attrValues v)
+        else
+          [ ];
+      guardErrors = uniqueBy (g: "${g.from}|${g.error}") (
+        concatMap (
+          k:
+          concatMap (
+            r: concatMap (e: map (g: g // { inherit (e) from; }) (markersIn e.value)) memo.${k}.${r.id}.elements
+          ) (receivers k)
+        ) sinkNames
+      );
+      deep =
+        map (
+          o:
+          errWith o.from "${concatStringsSep "." (map toString o.path)}: a part is not ${o.want}" {
+            code = "deep";
+            path = map toString o.path;
+            inherit (o) want;
+          }
+        ) (discharge (fieldOwe ++ sinkOwe))
+        ++ map (g: errWith g.from g.error { inherit (g) code fix; }) guardErrors;
       #: result.graph, yen.lib.graph :: { scopes; edges; } -- the scope tree and the routed elements: who gives what to whom
       graph = {
         scopes = map (s: { inherit (s) id kind name; }) scopes;
@@ -1789,7 +1855,7 @@ let
             opaque = any (w: w.opaque) ws;
           };
         in
-        if isRef v && isString v.kind && isString v.name && (instances.${v.kind} or { }) ? ${v.name} then
+        if isInstance v then
           {
             fp.__ref = [
               v.kind

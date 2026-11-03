@@ -58,22 +58,16 @@ let
           want = typeName t;
         };
       };
-  # every obligation checked, its own obligations too: one record per part that fails, with the path to it. A part
-  # that throws when forced is a failed part too (`tryEval`): errors stay data
+  # every obligation checked, its own obligations too: one record per part that fails, with the path to it
   discharge = concatMap (
     o:
     let
-      r = builtins.tryEval (
-        let
-          p = parseOf o.type o.value;
-        in
-        builtins.seq (p ? left) p
-      );
+      p = parseOf o.type o.value;
     in
-    if !r.success || r.value ? left then
+    if p ? left then
       [ (removeAttrs o [ "value" ] // { want = typeName o.type; }) ]
     else
-      discharge (map (x: x // { path = o.path ++ x.path; }) (r.value.owe or [ ]))
+      discharge (map (x: x // { path = o.path ++ x.path; }) (p.owe or [ ]))
   );
   # the whole check as a bool, parts included: it forces them (relation terms, query params: scalars)
   # a check that gives no bool (a curried gen-types check) fails, never throws; `boolCheck` names it in the error

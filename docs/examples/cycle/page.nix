@@ -5,7 +5,12 @@
   order = 2;
 
   body =
-    { docs, result, ... }:
+    {
+      docs,
+      result,
+      variant,
+      ...
+    }:
     [
       ''
         Each key of an [aspect](/behavior/aspects/) gives one element. For 0 to n elements, or to ask the tree for data, write a component
@@ -73,11 +78,12 @@
       ''
       (docs.value result.flake.peers)
       ''
-        An element that reads a field of another instance is refused. The variant below does that. The error names the
-        fix: "yen.host.server.addr: an aspect reads instance data only through its args: take `host` as an arg, or follow
-        a ref field of an arg".
+        An element that reads a field of another instance through `yen` is refused: the read gives a marker, never the
+        value, so nothing is built from it. The variant below does that. The [deep check](/model/types/) (`result.deep`)
+        reports the read, with its fix:
       ''
       (docs.file "variants/read-addr.nix")
+      (docs.value (map (e: { inherit (e) code error fix; }) (variant "variants/read-addr.nix").deep))
     ];
 
   checks =
@@ -95,11 +101,7 @@
         "br-db"
       ]);
       peers = eq (result.flake.peers.server) 0;
-      refused =
-        eq
-          (builtins.tryEval (
-            builtins.deepSeq (removeAttrs (variant "variants/read-addr.nix").flake [ "checks" ]) true
-          )).success
-          false;
+      # a read outside the args gets a marker, never the value; `result.deep` reports it
+      refused = eq (map (e: e.code) (variant "variants/read-addr.nix").deep) [ "instance-read" ];
     };
 }

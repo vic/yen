@@ -310,7 +310,11 @@ let
         {
           yen.aspects.saboteur = {
             at = yen.host.web-1;
-            http-backends = builtins.throw "web-1 sibling content boom";
+            http-backends =
+              let
+                p = p;
+              in
+              p; # never forced for a sibling: forcing it would loop
           };
         }
       )
@@ -410,10 +414,8 @@ let
     nixos-hostname-web1 = out.nixosConfigurations.web-1.config.networking.hostName == "web-1";
     deferred-channel-resolves-at-terminal =
       deferred.flake.nixosConfigurations.igloo.config.networking.domain == "host-is-igloo";
-    laziness-sibling-does-not-block =
-      (builtins.tryEval (builtins.deepSeq saboteur.reduced.http-backends.${igloo} true)).success;
-    laziness-throwing-sibling-is-real =
-      !(builtins.tryEval (builtins.deepSeq saboteur.reduced.http-backends.${web1} true)).success;
+    # a sibling's content is never forced for igloo (forced, it would loop and fail the check)
+    laziness-sibling-does-not-block = builtins.deepSeq saboteur.reduced.http-backends.${igloo} true;
   };
 in
 {

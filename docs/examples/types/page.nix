@@ -74,8 +74,8 @@
       ''
         A value that fails its type is an error record that names the field. A field reads only the shape of its
         value: a list, an attrset, a function. The parts are checked later, by `result.deep`, after the fleet
-        evaluated: so building one host never forces the list elements of another, and a part that throws is an
-        error record, not a crash. `nix flake check` fails on both (`checks.<system>.yen-lean`):
+        evaluated: so building one host never forces the list elements of another. `nix flake check` fails on both
+        (`checks.<system>.yen-lean`):
       ''
       (docs.file "variants/bad-values.nix")
       (docs.value (variant "variants/bad-values.nix").errors)

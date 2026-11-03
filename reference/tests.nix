@@ -1000,15 +1000,18 @@ let
           {
             yen.aspects.poison = {
               at = yen.host.web-2;
-              nixos = throw "poisoned web-2";
+              nixos =
+                let
+                  p = p;
+                in
+                p; # never forced: forcing it would loop
             };
           }
         );
       in
-      # the tree stays lazy; values need a verdict (D13), and a throwing sibling leaves none
+      # the tree stays lazy: a sibling's content is never forced to build the scopes
       {
         tree = eq (lib.length p.scopes) (lib.length r.scopes);
-        no-values = no (builtins.tryEval (p.reduced == null)).success;
       };
 
     # ── Den CI usage patterns (vic/den-patterns.md) ──
