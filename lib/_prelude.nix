@@ -1,0 +1,172 @@
+# The helpers the engine reads: builtins, the core leaves, the libraries and the Lean check. Each part of an eval
+# reads them from its state `st`, and lib/_engine.nix inherits them.
+self:
+let
+  b = builtins;
+  inherit (b)
+    all
+    any
+    attrNames
+    concatMap
+    concatStringsSep
+    elem
+    filter
+    foldl'
+    functionArgs
+    genericClosure
+    groupBy
+    head
+    intersectAttrs
+    isAttrs
+    isFunction
+    isList
+    isPath
+    isString
+    length
+    listToAttrs
+    mapAttrs
+    tail
+    ;
+
+  inherit (self._core.helpers)
+    toList
+    first
+    uniq
+    genAttrs
+    keySet
+    names
+    nest
+    orNull
+    optional
+    words
+    isRef
+    renderId
+    lit
+    curried
+    combinators
+    ;
+  inherit (self._core.keys)
+    sinkMeta
+    scopeKeys
+    aspectMeta
+    outMeta
+    scopeMeta
+    requestKinds
+    edbArity
+    yenKeys
+    kindKeys
+    ;
+  inherit (self._core.text) hasInfix floorOf uniqueBy;
+  inherit (self)
+    graphs
+    rdf
+    datalog
+    krn
+    _impact
+    ;
+  inherit (self._core.errors)
+    err
+    errWith
+    unknown
+    near
+    ;
+  inherit (self._core.types)
+    typeName
+    isLeaf
+    isType
+    refKind
+    hide
+    isSecret
+    checkOf
+    parseOf
+    discharge
+    boolCheck
+    get
+    attrsIn
+    ;
+  inherit (self._core.reduce) pure reduce;
+  inherit (self._core) static;
+  # the Lean check every flake gets (result.flake), and its systems
+  leanVerify = self.batteries.lean.verify;
+  leanSystems = self.batteries.lean.systems;
+in
+{
+  inherit
+    all
+    any
+    aspectMeta
+    attrNames
+    attrsIn
+    b
+    boolCheck
+    checkOf
+    combinators
+    concatMap
+    concatStringsSep
+    curried
+    datalog
+    discharge
+    edbArity
+    elem
+    err
+    errWith
+    filter
+    first
+    floorOf
+    foldl'
+    functionArgs
+    genAttrs
+    genericClosure
+    get
+    graphs
+    groupBy
+    hasInfix
+    head
+    hide
+    _impact
+    intersectAttrs
+    isAttrs
+    isFunction
+    isLeaf
+    isList
+    isPath
+    isRef
+    isSecret
+    isString
+    isType
+    keySet
+    kindKeys
+    krn
+    leanSystems
+    leanVerify
+    length
+    listToAttrs
+    lit
+    mapAttrs
+    names
+    near
+    nest
+    optional
+    orNull
+    outMeta
+    parseOf
+    pure
+    rdf
+    reduce
+    refKind
+    renderId
+    requestKinds
+    scopeKeys
+    scopeMeta
+    sinkMeta
+    static
+    tail
+    toList
+    typeName
+    uniq
+    uniqueBy
+    unknown
+    words
+    yenKeys
+    ;
+}
