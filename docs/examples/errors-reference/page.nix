@@ -73,6 +73,7 @@ let
     merge = "`merge`: two different leaves at one path";
     missing = "a required field has no value";
     missing-param = "a stored query is asked without a required parameter";
+    not-a-kind = "a kind declaration, or its `kinds`, is not an attrset";
     not-a-literal = "a check question (`why`, `whyNot`, `proof`, `from`) is a hand-written list, not a literal by reference";
     not-a-scope = "a query takes a scope as a string or another value: pass an instance ref, `{ kind; name; }`, or a path of them";
     one = "`one`: 0 or 2+ elements";

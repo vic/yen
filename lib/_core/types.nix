@@ -9,11 +9,11 @@ let
     isBool
     isFunction
     ;
-  inherit (self._core.helpers) isRef;
+  inherit (self._core.helpers) isRef renderId;
   typeName =
     t:
     t.name or t.description
-      or (if t ? __kind then "a ${t.__kind} ref" else "a value its check accepts");
+      or (if t ? __kind then "a ${renderId t.__kind} ref" else "a value its check accepts");
   isLeaf =
     v: !isAttrs v || v ? check || v ? __kind || v ? __functor || (v.type or null) == "derivation";
   isType = t: isAttrs t && (t ? check || t ? __kind);

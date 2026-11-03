@@ -32,6 +32,8 @@ let
   optional = c: x: if c then [ x ] else [ ];
   words = s: filter isString (builtins.split " " s); # "a b" is [ "a" "b" ]
   isRef = v: isAttrs v && v ? kind && v ? name; # an instance, or a ref to one
+  # a kind id as text, for messages only: the path a user writes, `x.kinds.y`
+  renderId = id: builtins.concatStringsSep ".kinds." (toList id);
   lit = atom: {
     inherit atom;
     join = [ ];
@@ -54,6 +56,7 @@ in
     optional
     words
     isRef
+    renderId
     lit
     curried
     combinators

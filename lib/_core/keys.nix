@@ -25,5 +25,5 @@ in
   };
   # the only keys `yen` and a kind declare; any other key is an error, never ignored
   yenKeys = words "kinds aspects helpers queries invariants relations labels flake sinks"; # and the kind names
-  kindKeys = words "fields spawns sinks";
+  kindKeys = words "fields spawns sinks kinds";
 }

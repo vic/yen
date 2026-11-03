@@ -2829,6 +2829,530 @@ let
       t3 = eq (map (e: e.code) (treeAllWith true).errors) ([ "tree-request" ]);
       t4 = eq ((treeAllWith true).reduced) (null);
     };
+    # c47 rung 1: a kind declares kinds inside it; a nested kind is reached only through its parent
+    nested-kinds-r1 =
+      let
+        r = yen.eval (
+          { yen, ... }:
+          {
+            yen.kinds.x = {
+              spawns = { }; # a root: the flake needs one scope
+              kinds.y = { };
+            };
+            yen.x.a = { };
+            yen.flake =
+              { ... }:
+              {
+                id = yen.kinds.x.kinds.y.__kind;
+                flat = yen.kinds ? y;
+              };
+          }
+        );
+        typo = yen.eval { yen.kinds.x.kinds.y.feilds = { }; };
+      in
+      {
+        clean = eq r.errors [ ];
+        id = eq r.flake.id [
+          "x"
+          "y"
+        ];
+        not-flat = no r.flake.flat;
+        typo = eq (map (e: e.path) typo.errors) [
+          [
+            "yen"
+            "kinds"
+            "x"
+            "kinds"
+            "y"
+            "feilds"
+          ]
+        ];
+      };
+    # c47 rung 2: a nested kind is spawned from its parent's data by default; an explicit spawns replaces it
+    nested-kinds-r2 =
+      let
+        ids = r: map (s: s.id) r.scopes;
+        nested =
+          spawns:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.x = {
+                inherit spawns;
+                kinds.y = { };
+              };
+              yen.x.a.y = {
+                b = { };
+                c = { };
+              };
+              yen.aspects.p.at = yen.kinds.x.kinds.y;
+            }
+          );
+        flat = yen.eval (
+          { yen, ... }:
+          {
+            yen.kinds.x = {
+              fields.y = yen.lib.is b.isAttrs; # flat: the child data is a field of x
+              spawns.y = s: s.y;
+            };
+            yen.kinds.y = { };
+            yen.x.a.y = {
+              b = { };
+              c = { };
+            };
+          }
+        );
+        dflt = nested { };
+        only-b = nested { y = s: { inherit (s.y) b; }; };
+      in
+      {
+        clean = eq dflt.errors [ ];
+        same-as-flat = eq (ids dflt) (ids flat);
+        kind = eq (map (s: s.kind) dflt.scopes) [
+          "x"
+          [
+            "x"
+            "y"
+          ]
+          [
+            "x"
+            "y"
+          ]
+        ];
+        at-nested = eq dflt.active.p {
+          "x:a" = false;
+          "x:a/y:b" = true;
+          "x:a/y:c" = true;
+        };
+        explicit = eq (ids only-b) [
+          "x:a"
+          "x:a/y:b"
+        ];
+        spawn-none = eq (ids (nested {
+          y = _: { };
+        })) [ "x:a" ];
+      };
+    # c47 rung 3a: a spawn from a nested kind counts; a nested scope reads by path; nested names cannot shadow
+    nested-kinds-r3a =
+      let
+        ids = r: map (s: s.id) r.scopes;
+        spawnsTop = yen.eval (
+          { yen, ... }:
+          {
+            yen.kinds.x.kinds.y = {
+              fields.d = yen.lib.is b.isAttrs;
+              spawns.d = s: s.d;
+            };
+            yen.kinds.d.spawns = { };
+            yen.x.a.y.b.d.e = { };
+            yen.d.e = { };
+          }
+        );
+        nested = yen.eval (
+          { yen, ... }:
+          {
+            yen.kinds.x.kinds.y = { };
+            yen.x.a.y.b = { };
+            yen.x.a2.y.b = { };
+            yen.aspects.p.at = yen.kinds.x.kinds.y;
+          }
+        );
+        p.aspect = "p";
+        y = name: {
+          kind = [
+            "x"
+            "y"
+          ];
+          inherit name;
+        };
+        # the whole record, message included, is JSON: a list kind never reaches a string as is
+        code = t: (b.fromJSON (b.toJSON (nested.explain p t 1))).code;
+        errs = m: map (e: { inherit (e) code path; }) (yen.eval m).errors;
+        reserved = path: [
+          {
+            code = "reserved";
+            path = [ "yen" ] ++ path;
+          }
+        ];
+        notKind = path: [
+          {
+            code = "not-a-kind";
+            path = [ "yen" ] ++ path;
+          }
+        ];
+      in
+      {
+        scope-key = eq (errs { yen.kinds.x.kinds.y.kinds.__here = { }; }) (reserved [
+          "kinds"
+          "x"
+          "kinds"
+          "y"
+          "kinds"
+          "__here"
+        ]);
+        field-name =
+          eq
+            (errs (
+              { yen, ... }:
+              {
+                yen.kinds.x = {
+                  fields.y = yen.lib.is b.isAttrs;
+                  kinds.y = { };
+                };
+              }
+            ))
+            (reserved [
+              "kinds"
+              "x"
+              "kinds"
+              "y"
+            ]);
+        kinds-not-attrs = eq (errs { yen.kinds.x.kinds = 5; }) (notKind [
+          "kinds"
+          "x"
+          "kinds"
+        ]);
+        kind-not-attrs = eq (errs { yen.kinds.x.kinds.y = 5; }) (notKind [
+          "kinds"
+          "x"
+          "kinds"
+          "y"
+        ]);
+        top-not-attrs = eq (errs { yen.kinds.x = 5; }) (notKind [
+          "kinds"
+          "x"
+        ]);
+        # PROPOSED, not ruled by vic: a nested kind named like a top kind
+        top-name =
+          eq
+            (errs {
+              yen.kinds.d = { };
+              yen.kinds.x.kinds.d = { };
+            })
+            (reserved [
+              "kinds"
+              "x"
+              "kinds"
+              "d"
+            ]);
+        round-trip = yes (
+          b.all (s: (nested.context (nested.pathOf s) { }).scope == nested.pathOf s) nested.scopes
+        );
+        unknown-nested = eq (code (y "z")) "unknown-scope";
+        unknown-nested-path = eq (code [ (y "z") ]) "unknown-scope";
+        ambiguous = eq (code (y "b")) "scope-ambiguous";
+        # two parents each hold a y.b: the parent keeps their scopes apart
+        distinct-parents = eq (ids nested) [
+          "x:a"
+          "x:a/y:b"
+          "x:a2"
+          "x:a2/y:b"
+        ];
+        # the refusal names a nested scope by its kind path; JSON forces the message
+        grant-nested =
+          eq
+            (b.fromJSON (
+              b.toJSON
+                (yen.stage {
+                  base =
+                    { yen, ... }:
+                    {
+                      yen.kinds.x.kinds.y.sinks.fw = { };
+                      yen.x.a.y.b = { };
+                      yen.aspects.p.at = yen.kinds.x.kinds.y;
+                    };
+                  change.yen.aspects.p.fw = "on";
+                  grant = yen.grant {
+                    scopes = [
+                      [
+                        {
+                          kind = "x";
+                          name = "a";
+                        }
+                        (y "c")
+                      ]
+                    ];
+                  };
+                }).refused
+            ))
+            [
+              {
+                class = "authority";
+                code = "outside-grant";
+                error = "the change can reach x a/x.kinds.y b, outside the grant";
+                from = "stage";
+                got = [
+                  {
+                    kind = "x";
+                    name = "a";
+                  }
+                  (y "b")
+                ];
+                path = [ ];
+              }
+            ];
+        spawns-top-once = eq (ids spawnsTop) [
+          "x:a"
+          "x:a/y:b"
+          "x:a/y:b/d:e"
+        ];
+      };
+    # c47 rung 3c: the data of a nested instance is typed by its own kind
+    nested-kinds-r3c =
+      let
+        typed = data: group { b = data; };
+        group =
+          y:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.x = {
+                fields.foo = yen.lib.is b.isInt;
+                kinds.y.fields = {
+                  bar = yen.lib.is b.isInt;
+                  n = yen.lib.opt (yen.lib.is b.isInt) 7;
+                  # a derived default reads its own nested instance
+                  n2 = yen.lib.derive (yen.lib.is b.isString) (i: "${i.name}:${toString i.bar}");
+                };
+              };
+              yen.x.a = {
+                foo = 1;
+                inherit y;
+              };
+            }
+          );
+        three =
+          q:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.x.kinds.y.kinds.z.fields.q = yen.lib.is b.isInt;
+              yen.x.a.y.b.z.c = { inherit q; };
+            }
+          );
+        errs = r: map (e: { inherit (e) code from path; }) r.errors;
+        # a nested instance error has the full data path (design-c47-nesting.md rung 3)
+        err = code: field: [
+          {
+            inherit code;
+            from = "x:a/y:b";
+            path = [
+              "x"
+              "a"
+              "y"
+              "b"
+              field
+            ];
+          }
+        ];
+      in
+      {
+        clean = eq (typed { bar = 2; }).errors [ ];
+        default = eq (map (s: s.n or null) (typed { bar = 2; }).scopes) [
+          null
+          7
+        ];
+        derive = eq (map (s: s.n2 or null) (typed { bar = 2; }).scopes) [
+          null
+          "b:2"
+        ];
+        check = eq (errs (typed {
+          bar = "2";
+        })) (err "check" "bar");
+        unknown = eq (errs (typed {
+          bar = 2;
+          baz = 3;
+        })) (err "unknown-field" "baz");
+        # the fix names the nested kind by its path
+        unknown-fix =
+          eq
+            (b.head
+              (typed {
+                bar = 2;
+                baz = 3;
+              }).errors
+            ).fix
+            "declare yen.kinds.x.kinds.y.fields.baz, or use a declared field";
+        three-clean = eq (three 1).errors [ ];
+        three-check = eq (errs (three "1")) [
+          {
+            code = "check";
+            from = "x:a/y:b/z:c";
+            path = [
+              "x"
+              "a"
+              "y"
+              "b"
+              "z"
+              "c"
+              "q"
+            ];
+          }
+        ];
+        # only the bad member reports
+        one-bad-member =
+          eq
+            (errs (group {
+              b.bar = 2;
+              c.bar = "2";
+            }))
+            [
+              {
+                code = "check";
+                from = "x:a/y:c";
+                path = [
+                  "x"
+                  "a"
+                  "y"
+                  "c"
+                  "bar"
+                ];
+              }
+            ];
+        # a nested group or member that is not an attrset is an error, never a lost value
+        group-not-set = eq (errs (group 5)) [
+          {
+            code = "check";
+            from = "x:a";
+            path = [
+              "x"
+              "a"
+              "y"
+            ];
+          }
+        ];
+        # the error names the kind of the bad value, never the value: a mis-keyed secret does not leak
+        not-set-got-string = eq (b.map (e: e.got) (group "hunter2").errors) [ "string" ];
+        not-set-no-leak = no (b.match ".*hunter2.*" (b.toJSON (group "hunter2").errors) != null);
+        not-set-got-lambda = eq (b.map (e: e.got) (group (_: 1)).errors) [ "lambda" ];
+        not-set-json = yes (b.isString (b.toJSON (group (_: 1)).errors));
+        not-set-got-types =
+          eq
+            (b.map (v: (b.head (group v).errors).got) [
+              5
+              "s"
+              [ ]
+              null
+            ])
+            [
+              "int"
+              "string"
+              "list"
+              "null"
+            ];
+        # a leaf is an attrset to `isAttrs`, but not a group
+        leaf-not-set = eq (b.map (e: { inherit (e) code got path; }) (group (yen.is b.isInt)).errors) [
+          {
+            code = "check";
+            got = "set";
+            path = [
+              "x"
+              "a"
+              "y"
+            ];
+          }
+        ];
+        member-not-set = eq (errs (typed 5)) [
+          {
+            code = "check";
+            from = "x:a/y:b";
+            path = [
+              "x"
+              "a"
+              "y"
+              "b"
+            ];
+          }
+        ];
+      };
+    # c47: a ref to a nested kind is not supported yet; each use is a yen error, never a Nix throw (GH #61)
+    nested-kinds-refs =
+      let
+        fleet =
+          extra:
+          yen.eval (
+            { yen, ... }:
+            {
+              imports = [ (extra yen) ];
+              yen.kinds.x = {
+                sinks.seen = { };
+                kinds.y.fields.bar = yen.lib.is b.isInt;
+              };
+              yen.x.a.y.b.bar = 1;
+            }
+          );
+        # JSON forces every message
+        errs = r: map (e: { inherit (e) code error fix; }) (b.fromJSON (b.toJSON r.errors));
+        err = code: [
+          {
+            inherit code;
+            error = "`yen.kinds.x.kinds.y` is a nested kind: refs to nested kinds are not supported here yet";
+            fix = "use a top kind here: a nested kind is reached only through its parent";
+          }
+        ];
+        field = fleet (yen: {
+          yen.kinds.t.fields.target = yen.kinds.x.kinds.y;
+          yen.t.u.target = yen.x.a.y.b;
+        });
+        request = fleet (yen: {
+          yen.aspects.see = {
+            at = yen.kinds.x;
+            cycle =
+              { tree, ... }:
+              let
+                all.instances = yen.kinds.x.kinds.y;
+              in
+              {
+                tree = [ all ];
+                seen = tree.select all;
+              };
+          };
+        });
+        of = fleet (yen: {
+          yen.kinds.x.sinks.ys.of = yen.kinds.x.kinds.y;
+          yen.aspects.put = {
+            at = yen.kinds.x.kinds.y;
+            ys = { scope, ... }: scope;
+          };
+        });
+        # a ref from JSON names a nested instance by its kind path
+        ask =
+          q: f:
+          (fleet (yen: {
+            yen.queries.one = {
+              params.it = yen.kinds.x;
+              answer = { it, result }: it.name;
+            };
+            yen.queries.many = {
+              params.it = yen.lib.listOf yen.kinds.x;
+              answer = { it, result }: b.length it;
+            };
+            yen.queries.typed = {
+              params.it = yen.kinds.x.kinds.y;
+              answer = { it, result }: it.name;
+            };
+          })).ask
+            q
+            {
+              it = f {
+                kind = [
+                  "x"
+                  "y"
+                ];
+                name = "b";
+              };
+            };
+      in
+      {
+        field = eq (errs field) (err "ref");
+        request = eq (errs request) (err "tree-request");
+        of = eq (errs of) (err "of");
+        of-agent = yes (b.isString (b.toJSON of.agent));
+        of-reads = yes (b.isString (b.toJSON of.reads));
+        ask = eq (errs { errors = [ (ask "one" (r: r)) ]; }) (err "ref");
+        ask-list = eq (errs { errors = [ (ask "many" (r: [ r ])) ]; }) (err "ref");
+        ask-type = eq (errs { errors = [ (ask "typed" (r: r // { kind = "x"; })) ]; }) (err "ref");
+      };
     # yen modules are not NixOS modules: a sink no module reads, or a key yen does not read, is an error
     unknown-keys =
       eq
