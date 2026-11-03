@@ -24,32 +24,66 @@ in
     [
       ''
 
-        **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen checks it and answers with proof-certificate if your specified invariants hold ${doc "/query/invariants/"}: things like which systems to build,
-        verification errors, dependency graphs of who gives what to whom, can be decided before deployment.
+        **Yen is a minimal pure-Nix language for fleets you can verify before you deploy them.** It has no dependencies
+        and no nixpkgs module system. You describe your fleet as terms ${doc "/model/kinds-fields/"} and the
+        relationships between them ${doc "/model/scopes/"}, and you write the rules that must hold across it ${doc "/query/invariants/"}.
+        Yen checks every rule before anything is built, and a checker proved correct in [Lean](https://lean-lang.org)
+        checks Yen's answer again.
 
-        Yen is inspired by [Cycle.js](https://cycle.js.org) `source->sink` value propagation and built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
-        NixOS, but it can describe fleets over any configuration domain: NixOS, nix-darwin, home-manager, clusters, terraform, k8s,
-        or anything else you can model as Nix values. You define your own domain language, and Yen uses it.
+        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · ${link "Verified by Lean" "/query/lean/"} · [Reference template](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
+        ## Your fleet model, formally verified
 
-        ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · ${link "A fleet on one page" "/start/one-page-fleet/"} · [Reference template](https://github.com/vic/yen/tree/main/templates/reference) · [vic/vix@yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
+        A wrong config is cheap to write and expensive to deploy. Two hosts get the same address. A database ends up in
+        another region than its app. A desktop lands on a server. Evaluation does not see these mistakes: each host is
+        valid alone, and the mistake is between them. Reviews catch some. An AI agent that writes your Nix makes them
+        faster than a person can review.
 
+        With Yen, you write these rules once, for the whole fleet. Yen turns your fleet into facts and decides each rule
+        on them before anything is built. A fleet that breaks a rule builds nothing. Yen names the hosts that break it,
+        and tells you why.
 
-        It is written for two kinds of fleet. In a home lab, a few hosts live in one flake and a mistake fails at evaluation, before a deploy.
-        In a business with a large infra, rules have to hold across all machines, and they are checked before anything is built.
+        You do not have to trust Yen for this. Each verdict comes with a certificate: the steps that prove it. A second
+        checker reads the certificate outside Nix. It is written in Lean, and Lean proves it correct. It does not trust
+        Yen's own work: it builds the cases of each rule from the facts itself. When it accepts, no rule is broken, and
+        no rule is left undecided.
 
-        ## Main Concepts
+        What you get:
+
+        - **A flake check.** Add the ${link "Lean battery" "/batteries/lean/"} to your flake, and `nix flake check`
+          fails when a rule breaks or the proof does not check.
+        - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
+          your laptop.
+        - **A tool for agents.** The MCP server (`nix run github:vic/yen#yen-mcp`) gives an agent `yen_verify`. The agent
+          stages a change, and it reports the fleet good only when Lean agrees.
+        - **Answers with reasons.** For each broken rule, Yen gives the facts that break it. For a rule that holds, it
+          gives what stops it from breaking.
+
+        What to expect:
+
+        - Yen verifies your fleet **model**: the hosts, their fields, their aspects and the links between them. It does
+          not verify what a built system does when it runs.
+        - Yen proves the rules you write. It does not find the rules you forgot. Write the mistakes you fear as rules.
+        - Nix turns your files into facts, and the checker trusts that step. A rule that calls a check written as a Nix
+          function cannot be decided by Lean. The checker says so and does not accept.
+        - A fleet with a broken rule has no flake outputs. You fix the rule or the fleet first.
+
+        <details>
+        <summary>A first Yen flake</summary>
+
+        ## Yen Flake example
+
+        Yen is inspired by [Cycle.js](https://cycle.js.org) `source->sink` value propagation and built on four concepts:
+        **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**.
+        The Yen kernel knows nothing about NixOS. It can describe fleets over any configuration domain: NixOS, nix-darwin,
+        home-manager, clusters, terraform, k8s, or anything else you can model as Nix values.
 
         - **Kinds**: the nouns of the things in your fleet, and their typed fields.
         - **Scopes**: how kinds nest inside each other. `.spawns.` builds the nested cycles from your data: a user under each host.
         - **Aspects**: reactive behavior. `.at` sets a predicate that must hold for the behavior to be active: a kind, an instance of a kind, another aspect, or any custom predicate.
         - **Sinks**: data channels. A configuration element goes up to the nearest scope that collects a sink, and that scope decides how to [reduce](https://yen.oeiuwq.com/behavior/sinks/) all the contributions.
 
-        ## Yen Flake example
-
-        Yen has no dependencies. It is built only on Nix `builtins`. This is the most basic flake
-        that takes a single Yen module.
+        Yen is built only on Nix `builtins`. This is the most basic flake that takes a single Yen module.
 
       ''
 
@@ -74,8 +108,12 @@ in
 
       ''
 
-        To start with a NixOS host instead, run `nix flake init -t github:vic/yen#minimal`. The rest of this page goes
-        deeper. Open the sections you need.
+        To start with a NixOS host instead, run `nix flake init -t github:vic/yen#minimal`.
+
+        </details>
+
+        The rest of this page goes deeper. Open the sections you need.
+
 
         <details>
         <summary>How Yen works</summary>
@@ -174,7 +212,8 @@ in
         Each verdict can come with a certificate. `yen.lib.datalog.checkCertificate` is a small checker. After evaluation,
         `result.check.certified` is true when the checker accepts the certificate and it states the same verdict. `result.check.seal`
         ties the verdict to hashes of the engine, the rules and the facts, so anyone can run `result.check.verify seal` again and get
-        `{ ok = true; }`.
+        `{ ok = true; }`. `result.check.lean` is the verdict for the Lean checker: the rules as written, the facts and the
+        certificate. ${doc "/query/lean/"}
 
         </details>
 
@@ -193,7 +232,7 @@ in
         An agent works on a Yen fleet through the MCP server in `mcp/`. The skill in `.claude/skills/yen-mcp/SKILL.md` gives the
         order of calls. The agent reads with `yen_schema` and `yen_check`, asks with `yen_why_not` and `yen_explain`, and stages a
         change with `yen_stage` before any file is written. A fleet passes `yen_check` only when `ok` is true, with no violations,
-        no `incomplete` or `opaque` atoms, and `certified` true.
+        no `incomplete` or `opaque` atoms, and `certified` true. `yen_verify` runs the Lean checker on the same verdict.
 
         From the fleet's working directory, run `nix run github:vic/yen?dir=mcp`. An MCP client starts the same server with
         the arguments `[ "run" "github:vic/yen?dir=mcp" ]`.
@@ -219,6 +258,8 @@ in
           overwrites itself, and two different answers without explicit reduce strategy are an error. ${doc "/principles/queried-not-merged/"}
         - **Rules across machines.** Write a rule once. A fleet that breaks it builds nothing. Each verdict comes with a proof
           that a small checker verifies, and a seal anyone can check again. ${doc "/query/invariants/"}
+        - **Verified by Lean.** A checker proved correct in Lean checks each verdict again, as a flake check, a command or
+          an agent tool. ${doc "/query/lean/"} ${doc "/batteries/lean/"}
         - **Changes staged before they land.** `yen.lib.stage` compares the fleet with and without a change. A grant narrows
           what a change may reach, and never widens it. ${doc "/agents/stage/"}
         - **Prove what holds across your fleet.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
