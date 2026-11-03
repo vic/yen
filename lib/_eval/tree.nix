@@ -11,6 +11,7 @@ let
     elem
     errWith
     filter
+    fix
     genericClosure
     groupBy
     here
@@ -28,24 +29,19 @@ let
   # ── the scope tree: nested cycles. key = what the parent spawned; identity = keys from the root ──
   mkScope =
     parent: kind: name: inst:
-    let
-      key = "${leafOf kind}:${name}"; # the parent in `path` keeps a nested key unique
-      path = (if parent == null then [ ] else parent.path) ++ [ key ];
-      s = inst // {
-        inherit
-          kind
-          name
-          key
-          parent
-          path
-          ;
+    fix (
+      s:
+      inst
+      // {
+        inherit kind name parent;
+        key = "${leafOf kind}:${name}"; # the parent in `path` keeps a nested key unique
+        path = (if parent == null then [ ] else parent.path) ++ [ s.key ];
         __here = here s;
-        id = concatStringsSep "/" path;
+        id = concatStringsSep "/" s.path;
         up = (if parent == null then [ ] else parent.up) ++ [ s ];
         rup = [ s ] ++ (if parent == null then [ ] else parent.rup);
-      }; # rup: nearest first, built once
-    in
-    s;
+      }
+    ); # rup: nearest first, built once
   # a nested kind is spawned from its parent's data by default; an explicit `spawns.<c>` replaces the default
   spawnsOf =
     k:
@@ -59,28 +55,25 @@ let
     filter (k: (kinds.${k} ? spawns || kinds.${k} ? kinds) && !elem k spawned) kindNames
   );
   childrenOf =
-    s:
-    concatMap (
-      c:
-      let
-        made = (spawnsOf s.kind).${c} s;
-      in
-      if !isAttrs made then
-        [ (errWith s.id "spawns.${c} gives no attrset" { code = "spawns"; }) ]
-      else
-        map (
-          n:
-          if any (x: x.key == "${c}:${n}") s.up then
-            errWith s.id "instance ${c}:${n} twice on path" {
-              code = "cycle";
-              got = "${c}:${n}";
-            }
-          else if !isAttrs made.${n} then
-            errWith s.id "spawns.${c}.${n} is no attrset" { code = "spawns"; }
-          else
-            mkScope s (childId s.kind c) n made.${n}
-        ) (attrNames made)
-    ) (attrNames (spawnsOf s.kind));
+    s: concatMap (c: childrenMade s c ((spawnsOf s.kind).${c} s)) (attrNames (spawnsOf s.kind));
+  # made: what spawns.<c> gives for scope s
+  childrenMade =
+    s: c: made:
+    if !isAttrs made then
+      [ (errWith s.id "spawns.${c} gives no attrset" { code = "spawns"; }) ]
+    else
+      map (
+        n:
+        if any (x: x.key == "${c}:${n}") s.up then
+          errWith s.id "instance ${c}:${n} twice on path" {
+            code = "cycle";
+            got = "${c}:${n}";
+          }
+        else if !isAttrs made.${n} then
+          errWith s.id "spawns.${c}.${n} is no attrset" { code = "spawns"; }
+        else
+          mkScope s (childId s.kind c) n made.${n}
+      ) (attrNames made);
   item =
     c:
     if c ? error then

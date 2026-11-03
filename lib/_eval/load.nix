@@ -33,22 +33,28 @@ let
   try = x: (b.tryEval x).value;
   spine = p: isAttrs p && b.seq (length (attrNames p) + length (attrNames (p.yen.sinks or { }))) true;
   forced = p: all (i: b.seq i true) (p.imports or [ ]);
+  # a file module is read once, by path; an inline module is read again from its parent's real `imports`
   node =
     S: parent: at: key: m:
-    let
-      file = isPath m || isString m;
-      f = if file then import m else m;
-      fa = if isFunction f then functionArgs f else { };
-      call = s: if isFunction f then f (b.mapAttrs (a: _: s.${a} or sentinel) fa) else f;
-      p0 = call { };
-      probe = call S;
-      k = if file then toString m else key;
-    in
-    {
+    if isPath m || isString m then
+      nodeOf S parent null (toString m) (import m)
+    else
+      nodeOf S parent at key m;
+  nodeOf =
+    S: parent: at: k: f:
+    nodeArgs S parent at k f (if isFunction f then functionArgs f else { });
+  callWith =
+    f: fa: s:
+    if isFunction f then f (b.mapAttrs (a: _: s.${a} or sentinel) fa) else f;
+  nodeArgs =
+    S: parent: at: k: f: fa:
+    nodeProbed k {
       key = k;
-      inherit fa parent;
-      at = if file then null else at; # an inline module is read again from its parent's real `imports`
-    }
+      inherit fa parent at;
+    } f (callWith f fa) (callWith f fa { }) (callWith f fa S);
+  nodeProbed =
+    k: base: f: call: p0: probe:
+    base
     // (
       if !try (spine p0) then
         {
@@ -86,11 +92,9 @@ let
         ) (length (n.probe.imports or [ ]));
     };
   # the sinks of a module set, from `p0` values: they never read a source
-  sinksOf =
-    F:
-    let
-      ns = filter (n: n ? p0) F;
-    in
+  sinksOf = F: sinksIn (filter (n: n ? p0) F);
+  sinksIn =
+    ns:
     genAttrs (filter (c: c != "yen") (names (concatMap gives ns ++ concatMap declares ns))) (
       c:
       (reduceWith c (first (n: (n.p0.yen.sinks or { }) ? ${c}) ns).p0.yen.sinks.${c} or { } (
@@ -105,12 +109,12 @@ let
     );
   importers = F: length (filter (n: n.importer or false) F);
   # one round per stratum: stop when the keys hold and every importer had its round (or the rounds outgrow the modules)
-  rounds =
-    r: F:
-    let
-      F' = closure (sinksOf F);
-      same = map (n: n.key) F' == map (n: n.key) F;
-    in
+  rounds = r: F: roundOf r F (closure (sinksOf F));
+  roundOf =
+    r: F: F':
+    roundEnd r F' (map (n: n.key) F' == map (n: n.key) F);
+  roundEnd =
+    r: F': same:
     if same && r > importers F' || r > length F' + 1 then
       {
         found = F';

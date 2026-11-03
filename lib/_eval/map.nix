@@ -8,6 +8,7 @@ let
     elem
     errWith
     filter
+    first
     functionArgs
     genAttrs
     head
@@ -57,20 +58,23 @@ let
   isFn = f: isFunction f || f ? __functionArgs;
   fnArgs = f: f.__functionArgs or (functionArgs f);
   isAttrsFn = f: fnArgs f != { } || b.match ".*<attrspat.*" (b.toXML f) != null; # toXML only for `{ ... }:` vs `x:`
-  fill =
-    s: v:
-    let
-      fa = fnArgs v;
-      mine = filter isRen (attrNames fa);
-      asked = genAttrs mine (argAt s);
-      none = filter (n: asked.${n} == [ ]) mine;
-      missing = filter (n: !fa.${n}) none;
-      got = mapAttrs (_: head) (removeAttrs asked none);
-      rest = removeAttrs fa mine;
-    in
-    if !isFn v then
-      { ok = v; }
-    else if !isAttrsFn v then
+  fill = s: v: if !isFn v then { ok = v; } else fillArgs s v (fnArgs v);
+  # asked: the answer to each arg yen fills; none: the args with no answer
+  fillArgs =
+    s: v: fa:
+    fillAsked s v fa (genAttrs (filter isRen (attrNames fa)) (argAt s));
+  fillAsked =
+    s: v: fa: asked:
+    fillNone s v fa asked (filter (n: asked.${n} == [ ]) (attrNames asked));
+  fillNone =
+    s: v: fa: asked: none:
+    fillWith s v fa (first (n: !fa.${n}) none) (mapAttrs (_: head) (removeAttrs asked none)) (
+      removeAttrs fa (attrNames asked)
+    );
+  # missing: the first arg with no answer and no default; got: the filled args; rest: the args that stay open
+  fillWith =
+    s: v: fa: missing: got: rest:
+    if !isAttrsFn v then
       errWith s.id "bare function: wrap it as `{ ... }:`" {
         code = "bare-function";
         fix = "write `{ ... }:` so yen knows which args to fill";
@@ -81,11 +85,11 @@ let
         want = "tree";
         fix = "ask the tree from a `cycle`: `cycle = { tree, ... }: { tree = [ … ]; <sink> = …; }`";
       }
-    else if missing != [ ] then
-      errWith s.id "arg `${head missing}` has no answer" {
+    else if missing != null then
+      errWith s.id "arg `${missing}` has no answer" {
         code = "arg";
-        want = head missing;
-        fix = "give `${head missing}` a default (`${head missing} ? null`) or make the element active only where it has an answer";
+        want = missing;
+        fix = "give `${missing}` a default (`${missing} ? null`) or make the element active only where it has an answer";
       } # Cycle: no source, no emission
     else if rest == { } then
       { ok = v got; }

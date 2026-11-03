@@ -107,84 +107,82 @@ let
   floor = floorOf labels graph.edges;
   # a key yen does not read is an error, not a silent no-op: yen modules are not NixOS modules.
   # `from` is the module that declares the key
-  keyErrors =
-    let
-      bad =
-        from: path: known: xs:
-        map (
-          k:
-          errWith (from k) "`${k}` is not a key yen reads here" {
-            code = "unknown-key";
-            path = path ++ [ k ];
-            near = near k known;
-            want = known;
-            fix = "use one of the keys in `want`; yen modules are not NixOS modules";
-          }
-        ) (filter (k: !elem k known) xs);
-      files = path: k: concatStringsSep ", " (declaredIn (path ++ [ k ]));
-      # a kind and every kind nested in it read only kindKeys; `decl` is the path under `yen`
-      kindKeyErrors =
-        decl: d:
-        if !isAttrs d then
-          [ (notKind decl "a kind, an attrset of kind keys") ]
+  bad =
+    from: path: known: xs:
+    map (
+      k:
+      errWith (from k) "`${k}` is not a key yen reads here" {
+        code = "unknown-key";
+        path = path ++ [ k ];
+        near = near k known;
+        want = known;
+        fix = "use one of the keys in `want`; yen modules are not NixOS modules";
+      }
+    ) (filter (k: !elem k known) xs);
+  files = path: k: concatStringsSep ", " (declaredIn (path ++ [ k ]));
+  # a kind and every kind nested in it read only kindKeys; `decl` is the path under `yen`
+  kindKeyErrors =
+    decl: d:
+    if !isAttrs d then
+      [ (notKind decl "a kind, an attrset of kind keys") ]
+    else
+      bad (files decl) ([ "yen" ] ++ decl) kindKeys (attrNames d)
+      # `aspects` is an attrset of aspects, each an attrset
+      ++ (
+        if !isAttrs (d.aspects or { }) then
+          [ (notKind (decl ++ [ "aspects" ]) "an attrset of aspects") ]
         else
-          bad (files decl) ([ "yen" ] ++ decl) kindKeys (attrNames d)
-          # `aspects` is an attrset of aspects, each an attrset
-          ++ (
-            if !isAttrs (d.aspects or { }) then
-              [ (notKind (decl ++ [ "aspects" ]) "an attrset of aspects") ]
-            else
-              map (
-                s:
-                notKind (
-                  decl
-                  ++ [
-                    "aspects"
-                    s
-                  ]
-                ) "an aspect, an attrset"
-              ) (filter (s: !isAttrs d.aspects.${s}) (attrNames (d.aspects or { })))
-          )
-          # #80: `sinks` is an attrset of sinks, each an attrset
-          ++ (
-            if !isAttrs (d.sinks or { }) then
-              [ (notKind (decl ++ [ "sinks" ]) "an attrset of sinks") ]
-            else
-              map (
-                s:
-                notKind (
-                  decl
-                  ++ [
-                    "sinks"
-                    s
-                  ]
-                ) "a sink, an attrset"
-              ) (filter (s: !isAttrs d.sinks.${s}) (attrNames (d.sinks or { })))
-          )
-          ++ (
-            if !isAttrs (d.kinds or { }) then
-              [ (notKind (decl ++ [ "kinds" ]) "an attrset of nested kinds") ]
-            else
-              concatMap (
-                c:
-                kindKeyErrors (
-                  decl
-                  ++ [
-                    "kinds"
-                    c
-                  ]
-                ) d.kinds.${c}
-              ) (attrNames (d.kinds or { }))
-          );
-      notKind =
-        decl: what:
-        errWith (concatStringsSep ", " (declaredIn decl)) "yen.${concatStringsSep "." decl} is not ${what}"
-          {
-            code = "not-a-kind";
-            path = [ "yen" ] ++ decl;
-            fix = "write yen.${concatStringsSep "." decl} as ${what}";
-          };
-    in
+          map (
+            s:
+            notKind (
+              decl
+              ++ [
+                "aspects"
+                s
+              ]
+            ) "an aspect, an attrset"
+          ) (filter (s: !isAttrs d.aspects.${s}) (attrNames (d.aspects or { })))
+      )
+      # #80: `sinks` is an attrset of sinks, each an attrset
+      ++ (
+        if !isAttrs (d.sinks or { }) then
+          [ (notKind (decl ++ [ "sinks" ]) "an attrset of sinks") ]
+        else
+          map (
+            s:
+            notKind (
+              decl
+              ++ [
+                "sinks"
+                s
+              ]
+            ) "a sink, an attrset"
+          ) (filter (s: !isAttrs d.sinks.${s}) (attrNames (d.sinks or { })))
+      )
+      ++ (
+        if !isAttrs (d.kinds or { }) then
+          [ (notKind (decl ++ [ "kinds" ]) "an attrset of nested kinds") ]
+        else
+          concatMap (
+            c:
+            kindKeyErrors (
+              decl
+              ++ [
+                "kinds"
+                c
+              ]
+            ) d.kinds.${c}
+          ) (attrNames (d.kinds or { }))
+      );
+  notKind =
+    decl: what:
+    errWith (concatStringsSep ", " (declaredIn decl)) "yen.${concatStringsSep "." decl} is not ${what}"
+      {
+        code = "not-a-kind";
+        path = [ "yen" ] ++ decl;
+        fix = "write yen.${concatStringsSep "." decl} as ${what}";
+      };
+  keyErrors =
     concatMap (
       n:
       map (

@@ -36,52 +36,48 @@ let
   sinkNames = uniq (concatMap (id: attrNames ((kindAt id).sinks or { })) kindIds);
   above = s: if s.parent == null then [ ] else s.parent.rup;
   receiverIn = k: first (r: sinkOf r k != null && holds ((sinkOf r k).at or (_: true)) r);
-  given = concatMap (
-    s:
-    concatMap (
-      n:
-      let
-        a = aspects.${n};
-        o = outAt n s;
-      in
-      if !active.${n}.${s.id} then
-        [ ]
-      else
-        concatMap (
-          k:
-          let
-            hs = answersRefs [
-              "aspects"
-              n
-              k
-            ];
-            one = length hs < 2 || all (x: isAttrs x && !isLeaf x) hs;
-          in
-          # data merges; functions from several files each apply
-          b.genList (i: {
-            origin = "aspect ${n}" + (if one then "" else "#${toString i}");
-            aspect = n;
-            key = k;
-            from = s;
-            value = if one then a.${k} else b.elemAt hs i;
-          }) (if one then 1 else length hs)
-        ) (attrNames (removeAttrs a aspectMeta))
-        ++ concatMap (
-          k:
-          let
-            vs = toList o.${k};
-          in
-          b.genList (i: {
-            origin = "aspect ${n}";
-            aspect = n;
-            key = k;
-            from = s;
-            value = b.elemAt vs i;
-            raw = i; # position: a cycle may emit many
-          }) (length vs)
-        ) (attrNames (removeAttrs o outMeta))
-    ) aspectNames
-  ) scopes;
+  given = concatMap (s: concatMap (givenBy s) aspectNames) scopes;
+  givenBy =
+    s: n:
+    if !active.${n}.${s.id} then
+      [ ]
+    else
+      concatMap (aspectGives s n) (attrNames (removeAttrs aspects.${n} aspectMeta))
+      ++ concatMap (cycleGives s n (outAt n s)) (attrNames (removeAttrs (outAt n s) outMeta));
+  # hs: the values of key k in each file of aspect n
+  aspectGives =
+    s: n: k:
+    givenFrom s n k (answersRefs [
+      "aspects"
+      n
+      k
+    ]);
+  givenFrom =
+    s: n: k: hs:
+    givenAs s n k hs (length hs < 2 || all (x: isAttrs x && !isLeaf x) hs);
+  # data merges (one): functions from several files each apply
+  givenAs =
+    s: n: k: hs: one:
+    b.genList (i: {
+      origin = "aspect ${n}" + (if one then "" else "#${toString i}");
+      aspect = n;
+      key = k;
+      from = s;
+      value = if one then aspects.${n}.${k} else b.elemAt hs i;
+    }) (if one then 1 else length hs);
+  cycleGives =
+    s: n: o: k:
+    cycleElems s n k (toList o.${k});
+  cycleElems =
+    s: n: k: vs:
+    b.genList (i: {
+      origin = "aspect ${n}";
+      aspect = n;
+      key = k;
+      from = s;
+      value = b.elemAt vs i;
+      raw = i; # position: a cycle may emit many
+    }) (length vs);
   direct = concatMap (e: map (to: e // { inherit to; }) (orNull (receiverIn e.key e.from.rup))) (
     filter (e: e.key != "errors") given
   ); # no receiver above: dropped. A static key no kind declares as a sink is an error in keyErrors; keys a cycle function returns are not checked

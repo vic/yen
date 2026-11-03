@@ -115,12 +115,6 @@ let
   # a scope's own data, with refs cut to their identity: its fingerprint, the instances it holds, and functions
   walk =
     v:
-    let
-      many = ws: {
-        refs = concatMap (w: w.refs) ws;
-        opaque = any (w: w.opaque) ws;
-      };
-    in
     if isRef v && isString v.kind && isString v.name && (instances.${v.kind} or { }) ? ${v.name} then
       {
         fp.__ref = [
@@ -143,21 +137,21 @@ let
         opaque = true;
       }
     else if isList v then
-      let
-        ws = map walk v;
-      in
-      many ws // { fp = map (w: w.fp) ws; }
+      walkList (map walk v)
     else if isAttrs v then
-      let
-        ws = mapAttrs (_: walk) v;
-      in
-      many (b.attrValues ws) // { fp = mapAttrs (_: w: w.fp) ws; }
+      walkAttrs (mapAttrs (_: walk) v)
     else
       {
         fp = if isPath v then toString v else v;
         refs = [ ];
         opaque = false;
       };
+  many = ws: {
+    refs = concatMap (w: w.refs) ws;
+    opaque = any (w: w.opaque) ws;
+  };
+  walkList = ws: many ws // { fp = map (w: w.fp) ws; };
+  walkAttrs = ws: many (b.attrValues ws) // { fp = mapAttrs (_: w: w.fp) ws; };
   walks = byScope (s: walk (removeAttrs s scopeMeta)) scopes;
   #: result.reads :: { edges; whole; data; } -- what every element, scope and instance reads, as tokens; whole: reached by any change; data: each scope's data by its sha256
   reads = {
@@ -179,24 +173,19 @@ let
         }) (instNames k)
       ) kindNames
       # a sink `of` a kind reduces the instances its refs name
-      ++ concatMap (
-        n:
-        concatMap (
-          r:
-          let
-            d = sinkOf r n;
-          in
-          optional (d ? of && isType d.of && isString (d.of.__kind or null)) {
-            out = sinkT n r.id;
-            reads = map (instT d.of.__kind) (instNames d.of.__kind);
-          }
-        ) (receivers n)
-      ) sinkNames;
+      ++ concatMap (n: concatMap (r: ofReads n r (sinkOf r n)) (receivers n)) sinkNames;
     whole =
       map (e: sinkT e.key e.to.id) (filter isWhole routed)
       ++ map (s: dataT s.id) (filter (s: walks.${s.id}.opaque) scopes); # a function in the data: no fingerprint
     data = mapAttrs (_: w: b.hashString "sha256" (b.toJSON w.fp)) walks; # by hash: a secret field stays unstated
   };
+  # a sink `of` a kind reads every instance of that kind
+  ofReads =
+    n: r: d:
+    optional (d ? of && isType d.of && isString (d.of.__kind or null)) {
+      out = sinkT n r.id;
+      reads = map (instT d.of.__kind) (instNames d.of.__kind);
+    };
 in
 {
   inherit

@@ -68,143 +68,157 @@ let
   # [ k n ] at the top, the parent's `at` ++ [ c n ] for an instance of the nested kind c
   inst =
     k: at: path:
-    let
-      ts = typesAt k path;
-      tys = filter isType ts;
-      hits = answers (at ++ path);
-      d = first (t: isAttrs t && (t ? default || t ? defaultFrom)) ts;
-      r =
-        if hits != [ ] then
-          { ok = head hits; }
-        else if d != null then
-          {
-            ok =
-              if d ? defaultFrom then
-                d.defaultFrom (
-                  foldl' (v: s: v.${s}) instances at
-                  // {
-                    kind = k;
-                    name = b.elemAt at (length at - 1);
-                  }
+    instAt k at path (typesAt k path) (answers (at ++ path));
+  # ts: the types declared at path; hits: the values given at path
+  instAt =
+    k: at: path: ts: hits:
+    instOf k at path ts hits (
+      valueIn k at hits (first (t: isAttrs t && (t ? default || t ? defaultFrom)) ts)
+    );
+  # r: { ok; } the value given, else the default d, else { }
+  valueIn =
+    k: at: hits: d:
+    if hits != [ ] then
+      { ok = head hits; }
+    else if d != null then
+      {
+        ok =
+          if d ? defaultFrom then
+            d.defaultFrom (
+              foldl' (v: s: v.${s}) instances at
+              // {
+                kind = k;
+                name = b.elemAt at (length at - 1);
+              }
+            )
+          else
+            d.default;
+      }
+    else
+      { };
+  instOf =
+    k: at: path: ts: hits: r:
+    instWith k at path ts hits r (factsOf at path (filter isType ts) r);
+  # the checks of value r against the types tys: each the first type that fails, or null
+  factsOf = at: path: tys: r: {
+    inherit tys;
+    id = idAt at;
+    p = concatStringsSep "." path;
+    bad = first (t: parseOf t r.ok ? left) tys;
+    notBool = first (t: !boolCheck t r.ok) tys;
+    kr = first (t: refKind t != null) tys;
+  };
+  failAt = at: path: e: {
+    value = null;
+    # a nested instance is named by its whole data path; a top instance keeps the field path
+    errors = [
+      (errWith (idAt at) e.error (
+        removeAttrs e [ "error" ] // { path = (if length at > 2 then at else [ ]) ++ path; }
+      ))
+    ];
+  };
+  # a key that names a nested kind holds its instances, keyed by name, each typed by that kind
+  subOf =
+    k: at: path: ts: hits:
+    genAttrs (names (attrsIn (hits ++ ts))) (
+      f:
+      if path == [ ] && (kindAt k).kinds or { } ? ${f} then
+        setOr at [ f ] "write ${f}.<name> = { ... }" (
+          collect (
+            genAttrs (names (attrsIn (answers (at ++ [ f ])))) (
+              m:
+              setOr at
+                [
+                  f
+                  m
+                ]
+                "write ${f}.${m} = { ... }"
+                (
+                  inst (toList k ++ [ f ]) (
+                    at
+                    ++ [
+                      f
+                      m
+                    ]
+                  ) [ ]
                 )
-              else
-                d.default;
-          }
-        else
-          { };
-      id = idAt at;
-      p = concatStringsSep "." path;
-      bad = first (t: parseOf t r.ok ? left) tys;
-      notBool = first (t: !boolCheck t r.ok) tys;
-      kr = first (t: refKind t != null) tys;
-      fail = e: {
-        value = null;
-        # a nested instance is named by its whole data path; a top instance keeps the field path
-        errors = [
-          (errWith id e.error (
-            removeAttrs e [ "error" ] // { path = (if length at > 2 then at else [ ]) ++ path; }
-          ))
-        ];
-      };
-      # a key that names a nested kind holds its instances, keyed by name, each typed by that kind
-      sub = genAttrs (names (attrsIn (hits ++ ts))) (
-        f:
-        if path == [ ] && (kindAt k).kinds or { } ? ${f} then
-          setOr [ f ] "write ${f}.<name> = { ... }" (
-            collect (
-              genAttrs (names (attrsIn (answers (at ++ [ f ])))) (
-                m:
-                setOr
-                  [
-                    f
-                    m
-                  ]
-                  "write ${f}.${m} = { ... }"
-                  (
-                    inst (toList k ++ [ f ]) (
-                      at
-                      ++ [
-                        f
-                        m
-                      ]
-                    ) [ ]
-                  )
-              )
             )
           )
-        else
-          inst k at (path ++ [ f ])
-      );
-      # a nested group or member that is not an attrset is an error, never a lost value
-      setOr =
-        ps: fix: x:
-        if all (v: isAttrs v && !isLeaf v) (answers (at ++ ps)) then
-          x
-        else
-          {
-            value = { };
-            errors = [
-              (errWith (idAt (at ++ ps)) "${concatStringsSep "." ps} is not an attrset" {
-                code = "check";
-                path = at ++ ps;
-                got = b.typeOf (first (v: !isAttrs v || isLeaf v) (answers (at ++ ps)));
-                want = "attrset";
-                inherit fix;
-              })
-            ];
-          };
-      collect = xs: {
-        value = mapAttrs (_: x: x.value) xs;
-        errors = concatMap (x: x.errors) (b.attrValues xs);
+        )
+      else
+        inst k at (path ++ [ f ])
+    );
+  # a nested group or member that is not an attrset is an error, never a lost value
+  setOr =
+    at: ps: fix: x:
+    if all (v: isAttrs v && !isLeaf v) (answers (at ++ ps)) then
+      x
+    else
+      {
+        value = { };
+        errors = [
+          (errWith (idAt (at ++ ps)) "${concatStringsSep "." ps} is not an attrset" {
+            code = "check";
+            path = at ++ ps;
+            got = b.typeOf (first (v: !isAttrs v || isLeaf v) (answers (at ++ ps)));
+            want = "attrset";
+            inherit fix;
+          })
+        ];
       };
-    in
-    if tys != [ ] && !(r ? ok) then
-      fail {
-        error = "missing ${p}";
+  collect = xs: {
+    value = mapAttrs (_: x: x.value) xs;
+    errors = concatMap (x: x.errors) (b.attrValues xs);
+  };
+  instWith =
+    k: at: path: ts: hits: r: c:
+    if c.tys != [ ] && !(r ? ok) then
+      failAt at path {
+        error = "missing ${c.p}";
         code = "missing";
-        want = typeName (head tys);
-        fix = "set ${id}.${p}";
+        want = typeName (head c.tys);
+        fix = "set ${c.id}.${c.p}";
       }
-    else if tys != [ ] && notBool != null then
-      fail {
-        error = "the check of ${p} gives a ${b.typeOf (notBool.check r.ok)}, not a bool";
+    else if c.tys != [ ] && c.notBool != null then
+      failAt at path {
+        error = "the check of ${c.p} gives a ${b.typeOf (c.notBool.check r.ok)}, not a bool";
         code = "check-not-bool";
-        want = typeName notBool;
+        want = typeName c.notBool;
         fix = "make the check `v: bool`; a curried check needs its other argument first";
       }
-    else if kr != null && isList (refKind kr) then
-      fail (nestedRef id "ref" (refKind kr))
-    else if tys != [ ] && bad != null then
-      fail {
-        error = if kr != null then "${p} wants a ${refKind kr} ref" else "${p} fails its check";
-        code = if kr != null then "ref" else "check";
+    else if c.kr != null && isList (refKind c.kr) then
+      failAt at path (nestedRef c.id "ref" (refKind c.kr))
+    else if c.tys != [ ] && c.bad != null then
+      failAt at path {
+        error = if c.kr != null then "${c.p} wants a ${refKind c.kr} ref" else "${c.p} fails its check";
+        code = if c.kr != null then "ref" else "check";
         got =
-          if any isSecret tys then
+          if any isSecret c.tys then
             hide r.ok
           else if isFunction r.ok then
             "<function>"
           else
             r.ok;
-        want = typeName bad;
+        want = typeName c.bad;
         fix =
-          if kr != null then
-            "use yen.${refKind kr}.<name>, not a string"
+          if c.kr != null then
+            "use yen.${refKind c.kr}.<name>, not a string"
           else
-            "give ${p} a value of type ${typeName bad}";
+            "give ${c.p} a value of type ${typeName c.bad}";
       }
-    else if tys != [ ] then
+    else if c.tys != [ ] then
       pure r.ok
     else if path != [ ] && ts == [ ] then
-      fail {
-        error = "unknown field ${p}";
+      failAt at path {
+        error = "unknown field ${c.p}";
         code = "unknown-field";
         near = near (b.elemAt path (length path - 1)) (
           names (attrsIn (typesAt k (b.genList (b.elemAt path) (length path - 1))))
         );
-        fix = "declare yen.kinds.${renderId k}.fields.${p}, or use a declared field";
+        fix = "declare yen.kinds.${renderId k}.fields.${c.p}, or use a declared field";
       }
     else
-      collect sub;
+      collect (subOf k at path ts hits);
   instNames = k: attrNames (top.${k} or { });
   instances = mapAttrs (
     k: _:
@@ -225,24 +239,17 @@ let
   ) kinds;
   # the owned aspects (key `[ …owner "aspects" a ]`), grouped by the owner's path: one parse per key
   ownedIndex = b.groupBy (x: b.toJSON x.owner) (
-    map (
-      key:
-      let
-        p = ownedKeys.${key};
-      in
-      {
-        inherit key;
-        owner = b.genList (b.elemAt p) (length p - 2);
-        name = b.elemAt p (length p - 1);
-      }
-    ) (attrNames ownedKeys)
+    map (key: ownedAt key ownedKeys.${key}) (attrNames ownedKeys)
   );
+  ownedAt = key: p: {
+    inherit key;
+    owner = b.genList (b.elemAt p) (length p - 2);
+    name = b.elemAt p (length p - 1);
+  };
   # the aspects an owner (an instance `[ k n ]`, a kind `[ "kinds" k … ]`) owns, as `{ aspects.<a> = ref; }`, or { }
-  ownedBy =
-    refs: owner:
-    let
-      own = ownedIndex.${b.toJSON owner} or [ ];
-    in
+  ownedBy = refs: owner: ownedIn refs (ownedIndex.${b.toJSON owner} or [ ]);
+  ownedIn =
+    refs: own:
     if own == [ ] then
       { }
     else

@@ -63,11 +63,10 @@ let
     && b.elemAt path (length path - 1) == "at"
     && !(length path == 4 && head path == "queries" && b.elemAt path 2 == "params");
   sinkKeyOf = path: length path == 3 && head path == "aspects" && elem (b.elemAt path 2) sinkNames; # several files may each give an element
-  declIn =
-    ans: path:
-    let
-      hs = ans path;
-    in
+  declIn = ans: path: declHits ans path (ans path);
+  # hs: the answers at path
+  declHits =
+    ans: path: hs:
     if atKey path then
       concatMap toList hs
     else if hs == [ ] then
@@ -76,11 +75,9 @@ let
       genAttrs (names (attrsIn hs)) (n: declIn ans (path ++ [ n ]))
     else
       head hs;
-  declErrors =
-    path:
-    let
-      hs = answers path;
-    in
+  declErrors = path: declErrs path (answers path);
+  declErrs =
+    path: hs:
     if atKey path || length hs < 2 || sinkKeyOf path then
       [ ]
     else if all (x: isAttrs x && !isLeaf x) hs then
@@ -172,18 +169,15 @@ let
   # values come from the refs load; `at` reads data: stage diffs where aspects are active and where sinks receive
   withAt = d: v: v // (if d ? at then { inherit (d) at; } else { });
   # an aspect a kind owns runs, by default, on the scopes of that kind, as a nested kind is spawned by default
-  ownerKind =
-    n:
-    let
-      p = ownedKeys.${n} or [ ];
-      ids = b.genList (i: b.elemAt p (2 * i + 1)) ((length p - 2) / 2);
-    in
+  ownerKind = n: ownerOf (ownedKeys.${n} or [ ]);
+  # p: the owner key [ "kinds" k … "aspects" a ]; ids: the kind ids on it
+  ownerOf =
+    p:
     if p == [ ] || head p != "kinds" then
       null
-    else if length ids == 1 then
-      head ids
     else
-      ids;
+      oneOrAll (b.genList (i: b.elemAt p (2 * i + 1)) ((length p - 2) / 2));
+  oneOrAll = ids: if length ids == 1 then head ids else ids;
   atOf = n: d: if d ? at || ownerKind n == null then d else d // { at = [ (kindAt (ownerKind n)) ]; };
   aspects = mapAttrs (n: a: withAt (atOf n top.aspects.${n}) (a // { __aspect = n; })) (
     topRefs.aspects or { }
@@ -266,62 +260,58 @@ let
   // mapAttrs (k: d: mapAttrs (f: _: fieldLit k f) (d.fields or { })) kinds;
   #: yen.facts.<kind>.<field> :: scope -> term -> literal -- the field of the scope holds the term; for a ref field, the term is a scope of the instance it refers to, or a ref constant
   #: yen.facts.<kind>.<field>.set :: scope -> literal -- the field of the scope holds a value
-  fieldLit =
-    k: f:
-    let
-      isRefField = first (t: refKind t != null) (typesAt k [ f ]) != null;
-      ref = s: [
-        "ref"
-        f
-        s
-        { var = "#k"; }
-        { var = "#n"; }
-      ];
-    in
-    {
-      __functor =
-        _: s: t:
-        if !isRefField then
-          lit [
+  fieldLit = k: f: fieldLitOf f (first (t: refKind t != null) (typesAt k [ f ]) != null);
+  refAtom = f: s: [
+    "ref"
+    f
+    s
+    { var = "#k"; }
+    { var = "#n"; }
+  ];
+  fieldLitOf = f: isRefField: {
+    __functor =
+      _: s: t:
+      if !isRefField then
+        lit [
+          "val"
+          f
+          s
+          t
+        ]
+      else if isRef t then
+        lit [
+          "ref"
+          f
+          s
+          t.kind
+          t.name
+        ]
+      else
+        {
+          atom = refAtom f s;
+          join = [
+            [
+              "instance"
+              t
+              { var = "#k"; }
+              { var = "#n"; }
+            ]
+          ];
+        };
+    set =
+      s:
+      lit (
+        if isRefField then
+          refAtom f s
+        else
+          [
             "val"
             f
             s
-            t
+            { var = "#v"; }
           ]
-        else if isRef t then
-          lit [
-            "ref"
-            f
-            s
-            t.kind
-            t.name
-          ]
-        else
-          {
-            atom = ref s;
-            join = [
-              [
-                "instance"
-                t
-                { var = "#k"; }
-                { var = "#n"; }
-              ]
-            ];
-          };
-      set =
-        s:
-        lit (
-          if isRefField then
-            ref s
-          else
-            [
-              "val"
-              f
-              s
-              { var = "#v"; }
-            ]
-        );
-    };
+      );
+  };
   kindNames = attrNames kinds;
   # every kind id, top and nested, by walking the tree
   kindIds = concatMap idsFrom kindNames;

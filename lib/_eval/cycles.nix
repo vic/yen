@@ -9,6 +9,7 @@ let
     b
     byScope
     filter
+    fix
     mapAttrs
     sourcesAt
     unsorted
@@ -16,13 +17,9 @@ let
   # ── cycles: one per (aspect, scope). Its own tree requests feed its sources ──
   cycleOuts = mapAttrs (
     n: a:
-    byScope (
-      s:
-      let
-        o = a.cycle (sourcesAt s (o.tree or [ ]));
-      in
-      o
-    ) (filter (s: active.${n}.${s.id}) unsorted)
+    byScope (s: fix (o: a.cycle (sourcesAt s (o.tree or [ ])))) (
+      filter (s: active.${n}.${s.id}) unsorted
+    )
   ) (b.removeAttrs aspects (filter (n: !(aspects.${n} ? cycle)) aspectNames));
   outAt = n: s: cycleOuts.${n}.${s.id} or { };
 
