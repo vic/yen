@@ -76,7 +76,8 @@ in
         3. For a feature, add a page: copy an example directory, edit `page.nix` and `modules/`, and give it `checks`.
         4. Run `docs-write` to regenerate the pages, then `ci` for every stage.
 
-        A change to the engine also needs a test in `tests/engine.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
+        A change to the engine also needs a test in the suite of its topic: `tests/model.nix`, `behavior.nix`, `query.nix`,
+        `agents.nix` or `logic.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
 
         ## Coding standards
 
@@ -87,6 +88,9 @@ in
 
         - One `let` per file, at the top. A binding that needs a value is a function of that value.
         - A leaf file is `self: value`. If the file does not use `self`, write `_: value`. Read other leaves from `self`.
+        - `default.nix` loads every file under `lib/` into one fixpoint, `self`, each at the path of its file. `tests.nix`
+          adds every file under `tests/`: a file directly in `tests/` is a suite, and `tests/_shared.nix` holds the fixtures
+          the engine suites share. A new file is loaded with no list to edit.
         - `b = builtins;` in the `let`, then `b.map`, `b.filter`. Name each attribute you use.
         - One `#:` line above each API: `#: <where> :: <takes> -> <returns> -- <purpose>`. The [API page](/reference/lib/)
           is read from these lines, and a check fails when an API has none.
