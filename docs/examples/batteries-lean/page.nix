@@ -35,6 +35,9 @@
 
         - `nix run github:vic/yen#yen-cert-check -- verdict.json`, with `verdict.json` from `builtins.toJSON result.check.lean`. Exit 0: verified. Exit 1: rejected. Exit 2: input Lean cannot decide.
         - The MCP tool `yen_verify`, from `nix run github:vic/yen#yen-mcp`.
+        - `yen-cert-check --change stage.json`, with `stage.json` from `builtins.toJSON (yen.lib.stage { … }).lean`: the
+          staged fleet must verify, and the checker names the cone of the change. `yen_stage` runs it for agents.
+        - `yen-cert-check --waves waves.json`, with `{ edges; layers; }`: what `lean.waves` runs.
 
         A full fleet with the battery, and what Lean proves: [Verified by Lean](/query/lean/).
       ''

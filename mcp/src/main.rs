@@ -141,7 +141,18 @@ fn call(cfg: &Config, tools: &Value, id: &Value, name: &str, args: &Value) -> Va
         return fail(id, -32602, &format!("unknown tool: {name}"));
     };
     let evaluated = match eval(cfg, tool, args) {
-        Ok(Eval::Done(verdict)) if tool == "verify" => lean_check(cfg, &verdict),
+        Ok(Eval::Done(verdict)) if tool == "verify" => lean_check(cfg, None, &verdict),
+        // a staged change: Lean checks the staged verdict, and its answer replaces the two exported verdicts
+        Ok(Eval::Done(mut staged)) if tool == "stage" => {
+            let change = staged["lean"].take();
+            lean_check(cfg, Some("--change"), &change).map(|lean| match lean {
+                Eval::Done(answer) => {
+                    staged["lean"] = answer;
+                    Eval::Done(staged)
+                }
+                other => other,
+            })
+        }
         other => other,
     };
     let (text, is_error) = match evaluated {
@@ -207,13 +218,15 @@ fn wait(cfg: &Config, child: &mut Child) -> io::Result<Option<ExitStatus>> {
     }
 }
 
-/// `yen-cert-check` (on PATH) on the exported verdict: exit 0 is verified, 1 rejected, 2 input Lean cannot decide.
-fn lean_check(cfg: &Config, verdict: &Value) -> io::Result<Eval> {
+/// `yen-cert-check` (on PATH) on the exported verdict, or with `--change` on a staged change: exit 0 is verified,
+/// 1 rejected, 2 input Lean cannot decide.
+fn lean_check(cfg: &Config, mode: Option<&str>, verdict: &Value) -> io::Result<Eval> {
     let file = cfg.scratch.join("verdict.json");
     let out_file = cfg.scratch.join("lean.txt");
     std::fs::write(&file, verdict.to_string())?;
     let out = std::fs::File::create(&out_file)?;
     let mut child = Command::new("yen-cert-check")
+        .args(mode)
         .arg(&file)
         .stdin(Stdio::null())
         .stdout(out.try_clone()?)
@@ -224,7 +237,9 @@ fn lean_check(cfg: &Config, verdict: &Value) -> io::Result<Eval> {
     };
     let message = std::fs::read_to_string(&out_file)?;
     Ok(match status.code() {
-        Some(code @ (0 | 1)) => Eval::Done(json!({"verified": code == 0, "message": message.trim_end()})),
+        Some(code @ (0 | 1)) => {
+            Eval::Done(json!({"verified": code == 0, "message": message.trim_end()}))
+        }
         _ => Eval::Failed(message.trim_end().to_string()),
     })
 }

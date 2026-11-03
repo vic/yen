@@ -2928,7 +2928,7 @@ let
     else
       !isFunction v;
   # stage: an agent's change, in quarantine. Nothing changes; two evals compare. `ok` only when nothing new is wrong.
-  #: lib.stage :: { base; change; rejected ? [ ]; grant ? null; by ? null; id ? null; baseResult ? eval base; } -> { ok; errors; violations; incomplete; refused; diff; labels; floor; sha; render; } -- a change evaluated with the base and applied nowhere; ok only when nothing new is wrong
+  #: lib.stage :: { base; change; rejected ? [ ]; grant ? null; by ? null; id ? null; baseResult ? eval base; } -> { ok; errors; violations; incomplete; refused; diff; labels; floor; lean; sha; render; } -- a change evaluated with the base and applied nowhere; ok only when nothing new is wrong
   stage =
     {
       base,
@@ -3184,6 +3184,11 @@ let
         labels
         ;
       floor = floorOf labels changedResult.graph.edges;
+      # both verdicts for the Lean checker: `yen-cert-check --change base staged`
+      lean = {
+        base = baseResult.check.lean;
+        staged = changedResult.check.lean;
+      };
       ok = errors == [ ] && violations == [ ] && incomplete == [ ] && refused == [ ];
       render = if isData change then b.toJSON change else null; # read back with builtins.fromJSON
     };

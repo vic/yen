@@ -1,4 +1,4 @@
-# Yen: Nix fleets you can formally verify before deployment.
+# Yen: Nix fleets you can [formally verify](https://yen.oeiuwq.com/query/lean/) before deployment.
 
 <!-- Generated from docs/examples/why/page.nix. Edit there, then run `nix run .#write-files` in docs/. -->
 
@@ -38,7 +38,14 @@ What you get:
 - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
   your laptop.
 - **A tool for agents.** The MCP server (`nix run github:vic/yen#yen-mcp`) gives an agent `yen_verify`. The agent
-  stages a change, and it reports the fleet good only when Lean agrees.
+  reports the fleet good only when Lean agrees.
+- **Changes checked before they land.** An agent stages a change with `yen_stage`. Lean checks the fleet with the
+  change, before any file is written, and names the rules the change can reach. Lean proves that the rest of the
+  fleet stays as it was.
+- **Deploy waves you can trust.** Yen orders your machines into deploy waves, each after what it depends on.
+  Lean checks the order, and proves the dependencies have no cycle.
+- **Facts checked too.** Before reading a rule, Lean checks that the facts make sense: every name points to a
+  real part of the fleet, and nothing is its own parent.
 - **Answers with reasons.** For each broken rule, Yen gives the facts that break it. For a rule that holds, it
   gives what stops it from breaking.
 
@@ -413,7 +420,7 @@ lets them write only verified changes. <sup>[docs](https://yen.oeiuwq.com/agents
 
 ## How agents check a change
 
-An agent works on a Yen fleet through the MCP server in `mcp/`. The skill in `.claude/skills/yen-mcp/SKILL.md` gives the
+An agent works on a Yen fleet through the MCP server in `mcp/`. The skill in `skills/yen-mcp/SKILL.md` gives the
 order of calls. The agent reads with `yen_schema` and `yen_check`, asks with `yen_why_not` and `yen_explain`, and stages a
 change with `yen_stage` before any file is written. A fleet passes `yen_check` only when `ok` is true, with no violations,
 no `incomplete` or `opaque` atoms, and `certified` true. `yen_verify` runs the Lean checker on the same verdict.

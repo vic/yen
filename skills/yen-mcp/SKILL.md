@@ -68,7 +68,8 @@ An error record in a result has `code`, `path`, `got`, `want`, `fix` and, for ty
    - `yen_program` with a list of ops is the safest form of a change. It gives `valid`, `errors`, `ok`,
      `violations` and the diff.
    - `yen_stage` with a `change` (a Yen module as JSON) gives `ok`, `errors`, `violations`, `incomplete`, `diff`,
-     `refused` and the change's `sha`.
+     `refused` and the change's `sha`. Its `lean` is the Lean checker on the staged fleet: `verified`, and a
+     `message` that names the violations the change can reach.
    - Write the change to the fleet's files only when `ok` is true. Then call `yen_check` and `yen_verify` again.
 6. **Export only when asked.** `yen_export` gives the whole fleet as sorted N-Triples with a sha256. It is large.
 

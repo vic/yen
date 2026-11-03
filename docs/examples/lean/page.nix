@@ -63,12 +63,21 @@
         | `verify_wfm` (Wfm.lean) | on a verified verdict, every violation is false in the well-founded model of the full program |
         | `shape_no_cycle` (Facts.lean) | on facts that pass the shape check, no scope is its own ancestor |
         | `waves_respect`, `waves_acyclic` (Waves.lean) | verified deploy waves put every dependency in an earlier wave, so the graph has no cycle |
+        | `relevance` (Wfm.lean) | two programs with the same rules under a set of atoms give those atoms the same value: a change reaches only its cone |
 
         CI runs `lean-check` on every change: the proofs compile, and none uses `sorry`. The consistency of the
         well-founded model (no atom both true and false) is cited, from Van Gelder, Ross and Schlipf 1991, Theorem 5.4.
 
         The checker also checks the shape of the facts: every id a fact names is a scope, each scope has one kind and
         at most one parent, and every scope reaches the root. Facts that fail are rejected before any rule is read.
+
+        ## Staged changes
+
+        `yen.lib.stage` evaluates the fleet with a change and without it. Its `lean` field holds both verdicts, and
+        `yen-cert-check --change` reads them: the staged verdict must verify, and the checker names the cone of the
+        change, the atoms whose rules changed and every atom that reads them. By `relevance`, every atom outside the
+        cone keeps its value. The MCP tool `yen_stage` answers with this check in `lean`, so an agent sees before it
+        writes a file whether Lean accepts the change and which violations it can touch.
 
         ## Deploy waves
 

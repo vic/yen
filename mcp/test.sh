@@ -38,6 +38,7 @@ check errors-list '.complete == true and (.result | type == "array")' "$out"
 
 out=$(call yen_stage '{"change":{"yen":{"aspects":{"attic":{"at":[{"kind":"mac","name":"studio"}]}}}}}' | text)
 check stage-attic '.result.ok == false and (.result.violations | map(.[1] == "attic") | any)' "$out"
+check stage-lean '.result.lean.verified == false and (.result.lean.message | contains("in the cone")) and (.result.lean.message | contains("attic"))' "$out"
 
 out=$(call yen_queries '{}' | text)
 check queries-freeport '.result.freePort.required == ["host"] and .result.freePort.types.host == "a host ref"' "$out"

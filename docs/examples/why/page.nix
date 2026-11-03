@@ -13,7 +13,7 @@ let
 in
 {
   title = "Why Yen";
-  plainTitle = "Yen: Nix fleets you can formally verify before deployment.";
+  plainTitle = "Yen: Nix fleets you can ${link "formally verify" "/query/lean/"} before deployment."; # the README h1
   description = "Yen is a cycle.js based language for Nix configurations";
   section = "start";
   order = 1;
@@ -59,7 +59,14 @@ in
         - **A command.** `nix run github:vic/yen#yen-cert-check -- verdict.json` checks a verdict anywhere, in CI or on
           your laptop.
         - **A tool for agents.** The MCP server (`nix run github:vic/yen#yen-mcp`) gives an agent `yen_verify`. The agent
-          stages a change, and it reports the fleet good only when Lean agrees.
+          reports the fleet good only when Lean agrees.
+        - **Changes checked before they land.** An agent stages a change with `yen_stage`. Lean checks the fleet with the
+          change, before any file is written, and names the rules the change can reach. Lean proves that the rest of the
+          fleet stays as it was.
+        - **Deploy waves you can trust.** Yen orders your machines into deploy waves, each after what it depends on.
+          Lean checks the order, and proves the dependencies have no cycle.
+        - **Facts checked too.** Before reading a rule, Lean checks that the facts make sense: every name points to a
+          real part of the fleet, and nothing is its own parent.
         - **Answers with reasons.** For each broken rule, Yen gives the facts that break it. For a rule that holds, it
           gives what stops it from breaking.
 

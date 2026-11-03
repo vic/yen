@@ -40,3 +40,4 @@ example : check program ⟨[⟨0, 0, r0⟩, ⟨1, 1, r1⟩], [⟨2, 1⟩]⟩ = f
 #print axioms Yen.verify_wfm
 #print axioms Yen.shape_no_cycle
 #print axioms Yen.waves_acyclic
+#print axioms Yen.relevance
