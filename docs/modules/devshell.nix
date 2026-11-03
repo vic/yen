@@ -39,6 +39,7 @@ in
       pkgs.shellcheck
       pkgs.gh
       pkgs.nix-unit
+      pkgs.lean4 # lean-check: the proofs of the certificate checker
       inputs.fastest.packages.${pkgs.stdenv.hostPlatform.system}.fastest # tests run here, no flake fetch per run
     ];
   };
@@ -106,6 +107,18 @@ in
     commands = [
       (cmd "engine" "engine-test" "the engine and library suites" (fastest "" ""))
       (cmd "engine" "engine-cost" "the memo cost oracles" "bash tests/cost.sh")
+      (cmd "engine" "lean-check"
+        "the Lean proofs of the certificate checker, its examples, and no sorry in them"
+        ''
+          out=$(mktemp -d)
+          lean -o "$out/Certificate.olean" lean/Certificate.lean
+          LEAN_PATH="$out" lean -o "$out/Ground.olean" lean/Ground.lean
+          LEAN_PATH="$out" lean lean/Main.lean
+          axioms=$(LEAN_PATH="$out" lean lean/Examples.lean)
+          echo "$axioms"
+          ! grep -q sorryAx <<<"$axioms"
+        ''
+      )
     ];
   };
   yen.aspects.reference-commands = {

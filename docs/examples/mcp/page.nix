@@ -81,7 +81,7 @@
     {
       tools = eq (builtins.length (
         builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"))
-      )) (14);
+      )) (15);
       # the agent skill names every tool the server serves, and no tool it does not
       skill =
         let

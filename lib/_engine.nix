@@ -1898,6 +1898,30 @@ let
             (D.checkCertificate verdictProgram certificate).valid
             && certAtoms (filter (x: isBad x.atom) certificate.true) == b.sort b.lessThan (map key violations)
             && !any (a: elem (key a) (certAtoms (certificate.true ++ certificate.false))) incomplete;
+          # each term as its key, the identity at the JSON edge; a variable stays { var; }
+          keyTerm = t: if D.isVar t then { inherit (t) var; } else key t;
+          keyRule = r: {
+            head = map keyTerm r.head;
+            pos = map (map keyTerm) (r.pos or [ ]);
+            neg = map (map keyTerm) (r.neg or [ ]);
+          };
+          #: result.check.lean :: { rules; facts; externals; certificate = { proved; refuted; }; } -- the verdict as the Lean checker reads it (lean/Main.lean): the rules as written, the facts, and the certificate; JSON-safe
+          lean = {
+            rules = map keyRule valid;
+            facts = map (map key) facts;
+            externals = attrNames externals;
+            certificate = {
+              proved = map (e: {
+                atom = map key e.atom;
+                inherit (e) stage;
+                rule = keyRule e.rule;
+              }) certificate.true;
+              refuted = map (e: {
+                atom = map key e.atom;
+                inherit (e) stage;
+              }) certificate.false;
+            };
+          };
           isBad = a: head a == "bad";
           #: result.check.violations :: [ atom ] -- the true bad atoms
           violations = filter isBad m.true;
@@ -2028,6 +2052,7 @@ let
             errors
             certificate
             certified
+            lean
             verify
             from
             opaque

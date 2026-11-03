@@ -347,6 +347,7 @@ let
     # atom false at a stage no later, or a negative atom true at a smaller stage. Sound by induction on the stage (VRS
     # 1991, Thm 5.4); no stratification needed. True and false are disjoint without a check: an atom in both has a rule
     # whose blocking atom is also in both with a smaller sum of its two stages, and the sum cannot descend forever.
+    # Both are proved in Lean: lean/Certificate.lean (`sound`, `disjoint`), checked by `lean-check` in CI.
     #: lib.datalog.checkCertificate :: [ rule ] -> certificate -> { valid; } -- the small trusted checker of a certificate
     checkCertificate =
       rules: cert:

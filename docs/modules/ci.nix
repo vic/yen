@@ -193,6 +193,7 @@ in
     workflow = {
       engine-test = one "engine" { timeout = 20; } "engine and library oracles" "engine-test";
       engine-cost = one "engine" { timeout = 20; } "cost oracles (memos)" "engine-cost";
+      lean-check = one "engine" { timeout = 20; } "Lean proofs of the certificate checker" "lean-check";
     };
   };
   yen.aspects.ci-docs = {

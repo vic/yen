@@ -1,0 +1,36 @@
+{
+  title = "Lean verification battery";
+  description = "lean.verify: a flake check that builds only when the Lean-proven checker verifies the fleet's verdict.";
+  section = "batteries";
+  route = "batteries/lean";
+  order = 10;
+
+  body =
+    { docs, ... }:
+    [
+      ''
+        | Battery | Value of | Gives |
+        |---|---|---|
+        | `lean.verify { pkgs; result; checker ? ; }` | a flake check, next to `yen.lib.eval` | a derivation that builds only when Lean verifies `result` |
+
+        `result` is the fleet, `yen.lib.eval module`. The battery writes `result.check.lean` to a file and runs
+        `yen-cert-check` on it in the build. The build fails when a violation is true or undefined, when the
+        certificate does not check, or when a rule uses an external relation that Lean cannot decide. Its output is
+        the checker's message. `checker` defaults to the checker built from `pkgs`.
+      ''
+      (docs.nix ''
+        checks.x86_64-linux.lean = yen.lib.batteries.lean.verify {
+          pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+          result = yen.lib.eval module;
+        };
+      '')
+      ''
+        The same checker, outside a flake check:
+
+        - `nix run github:vic/yen#yen-cert-check -- verdict.json`, with `verdict.json` from `builtins.toJSON result.check.lean`. Exit 0: verified. Exit 1: rejected. Exit 2: input Lean cannot decide.
+        - The MCP tool `yen_verify`, from `nix run github:vic/yen#yen-mcp`.
+
+        A full fleet with the battery, and what Lean proves: [Verified by Lean](/query/lean/).
+      ''
+    ];
+}

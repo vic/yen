@@ -19,7 +19,7 @@ out=$(rpc '{"jsonrpc":"2.0","id":1,"method":"initialize"}')
 check initialize '.result.serverInfo.name == "yen-mcp"' "$out"
 
 out=$(rpc '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
-check tools-list '(.result.tools | map(.name) | sort) == ["yen_ask","yen_check","yen_context","yen_declared_in","yen_errors","yen_explain","yen_export","yen_impact","yen_labels","yen_program","yen_queries","yen_schema","yen_stage","yen_why_not"]' "$out"
+check tools-list '(.result.tools | map(.name) | sort) == ["yen_ask","yen_check","yen_context","yen_declared_in","yen_errors","yen_explain","yen_export","yen_impact","yen_labels","yen_program","yen_queries","yen_schema","yen_stage","yen_verify","yen_why_not"]' "$out"
 
 out=$(call yen_schema '{}' | text)
 check schema '.complete == true and (.result.kinds | has("host"))' "$out"
@@ -65,6 +65,10 @@ check why-not-holds-false '.result.holds == false' "$out"
 
 out=$(call yen_why_not '{"invariant":"atic","scope":{"kind":"mac","name":"studio"}}' | text)
 check why-not-unknown-invariant '.result.code == "unknown-invariant"' "$out"
+
+# the Lean checker on the verdict: Lean grounds the invariants itself and agrees with yen_check (ok)
+out=$(call yen_verify '{}' | text)
+check verify '.complete == true and .result.verified == true and (.result.message | startswith("verified:"))' "$out"
 
 out=$(call yen_program '{"program":[{"op":"place","aspect":"attic","kind":"mac","name":"studio"}]}' | text)
 check program-violation '.result.ok == false and (.result.violations | map(.[1] == "attic") | any)' "$out"

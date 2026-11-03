@@ -129,6 +129,7 @@ Follow these rules in new code under `lib/` and `tests/`:
 | `docs-build` | docs | build the site to docs/dist |
 | `engine-test` | engine | the engine and library suites |
 | `engine-cost` | engine | the memo cost oracles |
+| `lean-check` | engine | the Lean proofs of the certificate checker, its examples, and no sorry in them |
 | `each-flake` | flake | run command in every flake.nix directory that has it |
 | `fmt-check` | fmt | every tracked nix file is formatted (nixfmt), as CI checks |
 | `lint` | fmt | the workflows are valid (actionlint, with shellcheck) |

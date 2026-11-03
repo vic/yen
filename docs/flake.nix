@@ -20,6 +20,7 @@
     {
       inherit (flake)
         packages
+        apps
         checks
         tests
         devShells

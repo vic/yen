@@ -96,6 +96,8 @@ let
           whyNot = r.check.whyNot l;
           why = r.check.why l;
         };
+    # the verdict as the Lean checker reads it; yen-mcp runs yen-cert-check on it
+    verify = r.check.lean;
     program = yen.lib.program.dryRun {
       inherit base;
       result = r;
