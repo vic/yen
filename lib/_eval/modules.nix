@@ -11,6 +11,7 @@ let
     errWith
     filter
     first
+    fix
     foldl'
     found
     genAttrs
@@ -87,80 +88,81 @@ let
   # a source: its sink reduced like a kind sink. `of` checks each module's value; `reduce` defaults to `one`
   source = y: c: if c == "yen" then y else (reduceModules c).value;
   # the givers and the declaration come from the module key sets: a sink never waits on every module (`top`)
-  reduceModules =
-    c:
-    let
-      ms = filter (n: real.${n.key} ? mod) ok0;
-      decl = first (n: (n.p0.yen.sinks or { }) ? ${c}) ms;
-    in
-    reduceWith c (if decl == null then { } else real.${decl.key}.mod.yen.sinks.${c}) (
+  reduceModules = c: reduceDecl c (filter (n: real.${n.key} ? mod) ok0);
+  # ms: the modules that load; the declaration of sink c is the first that declares it
+  reduceDecl =
+    c: ms:
+    reduceWith c (sinkDecl c (first (n: (n.p0.yen.sinks or { }) ? ${c}) ms)) (
       map (n: {
         from = n.key;
         value = real.${n.key}.mod.${c};
       }) (filter (n: n.p0 ? ${c}) ms)
     );
+  sinkDecl = c: decl: if decl == null then { } else real.${decl.key}.mod.yen.sinks.${c};
   reduceWith =
     c: d: es:
-    let
-      # the frontier decides the shape only; the parts it owes are checked by `result.deep`
-      okOf = e: !(d ? of) || parseOf d.of e.value ? right;
-      red = (d.reduce or reduce.one) (filter okOf es);
-    in
-    {
-      inherit (red) value;
-      # the parts `of` did not force, for `result.deep`
-      owe =
-        if d ? of then
-          concatMap (
-            e:
-            map (
-              o:
-              o
-              // {
-                path = [ c ] ++ o.path;
-                inherit (e) from;
-              }
-            ) ((parseOf d.of e.value).owe or [ ])
-          ) (filter okOf es)
-        else
-          [ ];
-      errors =
-        map (
+    reducedWith c d es ((d.reduce or reduce.one) (filter (okIn d) es));
+  # the frontier decides the shape only; the parts it owes are checked by `result.deep`
+  okIn = d: e: !(d ? of) || parseOf d.of e.value ? right;
+  reducedWith = c: d: es: red: {
+    inherit (red) value;
+    # the parts `of` did not force, for `result.deep`
+    owe =
+      if d ? of then
+        concatMap (
           e:
-          errWith e.from "sink ${c}: the value of ${e.from} fails `of`" {
-            code = "of";
-            path = [ c ];
-          }
-        ) (filter (e: !okOf e) es)
-        ++ map (
-          e:
-          e
-          // {
-            from = "modules";
-            sink = c;
-          }
-        ) red.errors;
-    };
+          map (
+            o:
+            o
+            // {
+              path = [ c ] ++ o.path;
+              inherit (e) from;
+            }
+          ) ((parseOf d.of e.value).owe or [ ])
+        ) (filter (okIn d) es)
+      else
+        [ ];
+    errors =
+      map (
+        e:
+        errWith e.from "sink ${c}: the value of ${e.from} fails `of`" {
+          code = "of";
+          path = [ c ];
+        }
+      ) (filter (e: !okIn d e) es)
+      ++ map (
+        e:
+        e
+        // {
+          from = "modules";
+          sink = c;
+        }
+      ) red.errors;
+  };
   real = realWith yen;
   # two loads: `yen` with instance data answers data and spawns; aspects and kind sinks get instances as refs
   realWith =
     y:
-    let
-      r = listToAttrs (
+    fix (
+      r:
+      listToAttrs (
         map (n: {
           name = n.key;
           value = load y r n;
         }) found
-      );
-    in
-    r;
+      )
+    );
   load =
     y: r: n:
-    let
-      parent = if n.at or null == null then null else r.${n.at.parent};
-      f = if parent == null then n.f else b.elemAt parent.mod.imports n.at.i;
-      missing = filter (a: !n.fa.${a} && !(moduleSinks ? ${a})) (attrNames n.fa);
-    in
+    loadAt y n (if n.at or null == null then null else r.${n.at.parent});
+  # parent: the loaded module that imports n inline, or null; f: the module; missing: an arg no module gives
+  loadAt =
+    y: n: parent:
+    loadMod y n parent (if parent == null then n.f else b.elemAt parent.mod.imports n.at.i) (
+      first (a: !n.fa.${a} && !(moduleSinks ? ${a})) (attrNames n.fa)
+    );
+  loadMod =
+    y: n: parent: f: missing:
     if !(n ? probe) then
       n
     else if looping ? ${n.key} then
@@ -173,11 +175,11 @@ let
       }
     else if parent != null && !(parent ? mod) || any (a: looping ? ${a}) (moduleAbove n) then
       { inherit (n) key; } # it goes with its parent, which has the error
-    else if missing != [ ] then
+    else if missing != null then
       {
         inherit (n) key;
-        error = "module ${n.key}: arg `${head missing}` has no answer";
-        fix = "a module must give `${head missing}`, or give the arg a default";
+        error = "module ${n.key}: arg `${missing}` has no answer";
+        fix = "a module must give `${missing}`, or give the arg a default";
       }
     else
       {
@@ -188,105 +190,99 @@ let
           else
             f;
       };
-  loadWith =
-    y:
-    let
-      r = realWith y;
-    in
-    map (n: r.${n.key}) found;
+  loadWith = y: loadedFrom (realWith y);
+  loadedFrom = r: map (n: r.${n.key}) found;
   loaded = map (n: real.${n.key}) found;
   # an aspect an instance or a kind owns is named by its declaration path under `yen`, as a nested kind is:
   # `[ "kit" "disko" "aspects" "default" ]`, `[ "kinds" "host" "aspects" "web" ]`. Its key is the path's toJSON;
   # a name a fleet gives in `yen.aspects` never starts with `[` (reserved), so no key is shared (#87)
   ownAspects = y: (hoistOf y).y;
   # one module's `yen`: `owned` the aspects its instances and kinds own, `y` the value with them hoisted
-  hoistOf =
-    y:
-    let
-      ks = filter (k: !(elem k yenKeys) && isAttrs y.${k}) (attrNames y);
-      asp =
-        path: d:
-        if isAttrs d && isAttrs (d.aspects or null) then
-          map (a: {
-            name = b.toJSON (
-              path
-              ++ [
-                "aspects"
-                a
-              ]
-            );
-            value = d.aspects.${a};
-          }) (filter (a: isAttrs d.aspects.${a}) (attrNames d.aspects))
-        else
-          [ ];
-      inst = concatMap (k: concatMap (n: asp [ k n ] y.${k}.${n}) (attrNames y.${k})) ks;
-      # a kind and its nested kinds, at every depth
-      kindAsp =
-        path: d:
-        asp path d
-        ++ (
-          if isAttrs d && isAttrs (d.kinds or null) then
-            concatMap (
-              c:
-              kindAsp (
-                path
-                ++ [
-                  "kinds"
-                  c
-                ]
-              ) d.kinds.${c}
-            ) (attrNames d.kinds)
-          else
-            [ ]
+  hoistOf = y: hoistKeys y (filter (k: !(elem k yenKeys) && isAttrs y.${k}) (attrNames y));
+  # ks: the keys of instance tables
+  hoistKeys = y: ks: hoistOwned y ks (if isAttrs y then instAsp y ks ++ kindOwned y else [ ]);
+  asp =
+    path: d:
+    if isAttrs d && isAttrs (d.aspects or null) then
+      map (a: {
+        name = b.toJSON (
+          path
+          ++ [
+            "aspects"
+            a
+          ]
         );
-      kindOwned =
-        if isAttrs (y.kinds or null) then
-          concatMap (k: kindAsp [ "kinds" k ] y.kinds.${k}) (attrNames y.kinds)
-        else
-          [ ];
-      # strip only what is hoisted: an `aspects` or an aspect that is no attrset stays, so its error is reported
-      noAspects =
-        v:
-        if !isAttrs v || !isAttrs (v.aspects or null) then
-          v
-        else
-          let
-            bad = b.listToAttrs (
-              map (a: {
-                name = a;
-                value = v.aspects.${a};
-              }) (filter (a: !isAttrs v.aspects.${a}) (attrNames v.aspects))
-            );
-          in
-          if bad == { } then removeAttrs v [ "aspects" ] else v // { aspects = bad; };
-      strip =
-        d:
-        if !isAttrs d then
-          d
-        else
-          noAspects d
-          // (if isAttrs (d.kinds or null) then { kinds = mapAttrs (_: strip) d.kinds; } else { });
-      owned = if isAttrs y then inst ++ kindOwned else [ ];
-    in
-    {
-      inherit owned;
-      y =
-        if owned == [ ] then
-          y
-        else
-          mapAttrs (
-            k: v:
-            if k == "kinds" && isAttrs v then
-              mapAttrs (_: strip) v
-            else if elem k ks then
-              mapAttrs (_: noAspects) v
-            else
-              v
-          ) y
-          // {
-            aspects = (y.aspects or { }) // b.listToAttrs owned;
-          };
-    };
+        value = d.aspects.${a};
+      }) (filter (a: isAttrs d.aspects.${a}) (attrNames d.aspects))
+    else
+      [ ];
+  instAsp = y: ks: concatMap (k: concatMap (n: asp [ k n ] y.${k}.${n}) (attrNames y.${k})) ks;
+  # a kind and its nested kinds, at every depth
+  kindAsp =
+    path: d:
+    asp path d
+    ++ (
+      if isAttrs d && isAttrs (d.kinds or null) then
+        concatMap (
+          c:
+          kindAsp (
+            path
+            ++ [
+              "kinds"
+              c
+            ]
+          ) d.kinds.${c}
+        ) (attrNames d.kinds)
+      else
+        [ ]
+    );
+  kindOwned =
+    y:
+    if isAttrs (y.kinds or null) then
+      concatMap (k: kindAsp [ "kinds" k ] y.kinds.${k}) (attrNames y.kinds)
+    else
+      [ ];
+  # strip only what is hoisted: an `aspects` or an aspect that is no attrset stays, so its error is reported
+  noAspects =
+    v:
+    if !isAttrs v || !isAttrs (v.aspects or null) then
+      v
+    else
+      keepBad v (
+        b.listToAttrs (
+          map (a: {
+            name = a;
+            value = v.aspects.${a};
+          }) (filter (a: !isAttrs v.aspects.${a}) (attrNames v.aspects))
+        )
+      );
+  keepBad = v: bad: if bad == { } then removeAttrs v [ "aspects" ] else v // { aspects = bad; };
+  strip =
+    d:
+    if !isAttrs d then
+      d
+    else
+      noAspects d
+      // (if isAttrs (d.kinds or null) then { kinds = mapAttrs (_: strip) d.kinds; } else { });
+  hoistOwned = y: ks: owned: {
+    inherit owned;
+    y =
+      if owned == [ ] then
+        y
+      else
+        mapAttrs (
+          k: v:
+          if k == "kinds" && isAttrs v then
+            mapAttrs (_: strip) v
+          else if elem k ks then
+            mapAttrs (_: noAspects) v
+          else
+            v
+        ) y
+        // {
+          aspects = (y.aspects or { }) // b.listToAttrs owned;
+        };
+  };
   # the keys of every owned aspect, from the hoist only: a name a fleet gives is never parsed as a key
   ownedKeys = b.listToAttrs (
     concatMap (
