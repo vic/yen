@@ -37,6 +37,11 @@ in
     at = yen.kinds.system;
     ci = { system, ... }: job system.name "devshell-${system.name}" "devShells.${system.name}.default";
   };
+  # the Lean checker on the fleet's verdict: every flake from yen.lib.mkFlake has it
+  yen.aspects.ci-lean = {
+    at = yen.kinds.fleet;
+    ci = job "x86_64-linux" "yen-lean" "checks.x86_64-linux.yen-lean";
+  };
   yen.aspects.ci-file = {
     at = yen.system.x86_64-linux;
     files = yen.lib.batteries.files.json {

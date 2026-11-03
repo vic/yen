@@ -36,6 +36,7 @@
     }:
     {
       outputs = eq (builtins.attrNames result.flake) ([
+        "checks"
         "colmenaHive"
         "deploy"
         "k8sManifests"

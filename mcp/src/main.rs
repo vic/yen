@@ -6,7 +6,7 @@
 use serde_json::{json, Value};
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, ExitStatus, Stdio};
 use std::time::{Duration, Instant};
 
 const TOOLS: &str = include_str!("tools.json");
@@ -140,7 +140,22 @@ fn call(cfg: &Config, tools: &Value, id: &Value, name: &str, args: &Value) -> Va
     let Some(tool) = name.strip_prefix("yen_").filter(|_| known) else {
         return fail(id, -32602, &format!("unknown tool: {name}"));
     };
-    let (text, is_error) = match eval(cfg, tool, args) {
+    let evaluated = match eval(cfg, tool, args) {
+        Ok(Eval::Done(verdict)) if tool == "verify" => lean_check(cfg, None, &verdict),
+        // a staged change: Lean checks the staged verdict, and its answer replaces the two exported verdicts
+        Ok(Eval::Done(mut staged)) if tool == "stage" => {
+            let change = staged["lean"].take();
+            lean_check(cfg, Some("--change"), &change).map(|lean| match lean {
+                Eval::Done(answer) => {
+                    staged["lean"] = answer;
+                    Eval::Done(staged)
+                }
+                other => other,
+            })
+        }
+        other => other,
+    };
+    let (text, is_error) = match evaluated {
         Ok(Eval::Done(result)) => (json!({"complete": true, "result": result}), false),
         Ok(Eval::Timeout) => (json!({"complete": false, "error": "timeout"}), false),
         Ok(Eval::Failed(error)) => (json!({"complete": false, "error": error}), true),
@@ -169,17 +184,8 @@ fn eval(cfg: &Config, tool: &str, args: &Value) -> io::Result<Eval> {
         .stdout(std::fs::File::create(&out_file)?)
         .stderr(std::fs::File::create(&err_file)?)
         .spawn()?;
-    let start = Instant::now();
-    let status = loop {
-        if let Some(status) = child.try_wait()? {
-            break status;
-        }
-        if start.elapsed() >= cfg.timeout {
-            child.kill()?;
-            child.wait()?;
-            return Ok(Eval::Timeout);
-        }
-        std::thread::sleep(Duration::from_millis(5));
+    let Some(status) = wait(cfg, &mut child)? else {
+        return Ok(Eval::Timeout);
     };
     if !status.success() {
         let err = std::fs::read_to_string(&err_file)?;
@@ -194,6 +200,48 @@ fn eval(cfg: &Config, tool: &str, args: &Value) -> io::Result<Eval> {
     serde_json::from_str(&out)
         .map(Eval::Done)
         .map_err(io::Error::other)
+}
+
+/// The child's exit status, or none when it ran past the timeout and was killed.
+fn wait(cfg: &Config, child: &mut Child) -> io::Result<Option<ExitStatus>> {
+    let start = Instant::now();
+    loop {
+        if let Some(status) = child.try_wait()? {
+            return Ok(Some(status));
+        }
+        if start.elapsed() >= cfg.timeout {
+            child.kill()?;
+            child.wait()?;
+            return Ok(None);
+        }
+        std::thread::sleep(Duration::from_millis(5));
+    }
+}
+
+/// `yen-cert-check` (on PATH) on the exported verdict, or with `--change` on a staged change: exit 0 is verified,
+/// 1 rejected, 2 input Lean cannot decide.
+fn lean_check(cfg: &Config, mode: Option<&str>, verdict: &Value) -> io::Result<Eval> {
+    let file = cfg.scratch.join("verdict.json");
+    let out_file = cfg.scratch.join("lean.txt");
+    std::fs::write(&file, verdict.to_string())?;
+    let out = std::fs::File::create(&out_file)?;
+    let mut child = Command::new("yen-cert-check")
+        .args(mode)
+        .arg(&file)
+        .stdin(Stdio::null())
+        .stdout(out.try_clone()?)
+        .stderr(out)
+        .spawn()?;
+    let Some(status) = wait(cfg, &mut child)? else {
+        return Ok(Eval::Timeout);
+    };
+    let message = std::fs::read_to_string(&out_file)?;
+    Ok(match status.code() {
+        Some(code @ (0 | 1)) => {
+            Eval::Done(json!({"verified": code == 0, "message": message.trim_end()}))
+        }
+        _ => Eval::Failed(message.trim_end().to_string()),
+    })
 }
 
 fn reply(id: &Value, result: Value) -> Value {

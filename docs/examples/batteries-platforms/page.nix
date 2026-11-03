@@ -42,7 +42,7 @@
       ...
     }:
     {
-      outputs = eq (builtins.attrNames (builtins.removeAttrs result.flake [ ])) ([
+      outputs = eq (builtins.attrNames (builtins.removeAttrs result.flake [ "checks" ])) ([
         "darwinConfigurations"
         "homeConfigurations"
         "nixOnDroidConfigurations"

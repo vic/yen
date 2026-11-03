@@ -95,6 +95,11 @@
         "br-db"
       ]);
       peers = eq (result.flake.peers.server) 0;
-      refused = eq (builtins.tryEval (builtins.deepSeq (variant "variants/read-addr.nix").flake true)).success false;
+      refused =
+        eq
+          (builtins.tryEval (
+            builtins.deepSeq (removeAttrs (variant "variants/read-addr.nix").flake [ "checks" ]) true
+          )).success
+          false;
     };
 }

@@ -1,0 +1,21 @@
+name = "yen"
+defaultTargets = ["yen-cert-check"]
+
+[[lean_lib]]
+name = "Certificate"
+
+[[lean_lib]]
+name = "Ground"
+
+[[lean_lib]]
+name = "Wfm"
+
+[[lean_lib]]
+name = "Facts"
+
+[[lean_lib]]
+name = "Waves"
+
+[[lean_exe]]
+name = "yen-cert-check"
+root = "Main"

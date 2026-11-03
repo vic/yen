@@ -551,7 +551,7 @@ All of them at once, in parallel: `fastest-tests` in the devshell (`nix develop 
 GitHub Actions run all of these on each push and pull request ([.github/workflows/test.yml](https://github.com/vic/yen/blob/main/.github/workflows/test.yml)): the engine and cost oracles, the fleet checks and e2e evaluations, the fleet cost oracle, the MCP tests, `nix flake check` (with KVM for the VM test) and one job per `ci.json` target that must evaluate to a derivation.
 
 ## This fleet, live
-Generated from the fleet's queries: 141 scopes, 30 kinds, 218 aspects, 1136 routed elements.
+Generated from the fleet's queries: 141 scopes, 30 kinds, 219 aspects, 1137 routed elements.
 | Kind | Fields | Spawns | Sinks | Scopes |
 |---|---|---|---|---|
 | `assembly` | `kit`, `roles` |  |  | 0 |
@@ -1461,7 +1461,7 @@ flowchart LR
 | `builders` | member | fleet | 1 |
 | `certificate-domains` | domain | fleet | 3 |
 | `checks` | system | system | 1 |
-| `ci` | home, host, mac, system | fleet | 14 |
+| `ci` | fleet, home, host, mac, system | fleet | 15 |
 | `class-members` | host | fleet | 9 |
 | `colmena` | host | fleet | 9 |
 | `connect-claims` | fleet | fleet | 1 |
@@ -1591,7 +1591,7 @@ flowchart LR
   necbadde1b9 --> ncaee6455ee
 ```
 
-**MCP tools** (14): `yen_ask`, `yen_check`, `yen_context`, `yen_declared_in`, `yen_errors`, `yen_explain`, `yen_export`, `yen_impact`, `yen_labels`, `yen_program`, `yen_queries`, `yen_schema`, `yen_stage`, `yen_why_not`.
+**MCP tools** (15): `yen_ask`, `yen_check`, `yen_context`, `yen_declared_in`, `yen_errors`, `yen_explain`, `yen_export`, `yen_impact`, `yen_labels`, `yen_program`, `yen_queries`, `yen_schema`, `yen_stage`, `yen_verify`, `yen_why_not`.
 
 ```mermaid
 flowchart LR
@@ -1609,6 +1609,7 @@ flowchart LR
   ncc44a3e3ff("yen_queries")
   n7aa4e78a07("yen_schema")
   n07a598af03("yen_stage")
+  n9574552e9e("yen_verify")
   n53cf4e0ffd("yen_why_not")
   n254d290cd5 --> nf3ef81de2f
   n254d290cd5 --> nf54195a4ac
@@ -1623,6 +1624,7 @@ flowchart LR
   n254d290cd5 --> ncc44a3e3ff
   n254d290cd5 --> n7aa4e78a07
   n254d290cd5 --> n07a598af03
+  n254d290cd5 --> n9574552e9e
   n254d290cd5 --> n53cf4e0ffd
 ```
 
@@ -1677,3 +1679,4 @@ flowchart LR
 | `studio` | `aarch64-darwin` | `darwinConfigurations.studio.config.system.build.toplevel` |
 | `web-1` | `x86_64-linux` | `nixosConfigurations.web-1.config.system.build.toplevel` |
 | `web-2` | `x86_64-linux` | `nixosConfigurations.web-2.config.system.build.toplevel` |
+| `yen-lean` | `x86_64-linux` | `checks.x86_64-linux.yen-lean` |

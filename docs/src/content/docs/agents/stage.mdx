@@ -74,6 +74,503 @@ nix eval --impure --json --file stage.nix --argstr change changes/desktop-on-web
       trust = 0;
     };
   };
+  lean = {
+    base = {
+      certificate = {
+        proved = [ ];
+        refuted = [ ];
+      };
+      externals = [
+        "lt"
+        "neq"
+      ];
+      facts = [
+        [
+          "\"scope\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:web\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main\""
+          "\"fleet\""
+          "\"main\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:db\""
+          "\"host\""
+          "\"db\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:thinkpad\""
+          "\"host\""
+          "\"thinkpad\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:web\""
+          "\"host\""
+          "\"web\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:db\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:thinkpad\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:web\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"kind\""
+          "\"fleet\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:web\""
+        ]
+        [
+          "\"has\""
+          "\"desktop\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"has\""
+          "\"postgres\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"edge\""
+          "\"services\""
+          "\"fleet:main/host:db\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:db\""
+          "\"10.0.0.2\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:db\""
+          "\"server\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:thinkpad\""
+          "\"10.0.0.50\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:thinkpad\""
+          "\"laptop\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:web\""
+          "\"10.0.0.1\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:web\""
+          "\"server\""
+        ]
+      ];
+      rules = [
+        {
+          head = [
+            "\"bad\""
+            "\"no-desktop-on-servers\""
+            {
+              var = "H";
+            }
+          ];
+          neg = [ ];
+          pos = [
+            [
+              "\"val\""
+              "\"form\""
+              {
+                var = "H";
+              }
+              "\"server\""
+            ]
+            [
+              "\"has\""
+              "\"desktop\""
+              {
+                var = "H";
+              }
+            ]
+          ];
+        }
+        {
+          head = [
+            "\"bad\""
+            "\"unique-addr\""
+            {
+              var = "A";
+            }
+            {
+              var = "B";
+            }
+          ];
+          neg = [ ];
+          pos = [
+            [
+              "\"val\""
+              "\"addr\""
+              {
+                var = "A";
+              }
+              {
+                var = "X";
+              }
+            ]
+            [
+              "\"val\""
+              "\"addr\""
+              {
+                var = "B";
+              }
+              {
+                var = "X";
+              }
+            ]
+            [
+              "\"lt\""
+              {
+                var = "A";
+              }
+              {
+                var = "B";
+              }
+            ]
+          ];
+        }
+      ];
+    };
+    staged = {
+      certificate = {
+        proved = [
+          {
+            atom = [
+              "\"bad\""
+              "\"no-desktop-on-servers\""
+              "\"fleet:main/host:web\""
+            ];
+            rule = {
+              head = [
+                "\"bad\""
+                "\"no-desktop-on-servers\""
+                "\"fleet:main/host:web\""
+              ];
+              neg = [ ];
+              pos = [
+                [
+                  "\"val\""
+                  "\"form\""
+                  "\"fleet:main/host:web\""
+                  "\"server\""
+                ]
+                [
+                  "\"has\""
+                  "\"desktop\""
+                  "\"fleet:main/host:web\""
+                ]
+              ];
+            };
+            stage = 1;
+          }
+          {
+            atom = [
+              "\"has\""
+              "\"desktop\""
+              "\"fleet:main/host:web\""
+            ];
+            rule = {
+              head = [
+                "\"has\""
+                "\"desktop\""
+                "\"fleet:main/host:web\""
+              ];
+              neg = [ ];
+              pos = [ ];
+            };
+            stage = 0;
+          }
+          {
+            atom = [
+              "\"val\""
+              "\"form\""
+              "\"fleet:main/host:web\""
+              "\"server\""
+            ];
+            rule = {
+              head = [
+                "\"val\""
+                "\"form\""
+                "\"fleet:main/host:web\""
+                "\"server\""
+              ];
+              neg = [ ];
+              pos = [ ];
+            };
+            stage = 0;
+          }
+        ];
+        refuted = [ ];
+      };
+      externals = [
+        "lt"
+        "neq"
+      ];
+      facts = [
+        [
+          "\"scope\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"scope\""
+          "\"fleet:main/host:web\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main\""
+          "\"fleet\""
+          "\"main\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:db\""
+          "\"host\""
+          "\"db\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:thinkpad\""
+          "\"host\""
+          "\"thinkpad\""
+        ]
+        [
+          "\"instance\""
+          "\"fleet:main/host:web\""
+          "\"host\""
+          "\"web\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:db\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:thinkpad\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"parent\""
+          "\"fleet:main/host:web\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"kind\""
+          "\"fleet\""
+          "\"fleet:main\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"kind\""
+          "\"host\""
+          "\"fleet:main/host:web\""
+        ]
+        [
+          "\"has\""
+          "\"desktop\""
+          "\"fleet:main/host:thinkpad\""
+        ]
+        [
+          "\"has\""
+          "\"desktop\""
+          "\"fleet:main/host:web\""
+        ]
+        [
+          "\"has\""
+          "\"postgres\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"edge\""
+          "\"services\""
+          "\"fleet:main/host:db\""
+          "\"fleet:main/host:db\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:db\""
+          "\"10.0.0.2\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:db\""
+          "\"server\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:thinkpad\""
+          "\"10.0.0.50\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:thinkpad\""
+          "\"laptop\""
+        ]
+        [
+          "\"val\""
+          "\"addr\""
+          "\"fleet:main/host:web\""
+          "\"10.0.0.1\""
+        ]
+        [
+          "\"val\""
+          "\"form\""
+          "\"fleet:main/host:web\""
+          "\"server\""
+        ]
+      ];
+      rules = [
+        {
+          head = [
+            "\"bad\""
+            "\"no-desktop-on-servers\""
+            {
+              var = "H";
+            }
+          ];
+          neg = [ ];
+          pos = [
+            [
+              "\"val\""
+              "\"form\""
+              {
+                var = "H";
+              }
+              "\"server\""
+            ]
+            [
+              "\"has\""
+              "\"desktop\""
+              {
+                var = "H";
+              }
+            ]
+          ];
+        }
+        {
+          head = [
+            "\"bad\""
+            "\"unique-addr\""
+            {
+              var = "A";
+            }
+            {
+              var = "B";
+            }
+          ];
+          neg = [ ];
+          pos = [
+            [
+              "\"val\""
+              "\"addr\""
+              {
+                var = "A";
+              }
+              {
+                var = "X";
+              }
+            ]
+            [
+              "\"val\""
+              "\"addr\""
+              {
+                var = "B";
+              }
+              {
+                var = "X";
+              }
+            ]
+            [
+              "\"lt\""
+              {
+                var = "A";
+              }
+              {
+                var = "B";
+              }
+            ]
+          ];
+        }
+      ];
+    };
+  };
   ok = false;
   refused = [ ];
   sha = "a1969acc86001f4528de7a4ec227f9cf7a5af809fd2555b04adeed0dd6c04146";

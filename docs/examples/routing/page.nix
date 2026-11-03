@@ -16,7 +16,7 @@
       (docs.fileWith "{17,23}" "modules/fleet.nix")
       (docs.file "modules/instances.nix")
       (docs.file "modules/aspects.nix")
-      (docs.value result.flake)
+      (docs.value (removeAttrs result.flake [ "checks" ]))
       (docs.table
         [ "Element" "Given at" "Received at" "Why" ]
         [
@@ -75,7 +75,12 @@
       ...
     }:
     {
-      flake = eq (result.flake) ({
+      lean = eq (builtins.mapAttrs (_: builtins.attrNames) result.flake.checks) {
+        aarch64-darwin = [ "yen-lean" ];
+        aarch64-linux = [ "yen-lean" ];
+        x86_64-linux = [ "yen-lean" ];
+      };
+      flake = eq (removeAttrs result.flake [ "checks" ]) ({
         dns = {
           fleet = [ "box A" ];
           prod = [ "web A" ];

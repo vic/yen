@@ -3906,6 +3906,26 @@ let
         t4 = yes (c.incomplete != [ ]);
         t5 = no ((b.elem [ "bad" "cycle" ] (map (e: e.atom) (c.certificate.true ++ c.certificate.false))));
       };
+    # the verdict as the Lean checker reads it (lean/Main.lean): JSON, every atom its key, one entry per certificate entry
+    lean-export =
+      let
+        p = (ports { }).check;
+      in
+      {
+        json = yes (b.isString (b.toJSON p.lean));
+        proved = eq (map (e: e.atom) p.lean.certificate.proved) (
+          map (e: map b.toJSON e.atom) p.certificate.true
+        );
+        refuted = eq (b.length p.lean.certificate.refuted) (b.length p.certificate.false);
+        # the rules as written: a variable stays { var; }, a constant is its key
+        rules = yes (
+          b.all (
+            r: b.all (a: b.all (t: b.isString t || t ? var) a) ([ r.head ] ++ r.pos ++ r.neg)
+          ) p.lean.rules
+        );
+        vars = yes (b.any (r: b.any (t: !(b.isString t)) r.head) p.lean.rules);
+        facts = eq (b.length p.lean.facts) (b.length (ports { }).facts);
+      };
     # a derived tuple that fails its relation's check is an error (ok takes one string term here)
     relation-check =
       let

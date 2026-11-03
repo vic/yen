@@ -149,6 +149,17 @@ tells you, or an agent, why:
 
 ```nix title="result"
 {
+  checks = {
+    aarch64-darwin = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+    aarch64-linux = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+    x86_64-linux = {
+      yen-lean = <derivation yen-lean-verdict>;
+    };
+  };
   invalid-flake-errors = {
     errors = [
       {

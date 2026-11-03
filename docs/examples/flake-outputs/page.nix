@@ -20,6 +20,9 @@
       (docs.fileWith "{12-18}" "modules/aspects.nix")
       (docs.value result.flake)
       ''
+        `checks.<system>.yen-lean` is in every flake whose `inputs` has `nixpkgs`: the [Lean checker](/query/lean/) on the
+        fleet's verdict, so `nix flake check` always checks the rules.
+
         ## With or without flakes
 
         `(import yen).lib.mkFlake sinks module` gives the flake outputs. `(import yen).lib.eval module` gives every query,
@@ -41,7 +44,7 @@
       ...
     }:
     {
-      flake = eq (result.flake) ({
+      flake = eq (removeAttrs result.flake [ "checks" ]) ({
         inventory = [
           "postgres"
           "nginx"

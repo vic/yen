@@ -47,6 +47,8 @@ An error record in a result has `code`, `path`, `got`, `want`, `fix` and, for ty
    - `certified` is true.
 
    An `incomplete` atom is undecided, and an `opaque` field is one a rule cannot see. Neither is a pass.
+   - `yen_verify`: the Lean checker on the same verdict. Lean grounds the invariants over the facts itself and checks
+     the certificate. `verified` true means no violation is true or undefined. Call it before you report the fleet good.
 3. **Explain what you see.**
    - `yen_context` with a scope (`{"kind":"host","name":"lb"}`, or a path `[{"kind":"fleet","name":"main"},…]` when the
      instance has two scopes): one scope, its parent, children, aspects, elements and errors, all as refs.
@@ -66,8 +68,9 @@ An error record in a result has `code`, `path`, `got`, `want`, `fix` and, for ty
    - `yen_program` with a list of ops is the safest form of a change. It gives `valid`, `errors`, `ok`,
      `violations` and the diff.
    - `yen_stage` with a `change` (a Yen module as JSON) gives `ok`, `errors`, `violations`, `incomplete`, `diff`,
-     `refused` and the change's `sha`.
-   - Write the change to the fleet's files only when `ok` is true. Then call `yen_check` again.
+     `refused` and the change's `sha`. Its `lean` is the Lean checker on the staged fleet: `verified`, and a
+     `message` that names the violations the change can reach.
+   - Write the change to the fleet's files only when `ok` is true. Then call `yen_check` and `yen_verify` again.
 6. **Export only when asked.** `yen_export` gives the whole fleet as sorted N-Triples with a sha256. It is large.
 
 ## Refusals
