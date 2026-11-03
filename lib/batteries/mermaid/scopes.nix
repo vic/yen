@@ -3,9 +3,10 @@
 #   keep: draw it (default all) · label: its text (default "<kind> <name>") · group: the id of the scope it sits in
 #   as a subgraph, or null · edge: draw the edge from its parent (default: when it has no group)
 #   mermaid.flowchart { } (mermaid.scopes { group = s: if holds yen.kinds.host s then s.system.id else null; } yen.lib.graph)
-_:
+self:
 let
   b = builtins;
+  inherit (self._core.helpers) renderId;
   parentOf =
     id:
     let
@@ -16,7 +17,7 @@ let
 in
 {
   keep ? _: true,
-  label ? s: "${s.kind} ${s.name}",
+  label ? s: "${renderId s.kind} ${s.name}",
   group ? _: null,
   edge ? s: group s == null,
 }:

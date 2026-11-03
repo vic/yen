@@ -435,6 +435,45 @@ let
     label = s: s.name;
     group = s: if s.kind == "person" then "top:t/box:a" else null;
   } viewR.graph;
+  # c47: every view names a nested kind by its kind path (a ref field, a gate, a scope)
+  nestR = run [
+    (
+      { yen, ... }:
+      {
+        yen.kinds.x.kinds.y.sinks.fw.reduce = yen.lib.reduce.list;
+        yen.kinds.z.fields.r = yen.lib.maybe yen.kinds.x.kinds.y;
+        yen.x.a.y.b = { };
+        yen.aspects.n1 = {
+          at = yen.kinds.x.kinds.y;
+          fw = "on";
+        };
+        yen.aspects.n2.at = yen.aspects.n1;
+        yen.aspects.views = {
+          at = yen.top.t;
+          cycle =
+            { tree, ... }:
+            let
+              whole.graph = true;
+              y = b.head (tree.select whole);
+            in
+            {
+              tree = [ whole ];
+              out = [
+                {
+                  views = {
+                    kinds = mm.kinds y.kinds;
+                    gates = mm.gates y.aspects;
+                  };
+                }
+              ];
+            };
+        };
+      }
+    )
+  ];
+  has = needle: text: b.replaceStrings [ needle ] [ "" ] text != text;
+  labelOf = id: (b.head (b.filter (n: n.id == id) (mm.scopes { } nestR.graph).nodes)).label;
+  routeLabelOf = id: (b.head (b.filter (n: n.id == id) (mm.routes nestR.graph).nodes)).label;
 
   linkRun =
     needle:
@@ -1710,6 +1749,42 @@ let
         label = "a";
       } sinksV.edges
     );
+    mermaid-nested = {
+      clean = eq nestR.errors [ ];
+      scopes = eq (labelOf "x:a/y:b") "x.kinds.y b";
+      routes = eq (routeLabelOf "x:a/y:b") "x.kinds.y b";
+      flowchart-scopes = yes (has "[\"x.kinds.y b\"]" (mm.flowchart { } (mm.scopes { } nestR.graph)));
+      flowchart-routes = yes (has "[\"x.kinds.y b\"]" (mm.flowchart { } (mm.routes nestR.graph)));
+      # a string kind with a shape keeps it; the nested node beside it stays a box
+      flowchart-shapes =
+        let
+          text = mm.flowchart { shapes.x = mm.shapes.round; } (mm.scopes { } nestR.graph);
+        in
+        yes (has "(\"x a\")" text && has "[\"x.kinds.y b\"]" text);
+      routing = yes (
+        b.elem {
+          from = "k:x.kinds.y";
+          to = "s:fw";
+          label = "1";
+        } (mm.routing nestR.graph).edges
+      );
+      gates = yes (
+        b.elem {
+          from = "r:kind x.kinds.y";
+          to = "a:n1";
+          label = "";
+          live = true;
+        } nestR.flake.views.gates.edges
+      );
+      kinds = yes (
+        b.elem {
+          from = "k:z";
+          to = "k:x.kinds.y";
+          label = "r";
+          live = false;
+        } nestR.flake.views.kinds.edges
+      );
+    };
     mermaid-scopes-options = {
       t1 = no ((b.any (n: n.id == "top:t") grouped.nodes));
       t2 = yes (

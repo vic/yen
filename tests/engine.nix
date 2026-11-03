@@ -3353,6 +3353,29 @@ let
         ask-list = eq (errs { errors = [ (ask "many" (r: [ r ])) ]; }) (err "ref");
         ask-type = eq (errs { errors = [ (ask "typed" (r: r // { kind = "x"; })) ]; }) (err "ref");
       };
+    # c47: a sink declared on a nested kind is a key an aspect at that kind gives; an undeclared key stays an error
+    nested-kinds-sinks =
+      let
+        nested =
+          key:
+          yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.x.kinds.y.sinks.fw.reduce = yen.lib.reduce.list;
+              yen.x.a.y.b = { };
+              yen.aspects.p = {
+                at = yen.kinds.x.kinds.y;
+                ${key} = "on";
+              };
+            }
+          );
+        given = nested "fw";
+      in
+      {
+        clean = eq given.errors [ ];
+        reduced = eq given.reduced.fw."x:a/y:b" [ "on" ];
+        undeclared = eq (map (e: e.code) (nested "zz").errors) [ "unknown-key" ];
+      };
     # yen modules are not NixOS modules: a sink no module reads, or a key yen does not read, is an error
     unknown-keys =
       eq

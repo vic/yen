@@ -1118,7 +1118,7 @@ let
       # ── routing: nearest ancestor-or-self receiver (Cycle isolateSink tags the identity) ──
       sinkOf = s: k: ((kindAt s.kind).sinks or { }).${k} or null;
       sinkKeys = d: attrNames (removeAttrs d sinkMeta);
-      sinkNames = uniq (concatMap (k: attrNames (k.sinks or { })) (b.attrValues kinds));
+      sinkNames = uniq (concatMap (id: attrNames ((kindAt id).sinks or { })) kindIds);
       above = s: if s.parent == null then [ ] else s.parent.rup;
       receiverIn = k: first (r: sinkOf r k != null && holds ((sinkOf r k).at or (_: true)) r);
       given = concatMap (

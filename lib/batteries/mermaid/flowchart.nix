@@ -10,6 +10,7 @@ let
   # md5 ids: any label is safe, and one id gets the same node in every view
   node = id: "n${b.substring 0 10 (b.hashString "md5" id)}";
   q = l: ''"${b.replaceStrings [ "\"" ] [ "'" ] l}"'';
+  plain = l: "[${l}]";
 in
 {
   direction ? "LR",
@@ -17,7 +18,9 @@ in
 }:
 view:
 let
-  box = n: node n.id + (shapes.${n.kind or ""} or (l: "[${l}]")) (q n.label);
+  # a nested kind is a path, not a shape key: its node is a plain box
+  shape = n: if b.isString (n.kind or "") then shapes.${n.kind or ""} or plain else plain;
+  box = n: node n.id + shape n (q n.label);
   inside = p: b.filter (n: (n.group or null) == p.id) view.nodes;
   isGroup = n: b.any (m: (m.group or null) == n.id) view.nodes;
   draw =
