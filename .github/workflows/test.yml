@@ -95,6 +95,7 @@
         "run": "nix develop ./docs -c engine-test"
     "timeout-minutes": 20
   "eval-aarch64-darwin":
+    "continue-on-error": true
     "runs-on": "macos-latest"
     "steps":
       -

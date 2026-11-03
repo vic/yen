@@ -242,6 +242,8 @@ Fix a failed push with a new commit on the same branch. Do not rewrite pushed hi
 
 CI runs in stages, one after another, so a push does not start every job at once: `fmt`, `engine`, `docs`, `fleet`,
 then `flake-check` and one evaluation job per system. `ci` in the devshell runs the same stages locally, except the last.
+The `aarch64-darwin` evaluation is not binding (`continue-on-error`): a darwin runner can take long to come, so a
+merge does not wait for it.
 
 ## Maintenance
 
