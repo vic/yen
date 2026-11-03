@@ -1199,7 +1199,10 @@ let
       byTo = groupBy (e: "${e.key}@${e.to.id}") routed;
 
       # ── sources at a scope (Cycle isolateSource): the tree driver and one source per sink ──
-      isRen = n: n == "scope" || n == "sinks" || kinds ? ${n} || elem n sinkNames; # `tree` is a cycle source, never an element arg
+      isRen = n: n == "scope" || n == "sinks" || elem n kindArgs || elem n sinkNames; # `tree` is a cycle source, never an element arg
+      # a kind arg is named by the kind's last id part (`user` for host.user); it reads the nearest ancestor scope of that kind
+      kindArgs = uniq (map leafOf kindIds);
+      nearestArg = n: s: first (x: leafOf x.kind == n) s.rup;
       nearest = k: s: first (x: x.kind == k) s.rup;
       # what a tree request answers at a scope: a list, empty when nothing answers (Cycle: no source, no emission)
       answer =
@@ -1277,8 +1280,8 @@ let
         s: n:
         if n == "scope" || n == "sinks" then
           s
-        else if kinds ? ${n} then
-          nearest n s
+        else if elem n kindArgs then
+          nearestArg n s
         else if elem n sinkNames then
           receiverIn n s.rup
         else
@@ -1287,7 +1290,7 @@ let
         s: n:
         if n == "sinks" then
           [ (sinksAt s) ]
-        else if n == "scope" || kinds ? ${n} then
+        else if n == "scope" || elem n kindArgs then
           orNull (argScope s n)
         else
           (sourcesAt s [ ]).${n} or [ ];
@@ -1459,8 +1462,8 @@ let
               [ (dataT s.id) ]
             else if n == "sinks" then
               concatMap (k: sinkAt k s) sinkNames
-            else if kinds ? ${n} then
-              map (x: dataT x.id) (orNull (nearest n s))
+            else if elem n kindArgs then
+              map (x: dataT x.id) (orNull (nearestArg n s))
             else
               sinkAt n s
           ) (filter isRen (attrNames (fnArgs v)));
