@@ -19,11 +19,11 @@
         [ "Arg" "Value" ]
         [
           [
-            "a kind name (`host`, `environment`)"
+            "a [kind](/model/kinds-fields/) name (`host`, `environment`)"
             "the nearest ancestor-or-self [scope](/model/scopes/) of that kind"
           ]
           [
-            "a sink name (`backends`)"
+            "a [sink](/behavior/sinks/) name (`backends`)"
             "the reduced value of that sink at its nearest receiver"
           ]
           [

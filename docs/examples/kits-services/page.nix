@@ -14,8 +14,8 @@
     }:
     [
       ''
-        `yen.lib.kits` holds ready-made kits. A kit is a module: you import it, then write an assembly that puts your
-        machines in its roles. The kit has the roles, the typed interface, the limits, the exports and the aspects.
+        `yen.lib.kits` holds ready-made kits. A kit is a [module](/principles/modules/): you import it, then write an assembly that puts your
+        machines in its roles. The kit has the roles, the typed interface, the limits, the exports and the [aspects](/behavior/aspects/).
         Each client reads what the servers of its own assembly export, never another assembly's.
 
         | Kit | Roles | Server exports | Client does |

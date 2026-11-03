@@ -16,7 +16,7 @@
         A predicate is a function `scope: bool`. A [kind](/model/kinds-fields/) ref, an instance ref, an [aspect](/behavior/aspects/) ref and a list are predicates too.
       ''
       (docs.table
-        [ "Predicate" "Holds at a scope when" ]
+        [ "Predicate" "Holds at a [scope](/model/scopes/) when" ]
         [
           [
             "`s: …`"

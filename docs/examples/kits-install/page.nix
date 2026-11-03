@@ -14,7 +14,7 @@
     }:
     [
       ''
-        The install lane has three batteries and two kits. The flake sink carries `apps` like any other output: an
+        The install lane has three batteries and two kits. The flake [sink](/behavior/sinks/) carries `apps` like any other output: an
         `out` value that gives `apps.<system>.<name>` merges with the rest.
 
         | Battery | Value of | Gives |
@@ -23,7 +23,7 @@
         | `install.apps { from; pkgs; report; target; flake; }` | `out` of the machine's disks sink | `apps.<system>.install-<machine>`: nixos-anywhere with the disko layout, writing the facter report to the path `report` gives for the machine |
         | `deploy.rebuild { from; pkgs; flake; }` | `out` of the machine's deploy sink | `apps.<system>.rebuild-<machine>`: `nixos-rebuild switch --target-host user@address`, with `--build-host` when the deploy target has a `buildHost` |
 
-        App names come from the scope name. No disks element, no install app; no deploy target, no rebuild app.
+        App names come from the [scope](/model/scopes/) name. No disks element, no install app; no deploy target, no rebuild app.
         Arguments after `--` go to the tool: a deploy user that is not root runs `nix run .#rebuild-<machine> -- --sudo`.
         `report` is a function from the machine to a path, such as `./facter/<machine>.json`. Point it into the directory
         you give kit `facter` as `dir`: kit `facter` reads `<dir>/<machine>.json`. Commit the report after the install,
@@ -31,10 +31,10 @@
 
         | Kit | Role | Interface | Does |
         |---|---|---|---|
-        | `lib.kits.disko` | `default` | `device` (str), `layout` (ref to a layout) | gives the layout's disko devices to sink `disks`; owns the kind `layout` |
+        | `lib.kits.disko` | `default` | `device` (str), `layout` (ref to a layout) | gives the layout's disko devices to sink `disks`; owns the [kind](/model/kinds-fields/) `layout` |
         | `lib.kits.facter` | `default` | `dir` (path) | imports `<dir>/<machine>.json` with `nixos.facter` |
 
-        A kit is a module: put `inputs.yen.lib.kits.disko` in `imports` of the top module.
+        A kit is a [module](/principles/modules/): put `inputs.yen.lib.kits.disko` in `imports` of the top module.
 
         ## Layouts
 
