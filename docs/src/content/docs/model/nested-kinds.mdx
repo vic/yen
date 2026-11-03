@@ -221,9 +221,10 @@ The instances of a nested kind are a set of names. A value that is not a set fai
 ```
 
 :::note[Limits today]
-A sink on a nested kind and the diagrams of a nested kind do not work yet. A follow-up change adds them.
-The name of a nested kind is not an arg yet: `{ user, ... }` is not resolved. Read the current scope with `{ scope, ... }`, as above.
+The name of a nested kind is not an arg yet: `{ user, ... }` is not resolved (issue #83). Read the current scope with `{ scope, ... }`, as above.
 A ref to a nested instance by name alone is not supported: reach it through its parent.
+A callback such as `keep = s: s.kind == "host"` drops nested scopes without a warning. The kind of a nested scope is a list, so the test never matches.
+The kinds diagram draws top kinds only as nodes. A nested kind is not a node there.
 :::
 
 :::tip[Run this example]
