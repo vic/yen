@@ -127,10 +127,9 @@ let
         definition: `#: <where> :: <takes> -> <returns> -- <purpose>`. A check fails when an API has no line, so the
         page always lists every function. Each API name links to its definition on GitHub.
 
-        Words in the signatures ([Glossary](/reference/glossary/)): a *key value* is the value of a sink key, `{ scope, sinks, ... }: …`; an *out value*
-        is the value of a sink's `out` key, which gives flake outputs; a *reduce* is a sink's `reduce`; a *module* is a
-        module of the target system; a *predicate* is what `at` takes; a *view* is `{ nodes; edges; }` for
-        `mermaid.flowchart`; `succ` is a graph, an attrset from a node to its successors.
+        Words in the signatures: *key value*, *out value*, *reduce* and *predicate* are in the [Glossary](/reference/glossary/).
+        A *module* is a module of the target system; a *view* is `{ nodes; edges; }` for `mermaid.flowchart`; `succ` is a
+        graph, an attrset from a node to its successors.
 
         ## Outside a fleet: `(import yen).lib`
       ''

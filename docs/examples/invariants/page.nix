@@ -101,7 +101,7 @@ in
       ''
         `result.check.why literal` gives the rules that prove a violation. `whyNot` and `proof` work as in Datalog. The question is
         a literal by reference: `result.check.bad.<invariant> terms`, each term an instance (`{ kind; name; }` from outside the fleet)
-        or a scope record:
+        or a [scope](/model/scopes/):
       ''
       (docs.value (whyUnique (variant "variants/mistakes.nix").check))
       (docs.caution "Incomplete is not a pass" ''

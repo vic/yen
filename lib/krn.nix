@@ -660,7 +660,7 @@ rec {
         ]
     )
       st;
-  # a table: each row is a fact; the pattern unifies with a row (records or tuples)
+  # a table: each row is a fact; the pattern unifies with a row (attrsets or lists)
   #: lib.krn.facto :: [ row ] -> pattern -> goal -- the pattern unifies with one row of the table
   facto = rows: pattern: disj (map (r: eq pattern r) rows);
 }

@@ -82,7 +82,7 @@
           ]
           [
             "key value"
-            "the value of an aspect key named after a sink: an element, or `{ scope, <sink>, ... }: element`"
+            "the value of an aspect key, or of a sink key that feeds another sink: an element, or `{ scope, <sink>, ... }: element`"
             "[Aspects](/behavior/aspects/)"
           ]
           [

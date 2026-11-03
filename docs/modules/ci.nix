@@ -31,6 +31,7 @@ let
       needs ? [ ],
       timeout ? 30,
       runs-on ? "ubuntu-latest",
+      binding ? true,
       pre ? [ ],
       nix ? { },
       steps,
@@ -41,7 +42,8 @@ let
       steps =
         pre ++ map (s: if s ? "with" then s // { "with" = s."with" // nix; } else s) setup ++ steps; # `nix`: extra install-nix inputs
     }
-    // lib.optionalAttrs (needs != [ ]) { inherit needs; };
+    // lib.optionalAttrs (needs != [ ]) { inherit needs; }
+    // lib.optionalAttrs (!binding) { continue-on-error = true; }; # a job that may fail or wait: it never blocks a merge
   dev = name: command: {
     inherit name;
     run = "nix develop ./docs -c ${command}";
@@ -197,6 +199,7 @@ in
       lib.nameValuePair "eval-${system}" (
         one "reference" {
           runs-on = runner.${system};
+          binding = system != "aarch64-darwin"; # #111: a darwin runner can take long to come; the darwin eval is not binding
         } "every ${system} target of ci.json evaluates" "reference-eval ${system}"
       )
     ) targets;

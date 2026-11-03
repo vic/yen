@@ -36,7 +36,7 @@ in
   yen.kinds.mac.spawns.member = membersOf;
 
   # one fleet sink for exports; a reader keeps the elements of one assembly and role (`yen.lib.same`).
-  # An element from the fleet scope is the owner's override of one entry.
+  # An element from the fleet scope is the owner's override of one element.
   yen.kinds.fleet.sinks.exports.reduce = kits.exports { isMember = holds yen.kinds.member; };
 
   # the contract: a kit ref, known roles, `at` predicates, machine and assembly counts; typed settings per member

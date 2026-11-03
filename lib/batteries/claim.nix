@@ -7,7 +7,7 @@ let
   b = builtins;
   pair = name: value: { inherit name value; };
   ids = es: b.sort b.lessThan (map (e: e.from.id) es);
-  # one entry per distinct giver, the first it gave
+  # one element per distinct giver, the first it gave
   byGiver = es: b.attrValues (b.listToAttrs (map (e: pair e.from.id e) (reverse es)));
   reverse = xs: b.genList (i: b.elemAt xs (b.length xs - 1 - i)) (b.length xs);
 in
