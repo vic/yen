@@ -460,7 +460,12 @@ let
         ) index path).vals;
       answers = answersIn (zipDefs (defsOf loaded));
       answersRefs = answersIn (zipDefs (defsOf (loadWith refsYen)));
-      atKey = path: path != [ ] && b.elemAt path (length path - 1) == "at";
+      # an `at` predicate: answers from several files are a union. A stored query's param named `at` is a type (#81)
+      atKey =
+        path:
+        path != [ ]
+        && b.elemAt path (length path - 1) == "at"
+        && !(length path == 4 && head path == "queries" && b.elemAt path 2 == "params");
       sinkKeyOf = path: length path == 3 && head path == "aspects" && elem (b.elemAt path 2) sinkNames; # several files may each give an element
       declIn =
         ans: path:
@@ -506,8 +511,20 @@ let
           check = checkOf { __kind = id; };
         }
         // (
-          if d ? sinks then
-            { sinks = mapAttrs (n: v: withAt d.sinks.${n} (v // { __sink = n; })) refs.sinks; }
+          # #80: a `sinks` or a sink that is no attrset reads as none here; kindKeyErrors gives its error record
+          if isAttrs (d.sinks or null) && isAttrs (refs.sinks or null) then
+            {
+              sinks = mapAttrs (n: v: withAt d.sinks.${n} (v // { __sink = n; })) (
+                b.listToAttrs (
+                  map (n: {
+                    name = n;
+                    value = refs.sinks.${n};
+                  }) (filter (n: isAttrs refs.sinks.${n} && isAttrs (d.sinks.${n} or null)) (attrNames refs.sinks))
+                )
+              );
+            }
+          else if d ? sinks then
+            { sinks = { }; }
           else
             { }
         ) # a sink is a ref: it carries its name
@@ -2668,6 +2685,22 @@ let
               [ (notKind decl "a kind, an attrset of kind keys") ]
             else
               bad (files decl) ([ "yen" ] ++ decl) kindKeys (attrNames d)
+              # #80: `sinks` is an attrset of sinks, each an attrset
+              ++ (
+                if !isAttrs (d.sinks or { }) then
+                  [ (notKind (decl ++ [ "sinks" ]) "an attrset of sinks") ]
+                else
+                  map (
+                    s:
+                    notKind (
+                      decl
+                      ++ [
+                        "sinks"
+                        s
+                      ]
+                    ) "a sink, an attrset"
+                  ) (filter (s: !isAttrs d.sinks.${s}) (attrNames (d.sinks or { })))
+              )
               ++ (
                 if !isAttrs (d.kinds or { }) then
                   [ (notKind (decl ++ [ "kinds" ]) "an attrset of nested kinds") ]
