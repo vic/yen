@@ -1,3 +1,18 @@
+let
+  host = name: {
+    kind = "host";
+    inherit name;
+  };
+  # why db and spare break unique-addr, asked by reference
+  whyUnique =
+    c:
+    c.why (
+      c.bad.unique-addr [
+        (host "db")
+        (host "spare")
+      ]
+    );
+in
 {
   title = "Invariants";
   description = "Rules that must hold across the whole fleet, checked before deploy: `result.check`.";
@@ -88,21 +103,7 @@
         a literal by reference: `result.check.bad.<invariant> terms`, each term an instance (`{ kind; name; }` from outside the fleet)
         or a scope record:
       ''
-      (docs.value (
-        let
-          c = (variant "variants/mistakes.nix").check;
-          host = name: {
-            kind = "host";
-            inherit name;
-          };
-        in
-        c.why (
-          c.bad.unique-addr [
-            (host "db")
-            (host "spare")
-          ]
-        )
-      ))
+      (docs.value (whyUnique (variant "variants/mistakes.nix").check))
       (docs.caution "Incomplete is not a pass" ''
         A `bad` atom on a cycle through `not` is undefined. It goes to `incomplete`, and `ok` is false.
       '')
@@ -143,9 +144,6 @@
       no,
       ...
     }:
-    let
-      m = (variant "variants/mistakes.nix").check;
-    in
     {
       ok = yes (result.check.ok);
       certified = {
@@ -161,8 +159,10 @@
           why = "facts";
         });
       };
-      violations = {
-        t1 = eq (m.violations) ([
+      # one eval of the variant, one comparison
+      violations = eq { inherit ((variant "variants/mistakes.nix").check) ok violations; } {
+        ok = false;
+        violations = [
           [
             "bad"
             "no-desktop-on-servers"
@@ -174,8 +174,7 @@
             "fleet:main/host:db"
             "fleet:main/host:spare"
           ]
-        ]);
-        t2 = no (m.ok);
+        ];
       };
     };
 }

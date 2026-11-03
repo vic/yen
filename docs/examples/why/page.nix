@@ -10,6 +10,13 @@ let
   db = web // {
     name = "db";
   };
+  whyNotAt = h: inv: inv.whyNot (inv.bad.no-desktop-on-servers h);
+  invariantAnswers = inv: {
+    inherit (inv) violations;
+    holds = whyNotAt web inv;
+    candidate = whyNotAt db inv;
+  };
+  cmd = "nix run github:vic/yen?dir=mcp"; # the run line the mcp flake and the skill both give
 in
 {
   title = "Why Yen";
@@ -198,12 +205,7 @@ in
         `whyNot` for `db` says that no rule has this head. The desktop aspect is only active at `web`, so the rule
         is not even a candidate at `db`.
       ''
-      (docs.value (
-        let
-          inv = (variant "variants/invariant.nix").check;
-        in
-        inv.whyNot (inv.bad.no-desktop-on-servers db)
-      ))
+      (docs.value (whyNotAt db (variant "variants/invariant.nix").check))
       ''
 
         ## Values from constraints
@@ -334,29 +336,25 @@ in
       lib,
       ...
     }:
-    let
-      inv = (variant "variants/invariant.nix").check;
-      p = (variant "variants/ports.nix").reduced.greetings."world:earth".ports;
-      cmd = "nix run github:vic/yen?dir=mcp";
-    in
     {
       # the hello flake has no nixpkgs input, so no checks.<system>.yen-lean; the docs harness gives it one
       result = eq (removeAttrs result.flake [ "checks" ]) (import ./result.nix);
-      invariant = {
-        violations = eq (inv.violations) ([
+      # one eval of the variant: the violation, and why not at web (it holds) and at db (no candidate rule)
+      invariant = eq (invariantAnswers (variant "variants/invariant.nix").check) {
+        violations = [
           [
             "bad"
             "no-desktop-on-servers"
             "fleet:main/host:web"
           ]
-        ]);
-        whyNot-holds = eq (inv.whyNot (inv.bad.no-desktop-on-servers web)) ([ ]);
-        whyNot-candidate = eq (inv.whyNot (inv.bad.no-desktop-on-servers db)) ([
+        ];
+        holds = [ ];
+        candidate = [
           {
             rule = null;
             reason = "no rule has this head";
           }
-        ]);
+        ];
       };
       ports-errors = eq ((variant "variants/ports.nix").errors) ([ ]);
       region = eq ((variant "variants/region.nix").check.violations) ([
@@ -370,15 +368,17 @@ in
         flake = eq (lib.hasInfix cmd (builtins.readFile ../../../mcp/flake.nix)) true;
         skill = eq (lib.hasInfix cmd (builtins.readFile ../../../skills/yen-mcp/SKILL.md)) true;
       };
-      ports = {
-        first = eq (p.first) ([
+      ports =
+        eq { inherit ((variant "variants/ports.nix").reduced.greetings."world:earth".ports) first count; }
           {
-            grafana = 8081;
-            loki = 8082;
-            prometheus = 8080;
-          }
-        ]);
-        count = eq (p.count) (12);
-      };
+            first = [
+              {
+                grafana = 8081;
+                loki = 8082;
+                prometheus = 8080;
+              }
+            ];
+            count = 12;
+          };
     };
 }

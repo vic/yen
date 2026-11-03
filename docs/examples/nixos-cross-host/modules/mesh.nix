@@ -3,15 +3,13 @@
 { yen, lib, ... }:
 let
   all.instances = yen.kinds.host; # a tree request: every host, with its data
+  othersOf = tree: scope: lib.filter (h: !yen.lib.same h scope) (lib.head (tree.select all)); # every host but this one
 in
 {
   yen.aspects.mesh = {
     at = yen.kinds.host;
     cycle =
       { tree, scope, ... }:
-      let
-        others = lib.filter (h: !yen.lib.same h scope) (lib.head (tree.select all));
-      in
       {
         tree = [ all ];
         nixos = [
@@ -23,7 +21,7 @@ in
                   hostNames = [ h.name ];
                   publicKey = h.sshKey;
                 };
-              }) others
+              }) (othersOf tree scope)
             );
             networking.wireguard.interfaces.wg0 = {
               ips = [ "${scope.wgIp}/24" ];
@@ -31,7 +29,7 @@ in
               peers = map (h: {
                 publicKey = h.wgKey;
                 allowedIPs = [ "${h.wgIp}/32" ];
-              }) others;
+              }) (othersOf tree scope);
             };
           }
         ];

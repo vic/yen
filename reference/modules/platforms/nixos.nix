@@ -4,6 +4,57 @@ let
   inherit (yen.lib) same;
   inherit (yen.lib.reduce) one;
   modlists = (import ./_modlists.nix).checked;
+  # trimmedModules: the host evaluates a smaller base module list (_modlists.nix), in module-list.nix order
+  trimmedOf = host: host.trimmedModules && modlists ? ${host.name};
+  # filter module-list.nix itself: path values stay paths, inline (non-path) entries stay, order stays
+  keepOf =
+    np: host:
+    lib.genAttrs (map (
+      p: builtins.unsafeDiscardStringContext "${np}/nixos/modules/${p}"
+    ) modlists.${host.name}) (_: true); # keys only: attr names hold no context
+  baseIn =
+    np: keep:
+    lib.filter (p: !(builtins.isPath p) || keep ? ${builtins.unsafeDiscardStringContext (toString p)}) (
+      import "${np}/nixos/modules/module-list.nix"
+    );
+  buildOf =
+    host: full: ms:
+    host.channel.nixpkgs.lib.nixosSystem (
+      {
+        system = host.system.name;
+        modules = ms;
+      }
+      // lib.optionalAttrs (trimmedOf host && !full) {
+        baseModules = baseIn host.channel.nixpkgs (keepOf host.channel.nixpkgs host);
+      }
+    );
+  # the first sharing host of the host's (channel, system)
+  leaderOf =
+    host: shared-pkgs:
+    lib.head (
+      lib.sort (a: b: a < b) (
+        map (e: e.from.name) (
+          lib.filter (e: same e.from.channel host.channel && same e.from.system host.system) shared-pkgs
+        )
+      )
+    );
+  isFollower = host: shared-pkgs: host.sharedPkgs && leaderOf host shared-pkgs != host.name;
+  readOnlyOf = np: shared: [
+    np.nixosModules.readOnlyPkgs
+    { options.nixpkgs.system = np.lib.mkOption { internal = true; }; }
+    {
+      nixpkgs.pkgs = shared;
+      nixpkgs.overlays = np.lib.mkForce shared.overlays;
+      nixpkgs.config = np.lib.mkForce shared.config;
+    }
+  ];
+  # the host's modules, with the leader's pkgs (read through the `out` arg, lazily) when it follows
+  modulesOf =
+    host: nixos: out: shared-pkgs:
+    nixos
+    ++ lib.optionals (isFollower host shared-pkgs) (
+      readOnlyOf host.channel.nixpkgs out.nixosConfigurations.${leaderOf host shared-pkgs}.pkgs
+    );
 in
 {
   # a host on shared pkgs keeps docs off: the manual, man pages and option help differ when pkgs is shared
@@ -47,63 +98,26 @@ in
             shared-pkgs,
             ...
           }:
-          let
-            np = host.channel.nixpkgs;
-            # trimmedModules: the host evaluates a smaller base module list (_modlists.nix), in module-list.nix order
-            trimmed = host.trimmedModules && modlists ? ${host.name};
-            # filter module-list.nix itself: path values stay paths, inline (non-path) entries stay, order stays
-            keep = lib.genAttrs (map (
-              p: builtins.unsafeDiscardStringContext "${np}/nixos/modules/${p}"
-            ) modlists.${host.name}) (_: true); # keys only: attr names hold no context
-            base = lib.filter (
-              p: !(builtins.isPath p) || keep ? ${builtins.unsafeDiscardStringContext (toString p)}
-            ) (import "${np}/nixos/modules/module-list.nix");
-            build' =
-              full: ms:
-              np.lib.nixosSystem (
-                {
-                  system = host.system.name;
-                  modules = ms;
-                }
-                // lib.optionalAttrs (trimmed && !full) { baseModules = base; }
-              );
-            build = build' false;
-            group = lib.sort (a: b: a < b) (
-              map (e: e.from.name) (
-                lib.filter (e: same e.from.channel host.channel && same e.from.system host.system) shared-pkgs
-              )
-            );
-            leader = lib.head group;
-            follower = host.sharedPkgs && leader != host.name;
-            shared = out.nixosConfigurations.${leader}.pkgs;
-            readOnly = [
-              np.nixosModules.readOnlyPkgs
-              { options.nixpkgs.system = np.lib.mkOption { internal = true; }; }
-              {
-                nixpkgs.pkgs = shared;
-                nixpkgs.overlays = np.lib.mkForce shared.overlays;
-                nixpkgs.config = np.lib.mkForce shared.config;
-              }
-            ];
-            sys = build (nixos ++ lib.optionals follower readOnly);
-          in
           {
-            nixosConfigurations.${host.name} = sys;
-            nixosConfigurationsOwnPkgs = lib.optionalAttrs follower { ${host.name} = build' true nixos; }; # a reference build: own pkgs, full module list
-            nixosConfigurationsFull = lib.optionalAttrs trimmed {
-              ${host.name} = build' true (nixos ++ lib.optionals follower readOnly);
+            nixosConfigurations.${host.name} = buildOf host false (modulesOf host nixos out shared-pkgs);
+            nixosConfigurationsOwnPkgs = lib.optionalAttrs (isFollower host shared-pkgs) {
+              ${host.name} = buildOf host true nixos;
+            }; # a reference build: own pkgs, full module list
+            nixosConfigurationsFull = lib.optionalAttrs (trimmedOf host) {
+              ${host.name} = buildOf host true (modulesOf host nixos out shared-pkgs);
             }; # the oracle: same drvPath as the trimmed build
             sharedPkgs = lib.optionalAttrs host.sharedPkgs {
               ${host.name} = {
-                inherit leader;
-                follower = follower;
+                leader = leaderOf host shared-pkgs;
+                follower = isFollower host shared-pkgs;
               };
             };
             deploy.nodes.${host.name} = {
               hostname = deploy.address;
               sshUser = deploy.user;
             };
-            ageManifest.${host.name} = lib.attrNames sys.config.age.secrets;
+            # the `out` arg: this host's system, built once above
+            ageManifest.${host.name} = lib.attrNames out.nixosConfigurations.${host.name}.config.age.secrets;
           };
         colmena =
           {

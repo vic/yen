@@ -7,59 +7,55 @@
 let
   D = yen.lib.datalog;
   whole.graph = true; # a tree request: the whole fleet (host data, scopes, aspects)
+  candidates = [
+    "lb"
+    "web-1"
+  ];
+  hostsOf = fleet: lib.filterAttrs (_: h: h ? addr && !(h.minimal or false)) fleet.host;
+  # the rules of one host n
+  hostRules =
+    fleet: n: h:
+    [
+      {
+        head = "serves:${n}";
+        pos = [ "web:${n}" ];
+        neg = [ "drained:${n}" ];
+      }
+      {
+        head = "drained:${n}";
+        pos = [ "maintenance:${n}" ];
+      }
+    ]
+    ++ map (d: {
+      head = "drained:${n}";
+      neg = [ "up:${d.name}" ];
+    }) (h.dependsOn or [ ])
+    ++ lib.optional (!h.maintenance) { head = "up:${n}"; }
+    ++ lib.optional h.maintenance { head = "maintenance:${n}"; }
+    ++ lib.optional (lib.any (fleet.lib.holds fleet.aspects.nginx) (fleet.lib.scopesOf h)) {
+      head = "web:${n}";
+    }; # a host with no scope (bad data) runs nothing
+  rulesOf =
+    fleet:
+    lib.concatLists (lib.mapAttrsToList (hostRules fleet) (hostsOf fleet))
+    ++ map (c: {
+      head = "primary:${c}";
+      neg = map (o: "primary:${o}") (lib.remove c candidates);
+    }) candidates;
+  # the atoms of the first stable model that start with prefix, without it
+  pickIn =
+    models: prefix:
+    map (lib.removePrefix prefix) (
+      lib.filter (lib.hasPrefix prefix) (if models == [ ] then [ ] else lib.head models)
+    );
+  policyOf = hosts: rules: models: {
+    inherit hosts rules models;
+    model = D.wfs rules;
+    pick = pickIn models;
+  };
   # the policy is a function of the whole fleet
-  policy =
-    yen:
-    let
-      hosts = lib.filterAttrs (_: h: h ? addr && !(h.minimal or false)) yen.host;
-      candidates = [
-        "lb"
-        "web-1"
-      ];
-      rules =
-        lib.concatLists (
-          lib.mapAttrsToList (
-            n: h:
-            [
-              {
-                head = "serves:${n}";
-                pos = [ "web:${n}" ];
-                neg = [ "drained:${n}" ];
-              }
-              {
-                head = "drained:${n}";
-                pos = [ "maintenance:${n}" ];
-              }
-            ]
-            ++ map (d: {
-              head = "drained:${n}";
-              neg = [ "up:${d.name}" ];
-            }) (h.dependsOn or [ ])
-            ++ lib.optional (!h.maintenance) { head = "up:${n}"; }
-            ++ lib.optional h.maintenance { head = "maintenance:${n}"; }
-            ++ lib.optional (lib.any (yen.lib.holds yen.aspects.nginx) (yen.lib.scopesOf h)) {
-              head = "web:${n}";
-            }
-          ) hosts
-        ) # a host with no scope (bad data) runs nothing
-        ++ map (c: {
-          head = "primary:${c}";
-          neg = map (o: "primary:${o}") (lib.remove c candidates);
-        }) candidates;
-      model = D.wfs rules;
-      models = D.stable rules;
-      choice = if models == [ ] then [ ] else lib.head models;
-      pick = prefix: map (lib.removePrefix prefix) (lib.filter (lib.hasPrefix prefix) choice);
-    in
-    {
-      inherit
-        hosts
-        rules
-        model
-        models
-        pick
-        ;
-    };
+  withRules = hosts: rules: policyOf hosts rules (D.stable rules);
+  policy = fleet: withRules (hostsOf fleet) (rulesOf fleet);
   # a cycle on the policy: it asks the tree for the whole fleet
   withPolicy = f: {
     cycle =

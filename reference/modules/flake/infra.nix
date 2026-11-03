@@ -8,22 +8,21 @@
 let
   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
   # a fact: { path; eq; } or { path; has; via ? id; }. `via` maps each realized list item first (impermanence makes { directory; … })
+  gotIn = cfg: f: lib.attrByPath f.path null cfg;
   holdsIn =
     cfg: f:
-    let
-      got = lib.attrByPath f.path null cfg;
-    in
-    if f ? has then lib.isList got && lib.elem f.has (map (f.via or (x: x)) got) else got == f.eq;
+    if f ? has then
+      lib.isList (gotIn cfg f) && lib.elem f.has (map (f.via or (x: x)) (gotIn cfg f))
+    else
+      gotIn cfg f == f.eq;
+  badIn = cfg: lib.filter (f: !holdsIn cfg f); # the facts the realized config breaks
   check =
     h: cfg: facts:
-    let
-      bad = lib.filter (f: !holdsIn cfg f) facts;
-    in
     pkgs.runCommand "infra-${h}" { } (
-      if bad == [ ] then
+      if badIn cfg facts == [ ] then
         "touch $out"
       else
-        "echo ${lib.escapeShellArg "infra ${h}: ${lib.concatMapStringsSep "; " (f: lib.concatStringsSep "." f.path) bad}"}; exit 1"
+        "echo ${lib.escapeShellArg "infra ${h}: ${lib.concatMapStringsSep "; " (f: lib.concatStringsSep "." f.path) (badIn cfg facts)}"}; exit 1"
     );
 in
 {

@@ -7,6 +7,21 @@
 }:
 let
   np = inputs.nixpkgs;
+  # the leader of the host's group: the first sharing host of its system. `system` is data, so `==`; `same` compares refs only
+  leaderOf =
+    host: shared-pkgs:
+    lib.head (
+      lib.sort (a: b: a < b) (
+        map (e: e.from.name) (lib.filter (e: e.from.system == host.system) shared-pkgs)
+      )
+    );
+  isFollower = host: shared-pkgs: host.sharedPkgs && leaderOf host shared-pkgs != host.name;
+  # the leader's built pkgs, read through the `out` arg, lazily
+  readOnlyOf = out: leader: [
+    np.nixosModules.readOnlyPkgs
+    { options.nixpkgs.system = lib.mkOption { internal = true; }; }
+    { nixpkgs.pkgs = out.nixosConfigurations.${leader}.pkgs; }
+  ];
 in
 {
   yen.kinds.fleet = {
@@ -35,25 +50,14 @@ in
         shared-pkgs,
         ...
       }:
-      let
-        group = lib.sort (a: b: a < b) (
-          map (e: e.from.name) (lib.filter (e: e.from.system == host.system) shared-pkgs)
-        ); # one group per system: `system` is data, so `==`; `same` compares refs only
-        leader = lib.head group;
-        follower = host.sharedPkgs && leader != host.name;
-        shared = out.nixosConfigurations.${leader}.pkgs; # the `out` arg: the leader's built pkgs, lazily
-        readOnly = [
-          np.nixosModules.readOnlyPkgs
-          { options.nixpkgs.system = lib.mkOption { internal = true; }; }
-          { nixpkgs.pkgs = shared; }
-        ];
-      in
       {
         nixosConfigurations.${host.name} = np.lib.nixosSystem {
           inherit (host) system;
-          modules = nixos ++ lib.optionals follower readOnly;
+          modules =
+            nixos ++ lib.optionals (isFollower host shared-pkgs) (readOnlyOf out (leaderOf host shared-pkgs));
         };
-        sharedLeader.${host.name} = if follower then leader else null; # whose pkgs this host reuses
+        sharedLeader.${host.name} =
+          if isFollower host shared-pkgs then leaderOf host shared-pkgs else null; # whose pkgs this host reuses
         ownPkgs.${host.name} = np.lib.nixosSystem {
           inherit (host) system;
           modules = nixos;

@@ -22,32 +22,32 @@ let
       (label (lib.attrValues vs))
     ]);
   lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
+  appsOf = tree: (lib.head (lib.head (tree.select lb))).apps;
 in
 {
   yen.aspects.ports = {
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        apps = (lib.head (lib.head (tree.select lb))).apps;
-      in
       {
         tree = [ lb ];
         out = [
           {
             ports = {
-              first = run 1 (ports apps); # one answer
-              count = lib.length (runAll (ports apps)); # every answer
+              first = run 1 (ports (appsOf tree)); # one answer
+              count = lib.length (runAll (ports (appsOf tree))); # every answer
               # the same relation, run backward: which app can take 8080?
               on8080 = lib.unique (
-                lib.concatMap (a: lib.attrNames (lib.filterAttrs (_: p: p == 8080) a)) (runAll (ports apps))
+                lib.concatMap (a: lib.attrNames (lib.filterAttrs (_: p: p == 8080) a)) (
+                  runAll (ports (appsOf tree))
+                )
               );
               # a bounded search: `complete = false` means "stopped", never "no answer"
-              bounded = removeAttrs (runFuel 1 5 (ports apps)) [ "answers" ];
+              bounded = removeAttrs (runFuel 1 5 (ports (appsOf tree))) [ "answers" ];
             };
           }
         ];
-        errors = [ (lib.optional (run 1 (ports apps) == [ ]) "ports: no assignment for lb") ];
+        errors = [ (lib.optional (run 1 (ports (appsOf tree)) == [ ]) "ports: no assignment for lb") ];
       };
   };
 }

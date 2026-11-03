@@ -1,3 +1,6 @@
+let
+  has = s: t: builtins.replaceStrings [ s ] [ "" ] t != t; # literal substring
+in
 {
   title = "Diagram and docs batteries";
   description = "mermaid views of scopes, kinds, gates and routes; tables, links that follow edits, doc lines checked against live names.";
@@ -12,9 +15,6 @@
       variant,
       ...
     }:
-    let
-      d = result.flake.diagrams;
-    in
     [
       ''
         Docs drift when they are written by hand. These batteries make them from the fleet itself: a renamed [kind](/model/kinds-fields/), a new
@@ -39,28 +39,28 @@
       ''
         ## Scopes, grouped by environment
       ''
-      (docs.mermaid d.scopes)
+      (docs.mermaid result.flake.diagrams.scopes)
       ''
         ## Kinds
 
         A dotted edge is a field that refers to a kind.
       ''
-      (docs.mermaid d.kinds)
+      (docs.mermaid result.flake.diagrams.kinds)
       ''
         ## Gates
 
         `monitored` reads `server`, and `legacy` under a `not`.
       ''
-      (docs.mermaid d.gates)
+      (docs.mermaid result.flake.diagrams.gates)
       ''
         ## Routes
       ''
-      (docs.mermaid d.routes)
+      (docs.mermaid result.flake.diagrams.routes)
       ''
         ## Routing by kind, and sinks
       ''
-      (docs.mermaid d.routing)
-      (docs.mermaid d.sinks)
+      (docs.mermaid result.flake.diagrams.routing)
+      (docs.mermaid result.flake.diagrams.sinks)
       ''
         ## Tables, links and a vocabulary
       ''
@@ -87,19 +87,15 @@
       no,
       ...
     }:
-    let
-      d = result.flake.diagrams;
-      has = s: t: builtins.replaceStrings [ s ] [ "" ] t != t; # literal substring
-    in
     {
       scopes = {
-        t1 = yes (has "subgraph" d.scopes);
-        t2 = yes (has "[\"prod\"]" d.scopes);
-        t3 = no ((has "fleet" d.scopes));
+        t1 = yes (has "subgraph" result.flake.diagrams.scopes);
+        t2 = yes (has "[\"prod\"]" result.flake.diagrams.scopes);
+        t3 = no ((has "fleet" result.flake.diagrams.scopes));
       };
-      kinds = yes (has "-.->|\"db\"|" d.kinds);
-      gates = yes (has "-.->|\"not\"|" d.gates);
-      routes = yes (has "-->|\"inventory\"|" d.routes);
+      kinds = yes (has "-.->|\"db\"|" result.flake.diagrams.kinds);
+      gates = yes (has "-.->|\"not\"|" result.flake.diagrams.gates);
+      routes = yes (has "-->|\"inventory\"|" result.flake.diagrams.routes);
       inventory = eq (result.flake.inventory) ({
         dev = [ "lab" ];
         prod = [
@@ -109,10 +105,10 @@
       });
       table = yes (has "| `host` | `db`, `environment` |  | `nixos` | 3 |" result.flake.kinds);
       routing = {
-        t1 = yes (has "|\"1\"|" d.routing);
-        t2 = yes (has "(\"inventory\")" d.routing);
+        t1 = yes (has "|\"1\"|" result.flake.diagrams.routing);
+        t2 = yes (has "(\"inventory\")" result.flake.diagrams.routing);
       };
-      sinks = yes (has "[(\"flake outputs\")]" d.sinks);
+      sinks = yes (has "[(\"flake outputs\")]" result.flake.diagrams.sinks);
       hosts-table = yes (has "| lab | dev |" result.flake.hosts);
       templates = eq (result.flake.templates) ({ hello = "hello: the smallest flake"; });
       links = eq (result.flake.links.db-field) ("[`db`](fleet.nix#L23)");

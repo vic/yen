@@ -7,6 +7,20 @@ let
   all.instances = yen.kinds.host; # a tree request: every host, with its data
   names = map (h: h.name);
   byName = hs: f: lib.listToAttrs (map (h: lib.nameValuePair h.name (names (f h))) hs);
+  # the waves of the hosts hs and their dependency graph g
+  wavesOf = hs: g: {
+    out = {
+      deployWaves = map names (G.layers g);
+      dependents = byName hs (h: lib.filter (x: lib.any (yen.lib.same h) x.dependsOn) hs);
+      impact = byName hs (G.reachers g);
+    };
+    errors = [
+      (map (
+        c: "deploy: hosts depend on each other in a cycle: ${lib.concatStringsSep " -> " (names c)}"
+      ) (G.sccs g))
+    ]; # one element: the list, as before
+  };
+  wavesFor = hs: wavesOf hs (G.of hs (h: h.dependsOn));
 in
 {
   yen.kinds.machine.fields.dependsOn = yen.lib.opt (yen.lib.listOf yen.kinds.host) [ ];
@@ -17,22 +31,6 @@ in
     at = yen.fleet.main;
     cycle =
       { tree, ... }:
-      let
-        hs = lib.filter (h: h ? addr) (lib.head (tree.select all));
-        g = G.of hs (h: h.dependsOn);
-      in
-      {
-        tree = [ all ];
-        out = {
-          deployWaves = map names (G.layers g);
-          dependents = byName hs (h: lib.filter (x: lib.any (yen.lib.same h) x.dependsOn) hs);
-          impact = byName hs (G.reachers g);
-        };
-        errors = [
-          (map (
-            c: "deploy: hosts depend on each other in a cycle: ${lib.concatStringsSep " -> " (names c)}"
-          ) (G.sccs g))
-        ]; # one element: the list, as before
-      };
+      { tree = [ all ]; } // wavesFor (lib.filter (h: h ? addr) (lib.head (tree.select all)));
   };
 }

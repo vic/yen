@@ -3,6 +3,11 @@
 let
   inherit (yen.lib) maybe opt;
   setting = path: h: yen.lib.cascade path ([ h ] ++ h.environment.delegates ++ [ h.environment ]); # local > delegated > parent
+  arcMaxOf = setting [
+    "settings"
+    "zfs"
+    "arcMax"
+  ];
 in
 {
   yen.kinds.machine.fields.settings.zfs.arcMax = maybe yen.lib.int;
@@ -15,11 +20,10 @@ in
     at = yen.kinds.host;
     nixos =
       { host, ... }:
-      let
-        m = setting [ "settings" "zfs" "arcMax" ] host;
-      in
       {
-        boot.kernelParams = lib.optional (m != null) "zfs.zfs_arc_max=${toString m}";
+        boot.kernelParams = lib.optional (
+          arcMaxOf host != null
+        ) "zfs.zfs_arc_max=${toString (arcMaxOf host)}";
       };
   };
 }

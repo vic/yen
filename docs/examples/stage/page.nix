@@ -1,3 +1,29 @@
+let
+  # the stage of a change of this page's fleet, as `stage.nix` runs it
+  stageOf =
+    inputs: dir: args:
+    import (dir + "/stage.nix") (
+      {
+        yen = inputs.yen.outPath;
+        inherit (inputs) nixpkgs import-tree;
+      }
+      // args
+    );
+  # the host `db`, as a caller outside the fleet names it
+  db = {
+    kind = "host";
+    name = "db";
+  };
+  # what the refusals of a grant say: all outside it, and which scopes they name last
+  grantFacts = refused: {
+    outside = builtins.all (e: e.code == "outside-grant") refused;
+    thinkpad = builtins.elem {
+      kind = "host";
+      name = "thinkpad";
+    } (map (e: builtins.elemAt e.got (builtins.length e.got - 1)) refused);
+    db = builtins.elem db (map (e: builtins.elemAt e.got (builtins.length e.got - 1)) refused);
+  };
+in
 {
   title = "Stage a change";
   description = "Evaluate the fleet without and with a change. New errors, new violations, a diff, and refusals with their reason.";
@@ -12,23 +38,6 @@
       engine,
       ...
     }:
-    let
-      S =
-        args:
-        import (dir + "/stage.nix") (
-          {
-            yen = inputs.yen.outPath;
-            inherit (inputs) nixpkgs import-tree;
-          }
-          // args
-        );
-      desktop = S { change = "changes/desktop-on-web.json"; };
-      db = {
-        kind = "host";
-        name = "db";
-      }; # the host `db`, as a caller outside the fleet names it
-      grant = engine.grant { scopes = [ db ]; };
-    in
     [
       ''
         Before you apply a change, stage it. `yen.lib.stage { base; change; rejected; grant; }` evaluates the fleet
@@ -39,7 +48,7 @@
       (docs.file "changes/desktop-on-web.json")
       (docs.file "stage.nix")
       (docs.sh "nix eval --impure --json --file stage.nix --argstr change changes/desktop-on-web.json")
-      (docs.value desktop)
+      (docs.value (stageOf inputs dir { change = "changes/desktop-on-web.json"; }))
       ''
         The change makes `desktop` active at the server `web`, and breaks an invariant. The answer has the violation,
         the diff (scopes, routed elements, active aspects) and the change's `sha`.
@@ -58,9 +67,9 @@
       ''
       (docs.file "changes/postgres-on-thinkpad.json")
       (docs.value
-        (S {
+        (stageOf inputs dir {
           change = "changes/postgres-on-thinkpad.json";
-          inherit grant;
+          grant = engine.grant { scopes = [ db ]; };
         }).refused
       )
       ''
@@ -69,9 +78,9 @@
         Pass the `sha` of changes refused before in `rejected`. The same change is refused again, whoever sends it:
       ''
       (docs.value
-        (S {
+        (stageOf inputs dir {
           change = "changes/desktop-on-web.json";
-          rejected = [ desktop.sha ];
+          rejected = [ (stageOf inputs dir { change = "changes/desktop-on-web.json"; }).sha ];
         }).refused
       )
       ''
@@ -101,65 +110,41 @@
       no,
       ...
     }:
-    let
-      S =
-        args:
-        import (dir + "/stage.nix") (
-          {
-            yen = inputs.yen.outPath;
-            inherit (inputs) nixpkgs import-tree;
-          }
-          // args
-        );
-      d = S { change = "changes/desktop-on-web.json"; };
-    in
     {
-      violation = {
-        t1 = no (d.ok);
-        t2 = eq (d.violations) ([
-          [
-            "bad"
-            "no-desktop-on-servers"
-            "fleet:main/host:web"
-          ]
-        ]);
-      };
-      clean = yes ((S { change = "changes/postgres-on-thinkpad.json"; }).ok);
+      # one stage, one comparison
+      violation =
+        eq
+          {
+            inherit (stageOf inputs dir { change = "changes/desktop-on-web.json"; }) ok violations;
+          }
+          {
+            ok = false;
+            violations = [
+              [
+                "bad"
+                "no-desktop-on-servers"
+                "fleet:main/host:web"
+              ]
+            ];
+          };
+      clean = yes (stageOf inputs dir { change = "changes/postgres-on-thinkpad.json"; }).ok;
       grant =
-        let
-          r =
-            (S {
+        eq
+          (grantFacts
+            (stageOf inputs dir {
               change = "changes/postgres-on-thinkpad.json";
-              grant = engine.grant {
-                scopes = [
-                  {
-                    kind = "host";
-                    name = "db";
-                  }
-                ];
-              };
-            }).refused;
-          last = map (e: builtins.elemAt e.got (builtins.length e.got - 1)) r;
-        in
-        {
-          t1 = yes (builtins.all (e: e.code == "outside-grant") r);
-          t2 = yes (
-            builtins.elem {
-              kind = "host";
-              name = "thinkpad";
-            } last
-          );
-          t3 = no (
-            builtins.elem {
-              kind = "host";
-              name = "db";
-            } last
-          );
-        };
+              grant = engine.grant { scopes = [ db ]; };
+            }).refused
+          )
+          {
+            outside = true;
+            thinkpad = true;
+            db = false;
+          };
       rejected = eq (map (e: e.code)
-        (S {
+        (stageOf inputs dir {
           change = "changes/desktop-on-web.json";
-          rejected = [ d.sha ];
+          rejected = [ (stageOf inputs dir { change = "changes/desktop-on-web.json"; }).sha ];
         }).refused
       ) ([ "rejected" ]);
       change-set = eq (engine.change.set

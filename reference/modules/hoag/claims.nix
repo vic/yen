@@ -4,6 +4,7 @@
 { yen, lib, ... }:
 let
   inherit (yen.lib) same;
+  claimsOn = host: lib.filter (e: same e.value.on host); # the claims aimed at the host
 in
 {
   yen.kinds.machine.fields.dbOn = yen.lib.maybe yen.kinds.host;
@@ -30,14 +31,11 @@ in
     ];
     nixos =
       { host, db-claims, ... }:
-      let
-        mine = lib.filter (e: same e.value.on host) db-claims;
-      in
       # the reverse read: who claims me
-      lib.optionalAttrs (mine != [ ]) {
+      lib.optionalAttrs (claimsOn host db-claims != [ ]) {
         services.postgresql = {
           enable = true;
-          ensureDatabases = map (e: e.value.db) mine;
+          ensureDatabases = map (e: e.value.db) (claimsOn host db-claims);
         };
       };
   };

@@ -16,61 +16,82 @@ let
 
   # a discipline is a reduce: per key, the first layer that names a strategy decides it ("replace" when none);
   # a value { ref = k; } reads the final value of key k. Provenance lists every layer that set the key.
-  strategies =
-    es:
-    let
-      sorted = lib.sort (a: b: a.value.rank < b.value.rank) es;
-      keys = lib.unique (lib.concatMap (e: lib.attrNames e.value.set) sorted);
-      layersOf = k: lib.filter (e: e.value.set ? ${k}) sorted;
-      strategy =
-        k: lib.findFirst (s: s != null) "replace" (map (e: e.value.strategy.${k} or null) sorted);
-      raw = lib.genAttrs keys (
+  sortedOf = lib.sort (a: b: a.value.rank < b.value.rank);
+  keysOf = sorted: lib.unique (lib.concatMap (e: lib.attrNames e.value.set) sorted);
+  layersIn = sorted: k: lib.filter (e: e.value.set ? ${k}) sorted;
+  strategyIn =
+    sorted: k: lib.findFirst (s: s != null) "replace" (map (e: e.value.strategy.${k} or null) sorted);
+  rawOf =
+    sorted:
+    lib.genAttrs (keysOf sorted) (
+      k:
+      if strategyIn sorted k == "append" then
+        lib.concatMap (e: e.value.set.${k}) (layersIn sorted k)
+      else
+        (lib.last (layersIn sorted k)).value.set.${k}
+    );
+  strategiesOf = sorted: raw: {
+    value = {
+      value = lib.mapAttrs (_: v: if lib.isAttrs v && v ? ref then raw.${v.ref} else v) raw;
+      provenance = lib.genAttrs (keysOf sorted) (
         k:
-        if strategy k == "append" then
-          lib.concatMap (e: e.value.set.${k}) (layersOf k)
-        else
-          (lib.last (layersOf k)).value.set.${k}
+        map (e: {
+          from = e.from.id;
+          inherit (e.value) rank;
+        }) (layersIn sorted k)
       );
-    in
-    {
-      value = {
-        value = lib.mapAttrs (_: v: if lib.isAttrs v && v ? ref then raw.${v.ref} else v) raw;
-        provenance = lib.genAttrs keys (
-          k:
-          map (e: {
-            from = e.from.id;
-            inherit (e.value) rank;
-          }) (layersOf k)
-        );
-      };
-      errors = [ ];
     };
+    errors = [ ];
+  };
+  withSorted = sorted: strategiesOf sorted (rawOf sorted);
+  strategies = es: withSorted (sortedOf es);
 
   # the nearest host along `via` that has a motd; equal distance: the first in `order`
+  reachOf =
+    hosts: start:
+    builtins.genericClosure {
+      startSet = [
+        {
+          key = start;
+          d = 0;
+        }
+      ];
+      operator =
+        x:
+        map (m: {
+          key = m.name;
+          d = x.d + 1;
+        }) (hosts.${x.key}.via or [ ]);
+    };
+  rankIn = order: n: lib.lists.findFirstIndex (o: o == n) (lib.length order) order;
+  bestIn =
+    order:
+    lib.foldl' (
+      a: x:
+      if a == null || x.d < a.d || x.d == a.d && rankIn order x.key < rankIn order a.key then x else a
+    ) null;
+  motdOf = hosts: best: if best == null then null else hosts.${best.key}.motd;
   visible =
     hosts: order: start:
-    let
-      reach = builtins.genericClosure {
-        startSet = [
-          {
-            key = start;
-            d = 0;
-          }
-        ];
-        operator =
-          x:
-          map (m: {
-            key = m.name;
-            d = x.d + 1;
-          }) (hosts.${x.key}.via or [ ]);
-      };
-      found = lib.filter (x: hosts.${x.key}.motd != null) reach;
-      rank = n: lib.lists.findFirstIndex (o: o == n) (lib.length order) order;
-      best = lib.foldl' (
-        a: x: if a == null || x.d < a.d || x.d == a.d && rank x.key < rank a.key then x else a
-      ) null found;
-    in
-    if best == null then null else hosts.${best.key}.motd;
+    motdOf hosts (bestIn order (lib.filter (x: hosts.${x.key}.motd != null) (reachOf hosts start)));
+  # the claims on the host from other hosts that no host depends on
+  lockdownOf =
+    hosts: host: db-claims:
+    toString (
+      map (e: e.from.name) (
+        lib.filter (
+          e:
+          same e.value.on host
+          && !same e.from host
+          && !lib.any (h: lib.any (same e.from) h.dependsOn) (lib.attrValues hosts)
+        ) (lib.head db-claims)
+      )
+    );
+  motdsOf = v: {
+    a = v [ "lb" "web-1" "web-2" ] "stage";
+    b = v [ "web-2" "web-1" ] "stage";
+    w = v [ ] "web-1";
+  };
 in
 {
   # H18 + H19: strategies, provenance, ref
@@ -150,24 +171,13 @@ in
         db-claims,
         ...
       }:
-      let
-        host = scope;
-        hosts = addressed (lib.head (tree.select allHosts));
-      in
       {
         tree = [ allHosts ];
         nixos = [
           {
-            environment.etc."db/lockdown".text = toString (
-              map (e: e.from.name) (
-                lib.filter (
-                  e:
-                  same e.value.on host
-                  && !same e.from host
-                  && !lib.any (h: lib.any (same e.from) h.dependsOn) (lib.attrValues hosts)
-                ) (lib.head db-claims)
-              )
-            );
+            environment.etc."db/lockdown".text = lockdownOf (addressed (
+              lib.head (tree.select allHosts)
+            )) scope db-claims;
           }
         ];
       };
@@ -231,20 +241,9 @@ in
     at = yen.fleet.main;
     cycle =
       { tree, ... }:
-      let
-        v = visible (addressed (lib.head (tree.select allHosts)));
-      in
       {
         tree = [ allHosts ];
-        out = [
-          {
-            visibleMotd = {
-              a = v [ "lb" "web-1" "web-2" ] "stage";
-              b = v [ "web-2" "web-1" ] "stage";
-              w = v [ ] "web-1";
-            };
-          }
-        ];
+        out = [ { visibleMotd = motdsOf (visible (addressed (lib.head (tree.select allHosts)))); } ];
       };
   };
 

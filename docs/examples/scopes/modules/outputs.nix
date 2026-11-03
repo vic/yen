@@ -2,6 +2,7 @@
 { yen, ... }:
 let
   whole.graph = true; # a tree request: the whole fleet
+  fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
 in
 {
   yen.kinds.fleet.sinks.out.reduce = yen.lib.reduce.merge;
@@ -10,14 +11,11 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        yen = builtins.head (tree.select whole); # the whole fleet, with its data
-      in
       {
         tree = [ whole ];
         out = [
           {
-            scopes = map (s: s.id) yen.lib.graph.scopes;
+            scopes = map (s: s.id) (fleetOf tree).lib.graph.scopes;
           }
         ];
       };

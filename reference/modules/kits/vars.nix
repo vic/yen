@@ -16,6 +16,12 @@ let
   # tree requests: every host and mac, with their data
   hosts.instances = yen.kinds.host;
   macs.instances = yen.kinds.mac;
+  machinesOf =
+    tree:
+    lib.concatMap (q: lib.head (tree.select q)) [
+      hosts
+      macs
+    ]; # every host and mac, with its data
 in
 {
   yen.kinds.fleet.sinks.generators = {
@@ -70,13 +76,6 @@ in
         generators,
         ...
       }:
-      let
-        fleet = scope;
-        machines = lib.concatMap (q: lib.head (tree.select q)) [
-          hosts
-          macs
-        ];
-      in
       {
         tree = [
           hosts
@@ -84,8 +83,8 @@ in
         ];
         errors = [
           (
-            map (m: "vars: ${m.name} uses secret store ${m.secretStore}, the fleet uses ${fleet.secretStore}") (
-              lib.filter (m: m.secretStore != null && m.secretStore != fleet.secretStore) machines
+            map (m: "vars: ${m.name} uses secret store ${m.secretStore}, the fleet uses ${scope.secretStore}") (
+              lib.filter (m: m.secretStore != null && m.secretStore != scope.secretStore) (machinesOf tree)
             )
             ++ lib.concatMap (
               g:
@@ -137,20 +136,7 @@ in
   # generators carried by an export: each machine in an export's `deploy` list gets them
   yen.aspects.vars-from-exports = {
     at = yen.helpers.machines;
-    generators =
-      { scope, exports, ... }:
-      let
-        gens = lib.concatMap (
-          x: lib.filter (g: yen.lib.holds g.deploy scope) (lib.attrValues (x.value.generators or { }))
-        ) exports;
-      in
-      if gens == [ ] then
-        null
-      else
-        {
-          name = "from-exports";
-          files = lib.foldl' (a: g: a // g.files) { } gens;
-        };
+    generators = yen.lib.batteries.vars.from-exports { inherit (yen.lib) holds; };
   };
 
   # machines from directories: every directory under machines/ is a host; its configuration.nix joins the config

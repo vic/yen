@@ -10,6 +10,7 @@ let
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
   machineOf = s: if holds yen.kinds.member s then s.parent else s;
+  get = tree: q: lib.head (tree.select q); # the answer of one tree request
 in
 {
   yen.kinds.fleet = {
@@ -56,9 +57,6 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        get = q: lib.head (tree.select q);
-      in
       {
         tree = [
           assemblyTree
@@ -66,8 +64,8 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = yen.lib.batteries.kits.assemblies (get assemblyTree);
-            machines = get hostTree;
+            assemblies = yen.lib.batteries.kits.assemblies (get tree assemblyTree);
+            machines = get tree hostTree;
             inherit holds;
           })
         ];
@@ -80,20 +78,7 @@ in
   # a generator that an export carries goes to the machines of its `deploy` predicate
   yen.aspects.generators-from-exports = {
     at = yen.kinds.host;
-    generators =
-      { scope, exports, ... }:
-      let
-        gens = lib.concatMap (
-          x: lib.filter (g: holds g.deploy scope) (lib.attrValues (x.value.generators or { }))
-        ) exports;
-      in
-      if gens == [ ] then
-        null
-      else
-        {
-          name = "from-exports";
-          files = lib.foldl' (a: g: a // g.files) { } gens;
-        };
+    generators = yen.lib.batteries.vars.from-exports { inherit holds; };
   };
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

@@ -1,7 +1,7 @@
 # kits and assemblies in yen. A kit is data: roles, a typed interface per role, constraints, the export keys it may
 # give, and the assemblies it adds. An assembly is one use of a kit: its `kit` is a ref, each role's machines an `at`
 # predicate. Each machine spawns one `member` scope per (assembly, role) it takes, so an aspect at a member scope runs
-# once per assembly and role, and an aspect at the machine that `has` a member runs once per machine.
+# once per assembly and role, and an aspect at the machine above a member (`below`) runs once per machine.
 # Exports are a fleet sink: the engine sets `from` (the member scope), so a kit cannot write another's scope.
 # The rules are yen.lib.batteries.kits; this file is the fleet's data and its words.
 { yen, lib, ... }:
@@ -17,6 +17,7 @@ let
   hosts.instances = yen.kinds.host;
   macs.instances = yen.kinds.mac;
   membersOf = kits.members { inherit assemblies holds; };
+  get = tree: q: lib.head (tree.select q); # the answer of one tree request
 in
 {
   yen.kinds.kit.fields = {
@@ -43,9 +44,6 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        get = q: lib.head (tree.select q);
-      in
       {
         tree = [
           own
@@ -54,8 +52,8 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = withAdded (get own);
-            machines = get hosts ++ get macs;
+            assemblies = withAdded (get tree own);
+            machines = get tree hosts ++ get tree macs;
             inherit holds;
           })
         ];

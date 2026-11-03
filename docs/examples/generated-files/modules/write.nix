@@ -2,16 +2,15 @@
 { yen, lib, ... }:
 let
   whole.graph = true; # a tree request: the whole fleet
+  fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
+  hostsIn = fleet: lib.filter (s: fleet.lib.holds fleet.kinds.host s) fleet.lib.graph.scopes;
+  hostsOf = tree: hostsIn (fleetOf tree);
 in
 {
   yen.aspects.write = {
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        yen = builtins.head (tree.select whole); # the whole fleet, with its data
-        hosts = lib.filter (s: yen.lib.holds yen.kinds.host s) yen.lib.graph.scopes;
-      in
       {
         tree = [ whole ];
         files = [
@@ -19,12 +18,12 @@ in
             files.file."README.md".text = ''
               # My fleet
 
-              Generated from the fleet. Hosts: ${lib.concatMapStringsSep ", " (s: "`${s.name}`") hosts}.
+              Generated from the fleet. Hosts: ${lib.concatMapStringsSep ", " (s: "`${s.name}`") (hostsOf tree)}.
 
               ```mermaid
               graph TD
                 fleet[main]
-              ${lib.concatMapStringsSep "\n" (s: "  fleet --> ${s.name}") hosts}
+              ${lib.concatMapStringsSep "\n" (s: "  fleet --> ${s.name}") (hostsOf tree)}
               ```
             '';
             files.file.".github/workflows/ci.yml".text = ''

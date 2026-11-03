@@ -7,6 +7,12 @@
 }:
 let
   inherit (yen.lib) same holds;
+  # the posix groups gs meet the grants of scope s, and its gates when it has any
+  allowedOn =
+    s: gs:
+    yen.helpers.meets gs (s.environment.grants ++ s.grants)
+    && (s.gates == [ ] || yen.helpers.meets gs s.gates);
+  guiIn = cfg: bad: lib.intersectLists bad (map lib.getName cfg.config.environment.systemPackages); # the bad packages cfg installs
 in
 {
   yen.helpers = {
@@ -42,24 +48,15 @@ in
     meets = xs: ys: lib.any (x: lib.any (same x) ys) xs;
     posixOf =
       u: lib.filter (g: g.label == "posix") (yen.helpers.closure (lib.attrValues yen.group) u.groups);
-    usersOn =
-      s:
-      lib.filterAttrs (
-        _: u:
-        let
-          gs = yen.helpers.posixOf u;
-        in
-        yen.helpers.meets gs (s.environment.grants ++ s.grants)
-        && (s.gates == [ ] || yen.helpers.meets gs s.gates)
-      ) yen.user;
+    usersOn = s: lib.filterAttrs (_: u: allowedOn s (yen.helpers.posixOf u)) yen.user;
     flatten = a: ms: lib.mkMerge (map (m: if lib.isFunction m then m a else m) ms); # config-only submodules (users.users.<n>)
     noGui =
       system: h: cfg: bad:
-      let
-        hit = lib.intersectLists bad (map lib.getName cfg.config.environment.systemPackages);
-      in
       inputs.nixpkgs.legacyPackages.${system.name}.runCommand "${h}-no-gui" { } (
-        if hit == [ ] then "touch $out" else "echo 'gui on ${h}: ${toString hit}'; exit 1"
+        if guiIn cfg bad == [ ] then
+          "touch $out"
+        else
+          "echo 'gui on ${h}: ${toString (guiIn cfg bad)}'; exit 1"
       );
     mermaid =
       g: yen.lib.batteries.mermaid.flowchart { direction = "TD"; } (yen.lib.batteries.mermaid.routes g);

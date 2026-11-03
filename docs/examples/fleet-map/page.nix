@@ -10,13 +10,8 @@
       root = inputs.yen + "/reference/modules";
       repo = "https://github.com/vic/yen/blob/main/reference/modules";
       # the first comment line of a file: what it shows
-      about =
-        f:
-        let
-          l = builtins.head (builtins.filter builtins.isString (builtins.split "\n" (builtins.readFile f)));
-          m = builtins.match "# (.*)" l;
-        in
-        if m == null then "" else builtins.head m;
+      comment = f: builtins.match "# (.*)" (builtins.head (builtins.split "\n" (builtins.readFile f)));
+      about = f: if comment f == null then "" else builtins.head (comment f);
       nixIn =
         d:
         builtins.filter (n: builtins.match "[^_].*\\.nix" n != null) (

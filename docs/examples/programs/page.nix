@@ -1,3 +1,13 @@
+let
+  # a dry run of the program file p, as an agent runs it
+  dryRunOf =
+    inputs: dir: p:
+    import (dir + "/dry-run.nix") {
+      program = p;
+      yen = inputs.yen.outPath;
+      inherit (inputs) nixpkgs import-tree;
+    };
+in
 {
   title = "Change programs";
   description = "A change as a list of data ops: set, ref, place, new. An agent writes a program, not Nix code.";
@@ -11,15 +21,6 @@
       dir,
       ...
     }:
-    let
-      P =
-        p:
-        import (dir + "/dry-run.nix") {
-          program = p;
-          yen = inputs.yen.outPath;
-          inherit (inputs) nixpkgs import-tree;
-        };
-    in
     [
       ''
         Writing Nix is a poor interface for an agent: it can write anything, and a typo is a parse error.
@@ -48,7 +49,7 @@
       )
       (docs.file "programs/new-cache.json")
       (docs.file "dry-run.nix")
-      (docs.value (P "programs/new-cache.json"))
+      (docs.value (dryRunOf inputs dir "programs/new-cache.json"))
       ''
         ## Checked against the schema
 
@@ -56,7 +57,7 @@
         `dryRun` validates first, and stages only a valid program:
       ''
       (docs.file "programs/typos.json")
-      (docs.value (P "programs/typos.json"))
+      (docs.value (dryRunOf inputs dir "programs/typos.json"))
       (docs.table
         [ "Function" "Use" ]
         [
@@ -89,18 +90,9 @@
       no,
       ...
     }:
-    let
-      P =
-        p:
-        import (dir + "/dry-run.nix") {
-          program = p;
-          yen = inputs.yen.outPath;
-          inherit (inputs) nixpkgs import-tree;
-        };
-    in
     {
-      ok = yes ((P "programs/new-cache.json").ok);
-      typos = eq (map (e: e.near) (P "programs/typos.json").errors) ([
+      ok = yes ((dryRunOf inputs dir "programs/new-cache.json").ok);
+      typos = eq (map (e: e.near) (dryRunOf inputs dir "programs/typos.json").errors) ([
         [ "addr" ]
         [ "postgres" ]
       ]);

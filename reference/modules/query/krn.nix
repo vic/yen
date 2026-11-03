@@ -44,37 +44,53 @@ let
   byName = xs: lib.listToAttrs (map (x: lib.nameValuePair x.name x) xs);
   guestsOf =
     guests: h: lib.attrNames (lib.filterAttrs (_: g: g.on.name == h.name && g.ramRange != [ ]) guests);
-  memRel =
-    guests: h: q:
-    let
-      gs = guestsOf guests h;
-      n = lib.length gs;
-      sums = lib.genList (i: "__s${toString i}") n;
-      v = vs: i: vs.${lib.elemAt sums i};
-    in
+  sumAt =
+    sums: vs: i:
+    vs.${lib.elemAt sums i}; # the running sum i
+  # the guests gs of host h, and their running sums
+  memRelSums =
+    guests: h: gs: sums: q:
     freshNamed (gs ++ sums) (
       vs:
       map (g: infd [ vs.${g} ] (lo guests.${g}.ramRange) (hi guests.${g}.ramRange)) gs
       ++ map (s: infd [ vs.${s} ] 0 h.ram) sums
-      ++ lib.genList (i: plusfd (if i == 0 then 0 else v vs (i - 1)) vs.${lib.elemAt gs i} (v vs i)) n
-      ++ lib.optional (n > 0) (lefd (v vs (n - 1)) (h.ram - h.ramReserve))
+      ++ lib.genList (
+        i: plusfd (if i == 0 then 0 else sumAt sums vs (i - 1)) vs.${lib.elemAt gs i} (sumAt sums vs i)
+      ) (lib.length gs)
+      ++ lib.optional (gs != [ ]) (lefd (sumAt sums vs (lib.length gs - 1)) (h.ram - h.ramReserve))
       ++ [
         (eq q (lib.getAttrs gs vs))
         (label (map (g: vs.${g}) gs))
       ]
     );
-  # the allocation that gives the guests the most memory (the first, in label order, among the largest)
+  memRelOf =
+    guests: h: gs:
+    memRelSums guests h gs (lib.genList (i: "__s${toString i}") (lib.length gs));
+  memRel = guests: h: memRelOf guests h (guestsOf guests h);
   # the allocation that gives the guests the most memory, by krn maximize within a fuel budget: a search cut by fuel is an
   # error record, never a silent "best"
   memSearch =
     guests: h:
     K.maximize h.ramFuel (m: lib.foldl' (a: x: a + x) 0 (lib.attrValues m)) (memRel guests h);
-  bestMem =
-    guests: h:
-    let
-      s = memSearch guests h;
-    in
-    if s.complete then s.best else null;
+  bestOf = s: if s.complete then s.best else null;
+  # the memory of a host's guests from one search s: the allocation, or an error record
+  memoryOf = host: s: {
+    nixos = lib.optionalAttrs (bestOf s != null) {
+      environment.etc."guests/memory".text = builtins.toJSON (bestOf s);
+    };
+    errors = [
+      (
+        lib.optional (s.complete && s.best == null)
+          "memory: the guests of ${host.name} do not fit in ${toString host.ram} GiB with ${toString host.ramReserve} reserved"
+        ++ lib.optional (
+          !s.complete
+        ) "memory: the search for ${host.name} ran out of fuel after ${toString s.count} answers"
+      )
+    ];
+  };
+  portsOf =
+    a:
+    lib.optionalAttrs (a != [ ]) { environment.etc."apps/ports".text = builtins.toJSON (lib.head a); };
   hostRows =
     hosts:
     map (h: {
@@ -82,6 +98,41 @@ let
       env = h.environment.name;
       db = h.dbRole;
     }) (lib.filter (h: h ? addr) hosts);
+  # the database hosts of host h's environment, by unification over the rows
+  dbsFor =
+    rows: h:
+    runAll (
+      q:
+      fresh (
+        {
+          env,
+          d,
+          own,
+        }:
+        [
+          (facto rows {
+            name = h;
+            inherit env;
+            db = own;
+          })
+          (facto rows {
+            name = d;
+            inherit env;
+            db = true;
+          })
+          (eq q d)
+        ]
+      )
+    );
+  placementOf = hosts: rows: {
+    dbPlacement = lib.genAttrs (map (r: r.name) rows) (dbsFor rows);
+    # backward: which apps can take port 8081 in some allocation of lb
+    takes8081 = lib.unique (
+      lib.concatMap (m: lib.attrNames (lib.filterAttrs (_: p: p == 8081) m)) (
+        runAll (portsRel (lib.findFirst (yen.lib.same yen.host.lb) null hosts))
+      )
+    );
+  };
 in
 {
   yen.kinds.machine.fields = {
@@ -124,25 +175,10 @@ in
     ];
     cycle =
       { tree, scope, ... }:
-      let
-        host = scope;
-        guests = byName (lib.head (tree.select guestsReq));
-        s = memSearch guests host;
-        m = bestMem guests host;
-      in
       {
         tree = [ guestsReq ];
-        nixos = lib.optionalAttrs (m != null) { environment.etc."guests/memory".text = builtins.toJSON m; };
-        errors = [
-          (
-            lib.optional (s.complete && s.best == null)
-              "memory: the guests of ${host.name} do not fit in ${toString host.ram} GiB with ${toString host.ramReserve} reserved"
-            ++ lib.optional (
-              !s.complete
-            ) "memory: the search for ${host.name} ran out of fuel after ${toString s.count} answers"
-          )
-        ];
-      };
+      }
+      // memoryOf scope (memSearch (byName (lib.head (tree.select guestsReq))) scope);
   };
 
   yen.aspects.port-synthesis = {
@@ -150,12 +186,7 @@ in
       yen.kinds.host
       (s: s.apps != [ ])
     ];
-    nixos =
-      { host, ... }:
-      let
-        a = run 1 (portsRel host);
-      in
-      lib.optionalAttrs (a != [ ]) { environment.etc."apps/ports".text = builtins.toJSON (lib.head a); };
+    nixos = { host, ... }: portsOf (run 1 (portsRel host));
     errors =
       { host, ... }:
       lib.optional (run 1 (portsRel host) == [ ])
@@ -165,46 +196,9 @@ in
     at = yen.fleet.main;
     cycle =
       { tree, ... }:
-      let
-        hosts = lib.head (tree.select hostsReq);
-        rows = hostRows hosts;
-      in
       {
         tree = [ hostsReq ];
-        out = {
-          dbPlacement = lib.genAttrs (map (r: r.name) rows) (
-            h:
-            runAll (
-              q:
-              fresh (
-                {
-                  env,
-                  d,
-                  own,
-                }:
-                [
-                  (facto rows {
-                    name = h;
-                    inherit env;
-                    db = own;
-                  })
-                  (facto rows {
-                    name = d;
-                    inherit env;
-                    db = true;
-                  })
-                  (eq q d)
-                ]
-              )
-            )
-          );
-          # backward: which apps can take port 8081 in some allocation of lb
-          takes8081 = lib.unique (
-            lib.concatMap (m: lib.attrNames (lib.filterAttrs (_: p: p == 8081) m)) (
-              runAll (portsRel (lib.findFirst (yen.lib.same yen.host.lb) null hosts))
-            )
-          );
-        };
+        out = placementOf (lib.head (tree.select hostsReq)) (hostRows (lib.head (tree.select hostsReq)));
       };
   };
 }

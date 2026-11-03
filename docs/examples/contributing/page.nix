@@ -1,3 +1,28 @@
+let
+  # the reply the issue bot gives to the code blocks in issue/
+  replyOf =
+    inputs: dir:
+    import (inputs.yen + "/docs/issue/eval.nix") {
+      inherit (inputs) yen nixpkgs;
+      blocks = dir + "/issue";
+    };
+  # one row per devshell command, by group
+  commandRows = lib: commands: commandRowsIn (lib.groupBy (c: c.category) commands);
+  commandRowsIn =
+    byCategory:
+    builtins.concatMap (
+      g:
+      map (c: [
+        "`${c.name}`"
+        g
+        c.help
+      ]) byCategory.${g}
+    ) (builtins.attrNames byCategory);
+  replySummary = r: {
+    inherit (r) modules;
+    errors = map (e: { inherit (e) code from; }) r.errors;
+  };
+in
 {
   title = "Contributing";
   description = "Issues with code, pull requests that exercise the docs examples, and every generator and test, in one place.";
@@ -14,13 +39,6 @@
       lib,
       ...
     }:
-    let
-      reply = import (inputs.yen + "/docs/issue/eval.nix") {
-        inherit (inputs) yen nixpkgs;
-        blocks = dir + "/issue";
-      };
-      byCategory = lib.groupBy (c: c.category) commands;
-    in
     [
       ''
         Thank you for helping. Bug reports, questions, docs fixes, examples and engine changes are all welcome.
@@ -38,7 +56,7 @@
       ''
         CI replies with the errors, the scopes, the active aspects and the invariant check:
       ''
-      (docs.value reply)
+      (docs.value (replyOf inputs dir))
       ''
         Here the answer is in the reply: a `one` sink with two elements is an error, not an override. The evaluation is pure and
         restricted (`--restrict-eval`): a block cannot read files outside its inputs, and it has a time limit.
@@ -86,23 +104,14 @@
         }
         ```
 
-        The test `batteries.one-let` holds every kit and every template module to one `let`.
+        The test `batteries.one-let` holds every kit, template module and docs example module to one `let`.
 
         ## Set up
 
         `nix develop ./docs` from the repository root (or `nix develop` in `docs/`) gives a devshell with every command below.
         `menu` lists them. Each command runs from the repository root, whatever your directory.
       ''
-      (docs.table [ "Command" "Group" "What it does" ] (
-        lib.concatMap (
-          g:
-          map (c: [
-            "`${c.name}`"
-            g
-            c.help
-          ]) byCategory.${g}
-        ) (lib.attrNames byCategory)
-      ))
+      (docs.table [ "Command" "Group" "What it does" ] (commandRows lib commands))
       ''
         ## Generated files
 
@@ -235,21 +244,16 @@
       no,
       ...
     }:
-    let
-      reply = import (inputs.yen + "/docs/issue/eval.nix") {
-        inherit (inputs) yen nixpkgs;
-        blocks = dir + "/issue";
-      };
-    in
     {
-      reply = {
-        t1 = eq (reply.modules) (2);
-        t2 = eq (map (e: { inherit (e) code from; }) reply.errors) ([
+      # one issue eval, one comparison
+      reply = eq (replySummary (replyOf inputs dir)) {
+        modules = 2;
+        errors = [
           {
             code = "one";
             from = "fleet:main/host:web";
           }
-        ]);
+        ];
       };
     };
 }
