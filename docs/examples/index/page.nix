@@ -1,13 +1,13 @@
 {
   title = "yen";
-  description = "Nix configurations you can ask questions about, and prove things about, before you deploy.";
+  description = "Nix configurations you can prove things about, before you deploy.";
   section = "start";
   order = 0;
   route = "index";
   frontmatter = {
     template = "splash";
     hero = {
-      tagline = "Nix configurations you can ask questions about,\nand prove things about, before you deploy.";
+      tagline = "Nix configurations you can prove things about,\nbefore you deploy.";
       image.html = ''<img src="/yen.png" style="max-width: 80%" />'';
       actions = [
         {
@@ -41,8 +41,8 @@
     { docs, ... }:
     [
       ''
-        **yen is a [query](/query/queries/) language for Nix configurations.** You write plain Nix data and behavior.
-        yen answers queries on it: the NixOS, nix-darwin and home-manager systems to build, the errors,
+        **yen is a verified language for Nix configurations.** You write plain Nix data and behavior.
+        yen checks it and answers: the NixOS, nix-darwin and home-manager systems to build, the errors,
         the graph of who gives what to whom, and whether your rules hold.
       ''
       (docs.cards [

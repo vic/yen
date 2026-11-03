@@ -8,11 +8,11 @@
     { docs, result, ... }:
     [
       ''
-        yen is a [query](/query/queries/) language for Nix configurations. You declare data and behavior in plain Nix files.
-        yen answers queries on them: the systems to build, the errors, and the graph of who gives what to whom.
+        yen is a verified language for Nix configurations. You declare data and behavior in plain Nix files.
+        yen checks them and answers: the systems to build, the errors, and the graph of who gives what to whom.
 
         yen is one small Nix file. It uses Nix builtins only: no nixpkgs, no module system, no flakes.
-        It never calls `throw`. An error is data that you can query.
+        It never calls `throw`. An error is data that you can prove.
       ''
       (docs.cards [
         {

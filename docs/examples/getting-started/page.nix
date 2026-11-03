@@ -59,7 +59,7 @@
       ''
         ## Ask it
 
-        yen answers queries on the fleet. This is the scope tree of this example, generated from `result.graph`:
+        yen checks the fleet and answers. This is the scope tree of this example, generated from `result.graph`:
       ''
       (docs.scopes result)
       ''

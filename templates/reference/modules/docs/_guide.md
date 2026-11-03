@@ -1,6 +1,6 @@
 ## What yen is
 
-yen is a query language for Nix configurations. You declare data and behavior in plain Nix files. yen answers queries on them: the NixOS systems, the homes, the flake outputs, the errors, the graph.
+yen is a verified language for Nix configurations. You declare data and behavior in plain Nix files. yen checks them and answers: the NixOS systems, the homes, the flake outputs, the errors, the graph.
 
 yen is a small Nix file with no dependencies. It uses builtins only. It does not use nixpkgs, the module system or flakes. It never calls `throw`: an error is data that you query.
 

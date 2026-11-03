@@ -4,7 +4,7 @@
 
 
 **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-You describe your fleet as terms <sup>[docs](https://yen.oeiuwq.com/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes/)</sup>. Yen answers queries <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup> about it: which systems to build,
+You describe your fleet as terms <sup>[docs](https://yen.oeiuwq.com/model/kinds-fields/)</sup> and the relationships between them <sup>[docs](https://yen.oeiuwq.com/model/scopes/)</sup>. Yen checks it and answers with proof <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup>: which systems to build,
 verification errors, dependency graphs of who gives what to whom, and whether your [invariant](https://yen.oeiuwq.com/query/invariants/) rules hold across all machines.
 
 Yen is built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
@@ -399,7 +399,7 @@ Errors are not throws. They are data that agents and humans can inspect, with **
   that a small checker verifies, and a seal anyone can check again. <sup>[docs](https://yen.oeiuwq.com/query/invariants/)</sup>
 - **Changes staged before they land.** `yen.lib.stage` compares the fleet with and without a change. A grant narrows
   what a change may reach, and never widens it. <sup>[docs](https://yen.oeiuwq.com/agents/stage/)</sup>
-- **Ask your fleet anything.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
+- **Prove what holds across your fleet.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
   name once and ask from Nix, the CLI or an agent. <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup>
 - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
   run backward. <sup>[docs](https://yen.oeiuwq.com/query/krn/)</sup>

@@ -33,8 +33,8 @@ in
     in
     [
       ''
-        **yen is a [query](/query/queries/) language for Nix configurations**: one file of Nix builtins, no dependencies, no module system,
-        no fixpoint, and no `throw`. You describe a fleet as data and behavior. yen answers queries on it: the systems to build,
+        **yen is a verified language for Nix configurations**: one file of Nix builtins, no dependencies, no module system,
+        no fixpoint, and no `throw`. You describe a fleet as data and behavior. yen checks it and answers: the systems to build,
         the errors, the graph of who gives what to whom, and whether your rules hold across machines.
 
         yen is domain independent. Its engine does not know what a host, a user or NixOS is. You name your own nouns,

@@ -25,7 +25,7 @@ in
       ''
 
         **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen answers queries ${doc "/query/queries/"} about it: which systems to build,
+        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen checks it and answers with proof ${doc "/query/queries/"}: which systems to build,
         verification errors, dependency graphs of who gives what to whom, and whether your [invariant](https://yen.oeiuwq.com/query/invariants/) rules hold across all machines.
 
         Yen is built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
@@ -221,7 +221,7 @@ in
           that a small checker verifies, and a seal anyone can check again. ${doc "/query/invariants/"}
         - **Changes staged before they land.** `yen.lib.stage` compares the fleet with and without a change. A grant narrows
           what a change may reach, and never widens it. ${doc "/agents/stage/"}
-        - **Ask your fleet anything.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
+        - **Prove what holds across your fleet.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
           name once and ask from Nix, the CLI or an agent. ${doc "/query/queries/"}
         - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
           run backward. ${doc "/query/krn/"}
