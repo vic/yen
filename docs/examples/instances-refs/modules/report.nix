@@ -1,27 +1,26 @@
 { yen, lib, ... }:
 let
   hosts.instances = yen.kinds.host; # a tree request: every host, with its data
+  # the other hosts of the host's environment; `same` compares two instances by kind and name
+  peersOf =
+    tree: host:
+    lib.filter (h: !yen.lib.same h host && yen.lib.same h.environment host.environment) (
+      lib.head (tree.select hosts)
+    );
 in
 {
   yen.aspects.report = {
     at = yen.kinds.host;
     cycle =
       { tree, scope, ... }:
-      let
-        host = scope;
-        hs = lib.head (tree.select hosts);
-      in
       {
         tree = [ hosts ];
         report = [
           {
-            ${host.name} = {
-              fqdn = "${host.name}.${host.environment.domain}"; # follow a ref, read its fields
-              backup = if host.backup == null then null else host.backup.name;
-              # `same` compares two instances by kind and name
-              peers = map (h: h.name) (
-                lib.filter (h: !yen.lib.same h host && yen.lib.same h.environment host.environment) hs
-              );
+            ${scope.name} = {
+              fqdn = "${scope.name}.${scope.environment.domain}"; # follow a ref, read its fields
+              backup = if scope.backup == null then null else scope.backup.name;
+              peers = map (h: h.name) (peersOf tree scope);
             };
           }
         ];

@@ -1,3 +1,14 @@
+let
+  # nixpkgs composite types check only the outer shape: each is true on a bad item; a leaf type checks it
+  shallowIn = t: {
+    list = (t.listOf t.int).check [ "a" ];
+    attrs = (t.attrsOf t.int).check { x = "a"; };
+    submodule = (t.submodule { options = { }; }).check { y = 1; };
+    function = (t.functionTo t.int).check (x: "a");
+    leaf = t.int.check "a";
+  };
+  shallow = inputs: shallowIn inputs.nixpkgs.lib.types;
+in
 {
   title = "Yen modules are not NixOS modules";
   description = "A yen module has `imports`, `yen` and sinks. yen does not use nixpkgs. Each NixOS pattern, and how to write it in yen.";
@@ -12,9 +23,6 @@
       inputs,
       ...
     }:
-    let
-      t = inputs.nixpkgs.lib.types;
-    in
     [
       ''
         A yen module looks like a NixOS module: a path, a function or an attrset, with `imports`. It is not one.
@@ -89,18 +97,10 @@
         strings:
 
         ${docs.nix ''
-          (lib.types.listOf lib.types.int).check [ "a" ]          # ${
-            builtins.toJSON ((t.listOf t.int).check [ "a" ])
-          }
-          (lib.types.attrsOf lib.types.int).check { x = "a"; }    # ${
-            builtins.toJSON ((t.attrsOf t.int).check { x = "a"; })
-          }
-          (lib.types.submodule { options = { }; }).check { y = 1; } # ${
-            builtins.toJSON ((t.submodule { options = { }; }).check { y = 1; })
-          }
-          (lib.types.functionTo lib.types.int).check (x: "a")     # ${
-            builtins.toJSON ((t.functionTo t.int).check (x: "a"))
-          }
+          (lib.types.listOf lib.types.int).check [ "a" ]          # ${builtins.toJSON (shallow inputs).list}
+          (lib.types.attrsOf lib.types.int).check { x = "a"; }    # ${builtins.toJSON (shallow inputs).attrs}
+          (lib.types.submodule { options = { }; }).check { y = 1; } # ${builtins.toJSON (shallow inputs).submodule}
+          (lib.types.functionTo lib.types.int).check (x: "a")     # ${builtins.toJSON (shallow inputs).function}
         ''}
         Use nixpkgs leaf types (`str`, `int`, `bool`, `port`, `enum`, `nullOr`) freely. For a list or an attrset
         whose items matter, use nested fields with a leaf type at each leaf, or a type that checks deep.
@@ -223,9 +223,6 @@
       no,
       ...
     }:
-    let
-      t = inputs.nixpkgs.lib.types;
-    in
     {
       nixos-style = eq (map (e: e.code) (variant "variants/nixos-style.nix").errors) ([
         "unread-sink"
@@ -256,12 +253,12 @@
       ]);
       default = eq ((builtins.head (builtins.filter (s: s.kind == "user") result.scopes)).shell) ("bash");
       # the warning is true: nixpkgs composite types check only the outer shape
-      nixpkgs-shallow = {
-        t1 = yes ((t.listOf t.int).check [ "a" ]);
-        t2 = yes ((t.attrsOf t.int).check { x = "a"; });
-        t3 = yes ((t.submodule { options = { }; }).check { y = 1; });
-        t4 = yes ((t.functionTo t.int).check (x: "a"));
-        t5 = no (t.int.check "a");
+      nixpkgs-shallow = eq (shallow inputs) {
+        list = true;
+        attrs = true;
+        submodule = true;
+        function = true;
+        leaf = false;
       };
     };
 }

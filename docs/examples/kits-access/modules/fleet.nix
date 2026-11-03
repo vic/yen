@@ -15,6 +15,7 @@ let
   hosts.instances = yen.kinds.machine;
   # what a machine gets, the NixOS values of its modules merged for the page
   merged = ms: lib.foldl' lib.recursiveUpdate { } (lib.filter lib.isAttrs ms);
+  get = tree: q: lib.head (tree.select q); # the answer of one tree request
 in
 {
   imports = [
@@ -66,9 +67,6 @@ in
       at = yen.kinds.fleet;
       cycle =
         { tree, ... }:
-        let
-          get = q: lib.head (tree.select q);
-        in
         {
           tree = [
             own
@@ -76,8 +74,8 @@ in
           ];
           errors = [
             (kits.contract {
-              assemblies = get own;
-              machines = get hosts;
+              assemblies = get tree own;
+              machines = get tree hosts;
               inherit holds;
             })
           ];

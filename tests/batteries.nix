@@ -9,6 +9,31 @@ let
   no = x: eq x false;
   nixos = yen.batteries.nixos;
   bat = yen.batteries;
+  # every .nix file under a directory
+  nixUnder =
+    d:
+    b.concatLists (
+      b.attrValues (
+        b.mapAttrs (
+          n: t:
+          if t == "directory" then
+            nixUnder (d + "/${n}")
+          else if b.match ".*\\.nix" n != null then
+            [ (d + "/${n}") ]
+          else
+            [ ]
+        ) (b.readDir d)
+      )
+    );
+  # the module files of each directory under d that has a `modules/`
+  modulesIn =
+    d:
+    b.concatMap (
+      n: if b.pathExists (d + "/${n}/modules") then nixUnder (d + "/${n}/modules") else [ ]
+    ) (b.attrNames (b.readDir d));
+  letsIn =
+    f:
+    b.length (b.filter (l: b.isString l && b.match "[ ]*let" l != null) (b.split "\n" (b.readFile f)));
   # the words of this fleet: no battery knows them. Every box gives its `sys` list as output.
   fleet =
     { yen, ... }:
@@ -900,23 +925,12 @@ let
 
   checks = {
     # #59: a kit or a template module has one top-level `let` (its bindings), never a nested one
-    one-let =
-      let
-        nixIn =
-          d: map (n: d + "/${n}") (b.filter (n: b.match ".*\\.nix" n != null) (b.attrNames (b.readDir d)));
-        lets =
-          f:
-          b.length (b.filter (l: b.isString l && b.match "[ ]*let" l != null) (b.split "\n" (b.readFile f)));
-        templates = b.attrNames (b.readDir ../templates);
-        modules = b.concatMap (
-          t:
-          if b.pathExists (../templates + "/${t}/modules") then
-            nixIn (../templates + "/${t}/modules")
-          else
-            [ ]
-        ) templates;
-      in
-      eq (map toString (b.filter (f: lets f > 1) (nixIn ../lib/kits ++ modules))) [ ];
+    # and so has every module of a docs example (#59)
+    one-let = eq (map toString (
+      b.filter (f: letsIn f > 1) (
+        nixUnder ../lib/kits ++ modulesIn ../templates ++ modulesIn ../docs/examples
+      )
+    )) [ ];
     # #97: a sink at a system scope as flake.<group>.<system>, and the inputs read at one system
     per-system =
       let

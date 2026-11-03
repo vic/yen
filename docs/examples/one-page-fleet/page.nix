@@ -1,5 +1,24 @@
 let
   link = text: path: "[${text}](${path})"; # absolute links
+  # the fleet staged with the change: a host in `lab` that uses the prod database
+  stagedOf =
+    engine: inputs: dir:
+    engine.stage {
+      base = {
+        imports = [ (inputs.import-tree (dir + "/modules")) ];
+        inherit inputs;
+        inherit (inputs.nixpkgs) lib;
+        yen.sinks = {
+          inputs = { };
+          lib = { };
+        };
+      };
+      change = dir + "/changes/api-in-lab.nix";
+    };
+  verdictOf = s: {
+    inherit (s) ok violations;
+    added = s.diff.scopes.added;
+  };
 in
 {
   title = "A fleet on one page";
@@ -16,21 +35,6 @@ in
       result,
       ...
     }:
-    let
-      base = {
-        imports = [ (inputs.import-tree (dir + "/modules")) ];
-        inherit inputs;
-        inherit (inputs.nixpkgs) lib;
-        yen.sinks = {
-          inputs = { };
-          lib = { };
-        };
-      };
-      staged = engine.stage {
-        inherit base;
-        change = dir + "/changes/api-in-lab.nix";
-      };
-    in
     [
       ''
         **yen is a verified language for Nix configurations**: one file of Nix builtins, no dependencies, no module system,
@@ -74,10 +78,7 @@ in
         the change, applies nothing, and refuses it with the rule it breaks:
       ''
       (docs.file "changes/api-in-lab.nix")
-      (docs.value {
-        inherit (staged) ok violations;
-        added = staged.diff.scopes.added;
-      })
+      (docs.value (verdictOf (stagedOf engine inputs dir)))
       ''
         ## What else it does
 
@@ -115,35 +116,22 @@ in
       no,
       ...
     }:
-    let
-      s = engine.stage {
-        base = {
-          imports = [ (inputs.import-tree (dir + "/modules")) ];
-          inherit inputs;
-          inherit (inputs.nixpkgs) lib;
-          yen.sinks = {
-            inputs = { };
-            lib = { };
-          };
-        };
-        change = dir + "/changes/api-in-lab.nix";
-      };
-    in
     {
       ok = yes (result.check.ok);
       postgres-by-fact = {
         t1 = yes (result.active.postgres."fleet:main/env:prod/host:db");
         t2 = no (result.active.postgres."fleet:main/env:prod/host:web");
       };
-      refused = {
-        t1 = no (s.ok);
-        t2 = eq (s.violations) ([
+      # one stage, one comparison: refused, with the rule it breaks
+      refused = eq (removeAttrs (verdictOf (stagedOf engine inputs dir)) [ "added" ]) {
+        ok = false;
+        violations = [
           [
             "bad"
             "db-same-env"
             "fleet:main/env:lab/host:api"
           ]
-        ]);
+        ];
       };
     };
   e2e =

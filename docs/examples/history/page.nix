@@ -4,6 +4,25 @@ let
     kind = "host";
     name = "web";
   };
+  # the fleet without the files that declare aspect `backend`
+  withoutBackend =
+    engine: module: dir:
+    engine.without {
+      files = [
+        (dir + "/modules/fleet.nix")
+        (dir + "/modules/features/backend.nix")
+      ];
+      path = [
+        "aspects"
+        "backend"
+      ];
+      args = { inherit (module) inputs lib yen; };
+    };
+  summaryOf = w: {
+    dropped = map baseNameOf w.dropped;
+    dns = w.result.flake.dns or null;
+    inherit (w.result) errors;
+  };
 in
 {
   title = "Impact, without, and time";
@@ -20,20 +39,6 @@ in
       dir,
       ...
     }:
-    let
-      files = [
-        (dir + "/modules/fleet.nix")
-        (dir + "/modules/features/backend.nix")
-      ];
-      w = engine.without {
-        inherit files;
-        path = [
-          "aspects"
-          "backend"
-        ];
-        args = { inherit (module) inputs lib yen; };
-      };
-    in
     [
       ''
         Three questions an agent asks before a change: what else does this touch, what if this were gone, and what
@@ -55,11 +60,7 @@ in
         `yen.lib.without { files; path; args; }` evaluates the fleet without the files that declare `path`.
         A whole file goes: there is no hook to remove part of one.
       ''
-      (docs.value {
-        dropped = map baseNameOf w.dropped;
-        dns = w.result.flake.dns or null;
-        errors = w.result.errors;
-      })
+      (docs.value (summaryOf (withoutBackend engine module dir)))
       ''
         ## Valid time
 
@@ -88,19 +89,6 @@ in
       no,
       ...
     }:
-    let
-      w = engine.without {
-        files = [
-          (dir + "/modules/fleet.nix")
-          (dir + "/modules/features/backend.nix")
-        ];
-        path = [
-          "aspects"
-          "backend"
-        ];
-        args = { inherit (module) inputs lib yen; };
-      };
-    in
     {
       impact = eq (map (x: x.scope) (result.impact web { }).reached) ([
         [
@@ -124,6 +112,6 @@ in
         t1 = yes (builtins.filter (s: s.kind == "host") result.scopes != [ ]);
         t2 = eq (map (s: s.name) (builtins.filter (s: s.kind == "host") result.scopes)) ([ "web" ]);
       };
-      without = eq (map baseNameOf w.dropped) ([ "backend.nix" ]);
+      without = eq (map baseNameOf (withoutBackend engine module dir).dropped) ([ "backend.nix" ]);
     };
 }

@@ -3,31 +3,28 @@
 { yen, lib, ... }:
 let
   # authority: each element is { rank; set; }. Higher rank wins per key (Leijen `shadow`); equal ranks must agree.
-  layers =
-    es:
-    let
-      sorted = lib.sort (a: b: a.value.rank < b.value.rank) es;
-    in
-    {
-      value = lib.foldl' (acc: e: lib.recursiveUpdate acc e.value.set) { } sorted;
-      errors = lib.concatLists (
-        lib.imap0 (
-          i: a:
-          lib.concatMap (
-            b:
-            lib.optional
-              (
-                a.value.rank == b.value.rank
-                && lib.intersectAttrs a.value.set b.value.set != lib.intersectAttrs b.value.set a.value.set
-              )
-              {
-                error = "aspect-settings: two layers of rank ${toString a.value.rank} disagree";
-                from = a.from.id;
-              }
-          ) (lib.drop (i + 1) es)
-        ) es
-      );
-    };
+  layers = es: {
+    value = lib.foldl' (acc: e: lib.recursiveUpdate acc e.value.set) { } (
+      lib.sort (a: b: a.value.rank < b.value.rank) es
+    );
+    errors = lib.concatLists (
+      lib.imap0 (
+        i: a:
+        lib.concatMap (
+          b:
+          lib.optional
+            (
+              a.value.rank == b.value.rank
+              && lib.intersectAttrs a.value.set b.value.set != lib.intersectAttrs b.value.set a.value.set
+            )
+            {
+              error = "aspect-settings: two layers of rank ${toString a.value.rank} disagree";
+              from = a.from.id;
+            }
+        ) (lib.drop (i + 1) es)
+      ) es
+    );
+  };
   rank = {
     schema = 0;
     contains = 1;

@@ -354,6 +354,7 @@ let
       (label (builtins.attrValues vs))
     ]);
   lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
+  appsOf = tree: (builtins.head (builtins.head (tree.select lb))).apps;
 in
 {
   yen.kinds.world.spawns.host = _: yen.host;
@@ -368,16 +369,13 @@ in
     at = yen.kinds.world;
     cycle =
       { tree, ... }:
-      let
-        apps = (builtins.head (builtins.head (tree.select lb))).apps;
-      in
       {
         tree = [ lb ];
         greetings = [
           {
             ports = {
-              first = run 1 (ports apps); # one answer
-              count = builtins.length (runAll (ports apps)); # every answer
+              first = run 1 (ports (appsOf tree)); # one answer
+              count = builtins.length (runAll (ports (appsOf tree))); # every answer
             };
           }
         ];

@@ -17,7 +17,7 @@
         each stage is an [aspect](/behavior/aspects/), and one job per system comes from the reference fleet's `ci.json`
         ([docs/modules/ci.nix](https://github.com/vic/yen/blob/main/docs/modules/ci.nix)).
       ''
-      (docs.fileWith "{17-36}" "modules/fleet.nix")
+      (docs.fileWith "{12,22,41-55}" "modules/fleet.nix")
       ''
         ## Inputs live with their users
 

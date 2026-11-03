@@ -7,6 +7,7 @@ let
   # tree requests: every assembly and machine, with their data
   assemblyTree.instances = yen.kinds.assembly;
   machineTree.instances = yen.kinds.machine;
+  get = tree: q: lib.head (tree.select q); # the answer of one tree request
 in
 {
   yen.kinds.fleet = {
@@ -50,9 +51,6 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        get = q: lib.head (tree.select q);
-      in
       {
         tree = [
           assemblyTree
@@ -60,8 +58,8 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = get assemblyTree;
-            machines = get machineTree;
+            assemblies = get tree assemblyTree;
+            machines = get tree machineTree;
             inherit holds;
           })
         ];

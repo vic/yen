@@ -1,3 +1,15 @@
+let
+  toolsOf = inputs: builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"));
+  skillOf = inputs: builtins.readFile (inputs.yen + "/skills/yen-mcp/SKILL.md");
+  # the tool names the skill mentions
+  usedIn =
+    skill:
+    builtins.filter (n: builtins.substring 0 4 n == "yen_") (
+      map (x: if builtins.isList x then builtins.head x else "") (builtins.split "(yen_[a-z_]+)" skill)
+    );
+  mentions =
+    skill: t: builtins.match ".*`${t}`.*" (builtins.replaceStrings [ "\n" ] [ " " ] skill) != null;
+in
 {
   title = "MCP server";
   description = "Agents ask a fleet over stdio JSON-RPC: schema, check, context, explain, stage, programs and stored queries.";
@@ -6,9 +18,6 @@
 
   body =
     { docs, inputs, ... }:
-    let
-      tools = builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"));
-    in
     [
       ''
         Yen ships an MCP server: `mcp/` at the top of the repository, a small Rust binary.
@@ -23,14 +32,14 @@
       ''
         ## Tools
 
-        This table is read from the tool list the server embeds (`mcp/src/tools.json`) (${toString (builtins.length tools)} tools):
+        This table is read from the tool list the server embeds (`mcp/src/tools.json`) (${toString (builtins.length (toolsOf inputs))} tools):
       ''
       (docs.table [ "Tool" "What it answers" ] (
         map (t: [
           "`${t.name}`"
           # MDX reads a bare { as a JSX expression: escape the braces in the description text
           (builtins.replaceStrings [ "{" "}" ] [ "\\{" "\\}" ] t.description)
-        ]) tools
+        ]) (toolsOf inputs)
       ))
       ''
         Each answer is `{ complete; result }`, or `{ complete = false; error }`. A timeout is never an empty answer.
@@ -79,27 +88,13 @@
       ...
     }:
     {
-      tools = eq (builtins.length (
-        builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"))
-      )) (15);
+      tools = eq (builtins.length (toolsOf inputs)) 15;
       # the agent skill names every tool the server serves, and no tool it does not
-      skill =
-        let
-          skill = builtins.readFile (inputs.yen + "/skills/yen-mcp/SKILL.md");
-          tools = map (t: t.name) (
-            builtins.fromJSON (builtins.readFile (inputs.yen + "/mcp/src/tools.json"))
-          );
-          used = builtins.filter (n: builtins.substring 0 4 n == "yen_") (
-            map (x: if builtins.isList x then builtins.head x else "") (builtins.split "(yen_[a-z_]+)" skill)
-          );
-        in
-        {
-          t1 = yes (
-            builtins.all (
-              t: builtins.match ".*`${t}`.*" (builtins.replaceStrings [ "\n" ] [ " " ] skill) != null
-            ) tools
-          );
-          t2 = yes (builtins.all (n: builtins.elem n tools) used);
-        };
+      skill = {
+        t1 = yes (builtins.all (t: mentions (skillOf inputs) t.name) (toolsOf inputs));
+        t2 = yes (
+          builtins.all (n: builtins.elem n (map (t: t.name) (toolsOf inputs))) (usedIn (skillOf inputs))
+        );
+      };
     };
 }

@@ -17,72 +17,101 @@ let
       ] s
       && yen.lib.same s.parent env
     ) result.scopes;
+  # the ports the apps on the host use
+  usedOn =
+    host: result:
+    lib.concatMap (m: lib.attrValues (builtins.fromJSON (m.environment.etc."apps/ports".text or "{}")))
+      (result.reduced.nixos.${(lib.findFirst (yen.lib.same host) { id = ""; } result.scopes).id} or [ ]);
+  freePortIn =
+    host: used: answers:
+    if answers == [ ] then
+      {
+        error = "no free port on ${host.name} in 8080..8099";
+        inherit used;
+      }
+    else
+      {
+        port = lib.head answers;
+        inherit used;
+      };
+  freePortOf =
+    host: used:
+    freePortIn host used (
+      K.run 1 (q: [ (K.infd [ q ] 8080 8099) ] ++ map (p: K.neqfd q p) used ++ [ (K.label [ q ]) ])
+    );
+  # one row per host: its name, its environment and whether it runs a database
+  rowsOf =
+    result:
+    map
+      (s: {
+        name = s.name;
+        env = s.parent.name;
+        db = s.dbRole or false;
+      })
+      (
+        lib.filter (
+          s: yen.lib.holds yen.kinds.host s && yen.lib.holds yen.kinds.environment s.parent
+        ) result.scopes
+      );
+  # the database hosts in the rows that share an environment with host
+  placeDbIn =
+    host: rows:
+    K.runAll (
+      q:
+      K.fresh (
+        {
+          env,
+          d,
+          own,
+        }:
+        [
+          (K.facto rows {
+            inherit (host) name;
+            inherit env;
+            db = own;
+          })
+          (K.facto rows {
+            name = d;
+            inherit env;
+            db = true;
+          })
+          (K.eq q d)
+        ]
+      )
+    );
+  # the dry run of placing the aspect on scope s
+  placeOn =
+    result: aspect: s:
+    yen.lib.program.dryRun {
+      base = result.root;
+      inherit result;
+      prog = [
+        {
+          op = "place";
+          aspect = aspect.__aspect;
+          inherit (s) kind name;
+        }
+      ];
+    };
+  verdictOf = tried: {
+    safe = map (x: x.name) (lib.filter (x: x.d.ok) tried);
+    refused = lib.listToAttrs (
+      map (x: {
+        name = x.name;
+        value = x.d.violations or [ ] ++ map (e: e.error) (x.d.errors or [ ]);
+      }) (lib.filter (x: !x.d.ok) tried)
+    );
+  };
 in
 {
   yen.queries = {
     freePort = {
       params.host = yen.kinds.host;
-      answer =
-        { host, result }:
-        let
-          id = (lib.findFirst (yen.lib.same host) { id = ""; } result.scopes).id;
-          used = lib.concatMap (
-            m: lib.attrValues (builtins.fromJSON (m.environment.etc."apps/ports".text or "{}"))
-          ) (result.reduced.nixos.${id} or [ ]);
-          a = K.run 1 (q: [ (K.infd [ q ] 8080 8099) ] ++ map (p: K.neqfd q p) used ++ [ (K.label [ q ]) ]);
-        in
-        if a == [ ] then
-          {
-            error = "no free port on ${host.name} in 8080..8099";
-            inherit used;
-          }
-        else
-          {
-            port = lib.head a;
-            inherit used;
-          };
+      answer = { host, result }: freePortOf host (usedOn host result);
     };
     placeDb = {
       params.host = yen.kinds.host;
-      answer =
-        { host, result }:
-        let
-          rows =
-            map
-              (s: {
-                name = s.name;
-                env = s.parent.name;
-                db = s.dbRole or false;
-              })
-              (
-                lib.filter (
-                  s: yen.lib.holds yen.kinds.host s && yen.lib.holds yen.kinds.environment s.parent
-                ) result.scopes
-              );
-        in
-        K.runAll (
-          q:
-          K.fresh (
-            {
-              env,
-              d,
-              own,
-            }:
-            [
-              (K.facto rows {
-                inherit (host) name;
-                inherit env;
-                db = own;
-              })
-              (K.facto rows {
-                name = d;
-                inherit env;
-                db = true;
-              })
-              (K.eq q d)
-            ]
-          )
-        );
+      answer = { host, result }: placeDbIn host (rowsOf result);
     };
     safeHostsFor = {
       params = {
@@ -95,34 +124,12 @@ in
           env,
           result,
         }:
-        let
-          try =
-            s:
-            yen.lib.program.dryRun {
-              base = result.root;
-              inherit result;
-              prog = [
-                {
-                  op = "place";
-                  aspect = aspect.__aspect;
-                  inherit (s) kind name;
-                }
-              ];
-            };
-          tried = map (s: {
+        verdictOf (
+          map (s: {
             inherit (s) name;
-            d = try s;
-          }) (machinesIn result env);
-        in
-        {
-          safe = map (x: x.name) (lib.filter (x: x.d.ok) tried);
-          refused = lib.listToAttrs (
-            map (x: {
-              name = x.name;
-              value = x.d.violations or [ ] ++ map (e: e.error) (x.d.errors or [ ]);
-            }) (lib.filter (x: !x.d.ok) tried)
-          );
-        };
+            d = placeOn result aspect s;
+          }) (machinesIn result env)
+        );
     };
   };
 }

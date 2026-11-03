@@ -1,3 +1,6 @@
+let
+  query = inputs: dir: import (dir + "/default.nix") { inherit (inputs) yen nixpkgs import-tree; };
+in
 {
   title = "Project layout";
   description = "One module tree, two entry points: a flake, or plain Nix with default.nix.";
@@ -61,13 +64,10 @@
       no,
       ...
     }:
-    let
-      q = import (dir + "/default.nix") { inherit (inputs) yen nixpkgs import-tree; };
-    in
     {
       same-queries = {
-        t1 = eq (q.errors) ([ ]);
-        t2 = eq (q.graph) (result.graph);
+        t1 = eq ((query inputs dir).errors) ([ ]);
+        t2 = eq ((query inputs dir).graph) (result.graph);
       };
     };
   e2e =
@@ -80,11 +80,8 @@
       no,
       ...
     }:
-    let
-      q = import (dir + "/default.nix") { inherit (inputs) yen nixpkgs import-tree; };
-    in
     {
-      same-system = eq (q.flake.nixosConfigurations.laptop.config.system.build.toplevel.drvPath) (
+      same-system = eq ((query inputs dir).flake.nixosConfigurations.laptop.config.system.build.toplevel.drvPath) (
         flake.nixosConfigurations.laptop.config.system.build.toplevel.drvPath
       );
     };

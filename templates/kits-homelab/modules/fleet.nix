@@ -17,21 +17,6 @@ let
   hostTree.instances = yen.kinds.host;
   machineOf = s: if holds yen.kinds.member s then s.parent else s;
   get = tree: q: lib.head (tree.select q);
-  # the generators that exports carry to this host (their `deploy` holds), as one generator
-  exportedTo =
-    scope:
-    lib.concatMap (
-      x: lib.filter (g: holds g.deploy scope) (lib.attrValues (x.value.generators or { }))
-    );
-  fromExports =
-    gens:
-    if gens == [ ] then
-      null
-    else
-      {
-        name = "from-exports";
-        files = lib.foldl' (a: g: a // g.files) { } gens;
-      };
 in
 {
   yen.kinds.fleet = {
@@ -117,7 +102,7 @@ in
   # a generator that an export carries goes to the machines of its `deploy` predicate
   yen.aspects.generators-from-exports = {
     at = yen.kinds.host;
-    generators = { scope, exports, ... }: fromExports (exportedTo scope exports);
+    generators = yen.lib.batteries.vars.from-exports { inherit holds; };
   };
   # the disks kit disko gave a host become its `disko.devices`
   yen.aspects.disko-devices = {

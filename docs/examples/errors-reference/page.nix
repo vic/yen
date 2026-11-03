@@ -107,9 +107,6 @@ in
 
   body =
     { docs, inputs, ... }:
-    let
-      codes = codesOf (engineText inputs.yen);
-    in
     [
       ''
         An error record has `error` and `from` for people, and `code`, `path`, `got`, `want`, `fix`, `class` and `near`
@@ -120,7 +117,7 @@ in
         map (c: [
           "`${c}`"
           (meaning.${c} or "")
-        ]) codes
+        ]) (codesOf (engineText inputs.yen))
       ))
       (docs.links [
         {

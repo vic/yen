@@ -1,3 +1,22 @@
+let
+  sort = builtins.sort builtins.lessThan;
+  # the facts of a NixOS config that Den and yen must agree on: tux's account and home, the system
+  factsOf = u: h: c: {
+    user = {
+      inherit (u) isNormalUser home name;
+      groups = sort u.extraGroups;
+    };
+    home = {
+      inherit (h.home) username homeDirectory stateVersion;
+      packages = sort (map (p: p.name) h.home.packages);
+    };
+    system = {
+      inherit (c.system) stateVersion;
+      hello = builtins.any (p: (p.pname or "") == "hello") c.environment.systemPackages;
+    };
+  };
+  fp = c: factsOf c.users.users.tux c.home-manager.users.tux c;
+in
 {
   title = "From Den";
   description = "Den's hosts, users, aspects, includes, defaults and batteries, in yen's four words.";
@@ -212,32 +231,10 @@
       no,
       ...
     }:
-    let
-      sort = builtins.sort builtins.lessThan;
-      fp =
-        c:
-        let
-          u = c.users.users.tux;
-          h = c.home-manager.users.tux;
-        in
-        {
-          user = {
-            inherit (u) isNormalUser home name;
-            groups = sort u.extraGroups;
-          };
-          home = {
-            inherit (h.home) username homeDirectory stateVersion;
-            packages = sort (map (p: p.name) h.home.packages);
-          };
-          system = {
-            inherit (c.system) stateVersion;
-            hello = builtins.any (p: (p.pname or "") == "hello") c.environment.systemPackages;
-          };
-        };
-      den = ((import (dir + "/before/flake.nix")).outputs inputs).nixosConfigurations.igloo.config;
-    in
     {
-      same-facts = eq (fp den) (fp flake.nixosConfigurations.igloo.config);
+      same-facts = eq (fp
+        ((import (dir + "/before/flake.nix")).outputs inputs).nixosConfigurations.igloo.config
+      ) (fp flake.nixosConfigurations.igloo.config);
       ports = eq (flake.nixosConfigurations.igloo.config.networking.firewall.allowedTCPPorts) ([
         22
         3000

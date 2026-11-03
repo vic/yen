@@ -21,6 +21,18 @@ let
         zone = domain.name;
       };
   };
+  # tree requests: the guests this host spawns, lb (the same request as guard asks: the same answer), every environment
+  guests.children = yen.kinds.guest;
+  lb.scopesOf = yen.host.lb;
+  envs.instances = yen.kinds.environment;
+  guardRun =
+    tree:
+    yen.helpers.guard {
+      scope.settings.guard.enable = true;
+      inherit tree;
+    };
+  publicEnvs =
+    tree: lib.length (lib.filter (e: e.dns.publicIPv4 != null) (lib.head (tree.select envs)));
 in
 {
   # served-domains ⋈ gateway-upstreams by host, in the cluster's environment; `exclude` drops names.
@@ -76,9 +88,6 @@ in
     ];
     cycle =
       { tree, ... }:
-      let
-        guests.children = yen.kinds.guest; # a tree request: the guests this host spawns
-      in
       {
         tree = [ guests ];
         nixos.environment.etc."vfio/ids".text = lib.concatStringsSep "," (
@@ -108,17 +117,10 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        lb.scopesOf = yen.host.lb; # the same request as guard asks: the same answer
-        run = yen.helpers.guard {
-          scope.settings.guard.enable = true;
-          inherit tree;
-        };
-      in
       {
         tree = [ lb ];
         unit-checks = [
-          { guard-pod = (lib.head run.k8s-manifests).applications.guard.hub == "alice@lb"; }
+          { guard-pod = (lib.head (guardRun tree).k8s-manifests).applications.guard.hub == "alice@lb"; }
         ];
       };
   };
@@ -128,14 +130,12 @@ in
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        envs.instances = yen.kinds.environment; # a tree request: every environment, with its data
-        n = lib.length (lib.filter (e: e.dns.publicIPv4 != null) (lib.head (tree.select envs)));
-      in
       {
         tree = [ envs ];
         errors = [
-          (lib.optional (n > 1) "dns: ${toString n} environments set dns.publicIPv4, at most one may")
+          (lib.optional (
+            publicEnvs tree > 1
+          ) "dns: ${toString (publicEnvs tree)} environments set dns.publicIPv4, at most one may")
         ];
       };
   };

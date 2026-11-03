@@ -25,7 +25,7 @@
         Clients publish their address to a fleet sink with `elements`. The engine sets `from`, so a member can only publish
         as itself. The server reads the elements and builds its allow list:
       ''
-      (docs.fileWith "{9,15}" "modules/backup.nix")
+      (docs.fileWith "{9,17}" "modules/backup.nix")
       (docs.value result.flake.config)
       (docs.tip "The full model" ''
         [Kits batteries](/batteries/kits/) add kits as data with typed role settings and errors, `at` predicates as

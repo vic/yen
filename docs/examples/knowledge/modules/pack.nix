@@ -2,21 +2,19 @@
 { yen, ... }:
 let
   whole.graph = true; # a tree request: the whole fleet
+  fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
 in
 {
   yen.aspects.pack = {
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:
-      let
-        yen = builtins.head (tree.select whole); # the whole fleet, with its data
-      in
       {
         tree = [ whole ];
         out = [
           {
             rdfPack = removeAttrs (yen.lib.rdf.share {
-              graph = yen.lib.graph;
+              graph = (fleetOf tree).lib.graph;
               active = { };
               errors = [ ];
             }) [ "ntriples" ];

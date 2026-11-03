@@ -56,6 +56,26 @@ let
     kits-homelab = (inputsOf inputs "kits-homelab" { inherit disko; }).self.outputs;
   };
   laptop = c: c.nixosConfigurations.laptop.config;
+  # agent swarm: the agent timers, the models and the endpoint of host config c
+  swarmFacts = c: {
+    timers = builtins.mapAttrs (_: t: t.timerConfig.OnCalendar) (
+      builtins.removeAttrs c.systemd.timers (
+        builtins.filter (n: builtins.substring 0 6 n != "agent-") (builtins.attrNames c.systemd.timers)
+      )
+    );
+    models = c.services.ollama.loadModels;
+    endpoint = builtins.match ".*(http://127.0.0.1:11434/v1/chat/completions).*" c.systemd.services.agent-writer.script;
+  };
+  # agent containers: their names, the read-only login, the first tools of `go`
+  containerFacts = c: {
+    names = builtins.attrNames c;
+    creds = c.go.bindMounts."/home/dev/.claude/.credentials.json".isReadOnly;
+    # the common tools, then the agent's own; NixOS adds its base packages after them
+    tools = builtins.genList (i: (builtins.elemAt c.go.config.environment.systemPackages i).pname) 6;
+  };
+  # the homelab's dummy WireGuard public key of host h, and whether a key is well formed (44 base64 chars ending in `=`)
+  wgKey = h: builtins.readFile (root + "/kits-homelab/vars/${h}/from-exports/wg-lab-wg.pub/value");
+  wellFormed = k: builtins.stringLength k == 44 && builtins.substring 43 1 k == "=";
   checksOf = eq: t: {
     minimal = eq (laptop t.minimal).networking.hostName "laptop";
     noflake = eq (laptop t.noflake).networking.hostName "laptop";
@@ -83,32 +103,18 @@ let
     basic-fleet-mac = eq t.basic-fleet.darwinConfigurations.studio.config.networking.hostName "studio";
     basic-fleet-home = eq t.basic-fleet.homeConfigurations."alice@laptop".config.home.username "alice";
     # agent swarm: one service and timer per agent, on the host's ollama endpoint
-    swarm =
-      let
-        c = (hosts t.agent-swarm).ai;
-      in
-      eq
-        {
-          timers = builtins.mapAttrs (_: t: t.timerConfig.OnCalendar) (
-            builtins.removeAttrs c.systemd.timers (
-              builtins.filter (n: builtins.substring 0 6 n != "agent-") (builtins.attrNames c.systemd.timers)
-            )
-          );
-          models = c.services.ollama.loadModels;
-          endpoint = builtins.match ".*(http://127.0.0.1:11434/v1/chat/completions).*" c.systemd.services.agent-writer.script;
-        }
-        {
-          timers = {
-            agent-planner = "weekly";
-            agent-reviewer = "daily";
-            agent-writer = "hourly";
-          };
-          models = [
-            "qwen2.5-coder:7b"
-            "llama3.2:3b"
-          ];
-          endpoint = [ "http://127.0.0.1:11434/v1/chat/completions" ];
-        };
+    swarm = eq (swarmFacts (hosts t.agent-swarm).ai) {
+      timers = {
+        agent-planner = "weekly";
+        agent-reviewer = "daily";
+        agent-writer = "hourly";
+      };
+      models = [
+        "qwen2.5-coder:7b"
+        "llama3.2:3b"
+      ];
+      endpoint = [ "http://127.0.0.1:11434/v1/chat/completions" ];
+    };
     # k8s services: two charts, two image apps, a ServiceMonitor for the app with metrics, and the apply list
     k8s = eq (builtins.attrNames t.k8s-services.k8sManifests.lab) [
       "api-deployment"
@@ -123,33 +129,22 @@ let
     ];
     k8s-apply = eq (builtins.isString t.k8s-services.packages.x86_64-linux.lab.drvPath) true;
     # agent containers: one per agent, each with its tools and the shared login, read-only
-    agents =
-      let
-        c = (hosts t.agent-containers).dev.containers;
-      in
-      eq
-        {
-          names = builtins.attrNames c;
-          creds = c.go.bindMounts."/home/dev/.claude/.credentials.json".isReadOnly;
-          # the common tools, then the agent's own; NixOS adds its base packages after them
-          tools = builtins.genList (i: (builtins.elemAt c.go.config.environment.systemPackages i).pname) 6;
-        }
-        {
-          names = [
-            "go"
-            "rust"
-            "web"
-          ];
-          creds = true;
-          tools = [
-            "claude-code"
-            "git"
-            "jujutsu"
-            "nodejs"
-            "go"
-            "gopls"
-          ];
-        };
+    agents = eq (containerFacts (hosts t.agent-containers).dev.containers) {
+      names = [
+        "go"
+        "rust"
+        "web"
+      ];
+      creds = true;
+      tools = [
+        "claude-code"
+        "git"
+        "jujutsu"
+        "nodejs"
+        "go"
+        "gopls"
+      ];
+    };
     # neovim: a terminal editor and a neovide one per variant, each a derivation
     neovim-variants = eq (builtins.attrNames t.neovim.packages.x86_64-linux) [
       "go"
@@ -229,12 +224,8 @@ in
       e2e-every-template = eq (builtins.attrNames (builtOf { })) names;
       # the homelab's dummy WireGuard public keys are well formed: 44 characters of base64 ending in `=`
       homelab-wg-keys =
-        let
-          key = h: builtins.readFile (root + "/kits-homelab/vars/${h}/from-exports/wg-lab-wg.pub/value");
-          ok = k: builtins.stringLength k == 44 && builtins.substring 43 1 k == "=";
-        in
         eq
-          (builtins.map (h: ok (key h)) [
+          (builtins.map (h: wellFormed (wgKey h)) [
             "lb"
             "nas"
             "web"

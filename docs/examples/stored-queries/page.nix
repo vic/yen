@@ -1,3 +1,10 @@
+let
+  # an instance ref, as JSON gives it
+  web = {
+    kind = "host";
+    name = "web";
+  };
+in
 {
   title = "Stored queries";
   description = "Name a question once with `yen.queries`, then ask it with `result.ask` from Nix, the CLI or an agent.";
@@ -6,12 +13,6 @@
 
   body =
     { docs, result, ... }:
-    let
-      web = {
-        kind = "host";
-        name = "web";
-      }; # an instance ref, as JSON gives it
-    in
     [
       ''
         A stored [query](/query/queries/) names a question about the fleet: `{ params; answer; }`. Each parameter has a type, and it is optional when
@@ -75,12 +76,6 @@
       no,
       ...
     }:
-    let
-      web = {
-        kind = "host";
-        name = "web";
-      };
-    in
     {
       ask = eq (result.ask "aspectsOn" { host = web; }) ([
         "git"

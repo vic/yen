@@ -2,6 +2,9 @@
 { yen, lib, ... }:
 let
   inherit (yen.helpers) linux upTo;
+  # the user owns the linux machine it lives on
+  ownsMachine =
+    s: (upTo linux s).system-owner or null != null && yen.lib.same (upTo linux s).system-owner s;
 in
 {
   yen.kinds.user.sinks.homeLinux = {
@@ -21,13 +24,7 @@ in
   yen.aspects.primary-user = {
     at = yen.lib.all [
       yen.kinds.user
-      (
-        s:
-        let
-          h = upTo linux s;
-        in
-        h != null && h.system-owner != null && yen.lib.same h.system-owner s
-      )
+      ownsMachine
     ];
     nixos =
       { user, ... }:

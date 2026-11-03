@@ -20,38 +20,40 @@ let
     );
   # the GitHub source of a definition: the first line after its `#:` line that is not a comment
   githubBase = "https://github.com/vic/yen/blob/main/";
+  linesOf = f: b.filter b.isString (b.split "\n" (b.readFile f));
+  isComment = l: b.match " *#.*" l != null;
+  # the line of the definition after line i: the first that is not a comment
+  defAt =
+    ls: i: if i + 1 < b.length ls && isComment (b.elemAt ls (i + 1)) then defAt ls (i + 1) else i + 1;
+  # one entry per name of a `#:` line m; url is its definition on GitHub
+  namesEntries =
+    url: m: names:
+    map (n: {
+      name = n;
+      value = {
+        inherit names url;
+        sig = b.elemAt m 2;
+        does = b.elemAt m 3;
+      };
+    }) names;
+  entriesAt =
+    url: m:
+    if m == null then [ ] else namesEntries url m (b.filter b.isString (b.split ", " (b.elemAt m 0)));
+  fileDocsIn =
+    rel: ls:
+    b.concatLists (
+      b.genList (
+        i:
+        entriesAt "${githubBase}${rel}#L${toString (defAt ls i + 1)}" (
+          b.match " *#: ([^ ]+(, [^ ]+)*) :: (.*) -- (.*)" (b.elemAt ls i)
+        )
+      ) (b.length ls)
+    );
+  fileDocs =
+    root: f: fileDocsIn (b.substring (b.stringLength root + 1) (b.stringLength f) f) (linesOf f);
   docsOf =
     root:
-    let
-      fileDocs =
-        f:
-        let
-          ls = b.filter b.isString (b.split "\n" (b.readFile f));
-          rel = b.substring (b.stringLength root + 1) (b.stringLength f) f;
-          isComment = l: b.match " *#.*" l != null;
-          defAt = i: if i + 1 < b.length ls && isComment (b.elemAt ls (i + 1)) then defAt (i + 1) else i + 1;
-          entries =
-            i: l:
-            let
-              m = b.match " *#: ([^ ]+(, [^ ]+)*) :: (.*) -- (.*)" l;
-              names = b.filter b.isString (b.split ", " (b.elemAt m 0));
-            in
-            if m == null then
-              [ ]
-            else
-              map (n: {
-                name = n;
-                value = {
-                  inherit names;
-                  sig = b.elemAt m 2;
-                  does = b.elemAt m 3;
-                  url = "${githubBase}${rel}#L${toString (defAt i + 1)}";
-                };
-              }) names;
-        in
-        b.concatLists (b.genList (i: entries i (b.elemAt ls i)) (b.length ls));
-    in
-    b.listToAttrs (b.concatMap fileDocs ([ (root + "/default.nix") ] ++ files (root + "/lib")));
+    b.listToAttrs (b.concatMap (fileDocs root) ([ (root + "/default.nix") ] ++ files (root + "/lib")));
   # the APIs: every function and type of `(import yen).lib`, nested sets walked; the fleet-bound extras of `yen.lib`; the
   # queries of an eval result, and those of `result.check`
   leaves =
@@ -60,42 +62,122 @@ let
       b.concatMap (n: leaves (p ++ [ n ]) v.${n}) (b.attrNames v)
     else
       [ (b.concatStringsSep "." p) ];
+  # the APIs of an engine, from an eval result and the lib and facts that a module of a fleet sees
+  apisWith = engine: result: inner: {
+    lib = leaves [ "lib" ] engine;
+    fleet = map (n: "yen.lib.${n}") (b.filter (n: !(engine ? ${n})) inner.lib);
+    # the rule literals: the built-ins, then the ones each kind field and each relation gives
+    rules = map (n: "yen.facts.${n}") inner.facts ++ [
+      "yen.facts.<kind>.<field>"
+      "yen.facts.<kind>.<field>.set"
+      "yen.relations.<name>"
+    ];
+    result =
+      map (n: "result.${n}") (b.attrNames result)
+      ++ map (n: "result.check.${n}") (b.attrNames result.check);
+  };
   apisOf =
     engine:
-    let
-      result = engine.eval {
+    apisWith engine
+      (engine.eval {
         yen.kinds.top = { };
         yen.top.t = { };
-      };
-      inner =
-        (engine.eval (
-          { yen, ... }:
-          {
-            yen.kinds.top.spawns.leaf = _: { };
-            yen.kinds.leaf = { };
-            yen.top.t = { };
-            yen.flake =
-              { ... }:
-              {
-                lib = b.attrNames yen.lib;
-                facts = b.attrNames (removeAttrs yen.facts (b.attrNames yen.kinds));
-              };
-          }
-        )).flake;
-    in
-    {
-      lib = leaves [ "lib" ] engine;
-      fleet = map (n: "yen.lib.${n}") (b.filter (n: !(engine ? ${n})) inner.lib);
-      # the rule literals: the built-ins, then the ones each kind field and each relation gives
-      rules = map (n: "yen.facts.${n}") inner.facts ++ [
-        "yen.facts.<kind>.<field>"
-        "yen.facts.<kind>.<field>.set"
-        "yen.relations.<name>"
-      ];
-      result =
-        map (n: "result.${n}") (b.attrNames result)
-        ++ map (n: "result.check.${n}") (b.attrNames result.check);
-    };
+      })
+      (engine.eval (
+        { yen, ... }:
+        {
+          yen.kinds.top.spawns.leaf = _: { };
+          yen.kinds.leaf = { };
+          yen.top.t = { };
+          yen.flake =
+            { ... }:
+            {
+              lib = b.attrNames yen.lib;
+              facts = b.attrNames (removeAttrs yen.facts (b.attrNames yen.kinds));
+            };
+        }
+      )).flake;
+  cell = s: b.replaceStrings [ "|" ] [ "\\|" ] s;
+  # plain MDX text: a brace or an angle bracket would read as JSX
+  prose = s: b.replaceStrings [ "|" "<" ">" "{" "}" ] [ "\\|" "&lt;" "&gt;" "&#123;" "&#125;" ] s;
+  under = p: b.filter (n: b.substring 0 (b.stringLength p) n == p);
+  # the other names of one `#:` line: a fleet query is also a result query, so it is listed once, under `yen.lib`
+  twins = d: n: b.filter (t: t != n) d.${n}.names;
+  once = d: b.filter (n: under "yen.lib." (twins d n) == [ ]);
+  table =
+    docs: d: names:
+    docs.table [ "API" "Takes and returns" "Purpose" ] (
+      map (n: [
+        (b.concatStringsSep ", " (
+          [ "[`${n}`](${d.${n}.url})" ] ++ map (t: "`${t}`") (under "result." (twins d n))
+        ))
+        "`${cell d.${n}.sig}`"
+        (prose d.${n}.does)
+      ]) (b.filter (n: d ? ${n}) names)
+    );
+  # the namespaces of the engine lib: `lib.<s>` sets that are no function
+  subsOf =
+    engine: b.filter (n: b.isAttrs engine.${n} && !(engine.${n} ? __functor)) (b.attrNames engine);
+  # the page, from the `#:` docs d and the apis
+  pageOf =
+    docs: engine: d: apis:
+    [
+      ''
+        This page is extracted from the source when the docs are written. Each API has one line above its
+        definition: `#: <where> :: <takes> -> <returns> -- <purpose>`. A check fails when an API has no line, so the
+        page always lists every function. Each API name links to its definition on GitHub.
+
+        Words in the signatures ([Glossary](/reference/glossary/)): a *key value* is the value of a sink key, `{ scope, sinks, ... }: …`; an *out value*
+        is the value of a sink's `out` key, which gives flake outputs; a *reduce* is a sink's `reduce`; a *module* is a
+        module of the target system; a *predicate* is what `at` takes; a *view* is `{ nodes; edges; }` for
+        `mermaid.flowchart`; `succ` is a graph, an attrset from a node to its successors.
+
+        ## Outside a fleet: `(import yen).lib`
+      ''
+      (table docs d (b.filter (n: b.length (b.filter b.isString (b.split "\\." n)) == 2) apis.lib))
+    ]
+    ++ b.concatMap (s: [
+      "## `lib.${s}`"
+      (table docs d (under "lib.${s}." apis.lib))
+    ]) (subsOf engine)
+    ++ [
+      ''
+        ## Inside a fleet: `yen.lib`
+
+        Modules get the same lib, plus these predicates and queries bound to the fleet. They have no `result`: see
+        [Inside the fleet](/query/queries/#inside-the-fleet). A query that an eval result also has is listed here
+        once, with its `result` name next to it.
+      ''
+      (table docs d apis.fleet)
+      ''
+        ## Rules: `yen.facts` and `yen.relations`
+
+        A rule is a function of its variables, `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. Its literals come
+        from these references, never from strings. See [Invariants](/query/invariants/).
+      ''
+      (table docs d apis.rules)
+      ''
+        ## Queries of an eval result: `result = yen.lib.eval module`
+      ''
+      (table docs d (once d apis.result))
+      (docs.links [
+        {
+          title = "Queries";
+          href = "/query/queries/";
+          description = "What each query answers, with examples.";
+        }
+        {
+          title = "Error codes";
+          href = "/reference/errors/";
+          description = "Every error record yen can give.";
+        }
+      ])
+    ];
+  # every API has its line, and every line names an API
+  checksOf = eq: d: apis: {
+    undocumented = eq (b.filter (n: !(d ? ${n})) apis) [ ];
+    stale = eq (b.filter (n: !(b.elem n apis)) (b.attrNames d)) [ ];
+  };
 in
 {
   title = "API reference";
@@ -110,81 +192,7 @@ in
       inputs,
       ...
     }:
-    let
-      d = docsOf inputs.yen.outPath;
-      apis = apisOf engine;
-      cell = s: b.replaceStrings [ "|" ] [ "\\|" ] s;
-      # plain MDX text: a brace or an angle bracket would read as JSX
-      prose = s: b.replaceStrings [ "|" "<" ">" "{" "}" ] [ "\\|" "&lt;" "&gt;" "&#123;" "&#125;" ] s;
-      table =
-        names:
-        docs.table [ "API" "Takes and returns" "Purpose" ] (
-          map (n: [
-            (b.concatStringsSep ", " (
-              [ "[`${n}`](${d.${n}.url})" ] ++ map (t: "`${t}`") (under "result." (twins n))
-            ))
-            "`${cell d.${n}.sig}`"
-            (prose d.${n}.does)
-          ]) (b.filter (n: d ? ${n}) names)
-        );
-      under = p: b.filter (n: b.substring 0 (b.stringLength p) n == p);
-      # the other names of one `#:` line: a fleet query is also a result query, so it is listed once, under `yen.lib`
-      twins = n: b.filter (t: t != n) d.${n}.names;
-      once = b.filter (n: under "yen.lib." (twins n) == [ ]);
-      subs = b.filter (n: b.isAttrs engine.${n} && !(engine.${n} ? __functor)) (b.attrNames engine);
-    in
-    [
-      ''
-        This page is extracted from the source when the docs are written. Each API has one line above its
-        definition: `#: <where> :: <takes> -> <returns> -- <purpose>`. A check fails when an API has no line, so the
-        page always lists every function. Each API name links to its definition on GitHub.
-
-        Words in the signatures ([Glossary](/reference/glossary/)): a *key value* is the value of a sink key, `{ scope, sinks, ... }: …`; an *out value*
-        is the value of a sink's `out` key, which gives flake outputs; a *reduce* is a sink's `reduce`; a *module* is a
-        module of the target system; a *predicate* is what `at` takes; a *view* is `{ nodes; edges; }` for
-        `mermaid.flowchart`; `succ` is a graph, an attrset from a node to its successors.
-
-        ## Outside a fleet: `(import yen).lib`
-      ''
-      (table (b.filter (n: b.length (b.filter b.isString (b.split "\\." n)) == 2) apis.lib))
-    ]
-    ++ b.concatMap (s: [
-      "## `lib.${s}`"
-      (table (under "lib.${s}." apis.lib))
-    ]) subs
-    ++ [
-      ''
-        ## Inside a fleet: `yen.lib`
-
-        Modules get the same lib, plus these predicates and queries bound to the fleet. They have no `result`: see
-        [Inside the fleet](/query/queries/#inside-the-fleet). A query that an eval result also has is listed here
-        once, with its `result` name next to it.
-      ''
-      (table apis.fleet)
-      ''
-        ## Rules: `yen.facts` and `yen.relations`
-
-        A rule is a function of its variables, `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. Its literals come
-        from these references, never from strings. See [Invariants](/query/invariants/).
-      ''
-      (table apis.rules)
-      ''
-        ## Queries of an eval result: `result = yen.lib.eval module`
-      ''
-      (table (once apis.result))
-      (docs.links [
-        {
-          title = "Queries";
-          href = "/query/queries/";
-          description = "What each query answers, with examples.";
-        }
-        {
-          title = "Error codes";
-          href = "/reference/errors/";
-          description = "Every error record yen can give.";
-        }
-      ])
-    ];
+    pageOf docs engine (docsOf inputs.yen.outPath) (apisOf engine);
 
   checks =
     {
@@ -193,13 +201,5 @@ in
       eq,
       ...
     }:
-    let
-      d = docsOf inputs.yen.outPath;
-      apis = b.concatLists (b.attrValues (apisOf engine));
-    in
-    {
-      # every API has its line, and every line names an API
-      undocumented = eq (b.filter (n: !(d ? ${n})) apis) [ ];
-      stale = eq (b.filter (n: !(b.elem n apis)) (b.attrNames d)) [ ];
-    };
+    checksOf eq (docsOf inputs.yen.outPath) (b.concatLists (b.attrValues (apisOf engine)));
 }

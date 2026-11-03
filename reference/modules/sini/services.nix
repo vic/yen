@@ -5,6 +5,9 @@ let
   inherit (yen.lib) all opt;
   inherit (yen.lib.reduce) elements;
   named = n: lib.filter (e: e.value.name == n);
+  users.instances = yen.kinds.user; # tree requests: every user, group and lb, with their data
+  groups.instances = yen.kinds.group;
+  lb.scopesOf = yen.host.lb;
 in
 {
   # Users whose oauth groups meet the environment's grants: identities only, no unix account (helpers.usersOn).
@@ -13,10 +16,6 @@ in
     at = yen.kinds.environment;
     cycle =
       { tree, scope, ... }:
-      let
-        users.instances = yen.kinds.user; # tree requests: every user and group, with their data
-        groups.instances = yen.kinds.group;
-      in
       {
         tree = [
           users
@@ -90,9 +89,6 @@ in
   };
   yen.helpers.guard =
     { tree, scope, ... }:
-    let
-      lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
-    in
     {
       tree = [ lb ];
       k8s-manifests = [

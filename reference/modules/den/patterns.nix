@@ -8,6 +8,9 @@
 let
   inherit (yen.lib) all within;
   pkgs = s: inputs.nixpkgs.legacyPackages.${s};
+  # tree requests: the users and the pets this host spawns
+  users.children = yen.kinds.user;
+  pets.children = yen.kinds.pet;
 in
 {
   # #22 #23 pets and toys under hosts. A host-level cycle pairs every user with every pet (cartesian);
@@ -31,10 +34,6 @@ in
     at = yen.kinds.host;
     cycle =
       { tree, ... }:
-      let
-        users.children = yen.kinds.user;
-        pets.children = yen.kinds.pet;
-      in
       {
         tree = [
           users

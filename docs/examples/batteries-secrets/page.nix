@@ -1,3 +1,11 @@
+let
+  # the text of each file the repo scope writes
+  textsOf =
+    result:
+    builtins.foldl' (
+      a: m: a // builtins.mapAttrs (_: f: f.text) m.files.file
+    ) { } result.reduced.files."repo:main";
+in
 {
   title = "Caches and secrets batteries";
   description = "cachix caches trusted by hosts and the flake, pushed from CI; secretspec.toml and .sops.yaml from what each feature declares.";
@@ -11,11 +19,6 @@
       result,
       ...
     }:
-    let
-      texts = builtins.foldl' (
-        a: m: a // builtins.mapAttrs (_: f: f.text) m.files.file
-      ) { } result.reduced.files."repo:main";
-    in
     [
       ''
         | Battery | Value of | Gives |
@@ -33,8 +36,8 @@
       (docs.file "modules/caches.nix")
       (docs.value result.flake.nixConfig)
       (docs.file "modules/secrets.nix")
-      (docs.code "toml" texts."secretspec.toml")
-      (docs.code "yaml" texts.".sops.yaml")
+      (docs.code "toml" (textsOf result)."secretspec.toml")
+      (docs.code "yaml" (textsOf result).".sops.yaml")
     ];
 
   checks =
@@ -45,24 +48,19 @@
       no,
       ...
     }:
-    let
-      texts = builtins.foldl' (
-        a: m: a // builtins.mapAttrs (_: f: f.text) m.files.file
-      ) { } result.reduced.files."repo:main";
-    in
     {
       flake-config = eq (result.flake.nixConfig.extra-substituters) ([
         "https://nix-community.cachix.org"
       ]);
-      secretspec = eq (texts."secretspec.toml") (
+      secretspec = eq ((textsOf result)."secretspec.toml") (
         "[defaults]\nproviders = [\"keyring\"]\n\n[profiles.default]\nDATABASE_URL = { description = \"PostgreSQL connection string\" }\n\n[profiles.development]\nDATABASE_URL = { default = \"sqlite://./dev.db\", required = false }\n\n[project]\nname = \"my-app\"\n"
       );
-      sops = eq (texts.".sops.yaml") (
+      sops = eq ((textsOf result).".sops.yaml") (
         "\"creation_rules\":\n  -\n    \"age\": \"age1db\"\n    \"path_regex\": \"secrets/db/.*\"\n"
       );
       action = yes (
         builtins.match ".*cachix/cachix-action@v17.*" (
-          builtins.replaceStrings [ "\n" ] [ " " ] texts.".github/workflows/build.yml"
+          builtins.replaceStrings [ "\n" ] [ " " ] (textsOf result).".github/workflows/build.yml"
         ) != null
       );
     };
@@ -75,13 +73,14 @@
       no,
       ...
     }:
-    let
-      c = flake.nixosConfigurations.build.config;
-    in
     {
-      substituters = yes (builtins.elem "https://nix-community.cachix.org" c.nix.settings.substituters);
+      substituters = yes (
+        builtins.elem "https://nix-community.cachix.org" flake.nixosConfigurations.build.config.nix.settings.substituters
+      );
       keys = yes (
-        builtins.any (k: builtins.substring 0 13 k == "nix-community") c.nix.settings.trusted-public-keys
+        builtins.any (
+          k: builtins.substring 0 13 k == "nix-community"
+        ) flake.nixosConfigurations.build.config.nix.settings.trusted-public-keys
       );
     };
 }

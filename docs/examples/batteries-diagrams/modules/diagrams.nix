@@ -4,46 +4,41 @@ let
   whole.graph = true; # a tree request: the whole fleet
   inherit (yen.lib.batteries) mermaid;
   draw = direction: view: mermaid.flowchart { inherit direction; } view;
+  # the diagrams of a fleet: `fleet` is the whole fleet, with its data, that the tree request selects
+  diagramsOf = fleet: {
+    # each environment as a subgraph around its hosts
+    scopes = draw "TD" (
+      mermaid.scopes {
+        keep = s: !(fleet.lib.holds fleet.kinds.fleet s);
+        label = s: s.name;
+        group = s: if fleet.lib.holds fleet.kinds.host s then dirOf s.id else null; # hosts inside their environment (the parent id)
+      } fleet.lib.graph
+    );
+    kinds = draw "LR" (mermaid.kinds fleet.kinds);
+    gates = draw "LR" (mermaid.gates fleet.aspects);
+    routes = draw "BT" (mermaid.routes fleet.lib.graph);
+    # kind level: kind -> sink -> kind, counted; sinks as rounded nodes, outputs as cylinders
+    routing = mermaid.flowchart {
+      shapes = {
+        sink = mermaid.shapes.round;
+      };
+    } (mermaid.routing fleet.lib.graph);
+    sinks = mermaid.flowchart {
+      shapes = {
+        sink = mermaid.shapes.round;
+        output = mermaid.shapes.cylinder;
+      };
+    } (mermaid.sinks fleet.lib);
+  };
 in
 {
   yen.aspects.diagrams = {
     at = yen.fleet.main;
     cycle =
       { tree, ... }:
-      let
-        yen = builtins.head (tree.select whole); # the whole fleet, with its data
-      in
       {
         tree = [ whole ];
-        out = [
-          {
-            diagrams = {
-              # each environment as a subgraph around its hosts
-              scopes = draw "TD" (
-                mermaid.scopes {
-                  keep = s: !(yen.lib.holds yen.kinds.fleet s);
-                  label = s: s.name;
-                  group = s: if yen.lib.holds yen.kinds.host s then dirOf s.id else null; # hosts inside their environment (the parent id)
-                } yen.lib.graph
-              );
-              kinds = draw "LR" (mermaid.kinds yen.kinds);
-              gates = draw "LR" (mermaid.gates yen.aspects);
-              routes = draw "BT" (mermaid.routes yen.lib.graph);
-              # kind level: kind -> sink -> kind, counted; sinks as rounded nodes, outputs as cylinders
-              routing = mermaid.flowchart {
-                shapes = with mermaid.shapes; {
-                  sink = round;
-                };
-              } (mermaid.routing yen.lib.graph);
-              sinks = mermaid.flowchart {
-                shapes = with mermaid.shapes; {
-                  sink = round;
-                  output = cylinder;
-                };
-              } (mermaid.sinks yen.lib);
-            };
-          }
-        ];
+        out = [ { diagrams = diagramsOf (builtins.head (tree.select whole)); } ];
       };
   };
 }

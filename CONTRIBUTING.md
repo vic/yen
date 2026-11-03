@@ -125,7 +125,7 @@ in
 }
 ```
 
-The test `batteries.one-let` holds every kit and every template module to one `let`.
+The test `batteries.one-let` holds every kit, template module and docs example module to one `let`.
 
 ## Set up
 
