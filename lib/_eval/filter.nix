@@ -77,12 +77,7 @@ let
     else if p ? __all then
       and3 (map (q: eval3 stack q s) p.__all)
     else if p ? __not then
-      (
-        let
-          v = eval3 (map (x: x // { neg = true; }) stack) p.__not s;
-        in
-        if v == null then null else !v
-      )
+      not3 (eval3 (map (x: x // { neg = true; }) stack) p.__not s)
     else if p ? __within then
       or3 (map (eval3 stack p.__within) (above s))
     else if p ? __below then
@@ -92,19 +87,22 @@ let
     else if p ? __kind then
       s.kind == p.__kind
     else if p ? __aspect then
-      let
-        q = p.__aspect;
-        f = frame q s;
-        hit = first (x: x.key == f.key) stack;
-      in
-      if hit != null then
-        (if hit.neg then null else false)
-      else if stack == [ ] || !cyclic.${q} then
-        s.__here.${q} # per scope: structure may depend on presence (Den #525) without the whole tree
-      else
-        eval3 (stack ++ [ f ]) (aspects.${q}.at or [ ]) s
+      aspectAt stack p.__aspect s (frame p.__aspect s)
     else
       isRef p && s.kind == p.kind && s.name == p.name;
+  not3 = v: if v == null then null else !v;
+  # aspect q at s; f: its frame; hit: f already on the stack (a cycle), or null
+  aspectAt =
+    stack: q: s: f:
+    aspect3 stack q s f (first (x: x.key == f.key) stack);
+  aspect3 =
+    stack: q: s: f: hit:
+    if hit != null then
+      (if hit.neg then null else false)
+    else if stack == [ ] || !cyclic.${q} then
+      s.__here.${q} # per scope: structure may depend on presence (Den #525) without the whole tree
+    else
+      eval3 (stack ++ [ f ]) (aspects.${q}.at or [ ]) s;
   frame = q: s: {
     key = "${q}@${s.id}";
     neg = false;
