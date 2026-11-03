@@ -10,9 +10,9 @@ let
   walk = s: x: if isVar x && s ? ${key x} then walk s s.${key x} else x;
   occurs =
     s: v: x:
-    let
-      y = walk s x;
-    in
+    occursIn s v (walk s x);
+  occursIn =
+    s: v: y:
     if isVar y then
       y.__lvar == v.__lvar
     else if b.isList y then
@@ -27,13 +27,10 @@ let
   #: lib.krn.unify :: subst -> u -> v -> subst or null -- the substitution extended so u and v are equal, with an occurs check; null when they cannot be
   unify =
     s: u: v:
-    let
-      x = walk s u;
-      y = walk s v;
-    in
-    if s == null then
-      null
-    else if isVar x && isVar y && x.__lvar == y.__lvar then
+    if s == null then null else unifyWalked s (walk s u) (walk s v);
+  unifyWalked =
+    s: x: y:
+    if isVar x && isVar y && x.__lvar == y.__lvar then
       s
     else if isVar x then
       ext s x y
@@ -69,27 +66,23 @@ let
     b.foldl' (
       acc: p:
       andThen acc (
-        a:
-        let
-          s2 = b.foldl' (s: k: unify s (var (b.fromJSON k)) p.${k}) a.s (b.attrNames p);
-        in
-        if s2 == null then
-          a # can never be equal: drop it
-        else
-          let
-            p2 = prefixOf a.s s2;
-          in
-          if p2 == { } then null else a // { neq = a.neq ++ [ p2 ]; }
+        a: neqAfter a (b.foldl' (s: k: unify s (var (b.fromJSON k)) p.${k}) a.s (b.attrNames p))
       )
     ) (st // { neq = [ ]; }) st.neq;
+  # s2: the substitution with disequality p made equal, or null
+  neqAfter =
+    a: s2:
+    if s2 == null then
+      a # can never be equal: drop it
+    else
+      neqKeep a (prefixOf a.s s2);
+  neqKeep = a: p2: if p2 == { } then null else a // { neq = a.neq ++ [ p2 ]; };
   sortInts = b.sort b.lessThan;
   inter = d1: d2: b.filter (v: b.elem v d2) d1;
   # a variable's domain: [ v ] when it is bound to an integer, null when it has none
-  domOf =
-    st: x:
-    let
-      w = walk st.s x;
-    in
+  domOf = st: x: domAt st (walk st.s x);
+  domAt =
+    st: w:
     if b.isInt w then
       [ w ]
     else if isVar w then
@@ -98,9 +91,9 @@ let
       [ ];
   setDom =
     st: x: d:
-    let
-      w = walk st.s x;
-    in
+    setDomAt st (walk st.s x) d;
+  setDomAt =
+    st: w: d:
     if d == [ ] then
       null
     else if b.isInt w then
@@ -108,19 +101,7 @@ let
     else if isVar w then
       (
         if b.length d == 1 then
-          (
-            let
-              s2 = unify st.s w (b.head d);
-            in
-            if s2 == null then
-              null
-            else
-              st
-              // {
-                s = s2;
-                dom = removeAttrs st.dom [ (key w) ];
-              }
-          )
+          bindDom st w (unify st.s w (b.head d))
         else
           st
           // {
@@ -131,6 +112,17 @@ let
       )
     else
       null;
+  # s2: the substitution with w bound to the one value of its domain, or null
+  bindDom =
+    st: w: s2:
+    if s2 == null then
+      null
+    else
+      st
+      // {
+        s = s2;
+        dom = removeAttrs st.dom [ (key w) ];
+      };
   # bound variables leave the domain table; two domain variables unified meet
   recheckDom =
     st:
@@ -141,54 +133,43 @@ let
         if !(a.dom ? ${n}) then
           a
         else
-          let
-            d = a.dom.${n};
-            w = walk a.s (var (b.fromJSON n));
-            rest = a // {
-              dom = removeAttrs a.dom [ n ];
-            };
-          in
-          if b.isInt w then
-            (if b.elem w d then rest else null)
-          else if isVar w && key w != n then
-            setDom rest w (if rest.dom ? ${key w} then inter d rest.dom.${key w} else d)
-          else if isVar w then
+          domMeet a n a.dom.${n} (walk a.s (var (b.fromJSON n))) (
             a
-          else
-            null
+            // {
+              dom = removeAttrs a.dom [ n ];
+            }
+          )
       )
     ) st (b.attrNames st.dom);
+  # variable n with domain d walks to w; rest: the state without n's domain
+  domMeet =
+    a: n: d: w: rest:
+    if b.isInt w then
+      (if b.elem w d then rest else null)
+    else if isVar w && key w != n then
+      setDom rest w (if rest.dom ? ${key w} then inter d rest.dom.${key w} else d)
+    else if isVar w then
+      a
+    else
+      null;
   step = st: b.foldl' (acc: c: andThen acc c) (andThen (recheckNeq st) recheckDom) st.fdc;
   # run every check until nothing changes (bounded: each round removes a value or binds a variable)
-  settle =
-    st:
-    let
-      go =
-        n: a:
-        if a == null || n == 0 then
-          a
-        else
-          let
-            a2 = step a;
-          in
-          if a2 == null then
-            null
-          else if a2.s == a.s && a2.dom == a.dom && a2.neq == a.neq then
-            a2
-          else
-            go (n - 1) a2;
-    in
-    go 1000 st;
+  settle = settleIn 1000;
+  settleIn = n: a: if a == null || n == 0 then a else settleTo n a (step a);
+  settleTo =
+    n: a: a2:
+    if a2 == null then
+      null
+    else if a2.s == a.s && a2.dom == a.dom && a2.neq == a.neq then
+      a2
+    else
+      settleIn (n - 1) a2;
   unit = st: {
     h = st;
     t = null;
   };
-  post =
-    st:
-    let
-      r = settle st;
-    in
-    if r == null then null else unit r;
+  post = st: unitOr (settle st);
+  unitOr = r: if r == null then null else unit r;
 
   mplus =
     s1: s2:
@@ -242,20 +223,16 @@ let
     else if s ? d then
       takeFuel n (fuel - 1) (s.d null)
     else
-      let
-        r = takeFuel (n - 1) (fuel - 1) s.t;
-      in
-      r // { answers = [ s.h ] ++ r.answers; };
+      consFuel s.h (takeFuel (n - 1) (fuel - 1) s.t);
+  consFuel = h: r: r // { answers = [ h ] ++ r.answers; };
   goal = g: if b.isList g then conj g else g;
   #: lib.krn.conj :: [ goal ] -> goal -- all goals hold (a list of goals is a conj too)
   conj = gs: st: b.foldl' (acc: g: bind acc (goal g)) (unit st) gs;
 
   #: lib.krn.walkStar :: subst -> term -> term -- the term with every bound variable replaced, deeply
-  walkStar =
-    s: x:
-    let
-      y = walk s x;
-    in
+  walkStar = s: x: walkStarIn s (walk s x);
+  walkStarIn =
+    s: y:
     if b.isList y then
       map (walkStar s) y
     else if isData y then
@@ -273,10 +250,10 @@ let
     else
       [ ];
   namesFor =
-    x:
-    let
-      vs = b.foldl' (acc: v: if b.elem v acc then acc else acc ++ [ v ]) [ ] (varsOf x);
-    in
+    x: namesOf (b.foldl' (acc: v: if b.elem v acc then acc else acc ++ [ v ]) [ ] (varsOf x));
+  # vs: the variables of a term, each once, in order
+  namesOf =
+    vs:
     b.listToAttrs (
       b.genList (i: {
         name = toString (b.elemAt vs i);
@@ -305,39 +282,44 @@ let
     };
   answer = st: reify (walkStar st.s (var 0));
   # the answer with the constraints left on its fresh variables
-  answerC =
-    st:
-    let
-      v = walkStar st.s (var 0);
-      mine = n: (namesFor v) ? ${n};
-      neqs = b.filter (p: b.all mine (b.attrNames p)) (map (p: b.mapAttrs (_: walkStar st.s) p) st.neq);
-      names = namesFor [
-        v
-        (map (
-          p:
-          map (k: [
-            (var (b.fromJSON k))
-            p.${k}
-          ]) (b.attrNames p)
-        ) neqs)
-      ]; # answer variables first, then the ones only constraints name
-    in
-    {
-      value = rename names v;
-      neq = map (
+  answerC = st: answerOf st (walkStar st.s (var 0));
+  # v: the answer term; mine: the names of its variables
+  answerOf = st: v: answerMine st v (namesFor v);
+  answerMine =
+    st: v: mine:
+    answerNeqs st v mine (
+      b.filter (p: b.all (n: mine ? ${n}) (b.attrNames p)) (
+        map (p: b.mapAttrs (_: walkStar st.s) p) st.neq
+      )
+    );
+  answerNeqs =
+    st: v: mine: neqs:
+    answerNamed st v mine neqs (namesFor [
+      v
+      (map (
         p:
         map (k: [
-          names.${k}
-          (rename names p.${k})
+          (var (b.fromJSON k))
+          p.${k}
         ]) (b.attrNames p)
-      ) neqs;
-      dom = b.listToAttrs (
-        map (n: {
-          name = names.${n};
-          value = st.dom.${n};
-        }) (b.filter mine (b.attrNames st.dom))
-      );
-    };
+      ) neqs)
+    ]); # answer variables first, then the ones only constraints name
+  answerNamed = st: v: mine: neqs: names: {
+    value = rename names v;
+    neq = map (
+      p:
+      map (k: [
+        names.${k}
+        (rename names p.${k})
+      ]) (b.attrNames p)
+    ) neqs;
+    dom = b.listToAttrs (
+      map (n: {
+        name = names.${n};
+        value = st.dom.${n};
+      }) (b.filter (n: mine ? ${n}) (b.attrNames st.dom))
+    );
+  };
 in
 {
   inherit
