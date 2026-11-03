@@ -20,7 +20,7 @@
         the rules. You keep the words: here the machine [kind](/model/kinds-fields/) is `machine` and the member kind is `member`.
 
         A kit adds no name outside itself: its data are values of the kit (`yen.kit.disko.layouts`), its aspects live
-        in the kit ([`yen.kit.sshd.aspects.server`](/behavior/aspects/#aspects-an-instance-owns)), and the
+        in the kit ([`yen.kit.sshd.aspects.server`](/behavior/aspects/#aspects-a-kind-or-an-instance-owns)), and the
         assemblies it adds are parts of the assembly that adds them (`kits.assemblies`).
 
         | Battery | Value of | Does |

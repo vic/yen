@@ -369,39 +369,108 @@ let
         in
         map (n: r.${n.key}) found;
       loaded = map (n: real.${n.key}) found;
-      # #87: an instance's `aspects` are its own (a kit's): each becomes a flat aspect named `<kind>:<instance>/<name>`,
-      # as a scope id is written, so it never clashes with an aspect a fleet names (a fleet name has no `:`)
-      ownAspects =
+      # an aspect an instance or a kind owns is named by its declaration path under `yen`, as a nested kind is:
+      # `[ "kit" "disko" "aspects" "default" ]`, `[ "kinds" "host" "aspects" "web" ]`. Its key is the path's toJSON;
+      # a name a fleet gives in `yen.aspects` never starts with `[` (reserved), so no key is shared (#87)
+      ownAspects = y: (hoistOf y).y;
+      # one module's `yen`: `owned` the aspects its instances and kinds own, `y` the value with them hoisted
+      hoistOf =
         y:
         let
           ks = filter (k: !(elem k yenKeys) && isAttrs y.${k}) (attrNames y);
-          owned = concatMap (
-            k:
-            concatMap (
-              n:
-              let
-                i = y.${k}.${n};
-              in
-              if isAttrs i && isAttrs (i.aspects or null) then
-                map (a: {
-                  name = "${k}:${n}/${a}";
-                  value = i.aspects.${a};
-                }) (attrNames i.aspects)
+          asp =
+            path: d:
+            if isAttrs d && isAttrs (d.aspects or null) then
+              map (a: {
+                name = b.toJSON (
+                  path
+                  ++ [
+                    "aspects"
+                    a
+                  ]
+                );
+                value = d.aspects.${a};
+              }) (filter (a: isAttrs d.aspects.${a}) (attrNames d.aspects))
+            else
+              [ ];
+          inst = concatMap (k: concatMap (n: asp [ k n ] y.${k}.${n}) (attrNames y.${k})) ks;
+          # a kind and its nested kinds, at every depth
+          kindAsp =
+            path: d:
+            asp path d
+            ++ (
+              if isAttrs d && isAttrs (d.kinds or null) then
+                concatMap (
+                  c:
+                  kindAsp (
+                    path
+                    ++ [
+                      "kinds"
+                      c
+                    ]
+                  ) d.kinds.${c}
+                ) (attrNames d.kinds)
               else
                 [ ]
-            ) (attrNames y.${k})
-          ) ks;
+            );
+          kindOwned =
+            if isAttrs (y.kinds or null) then
+              concatMap (k: kindAsp [ "kinds" k ] y.kinds.${k}) (attrNames y.kinds)
+            else
+              [ ];
+          # strip only what is hoisted: an `aspects` or an aspect that is no attrset stays, so its error is reported
+          noAspects =
+            v:
+            if !isAttrs v || !isAttrs (v.aspects or null) then
+              v
+            else
+              let
+                bad = b.listToAttrs (
+                  map (a: {
+                    name = a;
+                    value = v.aspects.${a};
+                  }) (filter (a: !isAttrs v.aspects.${a}) (attrNames v.aspects))
+                );
+              in
+              if bad == { } then removeAttrs v [ "aspects" ] else v // { aspects = bad; };
+          strip =
+            d:
+            if !isAttrs d then
+              d
+            else
+              noAspects d
+              // (if isAttrs (d.kinds or null) then { kinds = mapAttrs (_: strip) d.kinds; } else { });
+          owned = if isAttrs y then inst ++ kindOwned else [ ];
         in
-        if !isAttrs y || owned == [ ] then
-          y
-        else
-          mapAttrs (
-            k: v:
-            if elem k ks then mapAttrs (_: i: if isAttrs i then removeAttrs i [ "aspects" ] else i) v else v
-          ) y
-          // {
-            aspects = (y.aspects or { }) // b.listToAttrs owned;
-          };
+        {
+          inherit owned;
+          y =
+            if owned == [ ] then
+              y
+            else
+              mapAttrs (
+                k: v:
+                if k == "kinds" && isAttrs v then
+                  mapAttrs (_: strip) v
+                else if elem k ks then
+                  mapAttrs (_: noAspects) v
+                else
+                  v
+              ) y
+              // {
+                aspects = (y.aspects or { }) // b.listToAttrs owned;
+              };
+        };
+      # the keys of every owned aspect, from the hoist only: a name a fleet gives is never parsed as a key
+      ownedKeys = b.listToAttrs (
+        concatMap (
+          n:
+          map (x: {
+            inherit (x) name;
+            value = b.fromJSON x.name;
+          }) (hoistOf (n.mod.yen or { })).owned
+        ) (filter (n: n ? mod) loaded)
+      );
       defsOf = l: map (n: ownAspects (n.mod.yen or { })) (filter (n: n ? mod) l);
       # each loaded module's `yen`, its instances' aspects hoisted: what declaredIn reads, once per module
       hoisted = b.listToAttrs (
@@ -510,6 +579,8 @@ let
           __kind = id;
           check = checkOf { __kind = id; };
         }
+        # the aspects the kind owns, as refs: `yen.kinds.host.aspects.web`
+        // ownedBy aspects (declPath id)
         // (
           # #80: a `sinks` or a sink that is no attrset reads as none here; kindKeyErrors gives its error record
           if isAttrs (d.sinks or null) && isAttrs (refs.sinks or null) then
@@ -566,13 +637,28 @@ let
         }
         // (if d ? sinks then { sinks = mapAttrs (n: _: { __sink = n; }) d.sinks; } else { })
         // (if d ? kinds then { kinds = mapAttrs (_: kindRef) d.kinds; } else { })
+        // ownedBy refsYen.aspects (declPath d.__kind)
         // mapAttrs (
           f: _:
           throw "yen.kinds.${renderId d.__kind}.${f}: an aspect reads a kind only as a ref (a type, a request)"
-        ) (removeAttrs d (words "__kind check sinks kinds"));
+        ) (removeAttrs d (words "__kind check sinks kinds aspects"));
       # values come from the refs load; `at` reads data: stage diffs where aspects are active and where sinks receive
       withAt = d: v: v // (if d ? at then { inherit (d) at; } else { });
-      aspects = mapAttrs (n: a: withAt top.aspects.${n} (a // { __aspect = n; })) (
+      # an aspect a kind owns runs, by default, on the scopes of that kind, as a nested kind is spawned by default
+      ownerKind =
+        n:
+        let
+          p = ownedKeys.${n} or [ ];
+          ids = b.genList (i: b.elemAt p (2 * i + 1)) ((length p - 2) / 2);
+        in
+        if p == [ ] || head p != "kinds" then
+          null
+        else if length ids == 1 then
+          head ids
+        else
+          ids;
+      atOf = n: d: if d ? at || ownerKind n == null then d else d // { at = [ (kindAt (ownerKind n)) ]; };
+      aspects = mapAttrs (n: a: withAt (atOf n top.aspects.${n}) (a // { __aspect = n; })) (
         topRefs.aspects or { }
       );
       # a relation is called by reference: `yen.relations.rank e 3` is the atom [ "rank" e 3 ]; one of arity 0 is a literal
@@ -887,33 +973,58 @@ let
           }
         )
       ) kinds;
-      # #87: the aspects an instance owns (`<kind>:<name>/<aspect>`), as `{ aspects.<aspect> = ref; }`, or { }
+      # the owned aspects (key `[ …owner "aspects" a ]`), grouped by the owner's path: one parse per key
+      ownedIndex = b.groupBy (x: b.toJSON x.owner) (
+        map (
+          key:
+          let
+            p = ownedKeys.${key};
+          in
+          {
+            inherit key;
+            owner = b.genList (b.elemAt p) (length p - 2);
+            name = b.elemAt p (length p - 1);
+          }
+        ) (attrNames ownedKeys)
+      );
+      # the aspects an owner (an instance `[ k n ]`, a kind `[ "kinds" k … ]`) owns, as `{ aspects.<a> = ref; }`, or { }
       ownedBy =
-        refs: k: n:
+        refs: owner:
         let
-          pre = "${k}:${n}/";
-          own = filter (a: b.substring 0 (b.stringLength pre) a == pre) (attrNames (top.aspects or { }));
+          own = ownedIndex.${b.toJSON owner} or [ ];
         in
         if own == [ ] then
           { }
         else
           {
             aspects = b.listToAttrs (
-              map (a: {
-                name = b.substring (b.stringLength pre) (-1) a;
-                value = refs.${a};
+              map (x: {
+                inherit (x) name;
+                value = refs.${x.key};
               }) own
             );
           };
-      yen = mapAttrs (k: mapAttrs (n: i: i // ownedBy aspects k n)) instances // {
-        inherit kinds aspects lib;
-        helpers = top.helpers or { };
-        queries = top.queries or { };
-        invariants = top.invariants or { };
-        inherit relations; # user relations a rule derives: `<name>.arity`, called by reference
-        facts = factLits; # rule literals by reference
-        inherit labelTable;
-      }; # declarations an agent or the docs read
+      yen =
+        mapAttrs (
+          k:
+          mapAttrs (
+            n: i:
+            i
+            // ownedBy aspects [
+              k
+              n
+            ]
+          )
+        ) instances
+        // {
+          inherit kinds aspects lib;
+          helpers = top.helpers or { };
+          queries = top.queries or { };
+          invariants = top.invariants or { };
+          inherit relations; # user relations a rule derives: `<name>.arity`, called by reference
+          facts = factLits; # rule literals by reference
+          inherit labelTable;
+        }; # declarations an agent or the docs read
       # the `yen` aspects and kind sinks get: an instance is a ref, its fields are not readable; no structure queries.
       # A value reads the fleet only through its args and cycle `tree` requests, so every read is an edge.
       refsYen =
@@ -927,7 +1038,10 @@ let
               name = n;
             }
             # #87: the aspects the instance owns, as refs: `yen.kit.sshd.aspects.server`
-            // ownedBy refsYen.aspects k n
+            // ownedBy refsYen.aspects [
+              k
+              n
+            ]
             // mapAttrs (
               f: _:
               throw "yen.${k}.${n}.${f}: an aspect reads instance data only through its args: take `${k}` as an arg, or follow a ref field of an arg"
@@ -2685,6 +2799,22 @@ let
               [ (notKind decl "a kind, an attrset of kind keys") ]
             else
               bad (files decl) ([ "yen" ] ++ decl) kindKeys (attrNames d)
+              # `aspects` is an attrset of aspects, each an attrset
+              ++ (
+                if !isAttrs (d.aspects or { }) then
+                  [ (notKind (decl ++ [ "aspects" ]) "an attrset of aspects") ]
+                else
+                  map (
+                    s:
+                    notKind (
+                      decl
+                      ++ [
+                        "aspects"
+                        s
+                      ]
+                    ) "an aspect, an attrset"
+                  ) (filter (s: !isAttrs d.aspects.${s}) (attrNames (d.aspects or { })))
+              )
               # #80: `sinks` is an attrset of sinks, each an attrset
               ++ (
                 if !isAttrs (d.sinks or { }) then
@@ -2758,23 +2888,23 @@ let
         ) (attrNames (top.sinks or { }));
       # `scope` and `sinks` are fixed args: a sink of that name could never be read
       reservedErrors =
-        # #87: a `:` in an aspect a fleet names: that form is the id of an aspect an instance owns
+        # #87: a name a fleet gives in `yen.aspects` never starts with `[`: that is the key of an owned aspect
         map
           (
             n:
             errWith "declarations"
-              "aspect `${n}`: a `:` names an aspect an instance owns (`<kind>:<name>/<aspect>`)"
+              "aspect `${n}`: a name that starts with `[` is the key of an aspect an instance or a kind owns"
               {
                 code = "reserved";
                 path = [
                   "aspects"
                   n
                 ];
-                fix = "rename the aspect without `:`, or write it in its instance: `yen.<kind>.<name>.aspects.<aspect>`";
+                fix = "rename the aspect, or write it where it belongs: `yen.<kind>.<name>.aspects.<aspect>` or `yen.kinds.<kind>.aspects.<aspect>`";
               }
           )
           (
-            filter (n: b.match ".*:.*" n != null) (
+            filter (n: b.substring 0 1 n == "[") (
               concatMap (n: attrNames (n.mod.yen.aspects or { })) (filter (n: n ? mod) loaded)
             )
           )
