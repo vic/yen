@@ -80,7 +80,10 @@
     {
       write-files = yes (builtins.isString flake.packages.x86_64-linux.write-files.drvPath);
       write-flake = yes (builtins.isString flake.packages.x86_64-linux.write-flake.drvPath);
-      file-checks = eq (builtins.length (builtins.attrNames flake.checks.x86_64-linux)) (6);
+      file-checks = eq (builtins.length (
+        builtins.attrNames (removeAttrs flake.checks.x86_64-linux [ "yen-lean" ])
+      )) (6);
+      lean-check = yes (flake.checks.x86_64-linux ? yen-lean);
       numtide = yes (builtins.isString flake.devShells.x86_64-linux.repo.drvPath);
       shell = yes (builtins.isString flake.devShells.x86_64-linux.default.drvPath);
     };
