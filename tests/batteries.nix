@@ -1,4 +1,4 @@
-# Battery and sink-ref oracles. Run: nix-instantiate --eval --strict tests -A failed   (expect [ ])
+# Battery and sink-ref oracles: tests.batteries.<test> = { expr; expected; }. Run them: fastest --flake .#tests batteries
 self:
 let
   yen = self.api;

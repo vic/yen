@@ -35,7 +35,7 @@
         The engine evaluates 10,000 modules in about 20 s.
       ''
       (docs.sh ''
-        nix-instantiate --eval --strict tests -A failed   # [ ]: the engine suites
+        engine-test                                       # every suite of tests/, through tests.nix
         bash tests/cost.sh                                # PASS aspect-ref-memo, PASS reduction-memo
       '')
       (docs.tip "Where the time goes" ''

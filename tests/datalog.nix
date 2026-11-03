@@ -1,4 +1,4 @@
-# datalog oracles. Run: nix-instantiate --eval --strict tests/datalog.nix -A failed   (expect [ ])
+# datalog oracles: tests.datalog.<test> = { expr; expected; }. Run them: fastest --flake .#tests datalog
 root:
 let
   D = root.api.datalog;

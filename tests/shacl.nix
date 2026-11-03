@@ -1,4 +1,4 @@
-# yen shacl oracles. Run: nix-instantiate --eval --strict tests/shacl.nix -A failed   (expect [ ])
+# SHACL oracles: tests.shacl.<test> = { expr; expected; }. Run them: fastest --flake .#tests shacl
 self:
 let
   yen = self.api;

@@ -1,4 +1,4 @@
-# yen rdf oracles. Run: nix-instantiate --eval --strict tests/rdf.nix -A failed   (expect [ ])
+# rdf oracles: tests.rdf.<test> = { expr; expected; }. Run them: fastest --flake .#tests rdf
 self:
 let
   yen = self.api;

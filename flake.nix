@@ -29,7 +29,7 @@
       inherit (yen) lib;
       templates = import ./docs/templates.nix;
       # the engine suites, for github:denful/fastest: nix run github:denful/fastest#fastest -- --flake .#tests
-      inherit (yen) tests;
+      tests = import ./tests.nix;
       # nix run github:vic/yen#yen-cert-check -- verdict.json, nix run github:vic/yen#yen-mcp
       packages = perSystem (t: t);
       apps = perSystem (

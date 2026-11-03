@@ -46,150 +46,110 @@ let
   triple =
     s: p: o:
     "${s} ${p} ${o} .";
-  parentOf =
-    id:
-    let
-      m = b.match "(.*)/[^/]*" id;
-    in
-    if m == null then [ ] else b.head m;
-
+  parentIn = m: if m == null then [ ] else b.head m;
+  parentOf = id: parentIn (b.match "(.*)/[^/]*" id);
   inst = k: n: "<${base}instance/${iriPart k}/${iriPart n}>";
-  #: lib.rdf.triples :: result -> [ string ] -- the eval result as N-Triples lines, sorted
-  triples =
+  # a field value as an object: a literal, an instance IRI, or null (no triple)
+  fieldObj =
+    v:
+    if b.isString v then
+      lit v
+    else if b.isInt v then
+      "\"${toString v}\"^^<${xsd}integer>"
+    else if b.isBool v then
+      "\"${if v then "true" else "false"}\"^^<${xsd}boolean>"
+    else if b.isAttrs v && b.isString (v.kind or null) && b.isString (v.name or null) then
+      inst v.kind v.name
+    else
+      null;
+  fieldTriple =
+    n: k: o:
+    if o == null then [ ] else [ (triple n (fpred k) o) ];
+  fields =
+    n: s:
+    b.concatMap (k: fieldTriple n k (fieldObj s.${k})) (
+      b.attrNames (removeAttrs s self._core.keys.scopeMeta)
+    );
+  parentTriple = n: p: if p == [ ] then [ ] else [ (triple n (pred "parent") (iri "scope" p)) ];
+  scopeAt =
+    n: s:
+    [
+      (triple n type (iri "kind" s.kind))
+      (triple n (pred "name") (lit s.name))
+      (triple n (pred "instance") (inst s.kind s.name))
+    ]
+    ++ fields n s
+    ++ parentTriple n (parentOf s.id);
+  scopeTriples = s: scopeAt (iri "scope" s.id) s;
+  aspectTriples =
+    r: a:
+    map (id: triple (iri "scope" id) (pred "has") (iri "aspect" a)) (
+      b.filter (id: r.active.${a}.${id}) (b.attrNames r.active.${a})
+    );
+  edgeAt = n: e: [
+    (triple n (pred "sink") (lit e.sink))
+    (triple n (pred "from") (iri "scope" e.from))
+    (triple n (pred "to") (iri "scope" e.to))
+    (triple n (pred "origin") (lit e.origin))
+  ];
+  edgeTriples = e: edgeAt (iri "edge" (h16 "${e.sink}|${e.from}|${e.to}|${e.origin}")) e;
+  errorAt = n: e: [
+    (triple n (pred "message") (lit e.error))
+    (triple n (pred "at") (lit e.from))
+  ];
+  errorTriples = e: errorAt (iri "error" (h16 "${e.from}|${e.error}")) e;
+  # every instance is typed, so a ref field (an instance IRI) meets `sh:class`; data kinds have instances and no scopes
+  typed = k: n: [
+    (triple (inst k n) type (iri "kind" k))
+    (triple (inst k n) (pred "name") (lit n))
+  ];
+  scopesIn = r: r.scopes or r.graph.scopes; # inside a fleet only the graph is visible
+  instanceTriples =
     r:
-    let
-      fieldObj =
-        v:
-        if b.isString v then
-          lit v
-        else if b.isInt v then
-          "\"${toString v}\"^^<${xsd}integer>"
-        else if b.isBool v then
-          "\"${if v then "true" else "false"}\"^^<${xsd}boolean>"
-        else if b.isAttrs v && b.isString (v.kind or null) && b.isString (v.name or null) then
-          inst v.kind v.name
-        else
-          null;
-      fields =
-        n: s:
-        b.concatMap (
-          k:
-          let
-            o = fieldObj s.${k};
-          in
-          if o == null then [ ] else [ (triple n (fpred k) o) ]
-        ) (b.attrNames (removeAttrs s self._core.keys.scopeMeta));
-      scope =
-        s:
-        let
-          n = iri "scope" s.id;
-        in
-        [
-          (triple n type (iri "kind" s.kind))
-          (triple n (pred "name") (lit s.name))
-          (triple n (pred "instance") (inst s.kind s.name))
-        ]
-        ++ fields n s
-        ++ (
-          let
-            p = parentOf s.id;
-          in
-          if p == [ ] then [ ] else [ (triple n (pred "parent") (iri "scope" p)) ]
-        );
-      on = a: b.filter (id: r.active.${a}.${id}) (b.attrNames r.active.${a});
-      aspect = a: map (id: triple (iri "scope" id) (pred "has") (iri "aspect" a)) (on a);
-      edge =
-        e:
-        let
-          n = iri "edge" (h16 "${e.sink}|${e.from}|${e.to}|${e.origin}");
-        in
-        [
-          (triple n (pred "sink") (lit e.sink))
-          (triple n (pred "from") (iri "scope" e.from))
-          (triple n (pred "to") (iri "scope" e.to))
-          (triple n (pred "origin") (lit e.origin))
-        ];
-      error =
-        e:
-        let
-          n = iri "error" (h16 "${e.from}|${e.error}");
-        in
-        [
-          (triple n (pred "message") (lit e.error))
-          (triple n (pred "at") (lit e.from))
-        ];
-      # every instance is typed, so a ref field (an instance IRI) meets `sh:class`; data kinds have instances and no scopes
-      typed = k: n: [
-        (triple (inst k n) type (iri "kind" k))
-        (triple (inst k n) (pred "name") (lit n))
-      ];
-      instances =
-        b.concatLists (
-          b.attrValues (b.mapAttrs (k: ns: b.concatMap (typed k) (b.attrNames ns)) (r.data or { }))
-        )
-        ++ b.concatMap (s: typed s.kind s.name) scopes;
-      scopes = r.scopes or r.graph.scopes; # inside a fleet only the graph is visible
-      all =
-        b.concatMap scope scopes
-        ++ instances
-        ++ b.concatMap aspect (b.attrNames r.active)
-        ++ b.concatMap edge r.graph.edges
-        ++ b.concatMap error r.errors;
-      uniq = map (i: i.key) (
-        b.genericClosure {
-          startSet = map (key: { inherit key; }) all;
-          operator = _: [ ];
-        }
-      );
-    in
-    b.sort b.lessThan uniq;
-
-  #: lib.rdf.ntriples :: result -> string -- the eval result as one N-Triples document
+    b.concatLists (
+      b.attrValues (b.mapAttrs (k: ns: b.concatMap (typed k) (b.attrNames ns)) (r.data or { }))
+    )
+    ++ b.concatMap (s: typed s.kind s.name) (scopesIn r);
+  allOf =
+    r:
+    b.concatMap scopeTriples (scopesIn r)
+    ++ instanceTriples r
+    ++ b.concatMap (aspectTriples r) (b.attrNames r.active)
+    ++ b.concatMap edgeTriples r.graph.edges
+    ++ b.concatMap errorTriples r.errors;
+  #: lib.rdf.triples :: result -> [ string ] -- the eval result as N-Triples lines, sorted
+  triples = r: self._core.helpers.names (allOf r); # sorted, each line once
   textOf = ts: b.concatStringsSep "\n" ts + "\n"; # one N-Triples document
+  #: lib.rdf.ntriples :: result -> string -- the eval result as one N-Triples document
   ntriples = r: textOf (triples r);
 
   # SHACL shapes (Turtle) from r.schema; a leaf field is an attrset with a string `type`.
-  #: lib.rdf.shacl :: result -> string -- SHACL shapes (Turtle) from the result schema
-  shacl =
-    r:
-    let
-      kinds = r.schema.kinds;
-      names = b.filter (k: kinds.${k}.scopes > 0) (b.attrNames kinds);
-      kiri = k: "<${base}kind/${iriPart k}>";
-      spawners = k: b.filter (p: b.elem k kinds.${p}.spawns) (b.attrNames kinds);
-      isLeaf = f: b.isAttrs f && b.isString (f.type or null);
-      leaves =
-        fs:
-        b.concatMap (
-          n:
-          let
-            f = fs.${n};
-          in
-          if isLeaf f then [ { inherit n f; } ] else [ ]
-        ) (b.attrNames fs);
-      prop = path: extra: "  sh:property [ sh:path ${path} ;${extra} ] ;";
-      parentShape =
-        k:
-        let
-          ps = spawners k;
-        in
-        if b.length ps == 1 then " sh:class ${kiri (b.head ps)} ; sh:maxCount 1 ;" else " sh:maxCount 1 ;";
-      fieldShape =
-        l:
-        prop (fpred l.n) (" sh:maxCount 1 ;" + (if l.f ? ref then " sh:class ${kiri l.f.ref} ;" else ""));
-      shape =
-        k:
-        b.concatStringsSep "\n" (
-          [
-            "${kiri k} a sh:NodeShape ;"
-            "  sh:targetClass ${kiri k} ;"
-            (prop (pred "name") " sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;")
-            (prop (pred "parent") (parentShape k))
-          ]
-          ++ map fieldShape (leaves kinds.${k}.fields)
-          ++ [ "  ." ]
-        );
-    in
+  kiri = k: "<${base}kind/${iriPart k}>";
+  spawnersIn = kinds: k: b.filter (p: b.elem k kinds.${p}.spawns) (b.attrNames kinds);
+  isFieldLeaf = f: b.isAttrs f && b.isString (f.type or null);
+  leafOf = n: f: if isFieldLeaf f then [ { inherit n f; } ] else [ ];
+  leaves = fs: b.concatMap (n: leafOf n fs.${n}) (b.attrNames fs);
+  prop = path: extra: "  sh:property [ sh:path ${path} ;${extra} ] ;";
+  parentShapeOf =
+    ps:
+    if b.length ps == 1 then " sh:class ${kiri (b.head ps)} ; sh:maxCount 1 ;" else " sh:maxCount 1 ;";
+  fieldShape =
+    l:
+    prop (fpred l.n) (" sh:maxCount 1 ;" + (if l.f ? ref then " sh:class ${kiri l.f.ref} ;" else ""));
+  shape =
+    kinds: k:
+    b.concatStringsSep "\n" (
+      [
+        "${kiri k} a sh:NodeShape ;"
+        "  sh:targetClass ${kiri k} ;"
+        (prop (pred "name") " sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;")
+        (prop (pred "parent") (parentShapeOf (spawnersIn kinds k)))
+      ]
+      ++ map fieldShape (leaves kinds.${k}.fields)
+      ++ [ "  ." ]
+    );
+  shaclOf =
+    kinds:
     b.concatStringsSep "\n" (
       [
         "@prefix sh: <http://www.w3.org/ns/shacl#> ."
@@ -197,8 +157,10 @@ let
         "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
         ""
       ]
-      ++ map (k: shape k + "\n") names
+      ++ map (k: shape kinds k + "\n") (b.filter (k: kinds.${k}.scopes > 0) (b.attrNames kinds))
     );
+  #: lib.rdf.shacl :: result -> string -- SHACL shapes (Turtle) from the result schema
+  shacl = r: shaclOf r.schema.kinds;
   # the N-Triples of the lines ts, with their content hash and count: the triples are computed once
   shareOf = ts: shareText ts (textOf ts);
   shareText = ts: nt: {
