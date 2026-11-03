@@ -60,6 +60,15 @@
 
         A change to the engine also needs a test in `tests/engine.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
 
+        ## Write new Nix code
+
+        Follow these rules in new code under `lib/` and `tests/`:
+
+        - Do not nest `let`. Use one `let` per file.
+        - Do not use `with`. Name each attribute you use.
+        - Do not use `import`. Get a value from the `self` argument.
+        - Write a leaf file as `self: value`. If the file does not use `self`, write `_: value`.
+
         ## Set up
 
         `nix develop ./docs` from the repository root (or `nix develop` in `docs/`) gives a devshell with every command below.
