@@ -25,10 +25,10 @@ in
       ''
 
         **Yen is a minimal pure-Nix language for verified fleet configurations**: no dependencies, no nixpkgs module system.
-        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen checks it and answers with proof ${doc "/query/queries/"}: which systems to build,
-        verification errors, dependency graphs of who gives what to whom, and whether your [invariant](https://yen.oeiuwq.com/query/invariants/) rules hold across all machines.
+        You describe your fleet as terms ${doc "/model/kinds-fields/"} and the relationships between them ${doc "/model/scopes/"}. Yen checks it and answers with proof-certificate if your specified invariants hold ${doc "/query/invariants/"}: things like which systems to build,
+        verification errors, dependency graphs of who gives what to whom, can be decided before deployment.
 
-        Yen is built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
+        Yen is inspired by [Cycle.js](https://cycle.js.org) `source->sink` value propagation and built on four concepts: **kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**. The Yen kernel knows nothing about
         NixOS, but it can describe fleets over any configuration domain: NixOS, nix-darwin, home-manager, clusters, terraform, k8s,
         or anything else you can model as Nix values. You define your own domain language, and Yen uses it.
 
