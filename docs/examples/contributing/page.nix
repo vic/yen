@@ -78,14 +78,35 @@ in
 
         A change to the engine also needs a test in `tests/engine.nix`. Keep the engine to Nix builtins: no nixpkgs, no `throw`.
 
-        ## Write new Nix code
+        ## Coding standards
 
-        Follow these rules in new code under `lib/` and `tests/`:
+        A fleet author follows the [Style guide](/principles/style/). Code in yen itself follows it too, with these rules
+        for `lib/` and `tests/`. Some older files in `lib/` still nest `let`; they move to this form one at a time.
 
-        - Do not nest `let`. Use one `let` per file.
-        - Do not use `with`. Name each attribute you use.
-        - Do not use `import`. Get a value from the `self` argument.
-        - Write a leaf file as `self: value`. If the file does not use `self`, write `_: value`.
+        What works:
+
+        - One `let` per file, at the top. A binding that needs a value is a function of that value.
+        - A leaf file is `self: value`. If the file does not use `self`, write `_: value`. Read other leaves from `self`.
+        - `b = builtins;` in the `let`, then `b.map`, `b.filter`. Name each attribute you use.
+        - One `#:` line above each API: `#: <where> :: <takes> -> <returns> -- <purpose>`. The [API page](/reference/lib/)
+          is read from these lines, and a check fails when an API has none.
+        - A private file starts with `_`. The public names are only what `lib/api.nix` lists.
+        - An error is a record: `errWith from message { code; fix; }`, with a code the [error page](/reference/errors/) explains.
+        - A type, not an `if`: give a field or a sink a type (`check`, or `parse` for a composite), so bad data is an
+          error record where it enters, and the code that reads it needs no test.
+        - A ref, not a name: compare instances with `yen.lib.same`, and name kinds, sinks and aspects by their refs.
+        - Reuse the shared helpers in `lib/_core/` before you write a new one.
+        - A test is `eq expr expected` (or `yes`, `no`). Each new check comes with a mutant: change the code, see the
+          check fail, change it back. A single test runs in less than a second.
+
+        What to avoid:
+
+        - `throw`, `abort` and `assert` in new code: return an error record or an inert value.
+        - A nested `let`, `with`, `rec` and `import`.
+        - An `if` that checks data a type could check.
+        - A string where a ref belongs.
+        - The same list or function in two files: put it in `lib/_core/` once.
+        - A commit without `docs-write` and `reference-write` when the docs or the reference fleet changed.
 
         Write a Yen module (a kit, a template, an example) in one form: its bindings in one top-level `let`, its
         attributes simple assignments that use them. A binding that needs a value of an element (a `member`, a
