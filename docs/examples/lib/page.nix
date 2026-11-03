@@ -118,8 +118,7 @@ let
       ]) (b.filter (n: d ? ${n}) names)
     );
   # the namespaces of the engine lib: `lib.<s>` sets that are no function and no type
-  subsOf =
-    engine: b.filter (n: isSet engine.${n}) (b.attrNames engine);
+  subsOf = engine: b.filter (n: isSet engine.${n}) (b.attrNames engine);
   # the page, from the `#:` docs d and the apis
   pageOf =
     docs: engine: d: apis:
