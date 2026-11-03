@@ -63,7 +63,7 @@ in
       ])
       (docs.sh ''nix eval --impure --json --expr '(import ./query.nix).ask "aspectsOn" { host = { kind = "host"; name = "web"; }; }' '')
       (docs.tip "Queries that synthesize" ''
-        A stored query can return values that already meet your rules: a free port from [krn](/query/krn/), or the hosts where an
+        A stored query can return values that already meet your rules: a free port from [uKanren](/query/ukanren/), or the hosts where an
         aspect is safe from [Stage](/agents/stage/). The [MCP server](/agents/mcp/) serves stored queries to agents.
       '')
     ];

@@ -1,7 +1,7 @@
 self:
 let
   b = builtins;
-  inherit (self._krn.core)
+  inherit (self._uKanren.core)
     andThen
     conj
     domOf
@@ -11,9 +11,9 @@ let
     sortInts
     unit
     ;
-  inherit (self.krn) disj eq;
+  inherit (self.uKanren) disj eq;
   # finite domains
-  #: lib.krn.dom :: lvar -> [ int ] -> goal -- the variable takes one of these integers
+  #: lib.uKanren.dom :: lvar -> [ int ] -> goal -- the variable takes one of these integers
   dom =
     x: ds: st:
     domMeet st x (sortInts ds) (domOf st x);
@@ -21,24 +21,24 @@ let
   domMeet =
     st: x: d: cur:
     andThen (setDom st x (if cur == null then d else inter d cur)) post;
-  #: lib.krn.infd :: [ lvar ] -> lo -> hi -> goal -- each variable takes an integer in lo..hi
+  #: lib.uKanren.infd :: [ lvar ] -> lo -> hi -> goal -- each variable takes an integer in lo..hi
   infd =
     xs: lo: hi:
     conj (map (x: dom x (b.genList (i: lo + i) (hi - lo + 1))) xs);
-  #: lib.krn.propagator :: (state -> state or null) -> goal -- a finite-domain constraint, run again after every change
+  #: lib.uKanren.propagator :: (state -> state or null) -> goal -- a finite-domain constraint, run again after every change
   propagator = c: st: andThen (c (st // { fdc = st.fdc ++ [ c ]; })) post;
-  #: lib.krn.fdBound :: state -> [ lvar ] -> ([ domain ] -> state) -> state -- f on the domains, once every variable has one
+  #: lib.uKanren.fdBound :: state -> [ lvar ] -> ([ domain ] -> state) -> state -- f on the domains, once every variable has one
   fdBound =
     st: xs: f:
     fdWith f st (map (domOf st) xs);
   fdWith =
     f: st: ds:
     if b.any (d: d == null) ds then st else f ds;
-  #: lib.krn.minOf :: domain -> int -- the smallest value of a domain
+  #: lib.uKanren.minOf :: domain -> int -- the smallest value of a domain
   minOf = d: b.head d;
-  #: lib.krn.maxOf :: domain -> int -- the largest value of a domain
+  #: lib.uKanren.maxOf :: domain -> int -- the largest value of a domain
   maxOf = d: b.elemAt d (b.length d - 1);
-  #: lib.krn.lefd :: x -> y -> goal -- x <= y, by bounds propagation
+  #: lib.uKanren.lefd :: x -> y -> goal -- x <= y, by bounds propagation
   lefd =
     x: y: propagator (st: fdBound st [ x y ] (ds: lefdAt st x y (b.elemAt ds 0) (b.elemAt ds 1)));
   lefdAt =
@@ -46,7 +46,7 @@ let
     andThen (setDom st x (b.filter (v: v <= maxOf dy) dx)) (
       st2: setDom st2 y (b.filter (v: v >= minOf dx) dy)
     );
-  #: lib.krn.ltfd :: x -> y -> goal -- x < y, by bounds propagation
+  #: lib.uKanren.ltfd :: x -> y -> goal -- x < y, by bounds propagation
   ltfd =
     x: y: propagator (st: fdBound st [ x y ] (ds: ltfdAt st x y (b.elemAt ds 0) (b.elemAt ds 1)));
   ltfdAt =
@@ -54,7 +54,7 @@ let
     andThen (setDom st x (b.filter (v: v < maxOf dy) dx)) (
       st2: setDom st2 y (b.filter (v: v > minOf dx) dy)
     );
-  #: lib.krn.plusfd :: x -> y -> z -> goal -- x + y = z, by bounds propagation
+  #: lib.uKanren.plusfd :: x -> y -> z -> goal -- x + y = z, by bounds propagation
   plusfd =
     x: y: z:
     propagator (
@@ -68,7 +68,7 @@ let
         s2: setDom s2 y (b.filter (v: v >= minOf dz - maxOf dx && v <= maxOf dz - minOf dx) dy)
       )
     );
-  #: lib.krn.neqfd :: x -> y -> goal -- x != y over domains
+  #: lib.uKanren.neqfd :: x -> y -> goal -- x != y over domains
   neqfd =
     x: y: propagator (st: fdBound st [ x y ] (ds: neqfdAt st x y (b.elemAt ds 0) (b.elemAt ds 1)));
   neqfdAt =
@@ -81,7 +81,7 @@ let
       setDom st x (b.filter (v: v != b.head dy) dx)
     else
       st;
-  #: lib.krn.distinctfd :: [ lvar ] -> goal -- every two variables differ
+  #: lib.uKanren.distinctfd :: [ lvar ] -> goal -- every two variables differ
   distinctfd =
     xs:
     conj (
@@ -92,7 +92,7 @@ let
       )
     );
   # enumerate: the variable with the smallest domain first; a variable with no domain stays as it is
-  #: lib.krn.label :: [ lvar ] -> goal -- enumerate the values left in the domains, the smallest domain first
+  #: lib.uKanren.label :: [ lvar ] -> goal -- enumerate the values left in the domains, the smallest domain first
   label = xs: st: labelOpen xs st (b.filter (x: hasChoice (domOf st x)) xs);
   hasChoice = d: d != null && b.length d > 1;
   # open: the variables with a choice left; pick: the one with the smallest domain

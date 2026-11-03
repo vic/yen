@@ -1,12 +1,12 @@
 # Synthesis an agent can call (stored queries, so `ask` and the MCP server reach them). Each answer is checked
-# before it is given: krn finds values that meet the constraints, and a placement is staged against every invariant.
-# - freePort { host }          the lowest port in 8080..8099 that no app on the host uses (krn, finite domains)
-# - placeDb { host }           the database hosts of the host's own environment (krn, unification over host rows)
+# before it is given: uKanren finds values that meet the constraints, and a placement is staged against every invariant.
+# - freePort { host }          the lowest port in 8080..8099 that no app on the host uses (uKanren, finite domains)
+# - placeDb { host }           the database hosts of the host's own environment (uKanren, unification over host rows)
 # - safeHostsFor { aspect; env } the machines of `env` where the aspect can be active with no new error or violation:
 #                              each candidate is a change program, validated and staged; refusals come with their reason
 { yen, lib, ... }:
 let
-  K = yen.lib.krn;
+  K = yen.lib.uKanren;
   machinesIn =
     result: env:
     lib.filter (

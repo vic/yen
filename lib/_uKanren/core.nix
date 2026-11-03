@@ -1,9 +1,9 @@
-# The core of krn: terms, unification, the constraint store, states and streams. The API parts in lib/_krn/ read it.
+# The core of uKanren: terms, unification, the constraint store, states and streams. The API parts in lib/_uKanren/ read it.
 _:
 let
   b = builtins;
   isVar = x: b.isAttrs x && x ? __lvar;
-  #: lib.krn.var :: int -> lvar -- the logic variable number n
+  #: lib.uKanren.var :: int -> lvar -- the logic variable number n
   var = n: { __lvar = n; };
   isData = x: b.isAttrs x && !b.isFunction x && !(x ? __lvar);
   key = v: toString v.__lvar;
@@ -24,7 +24,7 @@ let
   ext =
     s: v: x:
     if occurs s v x then null else s // { ${key v} = x; };
-  #: lib.krn.unify :: subst -> u -> v -> subst or null -- the substitution extended so u and v are equal, with an occurs check; null when they cannot be
+  #: lib.uKanren.unify :: subst -> u -> v -> subst or null -- the substitution extended so u and v are equal, with an occurs check; null when they cannot be
   unify =
     s: u: v:
     if s == null then null else unifyWalked s (walk s u) (walk s v);
@@ -226,10 +226,10 @@ let
       consFuel s.h (takeFuel (n - 1) (fuel - 1) s.t);
   consFuel = h: r: r // { answers = [ h ] ++ r.answers; };
   goal = g: if b.isList g then conj g else g;
-  #: lib.krn.conj :: [ goal ] -> goal -- all goals hold (a list of goals is a conj too)
+  #: lib.uKanren.conj :: [ goal ] -> goal -- all goals hold (a list of goals is a conj too)
   conj = gs: st: b.foldl' (acc: g: bind acc (goal g)) (unit st) gs;
 
-  #: lib.krn.walkStar :: subst -> term -> term -- the term with every bound variable replaced, deeply
+  #: lib.uKanren.walkStar :: subst -> term -> term -- the term with every bound variable replaced, deeply
   walkStar = s: x: walkStarIn s (walk s x);
   walkStarIn =
     s: y:
@@ -271,15 +271,29 @@ let
     else
       y;
   reify = x: rename (namesFor x) x;
-  start =
-    f:
-    goal (f (var 0)) {
-      s = { };
-      c = 1;
-      neq = [ ];
-      dom = { };
-      fdc = [ ];
-    };
+  # the query: `q: goal` gives the value of q; `{ x, y, ... }: goal` gives { x; y; }, one variable per formal argument
+  start = f: startNamed f (b.attrNames (b.functionArgs f));
+  startNamed =
+    f: names:
+    if names == [ ] then
+      goal (f (var 0)) (state0 { } 1)
+    else
+      goal (f (varsFrom 1 names)) (state0 { "0" = varsFrom 1 names; } (1 + b.length names));
+  state0 = s: c: {
+    inherit s c;
+    neq = [ ];
+    dom = { };
+    fdc = [ ];
+  };
+  # one variable per name, numbered from c
+  varsFrom =
+    c: names:
+    b.listToAttrs (
+      b.genList (i: {
+        name = b.elemAt names i;
+        value = var (c + i);
+      }) (b.length names)
+    );
   answer = st: reify (walkStar st.s (var 0));
   # the answer with the constraints left on its fresh variables
   answerC = st: answerOf st (walkStar st.s (var 0));
@@ -356,6 +370,7 @@ in
     unify
     unit
     var
+    varsFrom
     varsOf
     walk
     walkStar

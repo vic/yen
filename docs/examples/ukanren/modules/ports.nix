@@ -1,7 +1,7 @@
 # µKanren with finite domains: give each app a port in 8080..8083, all different, prometheus before grafana.
 { yen, lib, ... }:
 let
-  inherit (yen.lib.krn)
+  inherit (yen.lib.uKanren)
     run
     runAll
     freshNamed

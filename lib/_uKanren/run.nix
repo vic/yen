@@ -1,7 +1,7 @@
 self:
 let
   b = builtins;
-  inherit (self._krn.core)
+  inherit (self._uKanren.core)
     answer
     answerC
     start
@@ -9,21 +9,21 @@ let
     takeAll
     takeFuel
     ;
-  #: lib.krn.run :: n -> (q -> goal) -> [ answer ] -- the first n answers for q
+  #: lib.uKanren.run :: n -> (q -> goal) -> [ answer ] -- the first n answers for q; `{ x, y, … }: goal` names the query variables and each answer is { x; y; }
   run = n: f: map answer (take n (start f));
-  #: lib.krn.runAll :: (q -> goal) -> [ answer ] -- every answer for q (finite searches only)
+  #: lib.uKanren.runAll :: (q -> goal) -> [ answer ] -- every answer for q (finite searches only)
   runAll = f: map answer (takeAll (start f)); # finite searches only
   # fuel-bounded search: { answers; complete; }. complete = false: fuel ran out first, answers are what was found.
-  #: lib.krn.runFuel :: n -> fuel -> (q -> goal) -> { answers; complete; } -- up to n answers in fuel steps; complete is false when the fuel ran out
+  #: lib.uKanren.runFuel :: n -> fuel -> (q -> goal) -> { answers; complete; } -- up to n answers in fuel steps; complete is false when the fuel ran out
   runFuel =
     n: fuel: f:
     fuelAnswers (takeFuel n fuel (start f));
   fuelAnswers = r: r // { answers = map answer r.answers; };
-  #: lib.krn.runAllFuel :: fuel -> (q -> goal) -> { answers; complete; } -- every answer found in fuel steps
+  #: lib.uKanren.runAllFuel :: fuel -> (q -> goal) -> { answers; complete; } -- every answer found in fuel steps
   runAllFuel = runFuel (-1);
   # maximize fuel measure f: { best; value; complete; count; }. best = first answer with the largest measure
   # (null if none). Under complete = false, best is "best found", not proven optimal.
-  #: lib.krn.maximize :: fuel -> (answer -> int) -> (q -> goal) -> { best; value; complete; count; } -- the first answer with the largest measure (best found when not complete)
+  #: lib.uKanren.maximize :: fuel -> (answer -> int) -> (q -> goal) -> { best; value; complete; count; } -- the first answer with the largest measure (best found when not complete)
   maximize =
     fuel: measure: f:
     maxIn measure (runAllFuel fuel f);
@@ -48,7 +48,7 @@ let
     count = b.length r.answers;
   };
   # with the constraints left on the answer: { value; neq; dom; }
-  #: lib.krn.runC :: n -> (q -> goal) -> [ { value; neq; dom; } ] -- the first n answers with the constraints left on them
+  #: lib.uKanren.runC :: n -> (q -> goal) -> [ { value; neq; dom; } ] -- the first n answers with the constraints left on them
   runC = n: f: map answerC (take n (start f));
 
 in

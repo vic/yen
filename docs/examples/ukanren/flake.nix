@@ -1,5 +1,5 @@
 {
-  description = "yen: krn synthesis";
+  description = "yen: uKanren synthesis";
 
   outputs =
     inputs:
