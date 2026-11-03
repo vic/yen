@@ -1,23 +1,22 @@
 # Kinds are your nouns. `spawns` builds the tree from data. Sinks collect what aspects give.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.lib) same is maybe;
+  inherit (yen.lib) maybe;
 in
 {
   yen.kinds.fleet.spawns.env = _: yen.env;
   yen.kinds.fleet.sinks.out.reduce = yen.lib.reduce.merge;
   yen.kinds.env.fields.domain = yen.lib.str;
-  yen.kinds.env.spawns.host = s: lib.filterAttrs (_: h: same h.env s) yen.host;
+  yen.kinds.env.spawns.host = yen.lib.pointing "env" yen.host;
   yen.kinds.host.fields = {
     env = yen.kinds.env;
     db = maybe yen.kinds.host;
   };
-  yen.kinds.host.spawns.user = s: lib.filterAttrs (_: u: lib.any (same s) u.on) yen.user;
+  yen.kinds.host.spawns.user = yen.lib.pointing "on" yen.user;
   yen.kinds.host.sinks.os.nixos =
     { os, ... }:
     {

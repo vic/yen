@@ -4682,6 +4682,43 @@ let
             "b"
           ]
         ]);
+    # a spawn by a ref field: one ref or a list that holds the scope; a missing field or another scope is no child
+    lib-pointing =
+      eq
+        (map (s: s.id)
+          (yen.eval (
+            { yen, ... }:
+            {
+              yen.kinds.host = {
+                spawns.user = yen.lib.pointing "hosts" yen.user;
+                spawns.guest = yen.lib.pointing "on" yen.guest;
+              };
+              yen.kinds.user.fields.hosts = yen.lib.listOf yen.kinds.host;
+              yen.kinds.guest.fields.on = yen.kinds.host;
+              yen.host = {
+                a = { };
+                b = { };
+              };
+              yen.user = {
+                both.hosts = [
+                  yen.host.a
+                  yen.host.b
+                ];
+                onlyB.hosts = [ yen.host.b ];
+                none = { };
+              };
+              yen.guest.g.on = yen.host.a;
+            }
+          )).scopes
+        )
+        [
+          "host:a"
+          "host:a/guest:g"
+          "host:a/user:both"
+          "host:b"
+          "host:b/user:both"
+          "host:b/user:onlyB"
+        ];
     lib-children-refused =
       eq
         (b.tryEval (

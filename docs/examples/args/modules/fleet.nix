@@ -1,6 +1,6 @@
-{ yen, lib, ... }:
+{ yen, ... }:
 let
-  under = s: lib.filterAttrs (_: h: yen.lib.same h.environment s) yen.host;
+  under = yen.lib.pointing "environment" yen.host;
 in
 {
   yen.kinds.fleet = {

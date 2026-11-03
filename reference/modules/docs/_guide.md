@@ -87,7 +87,7 @@ setting = path: h: yen.lib.cascade path ([ h ] ++ h.environment.delegates ++ [ h
 A scope is one instance at one place in a tree. The root kind has `spawns` and no kind spawns it. `spawns.<kind>` gives the children of a scope:
 
 ```nix
-yen.kinds.environment.spawns.host = s: lib.filterAttrs (_: h: yen.lib.same h.environment s) yen.host;
+yen.kinds.environment.spawns.host = yen.lib.pointing "environment" yen.host;
 ```
 
 The identity of a scope is its path: `fleet:main/environment:prod/host:lb`. One name can live in two places. In this fleet, `host:lb-minimal` lives under `host:lb` ([swarsel/variants.nix](modules/swarsel/variants.nix)). Names need not be unique.
@@ -408,7 +408,7 @@ In [den#739](https://github.com/denful/den/discussions/739), a Den user wants ho
 In yen, where a scope lives (`spawns`) and what it builds (`out`) are separate. The home `alice@stage` lives under host `stage`:
 
 ```nix
-yen.kinds.host.spawns.home = s: lib.filterAttrs (_: h: yen.lib.same h.on s) yen.home;
+yen.kinds.host.spawns.home = yen.lib.pointing "on" yen.home;
 yen.home."alice@stage" = { user = yen.user.alice; on = yen.host.stage; /* … */ };
 yen.aspects.monitor-env.homeManager = { monitor ? null, ... }: { home.sessionVariables.MONITORRES = monitor.resolution; };
 ```

@@ -1,12 +1,11 @@
 # Den's schema, declared: hosts build NixOS and hold users. Battery parameters are typed fields.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.lib) opt maybe is;
+  inherit (yen.lib) opt maybe;
 in
 {
   yen.kinds.fleet = {
@@ -15,7 +14,7 @@ in
   };
   yen.kinds.host = {
     fields.autologin = maybe yen.kinds.user; # den.batteries.tty-autologin "ana"
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

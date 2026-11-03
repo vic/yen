@@ -2376,6 +2376,12 @@ let
           #: result.check.invariants :: [ name ] -- the names of the invariants
           invariants = attrNames invs;
         };
+      #: yen.lib.same :: x -> y -> bool -- x and y are the same instance; a non-instance is never the same
+      same = x: y: isRef x && isRef y && x.kind == y.kind && x.name == y.name; # total: a non-instance is never the same
+      #: yen.lib.pointing :: name -> { name = instance; } -> scope -> { name = instance; } -- the instances whose field points at the scope: one ref, or a list that holds it (a `spawns` by a ref field)
+      pointing =
+        f: xs: s:
+        b.removeAttrs xs (filter (n: !any (same s) (toList (xs.${n}.${f} or [ ]))) (attrNames xs));
       lib =
         tools
         #: yen.lib.all :: [ predicate ] -> predicate -- every predicate holds
@@ -2397,8 +2403,7 @@ let
             floor
             schema
             ; # queries readable inside the fleet (docs); `check` and `context` read errors, so not here
-          #: yen.lib.same :: x -> y -> bool -- x and y are the same instance; a non-instance is never the same
-          same = x: y: isRef x && isRef y && x.kind == y.kind && x.name == y.name; # total: a non-instance is never the same
+          inherit same pointing;
           #: yen.lib.scopesOf :: instance -> [ scope ] -- the scopes of an instance
           scopesOf = x: filter (s: s.kind == x.kind && s.name == x.name) scopes;
           #: yen.lib.children :: predicate -> scope -> [ scope ] -- the children of the scope where the predicate holds, sorted

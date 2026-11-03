@@ -4,11 +4,11 @@
 # `homeConfigurations."alice@stage"`.
 { yen, lib, ... }:
 let
-  inherit (yen.lib) same maybe;
+  inherit (yen.lib) maybe;
 in
 {
   yen.kinds.home.fields.on = maybe yen.kinds.host;
-  yen.kinds.host.spawns.home = s: lib.filterAttrs (_: h: same h.on s) yen.home;
+  yen.kinds.host.spawns.home = yen.lib.pointing "on" yen.home;
   yen.kinds.host.sinks.monitor.reduce = yen.lib.reduce.merge;
   yen.kinds.home.sinks.os = { }; # a wall: the home's users give `os` here, and nothing reads it, so stage's NixOS stays untouched
   yen.home."alice@stage" = {

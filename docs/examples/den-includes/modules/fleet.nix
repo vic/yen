@@ -1,12 +1,11 @@
 # Den's schema, declared. A user's `meta` attrs become typed fields; `facter ./facter.json` becomes a host field.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.lib) opt is;
+  inherit (yen.lib) opt;
   strs = yen.lib.listOf yen.lib.str;
 in
 {
@@ -19,7 +18,7 @@ in
       system = opt yen.lib.str "x86_64-linux";
       shares = opt strs [ ]; # parameters of a parametric aspect
     };
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

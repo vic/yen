@@ -1,12 +1,10 @@
 # Environments own hosts, macs and phones (parent-side spawns) and two pools.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.helpers) inEnv;
   inherit (yen.lib) listOf enum;
   inherit (yen.lib) opt maybe;
 in
@@ -22,9 +20,9 @@ in
       ]);
     };
     spawns = {
-      host = inEnv yen.host;
-      mac = inEnv yen.mac;
-      phone = inEnv yen.phone;
+      host = yen.lib.pointing "environment" yen.host;
+      mac = yen.lib.pointing "environment" yen.mac;
+      phone = yen.lib.pointing "environment" yen.phone;
     };
     sinks.backends.of = yen.lib.str; # lb reads it
     sinks.terraform = {

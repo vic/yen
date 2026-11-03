@@ -1,7 +1,6 @@
 # A guest lives under its host. Its own `nixos` sink forwards up, into the host's containers.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
@@ -11,7 +10,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.guest = s: lib.filterAttrs (_: g: yen.lib.same g.on s) yen.guest;
+    spawns.guest = yen.lib.pointing "on" yen.guest;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

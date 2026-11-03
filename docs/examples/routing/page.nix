@@ -13,7 +13,7 @@
 
         This example has a fleet, two environments, two hosts, a user and a home:
       ''
-      (docs.fileWith "{17,23}" "modules/fleet.nix")
+      (docs.fileWith "{14,20}" "modules/fleet.nix")
       (docs.file "modules/instances.nix")
       (docs.file "modules/aspects.nix")
       (docs.value (removeAttrs result.flake [ "checks" ]))

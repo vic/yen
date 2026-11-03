@@ -1,4 +1,4 @@
-{ yen, lib, ... }:
+{ yen, ... }:
 {
   yen.kinds.fleet = {
     spawns.host = _: yen.host;
@@ -6,7 +6,7 @@
   };
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    spawns.user = s: lib.filterAttrs (_: u: yen.lib.same u.on s) yen.user;
+    spawns.user = yen.lib.pointing "on" yen.user;
     sinks.packages = {
       reduce = yen.lib.reduce.set;
       out =

@@ -3,14 +3,10 @@
 # builds one flake output.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
 let
-  inherit (yen.lib) same;
-  # the machines of a kind that name this environment
-  inEnv = machines: env: lib.filterAttrs (_: m: same env m.env) machines;
   b = yen.lib.batteries;
 in
 {
@@ -21,9 +17,9 @@ in
   yen.kinds.env = {
     fields.domain = yen.lib.str;
     spawns = {
-      host = inEnv yen.host;
-      mac = inEnv yen.mac;
-      home = inEnv yen.home;
+      host = yen.lib.pointing "env" yen.host;
+      mac = yen.lib.pointing "env" yen.mac;
+      home = yen.lib.pointing "env" yen.home;
     };
     # the packages of the environment's dev shell: `nix develop .#<env>`
     sinks.devshell.reduce = yen.lib.reduce.flat;
@@ -37,7 +33,7 @@ in
   };
   yen.kinds.host = {
     fields.env = yen.kinds.env;
-    spawns.user = h: lib.filterAttrs (_: u: lib.any (same h) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {

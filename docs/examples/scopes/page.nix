@@ -10,8 +10,10 @@
       ''
         A scope is one instance at one place in the tree. The root [kind](/model/kinds-fields/) is the kind that no kind spawns.
         `spawns.<kind>` is a function of the parent scope. It gives the instances that live under it.
+        Most children name their parent in a ref field: `yen.lib.pointing "hosts" yen.user` gives the users whose
+        `hosts` field holds the scope, as one ref or in a list.
       ''
-      (docs.fileWith "{7,8,11}" "modules/tree.nix")
+      (docs.fileWith "{4,5,8}" "modules/tree.nix")
       (docs.file "modules/instances.nix")
       ''
         The tree comes from the data. Nothing lists the children by hand:

@@ -10,7 +10,6 @@ let
     same
     maybe
     opt
-    is
     listOf
     ;
   meets = xs: ys: lib.any (x: lib.any (same x) ys) xs;
@@ -28,7 +27,7 @@ in
       grants = opt (listOf yen.kinds.group) [ ];
       settings.timeZone = maybe yen.lib.str;
     };
-    spawns.host = s: lib.filterAttrs (_: h: same h.environment s) yen.host;
+    spawns.host = yen.lib.pointing "environment" yen.host;
   };
   yen.kinds.host = {
     fields = {

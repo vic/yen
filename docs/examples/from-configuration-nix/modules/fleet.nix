@@ -1,7 +1,6 @@
 # The fleet spawns hosts and the users that log in to them.
 {
   yen,
-  lib,
   inputs,
   ...
 }:
@@ -11,7 +10,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.user = s: lib.filterAttrs (_: u: lib.any (yen.lib.same s) u.hosts) yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
       {
