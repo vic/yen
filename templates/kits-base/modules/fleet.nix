@@ -10,19 +10,8 @@ let
   kits = yen.lib.batteries.kits;
   inherit (yen.lib) opt holds;
   attrs = yen.lib.attrs;
-  # a kit that adds assemblies of another kit (borg adds sshd), per assembly of its own
-  added =
-    a:
-    lib.mapAttrsToList (
-      name: v:
-      v
-      // {
-        kind = "assembly";
-        inherit name;
-      }
-    ) (a.kit.adds a);
-  own = lib.attrValues yen.assembly;
-  assemblies = own ++ lib.concatMap added own;
+  # the fleet's assemblies and the parts their kits add (a part lives under its assembly)
+  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly);
   # tree requests: every assembly and host, with their data
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
@@ -114,7 +103,7 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = get tree assemblyTree ++ lib.concatMap added (get tree assemblyTree);
+            assemblies = yen.lib.batteries.kits.assemblies (get tree assemblyTree);
             machines = get tree hostTree;
             inherit holds;
           })

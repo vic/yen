@@ -9,18 +9,8 @@ let
   inherit (yen.lib) opt holds;
   kits = yen.lib.batteries.kits;
   attrs = yen.lib.attrs;
-  # a kit that needs another kit adds assemblies of it, per assembly of its own
-  added =
-    a:
-    lib.mapAttrsToList (
-      name: v:
-      v
-      // {
-        kind = "assembly";
-        inherit name;
-      }
-    ) (a.kit.adds a);
-  withAdded = own: own ++ lib.concatMap added own;
+  # the assemblies and the parts their kits add (a part lives under its assembly)
+  withAdded = yen.lib.batteries.kits.assemblies;
   assemblies = withAdded (lib.attrValues yen.assembly); # spawns and helpers read data
   # tree requests: every assembly, host and mac, with their data
   own.instances = yen.kinds.assembly;

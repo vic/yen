@@ -33,7 +33,7 @@ in
     ];
     # a kit that needs another: every borg assembly adds an sshd assembly on its servers
     adds = a: {
-      "${a.name}-sshd" = {
+      sshd = {
         kit = yen.kit.sshd;
         roles.server.at = a.roles.server.at;
       };

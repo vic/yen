@@ -24,14 +24,14 @@ in
     };
     # a kit that needs others: one assembly of each, on the machines of the base's role
     adds = a: {
-      "${a.name}-disko" = {
+      disko = {
         kit = yen.kit.disko;
         roles.default = {
           inherit (a.roles.default) at;
           settings = pick [ "device" "layout" ] a;
         };
       };
-      "${a.name}-facter" = {
+      facter = {
         kit = yen.kit.facter;
         roles.default = {
           inherit (a.roles.default) at;
@@ -43,11 +43,11 @@ in
             }) (pick [ "hardware" ] a m);
         };
       };
-      "${a.name}-sshd" = {
+      sshd = {
         kit = yen.kit.sshd;
         roles.server.at = a.roles.default.at;
       };
-      "${a.name}-emergency" = {
+      emergency = {
         kit = yen.kit.emergency-access;
         roles.default = {
           inherit (a.roles.default) at;

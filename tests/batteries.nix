@@ -899,6 +899,67 @@ let
   ];
 
   checks = {
+    # a kit's parts live under their assembly, at every depth; a name two assemblies share is an error
+    kit-parts =
+      let
+        leaf = {
+          roles.default = { };
+        };
+        mid = leaf // {
+          adds = _: {
+            leaf = {
+              kit = leaf;
+              roles.default.at = [ ];
+            };
+          };
+        };
+        top = leaf // {
+          adds = _: {
+            mid = {
+              kit = mid;
+              roles.default.at = [ ];
+            };
+          };
+        };
+        all = bat.kits.assemblies [
+          {
+            name = "lab";
+            kit = top;
+            roles.default.at = [ ];
+          }
+        ];
+        clash = bat.kits.contract {
+          assemblies = all ++ [
+            {
+              name = "lab-mid";
+              kit = leaf;
+              roles.default.at = [ ];
+            }
+          ];
+          machines = [ ];
+          holds = _: _: false;
+        };
+      in
+      {
+        names = eq (map (a: a.name) all) [
+          "lab"
+          "lab-mid"
+          "lab-mid-leaf"
+        ];
+        paths = eq (map (a: a.path or [ a.name ]) all) [
+          [ "lab" ]
+          [
+            "lab"
+            "mid"
+          ]
+          [
+            "lab"
+            "mid"
+            "leaf"
+          ]
+        ];
+        clash = yes (b.any (e: b.match ".*have one name: lab-mid.*" e != null) clash);
+      };
     imports-battery = eq (bat.imports { from.__sink = "s"; } { sinks.s = [ "m" ]; }) ({
       imports = [ "m" ];
     });

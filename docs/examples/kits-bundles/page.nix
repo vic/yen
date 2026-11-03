@@ -17,14 +17,16 @@
     in
     [
       ''
-        A bundle is a kit whose `adds` make several assemblies, each on machines taken from the bundle's own roles.
+        A bundle is a kit whose `adds` make several assemblies, each on machines taken from the bundle's own roles. They
+        are parts of the bundle's assembly, keyed by a short name (`base`, `wg`), not names in the fleet: the battery
+        `kits.assemblies` expands them at every depth, and `kits.contract` refuses two assemblies with one name.
 
         | Bundle | Roles | Adds |
         |---|---|---|
-        | `base` | `default` with `device`, `layout` (a ref), `authorizedKeys`, `hardware` | disko, facter, emergency-access, and sshd as server, on the same machines. No users: a user needs a name per machine |
+        | `base` | `default` with `device`, `layout` (one of `yen.kit.disko.layouts`), `authorizedKeys`, `hardware` | disko, facter, emergency-access, and sshd as server, on the same machines. No users: a user needs a name per machine |
         | `homelab` | `server` (exactly 1), `node`; the settings of `base` and `prefix` | base on both roles; wireguard (server controller, nodes peers); borg (server backs up); monitoring (server scrapes); dns on the server |
 
-        The engine adds one level, so `homelab` also lists what `base` and `borg` add. A role's `settings` may be a
+        The parts of `base` and `borg` come with them: `homelab` lists only its own. A role's `settings` may be a
         function of the machine, for a device per machine. You import the kits a bundle uses, then write one assembly:
       ''
       (docs.file "modules/assemblies.nix")
@@ -32,7 +34,7 @@
       ''
         ## The result
 
-        The members of each machine (the assemblies the bundle added are named `lab-...`):
+        The members of each machine (a part is named by its path joined by `-`: `lab-base-disko` is part `disko` of part `base` of `lab`):
       ''
 
       (docs.value (
