@@ -4024,6 +4024,42 @@ let
         );
         reserved = eq (map (e: e.code) (fleet { yen.aspects."kit:disko/x" = { }; }).errors) [ "reserved" ];
       };
+    # #80: a `sinks` or a sink that is no attrset is an error record, never a Nix throw
+    kind-sinks-not-attrs =
+      let
+        codes =
+          sinks:
+          map (e: e.code)
+            (yen.eval {
+              yen.kinds.fleet = { inherit sinks; };
+              yen.fleet.main = { };
+            }).errors;
+      in
+      {
+        whole = eq (codes 5) [ "not-a-kind" ];
+        one = eq (codes { out = 5; }) [ "not-a-kind" ];
+        good = eq (codes { out.reduce = yen.reduce.list; }) [ ];
+      };
+    # #81: a stored query param named `at` keeps its type, as any other param
+    query-param-at =
+      eq
+        (yen.eval (
+          { yen, ... }:
+          {
+            yen.kinds.x = { };
+            yen.queries.typed = {
+              params = {
+                at = yen.kinds.x;
+                other = yen.kinds.x;
+              };
+              answer = _: 1;
+            };
+          }
+        )).queries.typed.types
+        {
+          at = "a x ref";
+          other = "a x ref";
+        };
     # a value one of the types accepts: a string or an int pass, a bool is neither
     one-of =
       let
