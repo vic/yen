@@ -22,8 +22,8 @@
       ''
         ## Members exchange data
 
-        Clients publish their address to a fleet sink with `entries`. The engine sets `from`, so a member can only publish
-        as itself. The server reads the entries and builds its allow list:
+        Clients publish their address to a fleet sink with `elements`. The engine sets `from`, so a member can only publish
+        as itself. The server reads the elements and builds its allow list:
       ''
       (docs.fileWith "{9,15}" "modules/backup.nix")
       (docs.value result.flake.config)

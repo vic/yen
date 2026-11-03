@@ -4,10 +4,10 @@
 # config-dependent content stays in the deltas, as den-hoag's `classInvariant` projection does.
 { yen, lib, ... }:
 let
-  inherit (yen.lib.reduce) entries;
+  inherit (yen.lib.reduce) elements;
 in
 {
-  yen.kinds.fleet.sinks.class-members.reduce = entries;
+  yen.kinds.fleet.sinks.class-members.reduce = elements;
   yen.kinds.host.sinks.nixos.class-members =
     { host, nixos, ... }:
     {

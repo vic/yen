@@ -18,8 +18,8 @@ let
         };
         sinks = {
           out.reduce = yen.lib.reduce.merge;
-          ssh-peers.reduce = yen.lib.reduce.entries;
-          demands.reduce = yen.lib.reduce.entries;
+          ssh-peers.reduce = yen.lib.reduce.elements;
+          demands.reduce = yen.lib.reduce.elements;
         };
       };
       yen.kinds.env.spawns.host = s: lib.filterAttrs (_: h: yen.lib.same h.env s) yen.host;

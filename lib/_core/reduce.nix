@@ -68,8 +68,8 @@ let
     };
     #: lib.reduce.merge :: [ element ] -> { value = attrs; errors; } -- the element values merged as attrsets; two different answers at one path are an error
     merge = foldl' (acc: e: mergeStep acc (mergeAt [ ] acc.value e.value)) (pure { });
-    #: lib.reduce.entries :: [ element ] -> { value = [ element ]; errors; } -- the elements themselves, each with its value and where it came from
-    entries = pure;
+    #: lib.reduce.elements :: [ element ] -> { value = [ element ]; errors; } -- the elements themselves, each with its value and where it came from
+    elements = pure;
   };
   # each built-in reduce is callable and carries its name, so `schema` can say which strategy a sink uses
   reduceNamed = mapAttrs (n: f: {

@@ -1,4 +1,4 @@
-# A component: it reads sources (the tree, the sinks) and writes sinks. It gives 0 to n elements.
+# A cycle: it reads sources (the tree, the sinks) and writes sinks. It gives 0 to n elements.
 { yen, ... }:
 {
   yen.aspects.vm-network = {

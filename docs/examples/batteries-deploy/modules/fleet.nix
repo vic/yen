@@ -34,7 +34,7 @@ in
         name = _: "dns";
       };
       # machines write NixOS config into each other (oddlama's nodes.<name>)
-      nodes.reduce = yen.lib.reduce.entries;
+      nodes.reduce = yen.lib.reduce.elements;
     };
   };
   yen.kinds.host = {

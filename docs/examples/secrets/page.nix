@@ -19,7 +19,7 @@
       (docs.fileWith "{12-17}" "modules/kinds.nix")
       (docs.file "modules/data.nix")
       ''
-        One component delivers each secret to its owners. Another reports secrets that nobody owns:
+        One [cycle](/behavior/cycle/) delivers each secret to its owners. Another reports secrets that nobody owns:
       ''
       (docs.file "modules/deliver.nix")
       (docs.value result.flake.secretsPlan)

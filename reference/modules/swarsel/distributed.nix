@@ -2,7 +2,7 @@
 # and every machine adds fragments to fleet-wide `globals` that any scope reads.
 { yen, lib, ... }:
 {
-  yen.kinds.fleet.sinks.nodes.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.nodes.reduce = yen.lib.reduce.elements;
   yen.kinds.fleet.sinks.globals.reduce = yen.lib.reduce.merge;
   yen.aspects.lb-writes-backends = {
     at = yen.host.lb;

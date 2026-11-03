@@ -24,7 +24,7 @@ in
     spawns.host = _: yen.host;
     sinks = {
       out.reduce = yen.lib.reduce.merge;
-      exports.reduce = yen.lib.reduce.entries; # what members publish, with the scope that published it
+      exports.reduce = yen.lib.reduce.elements; # what members publish, with the scope that published it
     };
   };
   yen.kinds.assembly.fields.roles = yen.lib.attrs; # role name -> host refs

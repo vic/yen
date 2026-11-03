@@ -30,7 +30,7 @@
 
         A Syncthing device id exists only on hosts that run Syncthing. Each of them gives its id to the
         `syncthing-device` sink of the fleet. A host has no such sink, so the id goes up to the fleet. A Syncthing
-        host then reads the sink as an arg. `entries` keeps who gave each id, so a host can leave out its own.
+        host then reads the sink as an arg. `elements` keeps who gave each id, so a host can leave out its own.
       ''
       (docs.file "modules/syncthing.nix")
       (docs.note "Why there is no recursion" ''

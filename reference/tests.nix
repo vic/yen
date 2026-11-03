@@ -2434,7 +2434,7 @@ let
       };
     agent-schema = {
       t1 = eq (r.schema.kinds.host.sinks.deploy.reduce) ("one");
-      t2 = eq (r.schema.kinds.environment.sinks.k3s-nodes.reduce) ("entries");
+      t2 = eq (r.schema.kinds.environment.sinks.k3s-nodes.reduce) ("elements");
       t3 = eq (b.elem "sshd" (lib.attrNames r.schema.aspects)) (false);
       t4 = yes (
         r.schema.aspects.${

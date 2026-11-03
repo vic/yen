@@ -62,7 +62,7 @@
       (docs.file "modules/fleet.nix")
       (docs.file "modules/aspects.nix")
       ''
-        Where each aspect is active (the output comes from `modules/report.nix`, an `entries` sink):
+        Where each aspect is active (the output comes from `modules/report.nix`, an `elements` sink):
       ''
       (docs.value result.flake.active)
       ''

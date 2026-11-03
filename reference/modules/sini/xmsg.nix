@@ -4,7 +4,7 @@ let
   trusts = e: user: !(yen.lib.same e.from user);
 in
 {
-  yen.kinds.fleet.sinks.xmsg-nodes.reduce = yen.lib.reduce.entries;
+  yen.kinds.fleet.sinks.xmsg-nodes.reduce = yen.lib.reduce.elements;
   yen.aspects.xmsg = {
     at = yen.kinds.user;
     xmsg-nodes = { user, ... }: user.name;

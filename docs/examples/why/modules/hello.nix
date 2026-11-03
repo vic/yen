@@ -22,7 +22,7 @@
     at = yen.kinds.language;
 
     # This aspect contributes an element to the `greetings` sink.
-    # Since `hello` is active for each language, it produces two entries.
+    # Since `hello` is active for each language, it produces two elements.
     greetings =
       { language, ... }:
       {

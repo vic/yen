@@ -101,7 +101,7 @@
 
         There is no `evalModules` fixpoint and no merge step. Each read of a declaration is a query on the files
         that answer it. A value is computed only when something reads it. yen follows
-        [Cycle.js](https://cycle.js.org): a component reads sources and writes sinks, and Nix laziness closes the loop.
+        [Cycle.js](https://cycle.js.org): a [cycle](/behavior/cycle/) reads sources and writes sinks, and Nix laziness closes the loop.
       ''
       (docs.note "Why another configuration language?" ''
         yen covers every capability of [Den](https://github.com/denful/den), den-hoag and [clan](https://clan.lol)

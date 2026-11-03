@@ -33,7 +33,7 @@
       ''
         ## mesh: what the other hosts give
 
-        Each host gives its key to the fleet. The fleet reduces with `entries`, so each key keeps the scope that gave
+        Each host gives its key to the fleet. The fleet reduces with `elements`, so each key keeps the scope that gave
         it. Each host then reads the keys of the others. This is the same rule as known_hosts, WireGuard peers,
         Syncthing devices or remote builders, written by hand in [Facts from other hosts](/nixos/cross-host/).
       ''

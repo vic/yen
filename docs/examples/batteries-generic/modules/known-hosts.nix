@@ -4,7 +4,7 @@ let
   inherit (yen.lib.batteries) mesh;
 in
 {
-  yen.kinds.fleet.sinks.keys.reduce = yen.lib.reduce.entries; # an entry knows which host gave it
+  yen.kinds.fleet.sinks.keys.reduce = yen.lib.reduce.elements; # an element knows which host gave it
   yen.kinds.host.sinks.known = {
     reduce = yen.lib.reduce.one;
     out =

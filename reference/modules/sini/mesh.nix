@@ -5,7 +5,7 @@ let
   peersOf = host: es: lib.filter (e: !(yen.lib.same e.from host)) es;
 in
 {
-  yen.kinds.environment.sinks.mesh-peers.reduce = yen.lib.reduce.entries;
+  yen.kinds.environment.sinks.mesh-peers.reduce = yen.lib.reduce.elements;
   yen.kinds.machine.fields.builder = yen.lib.opt yen.lib.bool false;
   yen.host.web-1.builder = true;
   yen.aspects.mesh = {

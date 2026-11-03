@@ -136,7 +136,7 @@ let
     (
       { yen, ... }:
       {
-        yen.kinds.top.sinks.keys.reduce = yen.lib.reduce.entries;
+        yen.kinds.top.sinks.keys.reduce = yen.lib.reduce.elements;
         yen.aspects.key = {
           at = [
             yen.kinds.box

@@ -60,7 +60,7 @@ let
         pick
         ;
     };
-  # a component on the policy: it asks the tree for the whole fleet
+  # a cycle on the policy: it asks the tree for the whole fleet
   withPolicy = f: {
     cycle =
       { tree, ... }:

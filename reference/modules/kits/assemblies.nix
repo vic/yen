@@ -34,7 +34,7 @@ in
   yen.kinds.host.spawns.member = membersOf;
   yen.kinds.mac.spawns.member = membersOf;
 
-  # one fleet sink for exports; a reader keeps the entries of one assembly and role (`yen.lib.same`).
+  # one fleet sink for exports; a reader keeps the elements of one assembly and role (`yen.lib.same`).
   # An element from the fleet scope is the owner's override of one entry.
   yen.kinds.fleet.sinks.exports.reduce = kits.exports { isMember = holds yen.kinds.member; };
 

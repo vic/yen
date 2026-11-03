@@ -8,7 +8,7 @@
 }:
 let
   inherit (yen.lib) all opt same;
-  inherit (yen.lib.reduce) entries;
+  inherit (yen.lib.reduce) elements;
   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
   by = from: lib.filter (e: same e.from from);
   # a factory: an aspect with instance data (sini `dns.cloudflare "json64"`)
@@ -25,8 +25,8 @@ in
 {
   # served-domains ⋈ gateway-upstreams by host, in the cluster's environment; `exclude` drops names.
   yen.kinds.fleet.sinks = {
-    served-domains.reduce = entries;
-    gateway-upstreams.reduce = entries;
+    served-domains.reduce = elements;
+    gateway-upstreams.reduce = elements;
     dns-zones.reduce = yen.lib.reduce.list;
   };
   yen.aspects.served = {
