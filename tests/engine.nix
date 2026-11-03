@@ -3977,6 +3977,53 @@ let
               ]
             ];
       };
+    # #87: an instance owns aspects, `yen.<kind>.<name>.aspects.<a>`, under id `<kind>:<name>/<a>`; no fleet name can take it
+    owned-aspects =
+      let
+        fleet =
+          extra:
+          yen.eval {
+            imports = [
+              (
+                { yen, ... }:
+                {
+                  yen.kinds.top = {
+                    spawns.kit = _: yen.kit;
+                    sinks.out.reduce = yen.lib.reduce.list;
+                  };
+                  yen.top.t = { };
+                  yen.kinds.kit = { };
+                  yen.kit.disko.aspects.default.at = yen.kinds.kit;
+                  # a fleet aspect gated by the kit's aspect, through the instance
+                  yen.aspects.after = {
+                    at = yen.kit.disko.aspects.default;
+                    out = { scope, ... }: [ scope.name ];
+                  };
+                  yen.flake =
+                    { out, ... }:
+                    {
+                      inherit out;
+                    };
+                }
+              )
+              extra
+            ];
+          };
+        r = fleet { };
+      in
+      {
+        id = yes (r.agent.schema.aspects ? "kit:disko/default");
+        ref = eq r.flake.out [ [ "disko" ] ];
+        data = eq r.data.kit.disko { };
+        errors = eq r.errors [ ];
+        file = yes (
+          r.declaredIn [
+            "aspects"
+            "kit:disko/default"
+          ] != [ ]
+        );
+        reserved = eq (map (e: e.code) (fleet { yen.aspects."kit:disko/x" = { }; }).errors) [ "reserved" ];
+      };
     # a value one of the types accepts: a string or an int pass, a bool is neither
     one-of =
       let

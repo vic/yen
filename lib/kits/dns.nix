@@ -6,7 +6,7 @@ _:
 { yen, lib, ... }:
 {
   yen.kit.dns.roles.default = { };
-  yen.aspects.kit-dns = {
+  yen.kit.dns.aspects.default = {
     at = yen.kinds.fleet;
     out =
       { exports, ... }:

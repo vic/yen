@@ -8,7 +8,7 @@ _:
 {
   yen.kit.emergency-access.roles.default.interface.authorizedKeys.type = yen.lib.listOf yen.lib.str;
 
-  yen.aspects.kit-emergency-access = {
+  yen.kit.emergency-access.aspects.default = {
     at = yen.lib.all [
       yen.kinds.member
       (s: yen.lib.same (s.kit or null) yen.kit.emergency-access)

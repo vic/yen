@@ -38,7 +38,7 @@ in
       "generators"
     ];
   };
-  yen.aspects.wireguard-keys = {
+  yen.kit.wireguard.aspects.keys = {
     at = members;
     exports =
       { member, scope, ... }:
@@ -52,7 +52,7 @@ in
         };
       };
   };
-  yen.aspects.wireguard-addresses = {
+  yen.kit.wireguard.aspects.addresses = {
     at = yen.kinds.fleet;
     errors =
       { exports, ... }:
@@ -62,7 +62,7 @@ in
         )
       );
   };
-  yen.aspects.wireguard-net = {
+  yen.kit.wireguard.aspects.net = {
     at = members;
     nixos =
       {

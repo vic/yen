@@ -39,7 +39,7 @@ in
       };
     };
   };
-  yen.aspects.borg-server = {
+  yen.kit.borg.aspects.server = {
     at = member "server";
     exports =
       { scope, ... }:
@@ -51,7 +51,7 @@ in
         };
       };
   };
-  yen.aspects.borg-client = {
+  yen.kit.borg.aspects.client = {
     at = member "client";
     nixos =
       {

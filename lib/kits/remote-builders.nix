@@ -41,7 +41,7 @@ in
       "speedFactor"
     ];
   };
-  yen.aspects.builder = {
+  yen.kit.remote-builders.aspects.builder = {
     at = member "builder";
     exports =
       { scope, member, ... }:
@@ -58,7 +58,7 @@ in
         machine = scope.parent;
       };
   };
-  yen.aspects.builder-client = {
+  yen.kit.remote-builders.aspects.client = {
     at = member "client";
     nixos =
       { scope, sinks, ... }:

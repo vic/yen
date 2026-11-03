@@ -28,7 +28,7 @@ in
     };
     exports = [ "target" ];
   };
-  yen.aspects.monitoring-exporter = {
+  yen.kit.monitoring.aspects.exporter = {
     at = member "exporter";
     exports =
       { scope, member, ... }:
@@ -44,7 +44,7 @@ in
         };
       };
   };
-  yen.aspects.monitoring-server = {
+  yen.kit.monitoring.aspects.server = {
     at = member "server";
     nixos =
       { member, exports, ... }:

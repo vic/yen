@@ -42,7 +42,7 @@ in
     exports = [ "hostKey" ];
   };
 
-  yen.aspects.kit-sshd-server = {
+  yen.kit.sshd.aspects.server = {
     at = member "server";
     os.services.openssh.enable = true;
     generators =
@@ -64,7 +64,7 @@ in
       };
   };
 
-  yen.aspects.kit-sshd-client = {
+  yen.kit.sshd.aspects.client = {
     at = member "client";
     inherit (trust) nixos;
     errors =

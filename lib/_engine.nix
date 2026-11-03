@@ -369,7 +369,47 @@ let
         in
         map (n: r.${n.key}) found;
       loaded = map (n: real.${n.key}) found;
-      defsOf = l: map (n: n.mod.yen or { }) (filter (n: n ? mod) l);
+      # #87: an instance's `aspects` are its own (a kit's): each becomes a flat aspect named `<kind>:<instance>/<name>`,
+      # as a scope id is written, so it never clashes with an aspect a fleet names (a fleet name has no `:`)
+      ownAspects =
+        y:
+        let
+          ks = filter (k: !(elem k yenKeys) && isAttrs y.${k}) (attrNames y);
+          owned = concatMap (
+            k:
+            concatMap (
+              n:
+              let
+                i = y.${k}.${n};
+              in
+              if isAttrs i && isAttrs (i.aspects or null) then
+                map (a: {
+                  name = "${k}:${n}/${a}";
+                  value = i.aspects.${a};
+                }) (attrNames i.aspects)
+              else
+                [ ]
+            ) (attrNames y.${k})
+          ) ks;
+        in
+        if !isAttrs y || owned == [ ] then
+          y
+        else
+          mapAttrs (
+            k: v:
+            if elem k ks then mapAttrs (_: i: if isAttrs i then removeAttrs i [ "aspects" ] else i) v else v
+          ) y
+          // {
+            aspects = (y.aspects or { }) // b.listToAttrs owned;
+          };
+      defsOf = l: map (n: ownAspects (n.mod.yen or { })) (filter (n: n ? mod) l);
+      # each loaded module's `yen`, its instances' aspects hoisted: what declaredIn reads, once per module
+      hoisted = b.listToAttrs (
+        map (n: {
+          name = n.key;
+          value = ownAspects (n.mod.yen or { });
+        }) (filter (n: n ? mod) loaded)
+      );
       # the modules (file paths, or positions for inline modules) that answer a declaration path, in file order
       #: result.declaredIn, yen.lib.declaredIn :: [ name ] -> [ file ] -- the modules that answer a declaration path, in file order
       declaredIn =
@@ -379,7 +419,7 @@ let
             n:
             n ? mod
             &&
-              (foldl' (a: k: if a != null && isAttrs a && a ? ${k} then a.${k} else null) (n.mod.yen or { }) path)
+              (foldl' (a: k: if a != null && isAttrs a && a ? ${k} then a.${k} else null) hoisted.${n.key} path)
               != null
           ) loaded
         );
@@ -830,7 +870,25 @@ let
           }
         )
       ) kinds;
-      yen = instances // {
+      # #87: the aspects an instance owns (`<kind>:<name>/<aspect>`), as `{ aspects.<aspect> = ref; }`, or { }
+      ownedBy =
+        refs: k: n:
+        let
+          pre = "${k}:${n}/";
+          own = filter (a: b.substring 0 (b.stringLength pre) a == pre) (attrNames (top.aspects or { }));
+        in
+        if own == [ ] then
+          { }
+        else
+          {
+            aspects = b.listToAttrs (
+              map (a: {
+                name = b.substring (b.stringLength pre) (-1) a;
+                value = refs.${a};
+              }) own
+            );
+          };
+      yen = mapAttrs (k: mapAttrs (n: i: i // ownedBy aspects k n)) instances // {
         inherit kinds aspects lib;
         helpers = top.helpers or { };
         queries = top.queries or { };
@@ -851,6 +909,8 @@ let
               kind = k;
               name = n;
             }
+            # #87: the aspects the instance owns, as refs: `yen.kit.sshd.aspects.server`
+            // ownedBy refsYen.aspects k n
             // mapAttrs (
               f: _:
               throw "yen.${k}.${n}.${f}: an aspect reads instance data only through its args: take `${k}` as an arg, or follow a ref field of an arg"
@@ -2665,20 +2725,41 @@ let
         ) (attrNames (top.sinks or { }));
       # `scope` and `sinks` are fixed args: a sink of that name could never be read
       reservedErrors =
+        # #87: a `:` in an aspect a fleet names: that form is the id of an aspect an instance owns
         map
           (
             n:
-            errWith "declarations" "sink `${n}`: the name is a fixed arg" {
-              code = "reserved";
-              fix = "rename the sink; `scope` and `sinks` are args of every element";
-            }
+            errWith "declarations"
+              "aspect `${n}`: a `:` names an aspect an instance owns (`<kind>:<name>/<aspect>`)"
+              {
+                code = "reserved";
+                path = [
+                  "aspects"
+                  n
+                ];
+                fix = "rename the aspect without `:`, or write it in its instance: `yen.<kind>.<name>.aspects.<aspect>`";
+              }
           )
           (
-            filter (n: elem n sinkNames) [
-              "scope"
-              "sinks"
-            ]
+            filter (n: b.match ".*:.*" n != null) (
+              concatMap (n: attrNames (n.mod.yen.aspects or { })) (filter (n: n ? mod) loaded)
+            )
           )
+        ++
+          map
+            (
+              n:
+              errWith "declarations" "sink `${n}`: the name is a fixed arg" {
+                code = "reserved";
+                fix = "rename the sink; `scope` and `sinks` are args of every element";
+              }
+            )
+            (
+              filter (n: elem n sinkNames) [
+                "scope"
+                "sinks"
+              ]
+            )
         # a field named like a key of the scope record would read as that key, never as the field
         ++ concatMap (
           k:

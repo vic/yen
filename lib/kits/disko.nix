@@ -22,7 +22,7 @@ in
       layout.type = layout;
     };
   };
-  yen.aspects.kit-disko = {
+  yen.kit.disko.aspects.default = {
     at = yen.lib.all [
       yen.kinds.member
       (s: yen.lib.same (s.kit or null) yen.kit.disko)

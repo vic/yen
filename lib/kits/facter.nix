@@ -7,7 +7,7 @@ _:
 { yen, lib, ... }:
 {
   yen.kit.facter.roles.default.interface.dir.type = yen.lib.path;
-  yen.aspects.kit-facter = {
+  yen.kit.facter.aspects.default = {
     at = yen.lib.all [
       yen.kinds.member
       (s: yen.lib.same (s.kit or null) yen.kit.facter)
