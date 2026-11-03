@@ -22,7 +22,7 @@ in
     };
   };
   yen.kinds.machine = {
-    fields.addr = yen.lib.is lib.isString;
+    fields.addr = yen.lib.is builtins.isString;
     spawns.member = kits.members { inherit assemblies holds; };
     sinks.nixos = {
       reduce = yen.lib.reduce.merge;
