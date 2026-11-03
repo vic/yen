@@ -2,9 +2,10 @@
 # a view of routing at the kind level: the kind of the giving scope -> sink -> the kind of the receiver, each edge
 # labelled with its element count. Only elements given by aspects.
 #   mermaid.flowchart { } (mermaid.routing yen.lib.graph)
-_:
+self:
 let
   b = builtins;
+  inherit (self._core.helpers) renderId;
   sorted =
     xs: b.sort b.lessThan (b.foldl' (acc: x: if b.elem x acc then acc else acc ++ [ x ]) [ ] xs);
   isAspect = e: b.substring 0 7 e.origin == "aspect ";
@@ -14,7 +15,7 @@ let
   kindOf = b.listToAttrs (
     map (s: {
       name = s.id;
-      value = s.kind;
+      value = renderId s.kind;
     }) g.scopes
   );
   given = b.filter isAspect g.edges;

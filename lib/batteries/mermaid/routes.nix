@@ -1,14 +1,15 @@
 #: lib.batteries.mermaid.routes :: graph -> view -- who gives what to whom
 # a view of `yen.lib.graph`: who gives what to whom; an element given at its own scope is a loop, left out
-_:
+self:
 let
   b = builtins;
+  inherit (self._core.helpers) renderId;
   unique = b.foldl' (acc: x: if b.elem x acc then acc else acc ++ [ x ]) [ ];
 in
 g: {
   nodes = map (s: {
     inherit (s) id kind;
-    label = "${s.kind} ${s.name}";
+    label = "${renderId s.kind} ${s.name}";
   }) g.scopes;
   edges = unique (
     map (e: {

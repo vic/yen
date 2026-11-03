@@ -1,9 +1,10 @@
 #: lib.batteries.mermaid.kinds :: kinds -> view -- spawns between kinds, and fields that refer to a kind
 # a view of the kinds: a solid edge is `spawns` (parent kind to child kind), a dotted edge a field that refers to a kind
 #   mermaid.flowchart { } (mermaid.kinds yen.kinds)
-_:
+self:
 let
   b = builtins;
+  inherit (self._core.helpers) renderId;
   names = v: if b.isAttrs v then b.attrNames v else [ ];
 in
 kinds: {
@@ -31,7 +32,7 @@ kinds: {
           [
             {
               from = "k:${k}";
-              to = "k:${t.__kind or t.__maybe.__kind}";
+              to = "k:${renderId (t.__kind or t.__maybe.__kind)}";
               label = f;
               live = false;
             }

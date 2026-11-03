@@ -2,9 +2,10 @@
 # a view of the gates: the aspects that other aspects name in `at`, and what each gate's own `at` reads (kinds,
 # instances, fact tests). The edge label is the operators on the way (`not`, `within`, `has`); dashed under a `not`.
 #   mermaid.flowchart { } (mermaid.gates yen.aspects)
-_:
+self:
 let
   b = builtins;
+  inherit (self._core.helpers) renderId;
   sorted =
     xs: b.sort b.lessThan (b.foldl' (acc: x: if b.elem x acc then acc else acc ++ [ x ]) [ ] xs);
   unique = b.foldl' (acc: x: if b.elem x acc then acc else acc ++ [ x ]) [ ];
@@ -32,7 +33,7 @@ let
       [
         {
           inherit op;
-          ref = "kind ${p.__kind}";
+          ref = "kind ${renderId p.__kind}";
         }
       ]
     else if p ? __aspect then
