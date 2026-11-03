@@ -51,8 +51,8 @@ in
   };
 
   # #26 a user's `classes` choose its home systems
-  yen.kinds.user.fields.classes = yen.lib.opt (yen.helpers.listOf (
-    yen.helpers.enum [
+  yen.kinds.user.fields.classes = yen.lib.opt (yen.lib.listOf (
+    yen.lib.enum [
       "homeManager"
       "maid"
     ]

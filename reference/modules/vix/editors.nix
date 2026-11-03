@@ -7,7 +7,7 @@
   ...
 }:
 let
-  inherit (yen.helpers) listOf enum;
+  inherit (yen.lib) listOf enum;
   features = [
     "lsp"
     "git"

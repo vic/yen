@@ -6,7 +6,8 @@
   ...
 }:
 let
-  inherit (yen.helpers) listOf inEnv enum;
+  inherit (yen.helpers) inEnv;
+  inherit (yen.lib) listOf enum;
   inherit (yen.lib) opt maybe;
 in
 {

@@ -6,12 +6,12 @@ let
     opt
     all
     not
+    listOf
     ;
   inherit (yen.helpers)
     machines
     pkgsOf
     flatten
-    listOf
     ;
 in
 {

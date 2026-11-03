@@ -4,7 +4,7 @@ let
   inherit (yen.lib) all within has;
 in
 {
-  yen.kinds.user.fields.shell = yen.lib.opt (yen.helpers.enum [
+  yen.kinds.user.fields.shell = yen.lib.opt (yen.lib.enum [
     "bash"
     "zsh"
     "fish"

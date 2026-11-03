@@ -12,7 +12,7 @@ in
   yen.kinds.cluster = {
     fields = {
       environment = yen.kinds.environment;
-      hosts = yen.helpers.listOf yen.kinds.host;
+      hosts = yen.lib.listOf yen.kinds.host;
       ingestUrl = maybe yen.lib.str;
     };
     sinks.k8s-manifests.out = yen.lib.batteries.k8s.manifests {

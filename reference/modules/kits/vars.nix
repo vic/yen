@@ -30,7 +30,7 @@ in
       } args;
   };
   yen.kinds.fleet.sinks.public-reads.reduce = yen.lib.reduce.entries;
-  yen.kinds.fleet.fields.secretStore = opt (yen.helpers.enum [
+  yen.kinds.fleet.fields.secretStore = opt (yen.lib.enum [
     "sops"
     "age"
     "password-store"
@@ -48,7 +48,7 @@ in
   };
   yen.kinds.machine.fields.fromDir = opt yen.lib.bool false; # a host from a directory under machines/
   yen.kinds.machine.fields.secretStore = maybe (
-    yen.helpers.enum [
+    yen.lib.enum [
       "sops"
       "age"
       "password-store"

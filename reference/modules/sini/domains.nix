@@ -8,7 +8,7 @@ in
   yen.kinds.domain = {
     fields = {
       under = maybe yen.kinds.domain;
-      mail.dkim = opt (yen.helpers.listOf yen.lib.str) [ ];
+      mail.dkim = opt (yen.lib.listOf yen.lib.str) [ ];
       mail.enable = opt yen.lib.bool false;
     };
     spawns.domain = s: lib.filterAttrs (_: d: d.under != null && yen.lib.same d.under s) yen.domain;

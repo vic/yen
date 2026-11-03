@@ -19,8 +19,6 @@ in
       yen.kinds.host
       yen.kinds.guest
     ];
-    listOf = yen.lib.listOf; # a list of refs stays a ref field
-    enum = xs: yen.lib.is (v: lib.elem v xs);
     pkgsOf = m: m.channel.nixpkgs.legacyPackages.${m.system.name};
     inEnv = xs: s: lib.filterAttrs (_: x: same x.environment s) xs;
     upTo = p: s: lib.findFirst (holds p) null (lib.reverseList s.up); # nearest ancestor-or-self where p holds
