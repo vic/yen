@@ -5,6 +5,7 @@
   yen.aspects.openssh.nixos.services.openssh.enable = true;
   # (den.aspects.mount-cifs "//nas/media"): the parameters are the host's `shares` field
   yen.aspects.shares = {
+    # (1)
     at = s: (s.shares or [ ]) != [ ];
     nixos =
       { host, ... }:

@@ -11,10 +11,18 @@
         yen's own part of a host's evaluation is small: 1.4% on the reference fleet's `lb`. Most of the time goes to
         nixpkgs `pkgs` (56%) and the NixOS module system (36%). By default every host imports nixpkgs again.
 
-        With `sharedPkgs = true`, a host reuses the `pkgs` of the first sharing host on its system (the leader),
-        through nixpkgs' `readOnlyPkgs` module. The `out` arg gives the leader's built `pkgs`, lazily.
+        A host can instead reuse the `pkgs` of the first sharing host on its system, the leader. This file
+        declares the rule. The [reference fleet](https://github.com/vic/yen/tree/main/reference) has the full form.
       ''
-      (docs.fileWith "{11,20-24,49,57}" "modules/fleet.nix")
+      (docs.fileNoted "{11,20-25,44,50,58}" "modules/fleet.nix")
+      ''
+        `(1)` finds the leader: the first sharing host of the same `system`. `(2)` makes the modules of a follower. It uses
+        nixpkgs' `readOnlyPkgs` module, so the follower reuses the leader's built `pkgs`. `(3)` is the field that
+        a host sets to share: `sharedPkgs = true`. `(4)` is the `out` [arg](/behavior/args/): it gives the leader's built `pkgs`,
+        lazily. At `(5)` a follower adds those modules to its own.
+
+        These hosts share their `pkgs`:
+      ''
       (docs.file "modules/hosts.nix")
       ''
         ## The oracle

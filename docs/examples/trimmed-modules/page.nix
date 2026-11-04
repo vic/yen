@@ -10,10 +10,11 @@
     [
       ''
         NixOS evaluates about 1,900 base modules for every host, used or not. A host with `trimmedModules = true` in the
-        reference fleet evaluates only the ones it needs: about 400.
+        [reference fleet](https://github.com/vic/yen/tree/main/reference) evaluates only the ones it needs: about 400.
 
         The list is the closure of a learned core and the options the host defines. It filters `module-list.nix` itself,
-        so the order and the inline entries stay. The host passes it to `nixosSystem` as `baseModules`.
+        so the order and the inline entries stay. The host passes it to `nixosSystem` as `baseModules`. The code is the host sink in
+        [platforms/nixos.nix](https://github.com/vic/yen/blob/main/reference/modules/platforms/nixos.nix).
       ''
       (docs.table
         [ "Reference fleet: web-1, app-2 toplevel" "CPU" "Thunks" "GC total" ]

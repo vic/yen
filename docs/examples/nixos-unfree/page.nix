@@ -14,16 +14,23 @@
         conflict ([nixpkgs#55674](https://github.com/NixOS/nixpkgs/issues/55674),
         [discourse](https://discourse.nixos.org/t/appending-entries-to-nixpkgs-config-allowunfreepredicate/55844)).
         The usual fix declares a list option and sets the predicate once from it. Den ships the same fix as
-        `den.batteries.unfree`, its most used battery.
+        `den.batteries.unfree`, its most used battery ([Every Den battery](/den/batteries/)).
 
-        In yen the list option is a [sink](/behavior/sinks/). A feature gives the names that it needs. A user can give names too: they go
-        up to each host of the user.
+        In yen the list option is a [sink](/behavior/sinks/). This file declares it on the host kind:
       ''
-      (docs.file "modules/unfree.nix")
-      (docs.file "modules/features.nix")
+      (docs.fileNoted "" "modules/unfree.nix")
       ''
-        The `out` key of the sink makes the list a flake output, so you can see it. `server` has no names, so its sink
-        gives nothing: nixpkgs refuses every unfree package there, as by default.
+        `(1)` is the sink. `(2)` is its `nixos` key: one predicate that reads every name the sink collected. `(3)` is
+        its `out` key: the list of each host becomes a flake output, so you can see it.
+
+        A feature gives the names that it needs, next to the packages. A user can give names too: they go up to each
+        host of the user.
+      ''
+      (docs.fileNoted "" "modules/features.nix")
+      ''
+        `(1)` gives the names of the `gaming` [aspect](/behavior/aspects/). `(2)` gives the names from a user. The
+        `server` host has no names, so its sink gives nothing: nixpkgs refuses every unfree package there, as by
+        default. The flake output shows the list of each host:
       ''
       (docs.value result.flake.unfree)
       (docs.tabs [

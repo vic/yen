@@ -4,6 +4,7 @@
   yen.aspects.gaming = {
     at = yen.host.desk;
     unfree = [
+      # (1)
       "steam"
       "steam-unwrapped"
     ];
@@ -12,7 +13,7 @@
   # from a user: a user has no `unfree` sink, so the names go up to each of its hosts
   yen.aspects.ana-editor = {
     at = yen.user.ana;
-    unfree = [ "vscode" ];
+    unfree = [ "vscode" ]; # (2)
     nixos =
       { pkgs, ... }:
       {

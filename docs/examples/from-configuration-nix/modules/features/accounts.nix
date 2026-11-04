@@ -2,9 +2,9 @@
 { yen, ... }:
 {
   yen.aspects.account = {
-    at = yen.kinds.user;
+    at = yen.kinds.user; # (1)
     nixos =
-      { user, ... }:
+      { user, ... }: # (2)
       {
         users.users.${user.name} = {
           isNormalUser = true;

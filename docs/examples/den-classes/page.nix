@@ -46,17 +46,25 @@
         ## One class, two targets
 
         The same `nix` settings go to `nix.settings` of NixOS on hosts, and of home-manager on standalone homes.
+        The hosts and homes are declared in the `fleet.nix` tab below.
       ''
-      (docs.file "modules/nix.nix")
+      (docs.fileNoted "" "modules/nix.nix")
       ''
+        `(1)` declares the `nix` sink on the `host` kind. The `home` kind has its own. `(2)` is the `nixos` key of the
+        sink: it gives the reduced settings to the `nixos` sink. `(3)` is one aspect that gives `nix` elements to
+        every host and every home, so the settings are written once.
+
         ## A class under a path
 
         This is also the *DRY aspect* of the
         [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects),
-        for options inside an attribute set of submodules. A feature writes `lan` content. The sink puts it under the
-        interface that the host names, with `lib.mkMerge`, so two features never overwrite each other.
+        for options inside an attribute set of submodules.
       ''
-      (docs.file "modules/lan.nix")
+      (docs.fileNoted "" "modules/lan.nix")
+      ''
+        A feature writes `lan` content, as at `(3)`. The `lan` sink at `(1)` puts it under the interface that the
+        host names in its `lan` field. It uses `lib.mkMerge` at `(2)`, so two features never overwrite each other.
+      ''
       (docs.tabs [
         {
           label = "fleet.nix";

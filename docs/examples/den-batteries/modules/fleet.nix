@@ -13,7 +13,7 @@ in
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    fields.autologin = maybe yen.kinds.user; # den.batteries.tty-autologin "ana"
+    fields.autologin = maybe yen.kinds.user; # (1) den.batteries.tty-autologin "ana"
     spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
       { host, nixos, ... }:
@@ -27,7 +27,7 @@ in
       "bash"
       "zsh"
       "fish"
-    ]) "bash"; # den.batteries.user-shell "fish"
+    ]) "bash"; # (2) den.batteries.user-shell "fish"
   };
 
   yen.fleet.main = { };

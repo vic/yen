@@ -26,14 +26,19 @@
       (docs.tabs [
         {
           label = "fleet.nix";
-          body = docs.file "modules/fleet.nix";
+          body = docs.fileNoted "" "modules/fleet.nix";
         }
         {
           label = "machines.nix";
-          body = docs.file "modules/machines.nix";
+          body = docs.fileNoted "" "modules/machines.nix";
         }
       ])
       ''
+        In `fleet.nix`, `(1)` is the `homeManager` [sink](/behavior/sinks/) of a user: it forwards the content to the
+        `nixos` sink of each host the user lives on ([forwards](/behavior/forwards/)). `(2)` is the `homeManager` sink
+        of a standalone home: it builds the `homeConfigurations` output. In `machines.nix`, `(1)` is the home `ana@work`
+        of the user `ana`, and `(2)` is the aspect that every home gets.
+
         ## Two levels: the desktop and its users
 
         This is the *multi context aspect* of the
@@ -42,22 +47,29 @@
         that has the desktop. Two features that both need it do not import it two times: an aspect is given once per
         scope.
       ''
-      (docs.file "modules/gnome.nix")
+      (docs.fileNoted "" "modules/gnome.nix")
       ''
+        `(1)` is the system part: it is active at the host `desk`. `(2)` makes the home part active at every user
+        within a host where `gnome` is active ([predicates](/behavior/predicates/)).
+
         ## The same concern, a different level per machine
 
         On NixOS, fonts are system packages. On the work laptop there is no NixOS, so they go into the home. The two
-        aspects have different `at`. No module looks at `pkgs.stdenv` to find out where it is.
+        aspects have different `at`: `(1)` is every host, and `(2)` is every home. No module looks at `pkgs.stdenv`
+        to find out where it is.
       ''
-      (docs.file "modules/fonts.nix")
+      (docs.fileNoted "" "modules/fonts.nix")
       ''
         ## Values for home-manager
 
-        A home-manager module gets the same yen args as a NixOS module: the host, the user, and any sink. There is
-        no `extraSpecialArgs`. To read the host's *NixOS options* from home-manager, see
+        A home-manager module gets the same yen [args](/behavior/args/) as a NixOS module: the host, the user, and any
+        sink. There is no `extraSpecialArgs`. To read the host's *NixOS options* from home-manager, see
         [osConfig in home-manager](/recipes/os-config/).
       ''
-      (docs.file "modules/args.nix")
+      (docs.fileNoted "" "modules/args.nix")
+      ''
+        `(1)` makes the aspect active at every user within a host. `(2)` asks for the host and the user.
+      ''
       (docs.note "What the checks prove" ''
         The desk has GNOME, and ana's home on the desk has its settings. Her home on the work laptop has neither.
         Fonts are system packages on the desk, and home packages on the laptop, and never both.

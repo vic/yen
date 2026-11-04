@@ -1,7 +1,7 @@
 { yen, ... }:
 {
   yen.aspects.nginx = {
-    at = yen.host.web;
+    at = yen.host.web; # (1)
     nixos = {
       services.nginx.enable = true;
       networking.firewall.allowedTCPPorts = [ 80 ];

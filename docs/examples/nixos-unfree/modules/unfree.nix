@@ -2,13 +2,14 @@
 { lib, ... }:
 {
   yen.kinds.host.sinks.unfree = {
-    nixos =
+    # (1)
+    nixos = # (2)
       { unfree, ... }:
       {
         nixpkgs.config.allowUnfreePredicate = pkg: lib.elem (lib.getName pkg) (lib.flatten unfree);
       };
     # the list per host, as a flake output: review it before a deploy
-    out =
+    out = # (3)
       { host, unfree, ... }:
       {
         unfree.${host.name} = lib.sort lib.lessThan (lib.flatten unfree);

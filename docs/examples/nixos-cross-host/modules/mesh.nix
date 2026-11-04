@@ -2,16 +2,17 @@
 # Other hosts' data comes through a tree request, so each read is an edge `stage` can see.
 { yen, lib, ... }:
 let
-  all.instances = yen.kinds.host; # a tree request: every host, with its data
+  all.instances = yen.kinds.host; # (1) a tree request: every host, with its data
   othersOf = tree: scope: lib.filter (h: !yen.lib.same h scope) (lib.head (tree.select all)); # every host but this one
 in
 {
   yen.aspects.mesh = {
+    # (2)
     at = yen.kinds.host;
     cycle =
       { tree, scope, ... }:
       {
-        tree = [ all ];
+        tree = [ all ]; # (3)
         nixos = [
           {
             programs.ssh.knownHosts = lib.listToAttrs (

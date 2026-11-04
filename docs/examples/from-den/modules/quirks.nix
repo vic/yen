@@ -4,7 +4,8 @@
   # den.quirks.firewall: a sink on the host. A user has no `firewall` sink, so a user's ports go up
   # to its host by routing: Den's `pipe.expose` is the default here.
   yen.kinds.host.sinks.firewall = {
-    reduce = yen.lib.reduce.elements; # each value with the scope that gave it: provenance, as in pipe.collect
+    # (1)
+    reduce = yen.lib.reduce.elements; # (2) each value with the scope that gave it: provenance, as in pipe.collect
     nixos =
       { firewall, ... }:
       {
@@ -19,7 +20,7 @@
   };
   yen.aspects.tux-dev-server = {
     at = yen.user.tux;
-    firewall.ports = [ 3000 ]; # from a user, lands on each of its hosts
+    firewall.ports = [ 3000 ]; # (3) from a user, lands on each of its hosts
   };
 
   # pipe.filter / pipe.as: a plain reader. Here: the ports that users opened, for a report

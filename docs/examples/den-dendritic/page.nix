@@ -15,7 +15,7 @@
         by others. This page gives the yen form of each.
 
         In the guide, each pattern is a different way to write `flake.modules.<class>.<aspect>` and its `imports`. In yen
-        each pattern is an aspect. What changes is its `at`, or the data it reads.
+        each pattern is an aspect. What changes is its `at` (a [predicate](/behavior/predicates/)), or the data it reads.
       ''
       (docs.table
         [ "Pattern" "Guide" "yen" ]
@@ -28,7 +28,7 @@
           [
             "Multi context"
             "a NixOS module adds a home module to `home-manager.sharedModules`"
-            "an aspect at the users `within` the hosts that have the feature: [System and home](/nixos/system-and-home/)"
+            "an aspect at the users [`within`](/behavior/predicates/) the hosts that have the feature: [System and home](/nixos/system-and-home/)"
           ]
           [
             "Inheritance"
@@ -38,7 +38,7 @@
           [
             "Conditional"
             "`lib.mkMerge` and `lib.mkIf pkgs.stdenv.isLinux`"
-            "`at` tests a fact; `not` excludes, below"
+            "`at` tests a fact; [`not`](/behavior/predicates/) excludes, below"
           ]
           [
             "Collector"
@@ -48,7 +48,7 @@
           [
             "Constants"
             "a `generic` class module with `options.systemConstants`"
-            "a field of the fleet, read as the `fleet` arg, below"
+            "a field of the fleet, read as the `fleet` [arg](/behavior/args/), below"
           ]
           [
             "DRY"
@@ -62,7 +62,20 @@
           ]
         ]
       )
-      (docs.file "modules/patterns.nix")
+      ''
+        ## The patterns in yen
+
+        One file holds the aspects. The `fleet.nix` tab declares the hosts and users they apply to.
+      ''
+      (docs.fileNoted "" "modules/patterns.nix")
+      ''
+        `(1)` is the simple pattern: `at` is the `host` kind, so the aspect is active at every host.
+        `(2)` is inheritance: `system-cli` is active at `srv`, and wherever `system-desktop` or `system-dev` is active.
+        `(3)` is the conditional pattern: `at` is a function that tests the `gpu` field of the scope.
+        `(4)` excludes: `headless` is active at every host where `system-desktop` is not active.
+        `(5)` is the constants pattern: `fleet` is the arg that holds the fleet, and `adminEmail` is its field.
+        `(6)` is the factory pattern: `admin` is a field of the `user` kind, so each user is one call of the factory.
+      ''
       (docs.tabs [
         {
           label = "fleet.nix";

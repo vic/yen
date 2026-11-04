@@ -15,6 +15,7 @@ in
   };
   yen.kinds.host = {
     fields = {
+      # (1)
       sshKey = str;
       wgKey = str;
       wgIp = str;
@@ -29,6 +30,7 @@ in
   yen.flake = { out, ... }: out;
 
   yen.host = {
+    # (2)
     nas = {
       sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINas";
       wgKey = "nas0wgPublicKey0000000000000000000000000000=";

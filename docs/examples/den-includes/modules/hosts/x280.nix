@@ -6,7 +6,7 @@ in
 {
   yen.host.x280.shares = [ "//nas/media" ];
   yen.aspects.desktop.at = [ host ];
-  yen.aspects.openssh.at = [ host ];
+  yen.aspects.openssh.at = [ host ]; # (1)
   yen.aspects.x280 = {
     at = host;
     nixos = {
@@ -20,6 +20,7 @@ in
   # den.aspects.pol.provides.x280: pol's content, only on this host
   yen.aspects.pol-on-x280 = {
     at = yen.lib.all [
+      # (2)
       yen.user.pol
       (yen.lib.within host)
     ];

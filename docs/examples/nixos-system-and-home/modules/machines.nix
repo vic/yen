@@ -4,6 +4,7 @@
   yen.host.desk = { };
   yen.user.ana.hosts = [ yen.host.desk ];
   yen.home."ana@work" = {
+    # (1)
     user = yen.user.ana;
     system = "x86_64-linux";
   };
@@ -30,6 +31,7 @@
     homeManager.home.stateVersion = "25.05";
   };
   yen.aspects.standalone = {
+    # (2)
     at = yen.kinds.home;
     homeManager =
       { home, ... }:

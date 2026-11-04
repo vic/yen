@@ -6,8 +6,9 @@ let
 in
 {
   yen.kinds.host.sinks.nix = {
+    # (1)
     reduce = merge;
-    nixos =
+    nixos = # (2)
       { nix, ... }:
       {
         nix.settings = nix;
@@ -24,6 +25,7 @@ in
 
   # written once, for both
   yen.aspects.nix-settings = {
+    # (3)
     at = [
       yen.kinds.host
       yen.kinds.home

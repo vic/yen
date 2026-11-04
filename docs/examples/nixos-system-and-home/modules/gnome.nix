@@ -5,14 +5,14 @@ let
 in
 {
   yen.aspects.gnome = {
-    at = yen.host.desk;
+    at = yen.host.desk; # (1)
     nixos.services.xserver.desktopManager.gnome.enable = true;
   };
   # no home-manager.sharedModules: the users of a host that has gnome get this
   yen.aspects.gnome-home = {
     at = all [
       yen.kinds.user
-      (within yen.aspects.gnome)
+      (within yen.aspects.gnome) # (2)
     ];
     homeManager.dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
   };

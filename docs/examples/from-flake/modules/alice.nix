@@ -6,9 +6,9 @@
     yen.host.desk
   ];
   yen.aspects.alice = {
-    at = yen.user.alice;
+    at = yen.user.alice; # (1)
     nixos =
-      { user, ... }:
+      { user, ... }: # (2)
       {
         users.users.${user.name} = {
           isNormalUser = true;
@@ -16,6 +16,7 @@
         };
       };
     homeManager = {
+      # (3)
       programs.git = {
         enable = true;
         userName = "Alice";
