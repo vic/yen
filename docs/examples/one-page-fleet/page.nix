@@ -43,12 +43,14 @@ in
 
         yen is domain independent. Its engine does not know what a host, a user or NixOS is. You name your own nouns,
         so it configures NixOS, nix-darwin, home-manager, clusters, terraform or anything else you can model as Nix values.
-        For reuse, `yen.lib.batteries` are functions from roles to a yen module: you give every name. Domain batteries,
+        For reuse, [`yen.lib.batteries`](/batteries/) are functions from roles to a yen module: you give every name. Domain batteries,
         such as `yen.lib.batteries.nixos`, fill those roles with one domain's options.
 
         ${link "Documentation" "/"} · ${link "Getting started" "/start/getting-started/"} · [Reference fully-featured fleet](https://github.com/vic/yen/tree/main/reference) · [vic/vix on yen](https://github.com/vic/vix/tree/yen) · [Sponsor vic](https://dendritic.oeiuwq.com/sponsor)
 
         ## Four words
+
+        See the [glossary](/reference/glossary/) for every term.
 
         - **[Kinds](/model/kinds-fields/)**: your nouns, typed. `yen.kinds.host.fields.addr = yen.lib.str;`
         - **[Scopes](/model/scopes/)**: where things live. `spawns` builds a tree from your data: a user under each host it is on.
@@ -62,22 +64,38 @@ in
 
         Two environments, three NixOS hosts, a user on two of them, postgres placed by a fact (some host names it as its
         database), and a rule that holds across machines. Every line runs: these files are a tested template
-        (plus a `hardware.nix` stub so NixOS evaluates).
+        (plus a `hardware.nix` stub so NixOS evaluates). The first file declares the kinds:
       ''
-      (docs.file "modules/kinds.nix")
-      (docs.file "modules/data.nix")
-      (docs.file "modules/behavior.nix")
+      (docs.fileNoted "" "modules/kinds.nix")
       ''
+        At `(1)`, the root `fleet` spawns every `env`. At `(2)`, an `env` spawns the hosts that point at it with their
+        `env` field. At `(3)`, the `os` sink of a host feeds the `nixos` sink, so an element for `os` becomes a NixOS module.
+        At `(4)`, the `nixos` sink builds the system with `nixosSystem`. The second file is the data: plain instances that refer to each other.
+      ''
+      (docs.fileNoted "" "modules/data.nix")
+      ''
+        At `(1)`, `web` refers to the instance `prod`, not to a string. At `(2)`, the user `ana` is on two hosts, so a
+        `user` scope spawns under each. See [instances and refs](/model/instances-refs/). The third file is the behavior and the rule:
+      ''
+      (docs.fileNoted "" "modules/behavior.nix")
+      ''
+        At `(1)`, the aspect `names` is active at every host. At `(2)`, `postgres` is active where a fact holds:
+        some host uses this one as its `db`. At `(3)`, the [invariant](/query/invariants/) `db-same-env` says that
+        the database of a host must be in the environment of that host. Each element goes up to the nearest `os` sink.
+
         Ask it. The tree comes from the data:
       ''
       (docs.value (map (s: s.id) result.scopes))
       ''
         ## Change it safely
 
-        An agent proposes a host in `lab` that uses the prod database. `yen.lib.stage` evaluates the fleet without and with
-        the change, applies nothing, and refuses it with the rule it breaks:
+        An agent proposes a host in `lab` that uses the prod database. This is the change:
       ''
       (docs.file "changes/api-in-lab.nix")
+      ''
+        [`yen.lib.stage`](/agents/stage/) evaluates the fleet without and with the change, applies nothing, and refuses it with
+        the rule it breaks:
+      ''
       (docs.value (verdictOf (stagedOf engine inputs dir)))
       ''
         ## What else it does

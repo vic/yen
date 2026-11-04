@@ -12,6 +12,7 @@
       { host, nixos, ... }:
       {
         nixosConfigurations.${host.name} = import "${inputs.nixpkgs}/nixos/lib/eval-config.nix" {
+          # (1)
           inherit (host) system;
           modules = nixos;
         };

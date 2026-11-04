@@ -18,10 +18,12 @@
           ${docs.sh "nix flake init -t github:vic/yen#getting-started"}
         ''
         ''
-          Read `flake.nix`. The `yen` input is a normal flake input.
-          [import-tree](https://github.com/denful/import-tree) loads every file in `modules/`.
+          Read `flake.nix`:
 
           ${docs.file "flake.nix"}
+
+          The `yen` input is a normal flake input.
+          [import-tree](https://github.com/denful/import-tree) loads every file in `modules/`.
         ''
         ''
           Build the host:
@@ -32,27 +34,34 @@
       ''
         ## The fleet
 
-        yen has no built-in [kinds](/model/kinds-fields/). You say what a fleet is. The root kind is the one that nothing [spawns](/model/scopes/).
-        Here the root `fleet` spawns every host, and its `out` [sink](/behavior/sinks/) is the flake.
+        yen has no built-in kinds. You say what a fleet is. This file declares the first kind, the root:
       ''
-      (docs.file "modules/fleet.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
       ''
+        `fleet` is a [kind](/model/kinds-fields/) (see the [glossary](/reference/glossary/)). Nothing
+        [spawns](/model/scopes/) it, so it is the root. At `(1)`, the root spawns every `host`. At `(2)`, its `out`
+        [sink](/behavior/sinks/) merges all the elements it gets. At `(3)`, the flake takes that `out` value.
+
         ## The host
 
-        A kind has `fields` (the data of each instance) and `sinks` (where behavior goes).
-        The `nixos` sink collects NixOS modules. Its `out` key gives the built system to the flake.
+        A kind has fields and sinks. A field is the data of each instance. A sink is where behavior goes.
+        This kind has one field and one sink:
       ''
       (docs.fileNoted "" "modules/host.nix")
       ''
         `(1)` is a field: every host has a `system`, and it must be a string. `(2)` is the `out` function of the `nixos` sink.
-        yen fills `host` and `nixos` for you. At `(3)`, every NixOS module the sink collected goes to `nixosSystem`.
+        It gives the built system to the flake. yen fills `host` and `nixos` for you. At `(3)`, every NixOS module
+        the sink collected goes to `nixosSystem`.
 
         ## Behavior
 
-        An aspect is active where its `at` holds. Each key of an aspect gives one element to the sink
-        of that name. `base` is active at every host. `motd` is active at `laptop` only.
+        An [aspect](/behavior/aspects/) is behavior. It is active where a predicate holds:
       ''
-      (docs.file "modules/aspects.nix")
+      (docs.fileNoted "" "modules/aspects.nix")
+      ''
+        `at` is the predicate. At `(1)`, `base` is active at every host. At `(4)`, `motd` is active at `laptop` only.
+        At `(2)`, the key `nixos` gives one element to the sink of that name. At `(3)`, the element asks for `host`.
+      ''
       (docs.note "Args are filled for you" ''
         `{ host, ... }:` asks yen for the nearest host. yen fills it, and the rest of the function stays a normal NixOS module.
       '')
