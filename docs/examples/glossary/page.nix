@@ -42,7 +42,7 @@
           ]
           [
             "root kind"
-            "the kind that nothing spawns, and that spawns others"
+            "a kind that nothing spawns and that has `spawns`, nested `kinds` or `sinks`; its instances are the first scopes"
             "[Scopes and spawns](/model/scopes/)"
           ]
           [

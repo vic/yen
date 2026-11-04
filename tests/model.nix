@@ -1280,4 +1280,33 @@ in
     t1 = eq ((b.head (b.filter (s: s.name == "h1") gaps.scopes)).vpn) ("vpn-h1");
     t2 = eq ((b.head (b.filter (s: s.name == "h2") gaps.scopes)).vpn) ("custom");
   };
+  # #135: a kind of sinks is a root with no `spawns = { }`: its instance is a scope and its aspect gives to its sink
+  root-by-sinks =
+    let
+      r = yen.eval (
+        { yen, ... }:
+        {
+          yen.kinds.site.sinks.out.reduce = yen.lib.reduce.merge;
+          yen.site.main = { };
+          yen.aspects.hello = {
+            at = yen.kinds.site;
+            out = {
+              hello = "x";
+            };
+          };
+          yen.flake = { out, ... }: out;
+        }
+      );
+    in
+    eq
+      {
+        errors = map (e: e.code) r.errors;
+        scopes = map (s: s.id) r.graph.scopes;
+        flake = r.flake;
+      }
+      {
+        errors = [ ];
+        scopes = [ "site:main" ];
+        flake.hello = "x";
+      };
 }
