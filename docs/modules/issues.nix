@@ -108,8 +108,13 @@ in
           contact_links = [
             {
               name = "Read the docs first";
-              url = "https://github.com/vic/yen/tree/main/docs";
+              url = "https://yen.oeiuwq.com";
               about = "Every page is a tested example.";
+            }
+            {
+              name = "Ask a question or share an idea";
+              url = "https://github.com/vic/yen/discussions";
+              about = "Questions, ideas and show-and-tell go to Discussions. Issues are for bugs.";
             }
           ];
         };
