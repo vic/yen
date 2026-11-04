@@ -16,7 +16,6 @@ let
 in
 {
   yen.kinds.server = {
-    spawns = { };
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.server.yen-mcp = { };
