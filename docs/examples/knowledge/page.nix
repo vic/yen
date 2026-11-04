@@ -16,11 +16,16 @@
     in
     [
       ''
-        An agent with a knowledge store (a triple store such as quipu) can keep the fleet as a graph and query it with SPARQL.
-        `yen.lib.rdf.share result` gives the eval result as sorted N-Triples: [scopes](/model/scopes/), [kinds](/model/kinds-fields/), parents, active [aspects](/behavior/aspects/), every routed
-        element as a node with its origin, and errors. It adds a sha256 and a count.
+        An [agent](/agents/agent-surface/) with a knowledge store (a triple store such as quipu) can keep the fleet as a graph
+        and query it with SPARQL. The fleet gives itself as sorted N-Triples: [scopes](/model/scopes/), [kinds](/model/kinds-fields/), parents,
+        active [aspects](/behavior/aspects/), every routed element as a node with its origin, and errors. The pack adds a sha256 and a count.
+        This fleet has one environment and two hosts
+        ([working example](https://github.com/vic/yen/tree/main/docs/examples/knowledge)):
       ''
       (docs.file "modules/hosts.nix")
+      ''
+        These are the first triples of its pack, with the count and the sha256:
+      ''
       (docs.code "text" (
         builtins.concatStringsSep "\n" (
           builtins.genList (
@@ -38,8 +43,11 @@
 
         A fleet can give its pack as a flake output:
       ''
-      (docs.file "modules/pack.nix")
+      (docs.fileNoted "" "modules/pack.nix")
       ''
+        `(1)` is a [tree request](/behavior/cycle/) for the whole fleet. `(2)` is an aspect at the root kind, in a cycle.
+        `(3)` calls `yen.lib.rdf.share`, which gives the eval result as a pack. The output drops the triples and keeps the hash and the count.
+
         ## Shapes
 
         `yen.lib.rdf.shacl result` gives SHACL shapes from the schema: one node shape per kind with scopes, `yen:name` required,

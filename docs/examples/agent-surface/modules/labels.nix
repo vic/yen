@@ -3,7 +3,7 @@
 { ... }:
 {
   yen.labels = {
-    "modules/".trust = 3;
-    "agent/".trust = 1;
+    "modules/".trust = 3; # (1)
+    "agent/".trust = 1; # (2)
   };
 }

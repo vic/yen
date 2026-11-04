@@ -9,10 +9,12 @@
   ),
 }:
 (import yen).lib.program.dryRun {
+  # (1)
   base = {
+    # (2)
     imports = [ (import-tree ./modules) ];
     lib = import "${nixpkgs}/lib";
     yen.sinks.lib = { };
   };
-  prog = builtins.fromJSON (builtins.readFile (./. + "/${program}"));
+  prog = builtins.fromJSON (builtins.readFile (./. + "/${program}")); # (3)
 }

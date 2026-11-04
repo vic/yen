@@ -20,11 +20,19 @@ in
     }:
     [
       ''
-        `result = (import yen).lib.eval module` gives a set of queries. Each one is lazy: you pay only for what you read.
-        `result` exists outside the fleet: in a script, a test, the CLI or an agent. Inside the fleet, see [below](#inside-the-fleet).
-        Every answer is plain data, so `builtins.toJSON` prints it. This small fleet answers each query below.
+        yen answers questions about a fleet. A fleet is a set of [kinds](/model/kinds-fields/), [scopes](/model/scopes/),
+        [aspects](/behavior/aspects/) and [sinks](/behavior/sinks/). This small fleet has one host with one user.
+        Two aspects give packages to a `packages` sink. The queries below read it.
       ''
       (docs.file "modules/fleet.nix")
+      ''
+        ## The queries
+
+        `result = (import yen).lib.eval module` gives a set of queries. Each one is lazy: you pay only for what you read
+        (see [Data is queried, not merged](/principles/queried-not-merged/)).
+        `result` exists outside the fleet: in a script, a test, the CLI or an agent. Inside the fleet, see [below](#inside-the-fleet).
+        Every answer is plain data, so `builtins.toJSON` prints it. Each query answers for the fleet above:
+      ''
       (docs.table
         [ "Query" "Answer" ]
         [
@@ -121,8 +129,8 @@ in
       ''
         ## Inside the fleet
 
-        A module never gets `result`: the fleet is what `result` is computed from. An element reads results through its args.
-        A `cycle` asks the tree for the rest:
+        A module never gets `result`: the fleet is what `result` is computed from. An element reads results through its
+        [args](/behavior/args/). A [cycle](/behavior/cycle/) asks the tree for the rest:
       ''
       (docs.table
         [ "To read" "Inside the fleet" ]
@@ -157,7 +165,14 @@ in
           ]
         ]
       )
-      (docs.file "variants/inside.nix")
+      ''
+        The `inside` aspect reads four things at each host:
+      ''
+      (docs.fileNoted "" "variants/inside.nix")
+      ''
+        `(1)` asks the tree for the users under this host. `(2)` reads the reduced value of the `packages` sink.
+        `(3)` reads the parent scope. `(4)` asks whether the `nginx` aspect holds here. This is what it gives:
+      ''
       (docs.value (variant "variants/inside.nix").reduced.out."fleet:main".inside)
       (docs.note "Not inside" ''
         `errors`, `check`, `context`, `explain` and `impact` read the errors, and an element that reads the errors

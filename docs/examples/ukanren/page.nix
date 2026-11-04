@@ -10,11 +10,24 @@
     [
       ''
         Some values are not written but found: a port no other app uses, memory that fits a host, a database host in the
-        right environment. `yen.lib.uKanren` is µKanren with constraints. It has logic variables, unification over attrsets,
-        lists and scalars, and goals that run in both directions.
+        right environment. µKanren with constraints finds such values. It has logic variables, unification over attrsets,
+        lists and scalars, and goals that run in both directions. The fleet has one host `lb` with three apps:
       ''
       (docs.file "modules/fleet.nix")
-      (docs.fileWith "{6-12}" "modules/ports.nix")
+      ''
+        ## Ports for the apps
+
+        The goal gives each app a port in 8080..8083. All ports differ, and `prometheus` is before `grafana`.
+        The marked lines are explained below. The goals come from `yen.lib.uKanren`, and the table at the end of the page lists them.
+      ''
+      (docs.fileNoted "" "modules/ports.nix")
+      ''
+        `(1)` takes the goals from the library. `(2)` makes one logic variable for each app.
+        `(3)` gives every variable a finite domain of ports. `(4)` makes all ports differ, and `(5)` makes the `prometheus` port
+        lower than the `grafana` port. `(6)` unifies the answer `q` with the variables, and `(7)` enumerates what is left.
+        `(8)` takes one answer, and `(9)` reads the same relation backward. `(10)` is a search with fuel.
+        The aspect is a [cycle](/behavior/cycle/) that asks the tree for `lb`. These are the answers:
+      ''
       (docs.value result.flake.ports)
       ''
         `grafana` can never take 8080: `prometheus` must be lower. The same relation, read backward, says so.

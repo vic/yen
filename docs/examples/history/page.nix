@@ -41,12 +41,18 @@ in
     }:
     [
       ''
-        Three questions an agent asks before a change: what else does this touch, what if this were gone, and what
-        holds on a given day.
+        Three questions an [agent](/agents/agent-surface/) asks before a change: what else does this touch, what if this were gone, and what
+        holds on a given day. The fleet has an environment `prod` and three hosts. Two [kinds](/model/kinds-fields/)
+        carry the data and the [sinks](/behavior/sinks/). The marked lines are explained below.
       ''
-      (docs.file "modules/fleet.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
       (docs.file "modules/features/backend.nix")
       ''
+        `(1)` is a field of the fleet: the date, because pure evaluation has no clock. `(2)` gives the DNS of the environments to the
+        flake. `(3)` is the [spawn](/model/scopes/) of hosts: an environment spawns only the hosts that are valid on that date.
+        `(4)` collects the backends of an environment and gives them as DNS. `(5)` is the first of two fields, `validFrom` and
+        `validTo`, that bound the time a host is valid. The `backend` aspect gives each host name to `backends`.
+
         ## What does this scope reach?
 
         `result.impact scope { hops; sinks; max; }` follows routed elements from a scope, by depth. The scope is a ref (`{ kind; name; }`

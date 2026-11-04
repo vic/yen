@@ -8,15 +8,16 @@
     { docs, result, ... }:
     [
       ''
-        Every verdict of [invariants](/query/invariants/) comes with a certificate. Yen checks it in Nix, and a checker
-        written and proved in [Lean 4](https://lean-lang.org) checks it again, outside Nix. The fleet and its rules:
+        Every verdict of [invariants](/query/invariants/) comes with a [certificate](/reference/glossary/). yen checks it in Nix,
+        and a checker written and proved in [Lean 4](https://lean-lang.org) checks it again, outside Nix.
+        The fleet and the rules are the ones of the [invariants](/query/invariants/) page, as
+        [working code](https://github.com/vic/yen/tree/main/docs/examples/lean):
       ''
       (docs.file "modules/fleet.nix")
       (docs.file "modules/invariants.nix")
       ''
-        A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has this check already, as `checks.<system>.yen-lean`, for
-        every fleet, clean or not. For a flake you write by hand, the battery `lean.verify` gives the same check.
-        `nix flake check` builds it only when the Lean checker verifies the verdict:
+        To build the check, add the Lean battery to the flake outputs. `nix flake check` builds it only when the Lean
+        checker verifies the verdict:
       ''
       (docs.nix ''
         outputs =
@@ -36,11 +37,14 @@
           };
       '')
       ''
+        `lean.verify` is the [Lean battery](/batteries/lean/). You need it only for a flake you write by hand.
+        A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has this check already, as `checks.<system>.yen-lean`, for
+        every fleet, clean or not.
         The docs build this check on this fleet in CI, and a second one that must be rejected: the fleet with mistakes.
       ''
       ''
-        The checker reads `result.check.lean`: the rules as you wrote them, with their variables, the facts of the
-        fleet, and the certificate. Lean does not trust Yen's grounder. It grounds the rules over the facts itself and
+        The checker reads the rules as you wrote them, with their variables, the facts of the fleet, and the
+        certificate. Lean does not trust the yen grounder. It grounds the rules over the facts itself and
         checks that its ground program covers the full one: every instance of a rule whose positive atoms can hold.
         Then it checks the certificate on it. This fleet gives the checker:
       ''
@@ -51,7 +55,7 @@
         refuted = builtins.length result.check.lean.certificate.refuted;
       })
       ''
-        What Lean proves, in [lean/](https://github.com/vic/yen/tree/main/lean):
+        This data is `result.check.lean`. What Lean proves, in [lean/](https://github.com/vic/yen/tree/main/lean):
 
         | Theorem | Says |
         |---|---|
@@ -73,15 +77,15 @@
 
         ## Staged changes
 
-        `yen.lib.stage` evaluates the fleet with a change and without it. Its `lean` field holds both verdicts, and
+        [Stage](/agents/stage/) (`yen.lib.stage`) evaluates the fleet with a change and without it. Its `lean` field holds both verdicts, and
         `yen-cert-check --change` reads them: the staged verdict must verify, and the checker names the cone of the
         change, the atoms whose rules changed and every atom that reads them. By `relevance`, every atom outside the
-        cone keeps its value. The MCP tool `yen_stage` answers with this check in `lean`, so an agent sees before it
+        cone keeps its value. The [MCP tool](/agents/mcp/) `yen_stage` answers with this check in `lean`, so an agent sees before it
         writes a file whether Lean accepts the change and which violations it can touch.
 
         ## Deploy waves
 
-        `lib.graphs.layers` orders a graph into waves: each node comes after everything it depends on. The battery
+        `lib.graphs.layers` (see [Graphs](/query/graphs/)) orders a graph into waves: each node comes after everything it depends on. The battery
         `lean.waves` checks the waves in Lean. A cycle leaves nodes out of every wave, so the check fails and names them:
       ''
       (docs.nix ''
@@ -93,7 +97,7 @@
       ''
 
         Run the checker on any fleet without the battery: `nix run github:vic/yen#yen-cert-check -- verdict.json`,
-        where `verdict.json` is `builtins.toJSON result.check.lean`. The [MCP server](/agents/agent-surface/) gives the
+        where `verdict.json` is `builtins.toJSON result.check.lean`. The [MCP server](/agents/mcp/) gives the
         same check to agents as the tool `yen_verify`.
 
         What stays trusted: Nix, which evaluates the fleet into facts (Lean checks only their shape), and the Lean

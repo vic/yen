@@ -2,17 +2,17 @@
 # `host.form H "server"` is "H is a host whose form is server". A rule with `bad = H` that holds is a violation.
 { yen, ... }:
 let
-  inherit (yen.facts) host has lt;
+  inherit (yen.facts) host has lt; # (1)
 in
 {
   # no server runs a desktop
   yen.invariants.no-desktop-on-servers =
-    { H }:
+    { H }: # (2)
     {
-      bad = H;
+      bad = H; # (3)
       pos = [
-        (host.form H "server")
-        (has yen.aspects.desktop H)
+        (host.form H "server") # (4)
+        (has yen.aspects.desktop H) # (5)
       ];
     };
 
@@ -31,7 +31,7 @@ in
       pos = [
         (host.addr A X)
         (host.addr B X)
-        (lt A B)
+        (lt A B) # (6)
       ];
     };
 }

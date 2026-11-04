@@ -29,16 +29,26 @@ in
     [
       ''
         An invariant is a rule about the whole fleet: "no server runs a desktop", "no two hosts share an address".
-        `yen.invariants.<name>` gives [Datalog](/query/datalog/) rules over the fleet's facts. A true `[ "bad" … ]` atom is a violation.
+        The rules are [Datalog](/query/datalog/) rules over the facts of the fleet. This fleet has three hosts, a
+        `desktop` aspect for laptops and a `postgres` aspect for the database.
       ''
       (docs.file "modules/fleet.nix")
-      (docs.file "modules/invariants.nix")
       ''
-        A rule is a function of its variables: `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. Each argument is a
-        variable. A literal comes by reference from `yen.facts`, never by name: `host.addr A X` (a field holds X; for a ref
+        ## The rules
+
+        Each invariant is a rule. A rule that holds gives a violation. The marked lines are explained below.
+      ''
+      (docs.fileNoted "" "modules/invariants.nix")
+      ''
+        `(1)` takes the literals from `yen.facts`. `yen.invariants.<name>` is a rule, and a rule is a function of its
+        variables (`(2)`): each argument is a variable. At `(3)`, `bad = H` makes the violation `[ "bad" <invariant> H ]`.
+        A true `[ "bad" … ]` atom is a violation. The literals at `(4)` and `(5)` say: `H` is a host whose form is `"server"`,
+        and the `desktop` aspect is active at `H`. `lt` at `(6)` compares two bound terms, so only one of each pair of hosts is reported.
+
+        A rule is `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. A literal comes by reference from `yen.facts`, never by name: `host.addr A X` (a field holds X; for a ref
         field, X is a scope of the instance it refers to, and a ref such as `yen.env.prod` is a constant), `kind yen.kinds.host H`,
         `has yen.aspects.desktop H`, `instance H yen.host.db`, `parent H P`, and `lt` and `neq`, which compare two bound terms.
-        A string, an int or a bool is a constant. `bad = H` makes the violation `[ "bad" <invariant> H ]`. A typo in a field,
+        A string, an int or a bool is a constant. A typo in a field,
         an aspect or a variable is an evaluation error, so a rule can never silently match nothing.
 
         A relation you derive is declared with its arity and an optional `check` on its terms:

@@ -9,13 +9,34 @@
     [
       ''
         Some questions are rules: "a host serves when it runs a web server and is not drained; a host is drained when a host
-        it depends on is down." `yen.lib.datalog` solves ground rules with negation. Each rule is `{ head; pos; neg; }`.
-        You ground the rules with Nix: one set per host. Each atom is a relation of `yen.relations` called by reference,
-        and each term an instance: no relation or host is written as a string. In an answer, an instance is `{ kind; name; }`.
+        it depends on is down." Datalog solves such rules, with negation, over the data of your fleet.
+        This page uses [kinds](/model/kinds-fields/), [instances and refs](/model/instances-refs/) and [aspects](/behavior/aspects/).
+        The fleet is four hosts. A web host depends on a database host, and `db-2` is in maintenance.
       ''
       (docs.file "modules/fleet.nix")
-      (docs.fileWith "{17-29}" "modules/policy.nix")
+      ''
+        ## The rules
+
+        `yen.lib.datalog` solves ground rules. Each rule is `{ head; pos; neg; }`: the `head` holds when every atom
+        of `pos` holds and no atom of `neg` holds. You ground the rules with Nix: one set per host.
+        Each atom is a relation called by reference, and each term is an instance. No relation or host is written as a string.
+        The marked lines are explained below.
+      ''
+      (docs.fileNoted "" "modules/policy.nix")
+      ''
+        `(1)` is the Datalog library. `(2)` is a [tree request](/behavior/cycle/): every host, with its data.
+        The rule at `(3)` gives `serves h` when `h` is a web host and not `drained`.
+        A host is `drained` when a host it depends on is not `up`.
+        The two rules at `(4)` make a choice: exactly one `primary` database, and the policy does not say which.
+        At `(5)`, each relation of `yen.relations` is declared with its arity.
+        The `serving` aspect at `(6)` runs a [cycle](/behavior/cycle/) at the root kind.
+
+        In an answer, an instance is `{ kind; name; }`. This is the answer of the `serving` aspect:
+      ''
       (docs.value result.flake.serving)
+      ''
+        The library has these functions:
+      ''
       (docs.table
         [ "Function" "Answer" ]
         [

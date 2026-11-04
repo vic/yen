@@ -16,8 +16,11 @@ in
     [
       ''
         An agent that manages a fleet works through [queries](/query/queries/). Every answer is data that `builtins.toJSON` prints,
-        so a tool, a script or a model reads it the same way.
-
+        so a tool, a script or a model reads it the same way. This page uses a fleet of three hosts with a `desktop`
+        aspect for laptops and a `postgres` aspect for the database. It is the fleet of the [invariants](/query/invariants/) page.
+      ''
+      (docs.file "modules/fleet.nix")
+      ''
         ## One call to start
 
         `result.agent` is the schema, the errors, the [invariant](/query/invariants/) check and the counts, JSON-safe:
@@ -38,15 +41,18 @@ in
 
         ## Trust labels
 
-        `yen.labels."<path part>" = { trust = n; }` labels the content of files whose path contains that part.
-        An aspect declared in several files takes the lowest trust of them. A path part is plain text, never a pattern.
-        When a fleet has labels, an aspect that no label covers has trust 0: unknown origin is never above a floor.
-        A staged change takes its submitter's label: `stage { by = { name = "bot"; trust = 1; }; … }` gives every aspect
-        the change declares that trust, and `stage.floor n` lists them, even for program ops that live in no file.
+        A label gives a trust level to the content of the files whose path contains a path part.
+        Here, the files under `agent/` are written by an agent. The aspect `metrics` is declared in one of them:
       ''
-      (docs.file "modules/labels.nix")
+      (docs.fileNoted "" "modules/labels.nix")
       (docs.file "modules/agent/metrics.nix")
       ''
+        `yen.labels."<path part>" = { trust = n; }` is the form (`(1)`, `(2)`). A path part is plain text, never a pattern.
+        An aspect declared in several files takes the lowest trust of them.
+        When a fleet has labels, an aspect that no label covers has trust 0: unknown origin is never above a floor.
+        A staged change takes its submitter's label: `stage { by = { name = "bot"; trust = 1; }; … }` (see [Stage](/agents/stage/))
+        gives every aspect the change declares that trust, and `stage.floor n` lists them, even for program ops that live in no file.
+
         `result.labels` gives each labelled aspect. `result.floor 3` lists every routed element of an aspect below trust 3,
         with its file: what a reviewer reads first.
       ''

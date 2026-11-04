@@ -15,12 +15,17 @@ in
     { docs, result, ... }:
     [
       ''
-        A stored [query](/query/queries/) names a question about the fleet: `{ params; answer; }`. Each parameter has a type, and it is optional when
-        the type has a default (`yen.lib.opt`). `answer` gets the parameters and `result`, the same eval result as outside the fleet.
-        A parameter that names a [kind](/model/kinds-fields/), an instance or an [aspect](/behavior/aspects/) is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`), never a name.
+        A stored [query](/query/queries/) names a question about a fleet. Here, the fleet has one host `web`, one user `ana`
+        and two [aspects](/behavior/aspects/), `git` and `nginx`
+        ([working example](https://github.com/vic/yen/tree/main/docs/examples/stored-queries)). Two stored queries ask about it.
+        The marked lines are explained below.
       ''
-      (docs.file "modules/queries.nix")
+      (docs.fileNoted "" "modules/queries.nix")
       ''
+        `(1)` is the set of stored queries. Each is `{ params; answer; }`. Each parameter has a type (`(2)`), and it is optional when
+        the type has a default (`yen.lib.opt`, `(5)`). `answer` (`(3)`) gets the parameters and `result`, the same eval result as outside the fleet.
+        A parameter that names a [kind](/model/kinds-fields/), an instance or an aspect is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`, `(4)`), never a name.
+
         `result.queries` lists them with their parameters and types:
       ''
       (docs.value result.queries)

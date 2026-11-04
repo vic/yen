@@ -1,7 +1,7 @@
 # Ground rules { head; pos; neg; }, one set per host. Each atom is a relation called by reference, each term an instance.
 { yen, lib, ... }:
 let
-  D = yen.lib.datalog;
+  D = yen.lib.datalog; # (1)
   inherit (yen.relations)
     web
     up
@@ -9,7 +9,7 @@ let
     drained
     primary
     ;
-  all.instances = yen.kinds.host; # a tree request: every host, with its data
+  all.instances = yen.kinds.host; # (2) a tree request: every host, with its data
   rules =
     hosts:
     lib.concatMap (
@@ -18,7 +18,7 @@ let
       ++ lib.optional (!h.maintenance) { head = up h; }
       ++ [
         {
-          head = serves h;
+          head = serves h; # (3)
           pos = [ (web h) ];
           neg = [ (drained h) ];
         }
@@ -28,7 +28,7 @@ let
         neg = [ (up d) ];
       }) h.dependsOn
     ) hosts
-    # a choice: exactly one primary database, and the policy does not say which
+    # a choice: exactly one primary database, and the policy does not say which # (4)
     ++ [
       {
         head = primary yen.host.db-1;
@@ -57,13 +57,14 @@ let
 in
 {
   yen.relations = {
-    web.arity = 1;
+    web.arity = 1; # (5)
     up.arity = 1;
     serves.arity = 1;
     drained.arity = 1;
     primary.arity = 1;
   };
   yen.aspects.serving = {
+    # (6)
     at = yen.kinds.fleet;
     cycle =
       { tree, ... }:

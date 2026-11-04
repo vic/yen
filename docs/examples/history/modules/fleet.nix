@@ -5,19 +5,19 @@ let
 in
 {
   yen.kinds.fleet = {
-    fields.today = yen.lib.str;
+    fields.today = yen.lib.str; # (1)
     spawns.environment = _: yen.environment;
     sinks.out.reduce = yen.lib.reduce.merge;
-    sinks.dns.out =
+    sinks.dns.out = # (2)
       { dns, ... }:
       {
         inherit dns;
       };
   };
   yen.kinds.environment = {
-    spawns.host =
+    spawns.host = # (3)
       s: lib.filterAttrs (_: h: same h.environment s && yen.lib.validAt yen.fleet.main.today h) yen.host;
-    sinks.backends.dns =
+    sinks.backends.dns = # (4)
       { environment, backends, ... }:
       {
         ${environment.name} = backends;
@@ -25,7 +25,7 @@ in
   };
   yen.kinds.host.fields = {
     environment = yen.kinds.environment;
-    validFrom = maybe yen.lib.str; # null: open, valid since always
+    validFrom = maybe yen.lib.str; # (5) null: open, valid since always
     validTo = maybe yen.lib.str; # null: open, valid until always
   };
 
