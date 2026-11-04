@@ -9,9 +9,11 @@ in
     at = yen.kinds.repo;
     files.files.file = {
       "taplo.toml".text = files.toml { } {
+        # (1)
         formatting.align_entries = true;
       };
       ".github/dependabot.yml".text = github.yaml {
+        # (2)
         version = 2;
         updates = [
           {
@@ -25,6 +27,7 @@ in
   };
   # each aspect gives a list of commands; the shell shows them in its menu
   yen.kinds.repo.sinks.commands.out = devshell.numtide {
+    # (3)
     from = yen.kinds.repo.sinks.commands;
     inherit (inputs) devshell;
     systems = [ "x86_64-linux" ];

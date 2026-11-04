@@ -5,6 +5,7 @@ let
 in
 {
   yen.kinds.host.sinks.persist.nixos = nixos.persist {
+    # (1)
     from = yen.kinds.host.sinks.persist;
     hideMounts = true;
   };
@@ -24,6 +25,7 @@ in
   yen.aspects.facter = {
     at = s: builtins.pathExists (./. + "/${s.name}/facter.json");
     nixos = nixos.facter {
+      # (2)
       report = h: ./. + "/${h.name}/facter.json";
       module = inputs.nixos-facter-modules.nixosModules.facter;
     };

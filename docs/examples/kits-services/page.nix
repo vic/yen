@@ -14,26 +14,28 @@
     }:
     [
       ''
-        `yen.lib.kits` holds ready-made kits. A kit is a [module](/principles/modules/): you import it, then write an assembly that puts your
-        machines in its roles. The kit has the roles, the typed interface, the limits, the exports and the [aspects](/behavior/aspects/).
-        Each client reads what the servers of its own assembly export, never another assembly's.
+        The library ships ready-made kits for services: backups, wifi, remote builders, a binary cache, monitoring and a database.
+        A kit is a [module](/principles/modules/): you import it, then write an assembly that puts your machines in its roles.
+        See [Kits batteries](/batteries/kits/) for kits, assemblies and roles. The fleet writes only the assemblies:
+      ''
+      (docs.fileNoted "" "modules/assemblies.nix")
+      ''
+        - `(1)` imports the kits. `nix-cache` takes `{ root; }`, the vars directory the public key is read from.
+        - `(2)` is a kit of the fleet, `sshd`, with a role. The kit `borg` adds an assembly of it.
+        - `(3)` is the kit of the assembly `backup`, and `(4)` puts `nas` in its server role. The other roles take machines the same way.
+        - `(5)` is a setting of the role `default`: a set of networks. `(6)` is a setting of the client of the database.
 
-        | Kit | Roles | Server exports | Client does |
-        |---|---|---|---|
-        | `borg` | `client`, `server` (1) | `repo`, a known-hosts generator for the clients | `services.borgbackup.jobs` |
-        | `wifi` | `default` with `networks` | | `/etc/wifi/networks`; a generator `wifi.<assembly>.<network>` per network, shared by all machines of the role, with one secret file `psk` |
-        | `remote-builders` | `builder` (1 or more), `client` | `host`, `systems`, `speedFactor` | `nix.buildMachines`, with the battery `nixos.remote-builders` |
-        | `nix-cache` | `server` (1), `client` | `url`, `key` (the ref of the generated `cache-key.pub`); a signing-key generator; harmonia with the `cache-key.pem` path | `nix.settings.substituters` and `trusted-public-keys`, read from the public var |
-        | `monitoring` | `server` (1), `exporter` | exporter: `target` | server: `services.prometheus.scrapeConfigs`, one job per exporter |
-        | `postgres` | `server` (1), `client` with `database`, `user` | `dsn` | server: the roles and databases, listens, one `pg_hba` line per client of its own assembly; client: its connection string |
-
-        The kits need a machine field `addr`. `nix-cache` takes `{ root; }`, the vars directory the public key is read from. The fleet writes only the assemblies:
+        The kits need a machine field `addr`. The sinks and the contract are the fleet's words, the same as in the
+        [kits battery page](/batteries/kits/):
       ''
-      (docs.file "modules/assemblies.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
       ''
-        The sinks and the contract are the fleet's words, the same as in the kits battery page:
+        - `(1)` expands the assemblies, and the parts that their kits add.
+        - `(2)` is the exports sink, and `(3)` is the generators sink for the secrets that the kits generate.
+        - `(4)` gives each host one member [scope](/model/scopes/) for each (assembly, role) it takes.
+        - `(5)` is the contract, and `(6)` checks the types of the settings.
+        - `(7)` gives a generator that an export carries to the machines of its `deploy` predicate.
       ''
-      (docs.file "modules/fleet.nix")
       ''
         ## The result
 
@@ -70,6 +72,21 @@
       ''
       (docs.file "variants/no-key.nix")
       (docs.value (map (e: e.error) (variant "variants/no-key.nix").errors))
+      ''
+        ## The kits
+
+        Each kit has roles, a typed interface, limits, exports and [aspects](/behavior/aspects/).
+        Each client reads what the servers of its own assembly export, never another assembly's.
+
+        | Kit | Roles | Server exports | Client does |
+        |---|---|---|---|
+        | `borg` | `client`, `server` (1) | `repo`, a known-hosts generator for the clients | `services.borgbackup.jobs` |
+        | `wifi` | `default` with `networks` | | `/etc/wifi/networks`; a generator `wifi.<assembly>.<network>` per network, shared by all machines of the role, with one secret file `psk` |
+        | `remote-builders` | `builder` (1 or more), `client` | `host`, `systems`, `speedFactor` | `nix.buildMachines`, with the battery `nixos.remote-builders` |
+        | `nix-cache` | `server` (1), `client` | `url`, `key` (the ref of the generated `cache-key.pub`); a signing-key generator; harmonia with the `cache-key.pem` path | `nix.settings.substituters` and `trusted-public-keys`, read from the public var |
+        | `monitoring` | `server` (1), `exporter` | exporter: `target` | server: `services.prometheus.scrapeConfigs`, one job per exporter |
+        | `postgres` | `server` (1), `client` with `database`, `user` | `dsn` | server: the roles and databases, listens, one `pg_hba` line per client of its own assembly; client: its connection string |
+      ''
     ];
 
   checks = import ./checks.nix;

@@ -14,21 +14,19 @@
     }:
     [
       ''
-        `yen.lib.kits` holds kits written as [modules](/principles/modules/), so a fleet writes only assemblies. A kit that reads public values
-        takes `{ root; }`, the directory of the vars: the kit is a value in yen, not a file in your repo, so it cannot
-        find your vars by a relative path. Battery `addresses` gives each member an address of a prefix, in
-        member order; a repeated address, a prefix that is no IPv4 /16 to /24 and a prefix too small are error records.
-
-        | Kit | Roles | Interface | Does |
-        |---|---|---|---|
-        | `wireguard { root; }` | `controller` (exactly 1), `peer` | `prefix`, `port` (51820) | an address per member; keys by generators; the private key is a path, never in the store; a peer talks to the controller |
-        | `zerotier { root; }` | `controller` (1), `moon` (0 to 4), `peer` | none | the controller's network id and the moons' ids are public generator files; peers join and list the moons |
-        | `dns` | `default` | none | a record for every `endpoints` any kit exports |
-
-        This is the fleet's own words, and the assemblies:
+        The library ships kits for networks: a VPN with a hub, a virtual network with moons, and DNS records. A kit is a
+        [module](/principles/modules/), so a fleet writes only assemblies. See [Kits batteries](/batteries/kits/) for kits, assemblies and roles.
+        This is the fleet's own words, and its assemblies:
       ''
-      (docs.file "modules/network.nix")
+      (docs.fileNoted "" "modules/network.nix")
       ''
+        - `(1)` imports a kit that reads public values. It takes `{ root; }`, the directory of the vars. The kit is a value in yen, not a file in your repo, so it cannot
+          find your vars by a relative path.
+        - `(2)` is a wireguard assembly: `lb` is the hub, and `web` and `db` are peers. Addresses come from the prefix, in member order.
+        - `(3)` is a role taken by a predicate, not by a name.
+        - `(4)` is a zerotier assembly: one controller, one moon, and any other machine as a peer.
+        - `(5)` is a kit of the fleet that gives endpoints. `(6)` is the aspect that gives them. The kit `dns` reads them.
+
         Each wireguard member has an address in member order, and a peer sees only the controller:
       ''
       (docs.value result.flake.config)
@@ -37,6 +35,17 @@
       ''
       (docs.value result.flake.cnames)
       ''
+        ## The kits
+
+        | Kit | Roles | Interface | Does |
+        |---|---|---|---|
+        | `wireguard { root; }` | `controller` (exactly 1), `peer` | `prefix`, `port` (51820) | an address per member; keys by generators; the private key is a path, never in the store; a peer talks to the controller |
+        | `zerotier { root; }` | `controller` (1), `moon` (0 to 4), `peer` | none | the controller's network id and the moons' ids are public generator files; peers join and list the moons |
+        | `dns` | `default` | none | a record for every `endpoints` any kit exports |
+
+        Battery `addresses` gives each member an address of a prefix, in member order. A repeated address, a prefix that is no
+        IPv4 /16 to /24 and a prefix too small are error records.
+
         ## The contract
 
         A wireguard or zerotier network needs exactly one controller, zerotier allows four moons at most, and a prefix

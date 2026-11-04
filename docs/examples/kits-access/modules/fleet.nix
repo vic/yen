@@ -19,6 +19,7 @@ let
 in
 {
   imports = [
+    # (1)
     inputs.yen.lib.kits.sshd
     inputs.yen.lib.kits.users
     inputs.yen.lib.kits.emergency-access
@@ -26,13 +27,14 @@ in
   yen.kinds.fleet = {
     spawns.machine = _: yen.machine;
     sinks.out.reduce = yen.lib.reduce.merge;
-    sinks.exports.reduce = kits.exports { isMember = holds yen.kinds.member; };
+    sinks.exports.reduce = kits.exports { isMember = holds yen.kinds.member; }; # (2)
     sinks.generators.reduce = yen.lib.batteries.vars.generators {
+      # (3)
       machineOf = s: if holds yen.kinds.member s then s.parent else s;
     };
   };
   yen.kinds.machine = {
-    spawns.member = kits.members { inherit assemblies holds; };
+    spawns.member = kits.members { inherit assemblies holds; }; # (4)
     sinks.nixos.out =
       { scope, nixos, ... }:
       {
@@ -74,6 +76,7 @@ in
           ];
           errors = [
             (kits.contract {
+              # (5)
               assemblies = get tree own;
               machines = get tree hosts;
               inherit holds;
@@ -83,7 +86,7 @@ in
     };
     settings-typed = {
       at = yen.kinds.member;
-      errors = kits.settings-typed;
+      errors = kits.settings-typed; # (6)
     };
   };
 }

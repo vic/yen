@@ -18,33 +18,33 @@
         every fleet: each host reads the keys of the other hosts, each address has one owner, sections of a file come
         in an order. `yen.lib.batteries` has them ready.
 
-        A battery never adds a word to your fleet. **You write every key**, with your own names. The battery is the
+        A [battery](/batteries/) never adds a word to your fleet. **You write every key**, with your own names. The battery is the
         value. It reads only the fixed args `scope` and `sinks`, and it takes the [sinks](/behavior/sinks/) it reads as refs.
-
-        | Battery | Value of | Does |
-        |---|---|---|
-        | `mesh { from; build; }` | any key of an [aspect](/behavior/aspects/) | the records of sink `from`, except the ones that this [scope](/model/scopes/) or a scope under it gave; `build` makes content of them |
-        | `claim { key; rank ? ; }` | `reduce` of a sink | each key has one owner; two owners is an error, unless `rank` picks one |
-        | `ordered` | `reduce` of a sink | elements `{ name; value; before; after; }` in an order that meets all of them |
-        | `perSystem.out { from; group; systemOf ? ; }` | `out` of a sink at a system scope | the reduced sink as flake output `<group>.<system>` |
-        | `perSystem.inputs { inputs; system; }` | anywhere | each input read at one system: `packages.<system>` over `legacyPackages.<system>`, so `(…).nixpkgs.hello` |
+        Here are the words of the example: a fleet of hosts. Each host has an ssh key and an address. The batteries know none of these names.
       ''
       (docs.file "modules/fleet.nix")
       ''
-        ## mesh: what the other hosts give
+        ## What the other hosts give
 
         Each host gives its key to the fleet. The fleet reduces with `elements`, so each key keeps the scope that gave
         it. Each host then reads the keys of the others. This is the same rule as known_hosts, WireGuard peers,
         Syncthing devices or remote builders, written by hand in [Facts from other hosts](/nixos/cross-host/).
       ''
-      (docs.file "modules/known-hosts.nix")
+      (docs.fileNoted "" "modules/known-hosts.nix")
+      ''
+        `(1)` is the sink of the fleet. `(2)` is the sink of each host: its `reduce` is `one`, so a host has exactly one value.
+        At `(3)`, `mesh` gives the value of the key `known`. It is the records of sink `from`, except the ones that
+        this [scope](/model/scopes/) or a scope under it gave. `build` makes content of them: here, a sorted list.
+        Each host has the keys of the other two:
+      ''
       (docs.value result.flake.known)
       ''
-        ## claim: one owner per key
+        ## One owner per key
       ''
-      (docs.file "modules/addresses.nix")
+      (docs.fileNoted "" "modules/addresses.nix")
       ''
-        When a new host takes the address of the nas, the fleet has an error and no outputs:
+        At `(1)`, `claim` is the `reduce` of the sink. Each key has one owner, and two owners is an error. At `(2)`, every host
+        gives its address. When a new host takes the address of the nas, the fleet has an error and no outputs:
       ''
       (docs.value (
         map (e: {
@@ -60,21 +60,27 @@
         With `rank`, the highest value wins and there is no error: for example `rank = claim: claim.priority`, when two
         virtual machines ask for one GPU.
 
-        ## ordered: sections from many files
+        ## Sections from many files
       ''
-      (docs.file "modules/readme.nix")
+      (docs.fileNoted "" "modules/readme.nix")
+      ''
+        At `(1)`, `ordered` is the `reduce` of the sink. Its elements are `{ name; value; before; after; }`, and it finds
+        an order that meets all of them. `(2)` puts a section after `intro`. `(3)` is written in another file and goes between the two:
+      ''
       (docs.value result.flake.readme)
       ''
         A cycle, a name that is given two times, or an unknown name in `before` or `after` is an error.
 
-        ## Other module systems: eval-modules, configurations, imports
+        ## Other module systems
 
         A sink can collect modules of any module system: NixOS, flake-parts, sini/files, or plain `lib.evalModules`.
-        `eval-modules` evaluates them with fixed modules first. `configurations` gives one flake output per scope,
-        `<output>.<scope name>`, from a builder you pass (`nixosSystem`, `darwinSystem`, any function). `imports` turns a
-        sink of modules into one module for another sink.
       ''
-      (docs.file "modules/modules.nix")
+      (docs.fileNoted "" "modules/modules.nix")
+      ''
+        `(1)`, `configurations`, gives one flake output per scope, `<output>.<scope name>`, from a builder you pass
+        (`nixosSystem`, `darwinSystem`, any function). `(2)`, `eval-modules`, evaluates the modules with fixed modules
+        first. `(3)`, `imports`, turns a sink of modules into one module for another sink. This is what they give:
+      ''
       (docs.value {
         inherit (result.flake) settings report;
       })
@@ -97,6 +103,17 @@
           { scope, sinks, ... }:
           build (map (e: e.value) (builtins.filter (e: !own scope e) sinks.''${from.__sink}));
       '')
+      ''
+        ## All the generic batteries
+
+        | Battery | Value of | Does |
+        |---|---|---|
+        | `mesh { from; build; }` | any key of an [aspect](/behavior/aspects/) | the records of sink `from`, except the ones that this scope or a scope under it gave; `build` makes content of them |
+        | `claim { key; rank ? ; }` | `reduce` of a sink | each key has one owner; two owners is an error, unless `rank` picks one |
+        | `ordered` | `reduce` of a sink | elements `{ name; value; before; after; }` in an order that meets all of them |
+        | `perSystem.out { from; group; systemOf ? ; }` | `out` of a sink at a system scope | the reduced sink as flake output `<group>.<system>` |
+        | `perSystem.inputs { inputs; system; }` | anywhere | each input read at one system: `packages.<system>` over `legacyPackages.<system>`, so `(…).nixpkgs.hello` |
+      ''
     ];
 
   checks =

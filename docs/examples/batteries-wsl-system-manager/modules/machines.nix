@@ -33,12 +33,12 @@ in
       yen.kinds.wsl
       yen.kinds.machine
     ];
-    nixos =
+    nixos = # (1)
       { pkgs, ... }:
       {
         environment.systemPackages = tools pkgs;
       };
-    system =
+    system = # (2)
       { pkgs, ... }:
       {
         nixpkgs.hostPlatform = "x86_64-linux";

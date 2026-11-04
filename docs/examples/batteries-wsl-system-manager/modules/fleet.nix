@@ -21,23 +21,26 @@ in
   yen.fleet.main = { };
 
   yen.kinds.host.sinks.nixos.out = nixos.system {
+    # (1)
     from = yen.kinds.host.sinks.nixos;
     inherit (inputs) nixpkgs;
   };
   # WSL is NixOS with the NixOS-WSL module: the same battery, one more module
   yen.kinds.wsl.sinks.nixos.out = nixos.system {
+    # (2)
     from = yen.kinds.wsl.sinks.nixos;
     inherit (inputs) nixpkgs;
   };
   yen.aspects.wsl = {
     at = yen.kinds.wsl;
     nixos = {
-      imports = [ inputs.nixos-wsl.nixosModules.default ];
+      imports = [ inputs.nixos-wsl.nixosModules.default ]; # (3)
       wsl.enable = true;
     };
   };
   # system-manager: `systemConfigs.<name>` from the modules of the machine's sink
   yen.kinds.machine.sinks.system.out = configurations {
+    # (4)
     from = yen.kinds.machine.sinks.system;
     output = "systemConfigs";
     build = _: modules: inputs.system-manager.lib.makeSystemConfig { inherit modules; };

@@ -19,6 +19,7 @@ in
       out.reduce = yen.lib.reduce.merge;
       # each host gives its own NixOS modules to the hive
       colmena = {
+        # (1)
         reduce = yen.lib.reduce.merge;
         out = b.deploy.colmena {
           from = yen.kinds.fleet.sinks.colmena;
@@ -28,28 +29,32 @@ in
       };
       # dns records as terraform, built with terranix
       terraform.out = b.terranix.configuration {
+        # (2)
         from = yen.kinds.fleet.sinks.terraform;
         inherit (inputs.terranix.lib) terranixConfiguration;
         system = "x86_64-linux";
         name = _: "dns";
       };
       # machines write NixOS config into each other (oddlama's nodes.<name>)
-      nodes.reduce = yen.lib.reduce.elements;
+      nodes.reduce = yen.lib.reduce.elements; # (3)
     };
   };
   yen.kinds.host = {
     fields.addr = yen.lib.str;
     sinks.nixos.out = b.nixos.system {
+      # (4)
       from = yen.kinds.host.sinks.nixos;
       inherit (inputs) nixpkgs;
     };
   };
   yen.kinds.cluster.sinks.k8s.out = b.k8s.manifests {
+    # (5)
     from = yen.kinds.cluster.sinks.k8s;
     inherit lib;
   };
   # an export never builds a machine: what lands on it is nixosModules.<name> for other flakes
   yen.kinds.export.sinks.nixos.out = b.exports.modules {
+    # (6)
     from = yen.kinds.export.sinks.nixos;
     output = "nixosModules";
   };
@@ -66,6 +71,7 @@ in
     { out, ... }:
     out
     // b.deploy.deploy-rs {
+      # (7)
       configurations = out.nixosConfigurations;
       hostname = n: _: yen.host.${n}.addr;
       activate = _: c: inputs.deploy-rs.lib.x86_64-linux.activate.nixos c;

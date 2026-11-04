@@ -10,7 +10,7 @@ in
       addr = str;
       sshKey = str;
     };
-    sinks.ports.nixos = nixos.firewall { from = yen.kinds.host.sinks.ports; };
+    sinks.ports.nixos = nixos.firewall { from = yen.kinds.host.sinks.ports; }; # (1)
   };
   # every host gives a peer record and a builder record to the fleet; each host reads the others'
   yen.kinds.fleet.sinks = {
@@ -32,11 +32,11 @@ in
         system = "x86_64-linux";
         maxJobs = 4;
       };
-    nixos = nixos.hosts { from = yen.kinds.fleet.sinks.peers; };
+    nixos = nixos.hosts { from = yen.kinds.fleet.sinks.peers; }; # (2)
   };
   yen.aspects.builds = {
     at = yen.kinds.host;
-    nixos = nixos.remote-builders { from = yen.kinds.fleet.sinks.builders; };
+    nixos = nixos.remote-builders { from = yen.kinds.fleet.sinks.builders; }; # (3)
   };
   yen.aspects.ssh = {
     at = yen.kinds.host;

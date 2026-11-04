@@ -16,13 +16,14 @@ in
   yen.kinds.home = {
     sinks = {
       homeManager.out = b.home-manager.system {
+        # (1)
         from = yen.kinds.home.sinks.homeManager;
         homeManagerConfiguration = _: inputs.home-manager.lib.homeManagerConfiguration;
         pkgs = _: inputs.nixpkgs.legacyPackages.x86_64-linux;
       };
-      vscode.homeManager = b.editors.vscode { from = yen.kinds.home.sinks.vscode; };
-      zed.homeManager = b.editors.zed { from = yen.kinds.home.sinks.zed; };
-      # one pool of agent extensions; each agent picks the types it reads
+      vscode.homeManager = b.editors.vscode { from = yen.kinds.home.sinks.vscode; }; # (2)
+      zed.homeManager = b.editors.zed { from = yen.kinds.home.sinks.zed; }; # (3)
+      # (4) one pool of agent extensions; each agent picks the types it reads
       agent-ext.homeManager = b.ai.extensions {
         from = yen.kinds.home.sinks.agent-ext;
         types = [ "skill" ];

@@ -7,14 +7,15 @@ in
 {
   yen.kinds.repo.sinks = {
     secretspec = {
-      reduce = claim { key = s: "${s.profile or "default"}/${s.name}"; }; # one secret, one declaration
+      reduce = claim { key = s: "${s.profile or "default"}/${s.name}"; }; # (1) one secret, one declaration
       files = secretspec.toml {
+        # (2)
         from = yen.kinds.repo.sinks.secretspec;
         project.name = "my-app";
         defaults.providers = [ "keyring" ];
       };
     };
-    sops-rules.files = secrets.sops-config { from = yen.kinds.repo.sinks.sops-rules; };
+    sops-rules.files = secrets.sops-config { from = yen.kinds.repo.sinks.sops-rules; }; # (3)
   };
   yen.aspects.database = {
     at = yen.kinds.repo;

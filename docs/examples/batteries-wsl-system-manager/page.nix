@@ -14,26 +14,30 @@
         [kind](/model/kinds-fields/) with its own [sink](/behavior/sinks/), and each sink builds its own flake output.
         An [aspect](/behavior/aspects/) at several kinds shares one piece of configuration between them.
 
-        | Machine | Kind | Sink | Battery | Output |
-        |---|---|---|---|---|
-        | NixOS | `host` | `nixos` | `nixos.system` | `nixosConfigurations.<name>` |
-        | NixOS on WSL | `wsl` | `nixos` | `nixos.system`, plus the [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) module | `nixosConfigurations.<name>` |
-        | Other Linux | `machine` | `system` | `configurations` with `system-manager.lib.makeSystemConfig` | `systemConfigs.<name>` |
+        The kinds, their sinks and the [batteries](/batteries/) that build them:
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        - `(1)` builds `nixosConfigurations.<name>` for a NixOS host.
+        - `(2)` is the same battery for a machine on WSL. WSL needs no battery of its own: it is NixOS with one more module.
+        - `(3)` is that module, [NixOS-WSL](https://github.com/nix-community/NixOS-WSL). The aspect `wsl` adds it, and `wsl.enable`, at the kind `wsl`.
+        - `(4)` builds `systemConfigs.<name>` for another Linux, with `system-manager.lib.makeSystemConfig`.
 
-        The kinds, their sinks and the batteries that build them:
+        The machines, and the aspect `tools`, which gives the same packages to all three through the key of each kind:
       ''
-      (docs.file "modules/fleet.nix")
+      (docs.fileNoted "" "modules/machines.nix")
       ''
-        WSL needs no battery of its own: it is NixOS with one more module, so the aspect `wsl` adds
-        `nixos-wsl.nixosModules.default` and `wsl.enable` at the kind `wsl`. The machines, and the aspect `tools`, which
-        gives the same packages to all three through the key of each kind:
-      ''
-      (docs.file "modules/machines.nix")
-      ''
+        At `(1)`, the packages go to NixOS and WSL through the `nixos` key. At `(2)`, they go to the other Linux through the `system` key.
         The flake outputs, with the [Lean check](/query/lean/) every flake gets:
       ''
       (docs.value (builtins.mapAttrs (_: builtins.attrNames) result.flake))
       ''
+        | Machine | Kind | Sink | Battery | Output |
+        |---|---|---|---|---|
+        | NixOS | `host` | `nixos` | `nixos.system` | `nixosConfigurations.<name>` |
+        | NixOS on WSL | `wsl` | `nixos` | `nixos.system`, plus the NixOS-WSL module | `nixosConfigurations.<name>` |
+        | Other Linux | `machine` | `system` | `configurations` with `system-manager.lib.makeSystemConfig` | `systemConfigs.<name>` |
+
         nix-darwin works the same way: a kind with a `darwin` sink and the battery `darwin.system` (see
         [Platform batteries](/batteries/platforms/)). An aspect at `host`, `wsl`, `machine` and the darwin kind shares
         its configuration with all four.

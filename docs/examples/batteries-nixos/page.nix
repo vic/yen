@@ -10,8 +10,42 @@
     [
       ''
         `yen.lib.batteries.nixos` holds the NixOS rules that most fleets write. NixOS is the domain of these batteries:
-        they set NixOS options. They still name no yen [kind](/model/kinds-fields/), [sink](/behavior/sinks/) or [aspect](/behavior/aspects/). You write `yen.kinds.host`, the `nixos` and
-        `unfree` sinks and every aspect, in your own words.
+        they set NixOS options. They still name no yen [kind](/model/kinds-fields/), [sink](/behavior/sinks/) or [aspect](/behavior/aspects/).
+        You write `yen.kinds.host`, the sinks and every aspect, in your own words. This is a fleet of hosts that hold users:
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        - `(1)` is `system`, the `out` key of the sink that collects NixOS modules. It builds `nixosConfigurations.<host>`.
+        - `(2)` and `(3)` are the NixOS keys of two sinks of package names. One module per host allows or marks them.
+          Any aspect can give names to these sinks.
+
+        These are the data of the fleet and the aspect that gives the NixOS base to the hosts:
+      ''
+      (docs.file "modules/machines.nix")
+      ''
+        The aspects that set the host name, the users and their shells:
+      ''
+      (docs.fileNoted "" "modules/aspects.nix")
+      ''
+        Each battery is the value of the `nixos` key of an aspect. `(1)` sets the host name from the name of the [scope](/model/scopes/).
+        `(2)` defines a user's account. The kind `user` has no `nixos` sink, so the account goes into each of its hosts.
+        `(3)` makes `ana` the primary user. `(4)` reads the `shell` field that you name. At `(5)`, `user` reads a ref or a name.
+
+        Ports, peers and builders:
+      ''
+      (docs.fileNoted "" "modules/network.nix")
+      ''
+        `(1)` opens the ports that aspects give: `22`, or `{ tcp; udp; }`. At `(2)` and `(3)`, every host gives a record to the fleet, and each
+        host reads the records of the other machines: `/etc/hosts` and `known_hosts`, and `nix.buildMachines`.
+
+        Paths that survive a reboot, and hardware:
+      ''
+      (docs.fileNoted "" "modules/storage.nix")
+      ''
+        `(1)` collects paths from any aspect, for impermanence. A path from a user goes up to each of her hosts. `(2)` adds a
+        facter module only at hosts that have a report.
+
+        ## The batteries
 
         | Battery | Value of | Den |
         |---|---|---|
@@ -21,21 +55,15 @@
         | `primary-user { user ? ; }` | a NixOS key; `user` reads a ref or a name, by default the scope | `den.batteries.primary-user` |
         | `unfree { from; }` | the NixOS key of a sink of package names | `den.batteries.unfree` |
         | `insecure { from; }` | the NixOS key of a sink of package names | `den.batteries.insecure` |
-        | `user-shell { shell; }` | a NixOS key; `shell` reads the [scope](/model/scopes/) | `den.batteries.user-shell` |
+        | `user-shell { shell; }` | a NixOS key; `shell` reads the scope | `den.batteries.user-shell` |
         | `autologin { user; }` | a NixOS key; `user` reads a ref or a name | `den.batteries.tty-autologin` |
         | `firewall { from; }` | the NixOS key of a sink of ports (`22` or `{ tcp; udp; }`) | quirks `firewall` |
         | `hosts { from; }` | a NixOS key; /etc/hosts and known_hosts of the other machines (`mesh`) | sini hostsfile |
         | `remote-builders { from; systemOf; }` | a NixOS key; `nix.buildMachines` of the other machines (`mesh`) | sini remote-build-client |
         | `persist { from; root; hideMounts; }` | the NixOS key of a sink of paths (impermanence) | quirks `persist` |
         | `facter { report; module; }` | a NixOS key, at hosts that have a report | `den.aspects.facter` |
-      ''
-      (docs.file "modules/fleet.nix")
-      (docs.file "modules/aspects.nix")
-      (docs.file "modules/machines.nix")
-      (docs.file "modules/network.nix")
-      (docs.file "modules/storage.nix")
-      ''
-        Each battery is a few lines. The pages [Every Den battery](/den/batteries/) and
+
+        `mesh` is a [generic battery](/batteries/generic/). Each battery is a few lines. The pages [Every Den battery](/den/batteries/) and
         [Unfree packages from many files](/nixos/unfree/) write the same rules by hand. When a battery does not fit your
         fleet, copy those lines and change them: see [Write your own](/batteries/generic/#write-your-own).
       ''

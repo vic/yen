@@ -20,7 +20,7 @@ in
   };
   yen.aspects.hive = {
     at = yen.kinds.host;
-    colmena =
+    colmena = # (1)
       { host, ... }:
       {
         ${host.name} = {
@@ -28,7 +28,7 @@ in
           imports = [ { networking.hostName = host.name; } ];
         };
       };
-    terraform =
+    terraform = # (2)
       { host, ... }:
       {
         resource.cloudflare_record.${host.name} = {
@@ -37,12 +37,12 @@ in
           type = "A";
         };
       };
-    nixos = b.distributed.nodes { from = yen.kinds.fleet.sinks.nodes; };
+    nixos = b.distributed.nodes { from = yen.kinds.fleet.sinks.nodes; }; # (3)
   };
   # lb writes into web: its backends know the load balancer
   yen.aspects.lb-writes-web = {
     at = yen.host.lb;
-    nodes =
+    nodes = # (4)
       { host, ... }:
       {
         web.networking.extraHosts = "${host.addr} lb.internal";
@@ -51,12 +51,13 @@ in
   yen.aspects.ingress = {
     at = yen.cluster.axon;
     k8s.ingress.web = {
+      # (5)
       host = "web.example.org";
       port = 80;
     };
   };
   yen.aspects.ingress-tls = {
     at = yen.cluster.axon;
-    k8s.ingress.web.tls = true;
+    k8s.ingress.web.tls = true; # (6)
   };
 }

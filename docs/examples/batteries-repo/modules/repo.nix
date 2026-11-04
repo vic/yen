@@ -16,6 +16,7 @@ in
       out.reduce = yen.lib.reduce.merge;
       # every key below that gives to `files` becomes a repo file, written by `nix run .#write-files`
       files.out = files.writer {
+        # (1)
         from = yen.kinds.repo.sinks.files;
         inherit (inputs) files;
         inherit lib pkgs;
@@ -24,6 +25,7 @@ in
     };
   };
   yen.kinds.system.sinks.shell.out = devshell.mkshell {
+    # (2)
     from = yen.kinds.system.sinks.shell;
     pkgsOf = s: inputs.nixpkgs.legacyPackages.${s.name};
   };
