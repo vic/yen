@@ -10,7 +10,7 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.guest = yen.lib.pointing "on" yen.guest;
+    spawns.guest = yen.lib.pointing "on" yen.guest; # (1)
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -18,13 +18,13 @@
       };
   };
   yen.kinds.guest = {
-    fields.on = yen.kinds.host;
-    sinks.nixos.nixos =
+    fields.on = yen.kinds.host; # (2)
+    sinks.nixos.nixos = # (3)
       { guest, nixos, ... }:
       {
         containers.${guest.name} = {
           autoStart = true;
-          config.imports = nixos;
+          config.imports = nixos; # (4)
         };
       };
   };

@@ -9,7 +9,7 @@
 let
   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
   # flake-file needs `valueMeta` on submodule options: nixos-25.05 lib lacks it
-  flakeFileOf =
+  flakeFileOf = # (1)
     flake-file:
     (inputs.nixpkgs-unstable.lib.evalModules {
       specialArgs = { inherit inputs; };
@@ -19,7 +19,7 @@ let
         { flake-file.formatter = p: p.nixfmt-rfc-style; }
       ];
     }).config.flake-file;
-  filesOf =
+  filesOf = # (2)
     files:
     (lib.evalModules {
       modules = [
@@ -39,19 +39,20 @@ in
     sinks = {
       out.reduce = yen.lib.reduce.merge;
       flake-file = {
+        # (3)
         reduce = yen.lib.reduce.merge; # flake inputs, declared by the aspects that use them
         out =
           { flake-file, ... }:
           {
-            packages.x86_64-linux.write-flake = (flakeFileOf flake-file).apps.write-flake pkgs;
+            packages.x86_64-linux.write-flake = (flakeFileOf flake-file).apps.write-flake pkgs; # (4)
             checks.x86_64-linux.flake-file = (flakeFileOf flake-file).check-flake-file pkgs;
           };
       };
-      files.out =
+      files.out = # (5)
         { files, ... }:
         {
           packages.x86_64-linux.write-files = (filesOf files).writer.drv;
-          checks.x86_64-linux = (filesOf files).checks; # each committed file must match
+          checks.x86_64-linux = (filesOf files).checks; # (6) each committed file must match
         };
     };
   };

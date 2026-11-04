@@ -16,12 +16,22 @@
         yen never reads a secret. It plans which host gets which encrypted file, as data that a secrets tool
         (agenix, sops-nix) reads. A secret is an instance of a data [kind](/model/kinds-fields/); its owners are host refs.
       ''
-      (docs.fileWith "{12-17}" "modules/kinds.nix")
-      (docs.file "modules/data.nix")
+      (docs.fileNoted "{13-18}" "modules/kinds.nix")
       ''
-        One [cycle](/behavior/cycle/) delivers each secret to its owners. Another reports secrets that nobody owns:
+        At `(1)`, `secret` is a kind with a `file` and its `owners`. Nothing spawns it, so it is only data. At `(2)`, each host has a
+        `secrets` sink. At `(3)`, its `of` is the secret kind: only a ref to a secret passes. At `(4)`, the `out` function
+        gives the plan that a secrets tool reads. This is the data:
       ''
-      (docs.file "modules/deliver.nix")
+      (docs.fileNoted "" "modules/data.nix")
+      ''
+        At `(1)`, `tls` has one owner. At `(2)`, `db-password` has two. One [cycle](/behavior/cycle/) delivers each secret to its owners.
+        Another reports secrets that nobody owns:
+      ''
+      (docs.fileNoted "" "modules/deliver.nix")
+      ''
+        At `(1)`, a tree request for every secret. At `(2)`, each host gets the secrets that name it. At `(3)` and `(4)`,
+        a secret with no owner is an error, not a silent leftover. The plan:
+      ''
       (docs.value result.flake.secretsPlan)
       ''
         A secret that nobody owns is an error, and a fleet with an error gives no outputs (`flake` is `{ invalid-flake-errors = … }`, the reason):

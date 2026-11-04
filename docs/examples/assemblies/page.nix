@@ -9,15 +9,21 @@
     { docs, result, ... }:
     [
       ''
-        A backup has roles: one server, many clients. An assembly says which machine takes which role, with refs.
+        A backup has roles: one server, many clients. An assembly says which machine takes which role, with [refs](/model/instances-refs/):
       ''
-      (docs.file "modules/inventory.nix")
+      (docs.fileNoted "" "modules/inventory.nix")
       ''
-        Each machine spawns one `member` scope per (assembly, role) it takes part in. The member holds a ref to its
-        assembly. An aspect at a member scope runs once per assembly and role. An aspect at a machine that has a
-        member runs once per machine.
+        At `(1)`, the assembly `backup` has `roles`. At `(2)`, `server` lists one machine. `client` lists two.
+
+        Each machine spawns one `member` [scope](/model/scopes/) per (assembly, role) it takes part in. This kind file does it:
       ''
-      (docs.fileWith "{12-15,33}" "modules/kinds.nix")
+      (docs.fileNoted "{12-16,34}" "modules/kinds.nix")
+      ''
+        At `(1)`, for each assembly and each of its roles, the machine looks for itself in the list of that role.
+        At `(2)`, the member holds a ref to its assembly. At `(4)`, `spawns.member` creates the members. At `(3)`, the sink `exports`
+        collects what members publish. An aspect at a member scope runs once per assembly and role. An aspect at a machine that
+        has a member runs once per machine. These are the scopes:
+      ''
       (docs.scopes result)
       ''
         ## Members exchange data
@@ -25,7 +31,11 @@
         Clients publish their address to a fleet sink with `elements`. The engine sets `from`, so a member can only publish
         as itself. The server reads the elements and builds its allow list:
       ''
-      (docs.fileWith "{9,17}" "modules/backup.nix")
+      (docs.fileNoted "{9,17}" "modules/backup.nix")
+      ''
+        At `(1)`, an [aspect](/behavior/aspects/) is active only at members of the assembly `backup` with a given role.
+        At `(2)`, the client publishes its address with the key `exports`. The result:
+      ''
       (docs.value result.flake.config)
       (docs.tip "The full model" ''
         [Kits batteries](/batteries/kits/) add kits as data with typed role settings and errors, `at` predicates as

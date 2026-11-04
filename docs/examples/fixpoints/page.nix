@@ -17,7 +17,7 @@
         when something reads it. A yen fleet is a fixpoint too, in two layers:
 
         - **Declarations.** Every module gets `yen`, which is computed from the declarations of all modules,
-          its own too. A module reads `yen.host.a.addr` from any file, as a NixOS module reads `config.x`.
+          its own too. A module reads the data of any file through `yen`, as a NixOS module reads `config.x`.
         - **Results.** An element reads the reduced value of a [sink](/behavior/sinks/) through an arg. That value can hold elements
           that read other sinks. Sinks feed [sources](/behavior/cycle/) and sources feed sinks; laziness closes the loop.
 
@@ -27,8 +27,18 @@
 
         This fleet has two hosts. Each sink plays the part of one NixOS option:
       ''
-      (docs.file "modules/fleet.nix")
-      (docs.file "modules/aspects.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        At `(1)`, a sink of the fleet: every host gives to it, every host reads it. At `(2)`, `yen.lib.derive` makes a default
+        from the instance, as a NixOS default reads `config`. At `(3)`, a `reduce` you write picks one value. At `(4)`, the flake
+        outputs read a sink too. The [aspects](/behavior/aspects/) give the elements:
+      ''
+      (docs.fileNoted "" "modules/aspects.nix")
+      ''
+        At `(1)`, `firewall` reads the sink `ports`, as a NixOS option reads another option. At `(2)`, `at` names an aspect,
+        so `tls` is active where `web` is. At `(3)` and `(4)`, each host gives its address to the fleet, and `peers` reads
+        what the other hosts gave. This table maps each pattern to its name in this fleet:
+      ''
       (docs.table
         [ "NixOS" "yen" "Here" ]
         [
@@ -76,16 +86,16 @@
         In NixOS, any module can read any option, so a dependency is a read hidden in a function. Nothing lists it,
         and "what changes if I change this?" has no answer before you evaluate.
 
-        In yen, an element reads only what reaches its scope: its own scope, the nearest scope of a kind, and the
-        sinks of its receivers. A value goes from one scope to another only as a routed element, and each routed
-        element is an edge of `graph`, with the aspect that gave it. Here, `peers` on `a` reads what `b` gave to
-        the fleet:
+        In yen, an element reads only what reaches its [scope](/model/scopes/): its own scope, the nearest scope of a kind, and the
+        sinks of its receivers. A value goes from one scope to another only as a [routed](/behavior/routing/) element, and each routed
+        element is an edge of the [graph](/query/graphs/), with the aspect that gave it. Here are the edges of the sink `addrs`.
+        `peers` on `a` reads what `b` gave to the fleet:
       ''
       (docs.value (builtins.filter (e: e.sink == "addrs") result.graph.edges))
       ''
         ## Where routing helps
 
-        Because the edges are the dependencies, these questions are queries, not a search:
+        Because the edges are the dependencies, these questions are [queries](/query/queries/), not a search:
 
         - `result.impact scope { }`: the scopes a scope's elements reach, by depth. See [History](/agents/history/).
         - `result.explain aspect scope depth`: why an aspect is or is not active at a scope.

@@ -7,6 +7,7 @@
       { host, scope, ... }:
       {
         tags.${host.name} = lib.filter (r: yen.lib.holds yen.aspects.${r} scope) [
+          # (1)
           "server"
           "workstation"
           "laptop"

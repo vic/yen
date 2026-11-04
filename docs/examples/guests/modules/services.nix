@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.guest-base = {
-    at = yen.kinds.guest;
+    at = yen.kinds.guest; # (1)
     nixos =
       { guest, ... }:
       {
@@ -11,7 +11,7 @@
       };
   };
   yen.aspects.nginx = {
-    at = yen.guest.web;
+    at = yen.guest.web; # (2)
     nixos.services.nginx.enable = true;
   };
   yen.aspects.postgres = {

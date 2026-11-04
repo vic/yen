@@ -78,7 +78,7 @@ CI replies with the errors, the scopes, the active aspects and the invariant che
 }
 ```
 
-Here the answer is in the reply: a `one` sink with two elements is an error, not an override. The evaluation is pure and
+Here the answer is in the reply: a [`one` sink](/behavior/sinks/) with two elements is an error, not an override. The evaluation is pure and
 restricted (`--restrict-eval`): a block cannot read files outside its inputs, and it has a time limit.
 Run the same evaluation before you post, from the repository root, with your blocks in a directory as `block-1.nix`, `block-2.nix`:
 
@@ -91,6 +91,7 @@ nix-instantiate --eval --strict --json --restrict-eval -I yen=. -I nixpkgs=chann
 ## Send a pull request: exercise the examples
 
 The best pull request changes or adds an example under `docs/examples/`. An example is a page, a flake template and a test at once.
+See [getting-started](https://github.com/vic/yen/tree/main/docs/examples/getting-started) for a small one, and the [glossary](/reference/glossary/) for the words.
 
 1. For a bug, add a check to the `page.nix` of the closest example, or a `variants/` file that shows the bug. Run `docs-test`: it fails.
 2. Fix the engine (`default.nix`, `lib/`) or the example. Run `docs-test` again: it passes.

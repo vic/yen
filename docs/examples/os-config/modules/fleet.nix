@@ -11,7 +11,7 @@
   };
   yen.kinds.host = {
     spawns = {
-      user = yen.lib.pointing "hosts" yen.user;
+      user = yen.lib.pointing "hosts" yen.user; # (1)
       home = yen.lib.pointing "on" yen.home;
     };
     sinks.nixos.out =
@@ -19,11 +19,11 @@
       {
         nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
       };
-    sinks.osConfig.reduce = yen.lib.reduce.one; # the host's realized NixOS config
+    sinks.osConfig.reduce = yen.lib.reduce.one; # (2) the host's realized NixOS config
   };
   yen.kinds.user = {
     fields.hosts = yen.lib.listOf yen.kinds.host;
-    sinks.homeManager.nixos =
+    sinks.homeManager.nixos = # (3)
       { user, homeManager, ... }:
       {
         home-manager.users.${user.name}.imports = homeManager;
@@ -35,7 +35,7 @@
       on = yen.kinds.host;
       system = yen.lib.str;
     };
-    sinks.homeManager.out =
+    sinks.homeManager.out = # (4)
       { home, homeManager, ... }:
       {
         homeConfigurations.${home.name} = inputs.home-manager.lib.homeManagerConfiguration {
@@ -45,7 +45,7 @@
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.below yen.kinds.user;
+    at = yen.lib.below yen.kinds.user; # (5)
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;
@@ -53,7 +53,7 @@
   };
   yen.aspects.os-config = {
     at = yen.kinds.host;
-    osConfig = { host, out, ... }: out.nixosConfigurations.${host.name}.config; # lazy: read only when a module asks
+    osConfig = { host, out, ... }: out.nixosConfigurations.${host.name}.config; # (6) lazy: read only when a module asks
   };
 
   yen.fleet.main = { };

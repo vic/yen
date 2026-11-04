@@ -17,20 +17,31 @@
         each stage is an [aspect](/behavior/aspects/), and one job per system comes from the reference fleet's `ci.json`
         ([docs/modules/ci.nix](https://github.com/vic/yen/blob/main/docs/modules/ci.nix)).
       ''
-      (docs.fileWith "{12,22,41-55}" "modules/fleet.nix")
+      (docs.fileNoted "{12,22,41-56}" "modules/fleet.nix")
       ''
+        The kind `fleet` has two [sinks](/behavior/sinks/) that write files. At `(1)`, `flakeFileOf` evaluates the `flake-file`
+        options. At `(2)`, `filesOf` evaluates the `files` modules. At `(3)`, the `flake-file` sink reduces the inputs that
+        aspects declare. At `(4)`, it gives the app that writes `flake.nix`. At `(5)`, the `files` sink gives the writer of the other files.
+        At `(6)`, a check fails when a committed file is stale.
+
         ## Inputs live with their users
 
-        Each aspect declares the flake inputs it uses on the `flake-file` sink. The host's input goes up to the fleet:
+        Each [aspect](/behavior/aspects/) declares the flake inputs it uses on the `flake-file` sink:
       ''
-      (docs.fileWith "{29}" "modules/inputs.nix")
+      (docs.fileNoted "{27}" "modules/inputs.nix")
       ''
+        At `(1)`, `core-inputs` is active at the fleet. At `(2)`, it declares the inputs of the template. At `(3)`, the
+        input of the host goes up to the fleet.
+
         ## README and CI workflow
 
         The `files` sink collects `sini/files` modules. One aspect writes the README, with a single mermaid diagram of the fleet's hosts, and the CI workflow:
       ''
-      (docs.file "modules/write.nix")
+      (docs.fileNoted "" "modules/write.nix")
       ''
+        At `(1)`, a tree request for the whole fleet. At `(2)`, the [cycle](/behavior/cycle/) asks it. At `(3)`, the key `files`
+        gives the modules that write `README.md` and the CI workflow.
+
         The template's own `flake.nix` is the `flake-file` output. Remove the `web` aspect, and `nixpkgs` leaves the flake.
       ''
       (docs.file "flake.nix")

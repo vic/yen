@@ -21,14 +21,17 @@
       (docs.tabs [
         {
           label = "features/zfs.nix";
-          body = docs.file "modules/features/zfs.nix";
+          body = docs.fileNoted "" "modules/features/zfs.nix";
         }
         {
           label = "features/k3s.nix";
-          body = docs.file "modules/features/k3s.nix";
+          body = docs.fileNoted "" "modules/features/k3s.nix";
         }
       ])
       ''
+        In `zfs.nix`, `(1)` declares the field `settings.zfs.arcMax` of every [host](/model/kinds-fields/), and `(2)` declares
+        the same path on the kind `environment`. In `k3s.nix`, `(1)` declares `settings.k3s.role` with the default `"agent"`.
+
         A read of `host.settings.k3s.role` looks at the instance, then at the type default. It never reads `zfs.nix`.
         `result.declaredIn` answers which files declare a path:
       ''
@@ -45,21 +48,28 @@
       ''
         ## Cascades
 
-        A cascade is a list in your order. `yen.lib.cascade path xs` gives the first non-null value along `xs`.
-        `nas` sets its own `arcMax`; `node` falls back to its environment:
+        These hosts take a value from their own settings, or from their environment:
       ''
-      (docs.file "modules/hosts.nix")
-      (docs.fileWith "{10}" "modules/report.nix")
+      (docs.fileNoted "" "modules/hosts.nix")
+      ''
+        At `(1)`, a host has a ref to an `environment`. At `(2)`, the environment `prod` sets `arcMax`. At `(3)`, `nas` sets its
+        own. `node` sets none. This [aspect](/behavior/aspects/) reads the value for each host:
+      ''
+      (docs.fileNoted "{10}" "modules/report.nix")
+      ''
+        A cascade is a list in your order. At `(1)`, `yen.lib.cascade path xs` gives the first non-null value along `xs`.
+        `nas` has its own `arcMax`; `node` falls back to its environment. At `(2)`, the aspect reads a helper (see Helpers below). The report of the fleet:
+      ''
       (docs.value result.flake.report)
       ''
         ## Helpers
 
         `yen.helpers` holds shared values and functions. It is an open namespace: any file declares a key, and any
-        module reads it from its `yen` arg. Above, `report.nix` reads `yen.helpers.k3sRole`:
+        module reads it from its `yen` arg, as `report.nix` does. The key `k3sRole` is declared here:
       ''
-      (docs.file "modules/helpers.nix")
+      (docs.fileNoted "" "modules/helpers.nix")
       ''
-        A fleet chooses its own helpers, so yen does not document them and `schema` does not list them.
+        A fleet chooses its own helpers, so yen does not document them and the schema (see [Agent surface](/agents/agent-surface/)) does not list them.
         A helper is a declaration like any other: one answer per key. A second file that gives the same key is
         two answers, because two functions are never equal:
       ''

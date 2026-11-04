@@ -6,13 +6,15 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.secret.fields = {
+    # (1)
     file = yen.lib.str; # the encrypted file in the repo
     owners = yen.lib.listOf yen.kinds.host;
   };
   yen.kinds.host.sinks.secrets = {
+    # (2)
     reduce = yen.lib.reduce.set;
-    of = yen.kinds.secret;
-    # the plan a secrets tool reads: agenix, sops-nix, or your own
+    of = yen.kinds.secret; # (3)
+    # (4) the plan a secrets tool reads: agenix, sops-nix, or your own
     out =
       { host, secrets, ... }:
       {

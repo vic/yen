@@ -109,7 +109,7 @@ in
     { docs, inputs, ... }:
     [
       ''
-        An error record has `error` and `from` for people, and `code`, `path`, `got`, `want`, `fix`, `class` and `near`
+        An [error record](/principles/errors/) has `error` and `from` for people, and `code`, `path`, `got`, `want`, `fix`, `class` and `near`
         for tools. `class` is `fixable` (an edit to the data fixes it) or `authority` (no edit by this author can).
         The codes below are read from the engine source when the docs are written.
       ''

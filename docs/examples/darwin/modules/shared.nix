@@ -3,10 +3,11 @@
 {
   yen.aspects.shared = {
     at = [
+      # (1)
       yen.kinds.host
       yen.kinds.mac
     ];
-    os =
+    os = # (2)
       { scope, pkgs, ... }:
       {
         networking.hostName = scope.name;

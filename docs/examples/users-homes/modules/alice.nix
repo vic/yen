@@ -9,8 +9,9 @@ let
   ];
 in
 {
-  yen.user.alice.hosts = [ yen.host.server ];
+  yen.user.alice.hosts = [ yen.host.server ]; # (1)
   yen.home."alice@laptop" = {
+    # (2)
     user = alice;
     system = "x86_64-linux";
   };
@@ -23,7 +24,7 @@ in
     };
   };
   yen.aspects.alice-home = {
-    at = hers; # one home config, in NixOS and standalone
+    at = hers; # (3) one home config, in NixOS and standalone
     homeManager = {
       programs.git = {
         enable = true;

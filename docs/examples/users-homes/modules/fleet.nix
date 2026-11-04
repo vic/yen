@@ -8,12 +8,12 @@
   yen.kinds.fleet = {
     spawns = {
       host = _: yen.host;
-      home = _: yen.home;
+      home = _: yen.home; # (1)
     };
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host = {
-    spawns.user = yen.lib.pointing "hosts" yen.user;
+    spawns.user = yen.lib.pointing "hosts" yen.user; # (2)
     sinks.nixos.out =
       { host, nixos, ... }:
       {
@@ -22,7 +22,7 @@
   };
   yen.kinds.user = {
     fields.hosts = yen.lib.listOf yen.kinds.host;
-    sinks.homeManager.nixos =
+    sinks.homeManager.nixos = # (3)
       { user, homeManager, ... }:
       {
         home-manager.users.${user.name}.imports = homeManager;
@@ -33,7 +33,7 @@
       user = yen.kinds.user;
       system = yen.lib.str;
     };
-    sinks.homeManager.out =
+    sinks.homeManager.out = # (4)
       { home, homeManager, ... }:
       {
         homeConfigurations.${home.name} = inputs.home-manager.lib.homeManagerConfiguration {

@@ -7,11 +7,11 @@
       { warnings, ... }:
       {
         inherit warnings;
-      }; # messages that do not fail the fleet
+      }; # (1) messages that do not fail the fleet
   };
   yen.kinds.host.fields = {
     addr = yen.lib.str;
-    backup = yen.lib.opt yen.lib.bool true;
+    backup = yen.lib.opt yen.lib.bool true; # (2)
   };
 
   yen.fleet.main = { };

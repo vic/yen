@@ -10,22 +10,24 @@ in
   };
   yen.kinds.host.fields = {
     form = yen.lib.enum [
+      # (1)
       "server"
       "laptop"
       "desktop"
     ];
     gpu = opt (yen.lib.enum [
+      # (2)
       "none"
       "nvidia"
       "amd"
     ]) "none";
-    labels = opt (yen.lib.listOf (is builtins.isString)) [ ];
+    labels = opt (yen.lib.listOf (is builtins.isString)) [ ]; # (3)
   };
 
   yen.fleet.main = { };
   yen.host.rack-1 = {
     form = "server";
-    labels = [ "ci-runner" ];
+    labels = [ "ci-runner" ]; # (4)
   };
   yen.host.rack-2.form = "server";
   yen.host.thinkpad.form = "laptop";

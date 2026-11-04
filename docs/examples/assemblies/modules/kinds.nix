@@ -10,8 +10,9 @@ let
         lib.concatMap (
           role:
           lib.optional (lib.any (same m) a.roles.${role}) (
+            # (1)
             lib.nameValuePair "${a.name}.${role}" {
-              assembly = a;
+              assembly = a; # (2)
               inherit role;
             }
           )
@@ -24,13 +25,13 @@ in
     spawns.host = _: yen.host;
     sinks = {
       out.reduce = yen.lib.reduce.merge;
-      exports.reduce = yen.lib.reduce.elements; # what members publish, with the scope that published it
+      exports.reduce = yen.lib.reduce.elements; # (3) what members publish, with the scope that published it
     };
   };
   yen.kinds.assembly.fields.roles = yen.lib.attrs; # role name -> host refs
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    spawns.member = membersOf;
+    spawns.member = membersOf; # (4)
     sinks.config = {
       reduce = yen.lib.reduce.merge;
       out =

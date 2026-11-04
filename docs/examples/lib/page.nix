@@ -126,7 +126,7 @@ let
       ''
         This page is extracted from the source when the docs are written. Each API has one line above its
         definition: `#: <where> :: <takes> -> <returns> -- <purpose>`. A check fails when an API has no line, so the
-        page always lists every function. Each API name links to its definition on GitHub.
+        page always lists every function. Each API name links to its definition on GitHub. [Contributing](/project/contributing/#coding-standards) says how to write the line.
 
         Words in the signatures: *key value*, *out value*, *reduce* and *predicate* are in the [Glossary](/reference/glossary/).
         A *module* is a module of the target system; a *view* is `{ nodes; edges; }` for `mermaid.flowchart`; `succ` is a

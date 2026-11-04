@@ -8,8 +8,9 @@ let
   ];
 in
 {
-  yen.user.alice.hosts = [ yen.host.server ];
+  yen.user.alice.hosts = [ yen.host.server ]; # (1)
   yen.home."alice@server" = {
+    # (2)
     user = alice;
     on = yen.host.server;
     system = "x86_64-linux";
@@ -20,9 +21,9 @@ in
     nixos.users.users.alice.isNormalUser = true;
   };
   yen.aspects.editors = {
-    at = hers; # one module, in NixOS and standalone
+    at = hers; # (3) one module, in NixOS and standalone
     homeManager =
-      { osConfig, pkgs, ... }: # osConfig: the host's sink; pkgs: home-manager's own
+      { osConfig, pkgs, ... }: # (4) osConfig: the host's sink; pkgs: home-manager's own
       {
         home.sessionVariables.EDITOR_HOST = osConfig.networking.hostName;
         home.packages = [ pkgs.nano ];

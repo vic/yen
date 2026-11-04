@@ -7,8 +7,8 @@
       { host, ... }:
       {
         ${host.name} = {
-          arcMax = yen.lib.cascade [ "settings" "zfs" "arcMax" ] [ host host.environment ];
-          k3s = yen.helpers.k3sRole host;
+          arcMax = yen.lib.cascade [ "settings" "zfs" "arcMax" ] [ host host.environment ]; # (1)
+          k3s = yen.helpers.k3sRole host; # (2)
         };
       };
   };

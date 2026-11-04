@@ -5,7 +5,7 @@ let
 in
 {
   yen.aspects = {
-    server.at = s: (s.form or null) == "server";
+    server.at = s: (s.form or null) == "server"; # (1)
     workstation.at =
       s:
       lib.elem (s.form or null) [
@@ -16,11 +16,13 @@ in
     nvidia.at = s: (s.gpu or null) == "nvidia";
     ci-runner.at = s: lib.elem "ci-runner" (s.labels or [ ]);
     gaming.at = all [
+      # (2)
       yen.aspects.workstation
       yen.aspects.nvidia
       (not yen.aspects.laptop)
     ];
     backups.at = [
+      # (3)
       yen.aspects.server
       yen.aspects.workstation
     ];

@@ -1,7 +1,7 @@
 { yen, ... }:
 {
-  yen.host.server = { };
-  yen.mac.studio = { };
+  yen.host.server = { }; # (1)
+  yen.mac.studio = { }; # (2)
 
   yen.aspects.server = {
     at = yen.host.server;

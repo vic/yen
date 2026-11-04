@@ -3,14 +3,16 @@
 { yen, ... }:
 {
   yen.sinks.admins = {
-    of = yen.lib.listOf yen.lib.str;
-    reduce = yen.lib.reduce.flat;
+    # (1)
+    of = yen.lib.listOf yen.lib.str; # (2)
+    reduce = yen.lib.reduce.flat; # (3)
   };
   imports = [
-    { admins = [ "ana" ]; }
+    # (4)
+    { admins = [ "ana" ]; } # (5)
     { admins = [ "bo" ]; }
     (
-      { yen, admins, ... }:
+      { yen, admins, ... }: # (6)
       {
         yen.aspects.wheel = {
           at = yen.host.web;
