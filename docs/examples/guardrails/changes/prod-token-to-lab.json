@@ -1,0 +1,1 @@
+{ "yen": { "aspects": { "prod-credentials": { "at": [ { "kind": "host", "name": "lab" } ] } } } }

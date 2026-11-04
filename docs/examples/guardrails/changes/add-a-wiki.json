@@ -1,0 +1,1 @@
+{ "yen": { "service": { "wiki": { "on": { "kind": "host", "name": "edge" }, "port": 8080 } } } }
