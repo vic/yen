@@ -9,7 +9,7 @@ let
     datalog
     graphs
     _impact
-    krn
+    uKanren
     mapAttrs
     rdf
     static
@@ -36,7 +36,7 @@ let
       graphs
       rdf
       datalog
-      krn
+      uKanren
       stage
       change
       program

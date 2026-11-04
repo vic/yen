@@ -2222,7 +2222,7 @@ let
         )) "lb/serving") ([ "web-2" ]); # stage depends on web-1: drained too
         t5 = yes (lib.hasInfix "web:web-1" (lib.head (etc r "lb/why-web-1")));
       };
-    krn-ports =
+    uKanren-ports =
       let
         p = builtins.fromJSON (
           lib.head (
@@ -2258,7 +2258,7 @@ let
           )) ".*no allocation for web-2: 2 apps, ports 9000 9000.*"
         );
       };
-    krn-memory =
+    uKanren-memory =
       let
         mem =
           x:
@@ -2319,7 +2319,7 @@ let
           )
         );
       };
-    krn-placement = {
+    uKanren-placement = {
       t1 = eq (noApps out.dbPlacement) ({
         lb = [ "lb" ];
         stage = [ "stage" ];
@@ -2558,9 +2558,9 @@ let
         t1 = eq (map baseNameOf w.dropped) ([ "secrets.nix" ]);
         t2 = no ((w.result.active ? attic));
       };
-    krn-fuel =
+    uKanren-fuel =
       let
-        K = yen.krn;
+        K = yen.uKanren;
         fives =
           x:
           K.disj [

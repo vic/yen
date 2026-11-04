@@ -1,26 +1,26 @@
 self:
 let
   b = builtins;
-  inherit (self._krn.core) isData walk;
-  inherit (self.krn)
+  inherit (self._uKanren.core) isData walk;
+  inherit (self.uKanren)
     conde
     disj
     eq
     fresh
     ;
   # relational lists: nil and cons cells
-  #: lib.krn.nil :: list -- the empty relational list
+  #: lib.uKanren.nil :: list -- the empty relational list
   nil = null;
-  #: lib.krn.cons :: head -> tail -> list -- a relational list cell
+  #: lib.uKanren.cons :: head -> tail -> list -- a relational list cell
   cons = h: t: {
     head = h;
     tail = t;
   };
-  #: lib.krn.fromList :: [ x ] -> list -- a Nix list as a relational list
+  #: lib.uKanren.fromList :: [ x ] -> list -- a Nix list as a relational list
   fromList =
     xs:
     b.foldl' (acc: x: cons x acc) nil (b.genList (i: b.elemAt xs (b.length xs - 1 - i)) (b.length xs));
-  #: lib.krn.toList :: list -> [ x ] -- a relational list as a Nix list
+  #: lib.uKanren.toList :: list -> [ x ] -- a relational list as a Nix list
   toList =
     l:
     if l == null then
@@ -30,7 +30,7 @@ let
     else
       [ l ];
   # l ++ s == out, in every direction (a list of unknown length enumerates without end)
-  #: lib.krn.appendo :: l -> s -> out -> goal -- l ++ s == out, in every direction
+  #: lib.uKanren.appendo :: l -> s -> out -> goal -- l ++ s == out, in every direction
   appendo =
     l: s: out:
     conde [
@@ -54,32 +54,30 @@ let
       ]
     ];
   # x is in the list l: a Nix list (known) or a cons list (relational)
-  #: lib.krn.membero :: x -> l -> goal -- x is in the list l (a Nix list or a relational list)
+  #: lib.uKanren.membero :: x -> l -> goal -- x is in the list l (a Nix list or a relational list)
   membero =
     x: l: st:
-    let
-      w = walk st.s l;
-    in
-    (
-      if b.isList w then
-        disj (map (y: eq x y) w)
-      else
-        conde [
-          [ (fresh ({ d }: eq l (cons x d))) ]
-          [
-            (fresh (
-              { a, d }:
-              [
-                (eq l (cons a d))
-                (membero x d)
-              ]
-            ))
-          ]
+    memberIn x l (walk st.s l) st;
+  # w: the list as far as it is known now
+  memberIn =
+    x: l: w:
+    if b.isList w then
+      disj (map (y: eq x y) w)
+    else
+      conde [
+        [ (fresh ({ d }: eq l (cons x d))) ]
+        [
+          (fresh (
+            { a, d }:
+            [
+              (eq l (cons a d))
+              (membero x d)
+            ]
+          ))
         ]
-    )
-      st;
+      ];
   # a table: each row is a fact; the pattern unifies with a row (attrsets or lists)
-  #: lib.krn.facto :: [ row ] -> pattern -> goal -- the pattern unifies with one row of the table
+  #: lib.uKanren.facto :: [ row ] -> pattern -> goal -- the pattern unifies with one row of the table
   facto = rows: pattern: disj (map (r: eq pattern r) rows);
 in
 {

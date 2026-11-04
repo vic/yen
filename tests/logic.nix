@@ -273,7 +273,7 @@ in
         }
       ];
     };
-  krn-backward = {
+  uKanren-backward = {
     t1 =
       eq
         (map (map K.toList) (
@@ -335,7 +335,7 @@ in
           ]
         ]);
   };
-  krn-unify-records = {
+  uKanren-unify-records = {
     t1 =
       eq
         (K.runAll (
@@ -379,7 +379,7 @@ in
         }
     )) ([ "10.0.1.1" ]); # record against record
   };
-  krn-fresh-occurs = {
+  uKanren-fresh-occurs = {
     t1 =
       eq
         (K.run 1 (
@@ -400,7 +400,56 @@ in
         ]);
     t2 = eq (K.run 1 (q: K.eq q [ q ])) ([ ]);
   };
-  krn-interleave =
+  # #106: `{ x, y, ... }:` names the query variables, as a datalog rule does; the answer has one value per name
+  uKanren-named-query = {
+    t1 =
+      eq
+        (K.run 1 (
+          { x, y }:
+          [
+            (K.eq x 1)
+            (K.eq y [ x ])
+          ]
+        ))
+        [
+          {
+            x = 1;
+            y = [ 1 ];
+          }
+        ];
+    t2 = eq (K.run 1 ({ x, y }: K.eq x 2)) [
+      {
+        x = 2;
+        y = "_.0";
+      }
+    ];
+    t3 =
+      eq
+        (K.runAllFuel 100 (
+          { x, y }:
+          K.fresh (
+            { z }:
+            [
+              (K.membero x [
+                1
+                2
+              ])
+              (K.eq y x)
+            ]
+          )
+        )).answers
+        [
+          {
+            x = 1;
+            y = 1;
+          }
+          {
+            x = 2;
+            y = 2;
+          }
+        ];
+  };
+  uKanren-interleave =
     let
       fives =
         x:
@@ -429,7 +478,7 @@ in
         5
         6
       ]);
-  krn-cons-unbounded = {
+  uKanren-cons-unbounded = {
     t1 = eq (K.run 3 (q: K.fresh ({ x, y }: [ (K.appendo x y q) ]))) ([
       "_.0"
       {
@@ -460,7 +509,7 @@ in
           "y"
         ]);
   };
-  krn-neq-store = {
+  uKanren-neq-store = {
     t1 =
       eq
         (K.runAll (q: [
@@ -508,7 +557,7 @@ in
       (K.eq q 1)
     ])) ([ ]);
   };
-  krn-fd = {
+  uKanren-fd = {
     t1 =
       eq
         (K.runAll (
@@ -653,7 +702,7 @@ in
           }
         ]); # the sum is bounded
   };
-  krn-neq =
+  uKanren-neq =
     eq
       (K.runAll (
         q:

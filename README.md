@@ -327,14 +327,14 @@ is not even a candidate at `db`.
 
 ## Values from constraints
 
-`yen.lib.krn` finds values that fit your constraints, and a relation can run backward.
+`yen.lib.uKanren` finds values that fit your constraints, and a relation can run backward.
 
 
 ```nix title="variants/ports.nix"
 # µKanren with finite domains: give each app a port in 8080..8083, all different, prometheus before grafana.
 { yen, ... }:
 let
-  inherit (yen.lib.krn)
+  inherit (yen.lib.uKanren)
     run
     runAll
     freshNamed
@@ -464,7 +464,7 @@ Errors are not throws. They are data that agents and humans can inspect, with **
 - **Prove what holds across your fleet.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
   name once and ask from Nix, the CLI or an agent. <sup>[docs](https://yen.oeiuwq.com/query/queries/)</sup>
 - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
-  run backward. <sup>[docs](https://yen.oeiuwq.com/query/krn/)</sup>
+  run backward. <sup>[docs](https://yen.oeiuwq.com/query/ukanren/)</sup>
 - **Batteries and kits.** Ready rules in `yen.lib.batteries`, and ready parts in `yen.lib.kits`: wireguard, dns, sshd,
   backups, monitoring, postgres and more. You write the keys, the battery gives the values. <sup>[docs](https://yen.oeiuwq.com/batteries/)</sup>
 - **Every platform.** NixOS, nix-darwin, home-manager, nix-on-droid and microvm.nix. One aspect can serve them all.

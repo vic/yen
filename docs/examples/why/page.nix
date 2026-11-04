@@ -210,7 +210,7 @@ in
 
         ## Values from constraints
 
-        `yen.lib.krn` finds values that fit your constraints, and a relation can run backward.
+        `yen.lib.uKanren` finds values that fit your constraints, and a relation can run backward.
       ''
       (docs.file "variants/ports.nix")
       (docs.value (variant "variants/ports.nix").reduced.greetings."world:earth".ports)
@@ -282,7 +282,7 @@ in
         - **Prove what holds across your fleet.** Graphs for deploy waves, cycles and impact. Datalog with negation. Stored queries you
           name once and ask from Nix, the CLI or an agent. ${doc "/query/queries/"}
         - **Values that solve themselves.** µKanren with finite domains: a free port, guest memory that fits, relations that
-          run backward. ${doc "/query/krn/"}
+          run backward. ${doc "/query/ukanren/"}
         - **Batteries and kits.** Ready rules in `yen.lib.batteries`, and ready parts in `yen.lib.kits`: wireguard, dns, sshd,
           backups, monitoring, postgres and more. You write the keys, the battery gives the values. ${doc "/batteries/"}
         - **Every platform.** NixOS, nix-darwin, home-manager, nix-on-droid and microvm.nix. One aspect can serve them all.

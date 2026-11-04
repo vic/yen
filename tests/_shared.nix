@@ -840,7 +840,7 @@ let
 
   G = yen.graphs;
   D = yen.datalog;
-  K = yen.krn;
+  K = yen.uKanren;
   ring = {
     a = [ "b" ];
     b = [ "c" ];

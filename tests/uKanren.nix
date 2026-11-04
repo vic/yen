@@ -1,6 +1,6 @@
 self:
 let
-  K = self.api.krn;
+  K = self.api.uKanren;
   fives =
     x:
     K.disj [

@@ -62,7 +62,7 @@ let
     graphs
     rdf
     datalog
-    krn
+    uKanren
     _impact
     ;
   inherit (self._core.errors)
@@ -138,7 +138,7 @@ in
     isType
     keySet
     kindKeys
-    krn
+    uKanren
     leanSystems
     leanVerify
     length

@@ -209,7 +209,7 @@ Tree requests: `nearest = <kind>`, `parent = true`, `children = <predicate>`, `s
 
 `yen.lib.graph` is readable inside the fleet. Each edge has `sink`, `from`, `to` and `origin` (the aspect that gave the element), so "which aspects reach this host" is a query, not a registry. The diagrams and tables at the end of this README come from `graph`, the kind declarations and sink values ([docs/readme.nix](modules/docs/readme.nix)): the fleet map, the kind tree, sink forwarding, pools, clan instances, vars generators and the deploy order.
 
-## Graphs, Datalog and krn
+## Graphs, Datalog and uKanren
 
 Fleet data is plain Nix, so a question about it is a function. yen ships three libraries for the hard ones. Each is builtins only, total, and gives the same answer whatever the file order.
 
@@ -229,7 +229,7 @@ impact = lib.genAttrs (lib.attrNames hosts) (G.reachers dependsOn); # lb down: s
 { head = "primary:lb"; neg = [ "primary:web-1" ]; }                # and the other way round: two stable models
 ```
 
-**`yen.lib.krn`** is µKanren with constraints: logic variables, unification over attrsets, lists and scalars (with an occurs check), and goals that run in both directions. It synthesizes values that meet constraints.
+**`yen.lib.uKanren`** is µKanren with constraints: logic variables, unification over attrsets, lists and scalars (with an occurs check), and goals that run in both directions. It synthesizes values that meet constraints.
 
 | Goal | Meaning |
 |---|---|
@@ -242,7 +242,7 @@ impact = lib.genAttrs (lib.attrNames hosts) (G.reachers dependsOn); # lb down: s
 | `facto rows pattern` | a table of facts |
 | `run n`, `runAll`, `runC n` | answers; `runC` adds the constraints left on fresh variables (`{ value; neq; dom; }`) |
 
-[query/krn.nix](modules/query/krn.nix) uses them on fleet data. Each app on lb gets a port in its range: all different, and prometheus before grafana. The same relation, run backward, answers which apps can take port 8081. Each guest on stage gets memory in its range, and the guests' sum plus the host's reserve fits its RAM. A join over host records places each host's database:
+[query/uKanren.nix](modules/query/uKanren.nix) uses them on fleet data. Each app on lb gets a port in its range: all different, and prometheus before grafana. The same relation, run backward, answers which apps can take port 8081. Each guest on stage gets memory in its range, and the guests' sum plus the host's reserve fits its RAM. A join over host records places each host's database:
 
 ```nix
 portsRel = h: q: freshNamed h.apps (vs: [ (infd (lib.attrValues vs) 8080 8083) (distinctfd (lib.attrValues vs)) (ltfd vs.prometheus vs.grafana) (eq q vs) (label (lib.attrValues vs)) ]);
@@ -251,7 +251,7 @@ memRel: (plusfd 0 ci s0) (plusfd s0 build s1) (lefd s1 (ram - reserve))   # runn
 runAll (q: fresh ({ env, d, own }: [ (facto hosts { name = "web-1"; inherit env; db = own; }) (facto hosts { name = d; inherit env; db = true; }) (eq q d) ]))
 ```
 
-A search with no answer gives `[ ]`. Give an error record then, as `port-synthesis` and `memory-synthesis` do. krn has no constraints over terms other than `neq` (no `absento`), and `appendo` with two unknown lists enumerates without end: use `run n`.
+A search with no answer gives `[ ]`. Give an error record then, as `port-synthesis` and `memory-synthesis` do. uKanren has no constraints over terms other than `neq` (no `absento`), and `appendo` with two unknown lists enumerates without end: use `run n`.
 
 ## For agents: ask, prove, change
 
@@ -308,7 +308,7 @@ SELECT ?name WHERE { ?s rdf:type <https://yen.dev/fleet/kind/host> ; <https://ye
 # at the first revision's tx: db, web.   Now: web.
 ```
 
-**Bounded search.** A krn query an agent writes must stop. `yen.lib.krn.runFuel n fuel f` and `runAllFuel fuel f` count each search step and return `{ answers; complete; }`: `complete = false` means "bounded", never "no answer". `maximize fuel measure f` gives `{ best; value; complete; count; }`; a best found under `complete = false` is not proven optimal. [query/krn.nix](modules/query/krn.nix) gives guest memory by `maximize` with `ramFuel` steps; a search that runs out of fuel is an error record.
+**Bounded search.** A uKanren query an agent writes must stop. `yen.lib.uKanren.runFuel n fuel f` and `runAllFuel fuel f` count each search step and return `{ answers; complete; }`: `complete = false` means "bounded", never "no answer". `maximize fuel measure f` gives `{ best; value; complete; count; }`; a best found under `complete = false` is not proven optimal. [query/uKanren.nix](modules/query/uKanren.nix) gives guest memory by `maximize` with `ramFuel` steps; a search that runs out of fuel is an error record.
 
 **Shapes.** `yen.lib.rdf.shacl result` gives SHACL shapes from the schema: one node shape per kind with scopes, `yen:name` required, `yen:parent` of the spawning kind, each field at most once, and `sh:class` for ref fields. The pack types every instance, so a ref meets its class. quipu's validator accepts the pack of a fixture fleet and reports one `sh:class` violation for a ref to a missing instance.
 
@@ -320,7 +320,7 @@ SELECT ?name WHERE { ?s rdf:type <https://yen.dev/fleet/kind/host> ; <https://ye
 
 **Install order.** The stored query `installOrder { assembly }` gives the waves of an assembly: the servers first, then the clients ([agent/queries.nix](modules/agent/queries.nix), `yen.lib.graphs.layers`). For the backup instance: `[ [ "lb" ] [ … every client … ] ]`.
 
-**Synthesis, checked.** Stored queries (`{ params; answer; }`: each parameter typed, a fleet name given as a ref) in [agent/synthesis.nix](modules/agent/synthesis.nix) answer with values that already meet the rules. `freePort { host }` lets krn pick a port no app on the host uses. `placeDb { host }` joins host records to find the database hosts of its environment. `safeHostsFor { aspect; env }` stages the aspect on each machine of the environment and returns where it is safe, and why the others are refused:
+**Synthesis, checked.** Stored queries (`{ params; answer; }`: each parameter typed, a fleet name given as a ref) in [agent/synthesis.nix](modules/agent/synthesis.nix) answer with values that already meet the rules. `freePort { host }` lets uKanren pick a port no app on the host uses. `placeDb { host }` joins host records to find the database hosts of its environment. `safeHostsFor { aspect; env }` stages the aspect on each machine of the environment and returns where it is safe, and why the others are refused:
 
 ```nix
 result.ask "safeHostsFor" { aspect = yen.aspects.attic; env = yen.environment.staging; }
@@ -372,7 +372,7 @@ result.ask "safeHostsFor" { aspect = yen.aspects.attic; env = yen.environment.st
 | machines from directories, a kit from outside `modules/` | clan | [kits/vars.nix](modules/kits/vars.nix), [lib/kits/borg.nix](../../lib/kits/borg.nix) |
 | deploy waves, impact of losing a host, a dependency cycle as an error (`yen.lib.graphs`) | den-hoag | [hoag/relations.nix](modules/hoag/relations.nix) |
 | a serving policy with maintenance, drain by dependency, a primary chosen by stable models (`yen.lib.datalog`) | Gen | [query/datalog.nix](modules/query/datalog.nix) |
-| port allocation, guest memory, database placement, a query run backward (`yen.lib.krn` with finite domains) | µKanren, CLP(FD) | [query/krn.nix](modules/query/krn.nix) |
+| port allocation, guest memory, database placement, a query run backward (`yen.lib.uKanren` with finite domains) | µKanren, CLP(FD) | [query/uKanren.nix](modules/query/uKanren.nix) |
 | one machine, two builds | swarsel | [swarsel/variants.nix](modules/swarsel/variants.nix) |
 | one machine writes config into another, and fleet globals | swarsel | [swarsel/distributed.nix](modules/swarsel/distributed.nix) |
 | aspects exported as `nixosModules` | swarsel, Den | [swarsel/exports.nix](modules/swarsel/exports.nix) |
@@ -538,7 +538,7 @@ nix run github:denful/fastest#fastest -- --flake ".#tests" e2e     # real NixOS,
 From the yen repository root, the engine and library oracles, and the cost oracles. A memo is invisible to an eval, so `tests/cost.sh` bounds Nix's own counters (`NIX_SHOW_STATS`): 30 levels of aspect-ref diamonds and a 150-host fan-in must each stay under 200,000 function calls. Without the memos they take 26 million calls (at 16 levels) and 954,000.
 
 ```sh
-nix run github:denful/fastest#fastest -- --flake ".#tests"   # engine, datalog, rdf, krn, shacl and batteries suites
+nix run github:denful/fastest#fastest -- --flake ".#tests"   # engine, datalog, rdf, uKanren, shacl and batteries suites
 bash tests/cost.sh                                         # PASS aspect-ref-memo, reduction-memo, scale-400/800-services
 ```
 

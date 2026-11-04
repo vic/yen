@@ -1,4 +1,4 @@
-# Configuration synthesis with krn (µKanren with =/= and finite domains). The fleet states constraints; krn finds
+# Configuration synthesis with uKanren (µKanren with =/= and finite domains). The fleet states constraints; uKanren finds
 # values that satisfy them, or none, which is an error record.
 # 1. Ports: each app on a host gets a port from the host's range, no two apps share one (`distinctfd`), and an app
 #    may ask to come before another (`ltfd`). Run backward, the same relation answers "which apps can take 8081".
@@ -6,7 +6,7 @@
 # 3. Placement: each host gets the database hosts of its own environment, a join over host rows by unification.
 { yen, lib, ... }:
 let
-  K = yen.lib.krn;
+  K = yen.lib.uKanren;
   inherit (K)
     run
     runAll
@@ -67,7 +67,7 @@ let
     guests: h: gs:
     memRelSums guests h gs (lib.genList (i: "__s${toString i}") (lib.length gs));
   memRel = guests: h: memRelOf guests h (guestsOf guests h);
-  # the allocation that gives the guests the most memory, by krn maximize within a fuel budget: a search cut by fuel is an
+  # the allocation that gives the guests the most memory, by uKanren maximize within a fuel budget: a search cut by fuel is an
   # error record, never a silent "best"
   memSearch =
     guests: h:
@@ -143,7 +143,7 @@ in
     ram = yen.lib.opt yen.lib.int 0;
     ramReserve = yen.lib.opt yen.lib.int 0;
     ramRange = yen.lib.opt (yen.lib.listOf yen.lib.int) [ ];
-    ramFuel = yen.lib.opt yen.lib.int 100000; # krn search steps for the memory allocation
+    ramFuel = yen.lib.opt yen.lib.int 100000; # uKanren search steps for the memory allocation
   };
   yen.host.lb = {
     apps = [

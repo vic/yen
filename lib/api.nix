@@ -28,7 +28,7 @@ self: {
     graphs
     rdf
     datalog
-    krn
+    uKanren
     batteries
     kits
     ;

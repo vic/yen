@@ -1,4 +1,4 @@
-# krn: µKanren (Hemann, Friedman 2013) with constraints, in pure Nix. Builtins only.
+# uKanren: µKanren (Hemann, Friedman 2013) with constraints, in pure Nix. Builtins only.
 #
 # Terms: Nix values. A logic variable is { __lvar = n; }. Unification walks attrsets (same keys), Nix lists (same
 # length) and scalars, with an occurs check. Relational lists are cons cells: `nil` and { head; tail; }, as in
@@ -11,14 +11,14 @@
 #   label xs       enumerate the values left in the domains (first-fail: the smallest domain first).
 #
 # A state is { s; c; neq; dom; fdc; }: substitution, next variable, disequality store, domains, FD propagators.
-# The API is the parts in lib/_krn/: goals, finite domains, runs and relational lists, on the core of lib/_krn/core.nix.
+# The API is the parts in lib/_uKanren/: goals, finite domains, runs and relational lists, on the core of lib/_uKanren/core.nix.
 self:
-self._krn.goals
-// self._krn.fd
-// self._krn.run
-// self._krn.lists
+self._uKanren.goals
+// self._uKanren.fd
+// self._uKanren.run
+// self._uKanren.lists
 // {
-  inherit (self._krn.core)
+  inherit (self._uKanren.core)
     var
     unify
     walkStar

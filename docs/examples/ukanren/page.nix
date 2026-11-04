@@ -1,5 +1,5 @@
 {
-  title = "krn: synthesis with constraints";
+  title = "uKanren: synthesis with constraints";
   description = "µKanren with finite domains in pure Nix: values that meet your rules, relations that run backward.";
   section = "query";
   order = 7;
@@ -10,7 +10,7 @@
     [
       ''
         Some values are not written but found: a port no other app uses, memory that fits a host, a database host in the
-        right environment. `yen.lib.krn` is µKanren with constraints. It has logic variables, unification over attrsets,
+        right environment. `yen.lib.uKanren` is µKanren with constraints. It has logic variables, unification over attrsets,
         lists and scalars, and goals that run in both directions.
       ''
       (docs.file "modules/fleet.nix")
@@ -52,7 +52,7 @@
           ]
           [
             "`run n`, `runAll`, `runC n`"
-            "answers; `runC` adds the constraints left on fresh variables"
+            "answers for `q: goal`, or `{ x; y; }` for `{ x, y, ... }: goal`; `runC` adds the constraints left on fresh variables"
           ]
           [
             "`runFuel n fuel`, `runAllFuel fuel`, `maximize fuel measure`"
@@ -66,7 +66,7 @@
       '')
       (docs.tip "More" ''
         The reference fleet's ${
-          docs.fleet "modules/query/krn.nix" null "query/krn.nix"
+          docs.fleet "modules/query/uKanren.nix" null "query/uKanren.nix"
         } also sums guest memory under a host's RAM
         and joins host records to place a database.
       '')

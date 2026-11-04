@@ -458,7 +458,7 @@ let
           !lib.elem n [
             "graphs"
             "datalog"
-            "krn"
+            "uKanren"
             "rdf"
             "reduce"
             "program"
@@ -480,7 +480,7 @@ let
     |---|---|
     | `yen.lib.graphs` | ${fnList (lib.attrNames sv.lib.graphs)} |
     | `yen.lib.datalog` | ${fnList (lib.attrNames sv.lib.datalog)} |
-    | `yen.lib.krn` | ${fnList (lib.attrNames sv.lib.krn)} |
+    | `yen.lib.uKanren` | ${fnList (lib.attrNames sv.lib.uKanren)} |
     | `yen.lib.rdf` | ${fnList (lib.attrNames sv.lib.rdf)} |
 
     **Stored queries** (`result.ask name args`):
