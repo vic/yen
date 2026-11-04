@@ -4,19 +4,43 @@ let
   inherit (self.tests._shared)
     b
     eq
-    hostAt
     no
     nofw
     ports
     portsBase
-    r1grant
-    r1outside
-    r1stage
     rung1
-    T
     yen
     yes
     ;
+
+  r1stage =
+    change: grant:
+    yen.stage {
+      base = rung1 [ ];
+      inherit change grant;
+    };
+  # a scope by reference, as a caller outside the fleet writes it: its path of identities
+  T = {
+    kind = "top";
+    name = "t";
+  };
+  hostAt = name: [
+    T
+    {
+      kind = "host";
+      inherit name;
+    }
+  ];
+  r1grant = yen.grant { scopes = [ (hostAt "web") ]; };
+  # a refused path, joined only to compare it here
+  r1outside =
+    s:
+    b.sort b.lessThan (
+      map (e: b.concatStringsSep "/" (map (x: "${x.kind}:${x.name}") e.got)) (
+        b.filter (e: e.code == "outside-grant") s.refused
+      )
+    );
+
 in
 {
   stage-ok-and-diff =

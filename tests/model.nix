@@ -5,8 +5,6 @@ let
     b
     codes
     eq
-    feat
-    featLazy
     fleet
     gaps
     has
@@ -14,11 +12,55 @@ let
     ids
     msgs
     no
-    noAddr
-    presence
     yen
     yes
     ;
+
+  noAddr = yen.eval (fleet { });
+  # §4: two feature files, types at two paths of one field; no merge
+  settings = [
+    (
+      { yen, ... }:
+      {
+        yen.kinds.host.fields.settings.zfs.arcMax = yen.lib.maybe (yen.lib.is b.isInt);
+      }
+    )
+    (
+      { yen, ... }:
+      {
+        yen.kinds.host.fields.settings.k3s.role = yen.lib.opt (yen.lib.is b.isString) "agent";
+      }
+    )
+  ];
+  feat = data: yen.eval { imports = [ (fleet ({ addr = "a"; } // data)) ] ++ settings; };
+  featLazy = yen.eval {
+    imports = [
+      (fleet { addr = "a"; })
+      (
+        { yen, ... }:
+        {
+          yen.kinds.host.fields.settings.lazy = yen.lib.opt (yen.lib.is b.isString) (throw "touched");
+        }
+      )
+    ]
+    ++ settings;
+  };
+  # structure from presence (Den #525): a child exists only where an aspect holds at its parent
+  presence = yen.eval (
+    { yen, ... }:
+    {
+      yen.kinds.top.spawns.host = _: yen.host;
+      yen.kinds.host.spawns.svc = p: if yen.lib.holds yen.aspects.server p then { web = { }; } else { };
+      yen.kinds.svc = { };
+      yen.top.t = { };
+      yen.host = {
+        a = { };
+        b = { };
+      };
+      yen.aspects.server.at = yen.host.a;
+    }
+  );
+
 in
 {
   # enum and attrsOf are types: a check, and a description for the error record
