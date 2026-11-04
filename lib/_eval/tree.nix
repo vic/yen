@@ -51,8 +51,11 @@ let
     ) ((kindAt k).kinds or { })
     // (kindAt k).spawns or { };
   spawned = concatMap (k: filter (c: isString (childId k c)) (attrNames (spawnsOf k))) kindIds;
+  # a root is a kind with spawns, nested kinds or sinks that no other kind spawns: `spawns = { }` is not needed for a kind of sinks
   roots = concatMap (k: map (n: mkScope null k n instances.${k}.${n}) (instNames k)) (
-    filter (k: (kinds.${k} ? spawns || kinds.${k} ? kinds) && !elem k spawned) kindNames
+    filter (
+      k: (kinds.${k} ? spawns || kinds.${k} ? kinds || kinds.${k} ? sinks) && !elem k spawned
+    ) kindNames
   );
   childrenOf =
     s: concatMap (c: childrenMade s c ((spawnsOf s.kind).${c} s)) (attrNames (spawnsOf s.kind));
