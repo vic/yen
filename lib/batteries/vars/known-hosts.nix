@@ -18,16 +18,14 @@ let
   pub = self.batteries.vars.public-value;
   pick =
     { scope, sinks, ... }:
-    map (
-      k:
-      let
-        root = rootOf scope; # null: the setting is unset, settings-typed says so
-      in
-      {
-        inherit k;
-        key = if root == null then null else pub { inherit root; } k.machine k.generator k.file null;
-      }
-    ) (b.filter (k: k != null) (map entry (b.filter (e: keep scope e) sinks.${from.__sink})));
+    map (pickKey (rootOf scope)) (
+      b.filter (k: k != null) (map entry (b.filter (e: keep scope e) sinks.${from.__sink}))
+    );
+  # root: null when the setting is unset, settings-typed says so
+  pickKey = root: k: {
+    inherit k;
+    key = if root == null then null else pub { inherit root; } k.machine k.generator k.file null;
+  };
 in
 {
   nixos =

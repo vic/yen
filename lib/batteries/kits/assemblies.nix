@@ -7,18 +7,15 @@ _: own:
 let
   b = builtins;
   pathOf = a: a.path or [ a.name ];
-  partsOf =
-    a:
-    b.concatMap (
-      key:
-      let
-        p = ((a.kit.adds or (_: { })) a).${key} // {
-          kind = "assembly";
-          path = pathOf a ++ [ key ];
-          name = b.concatStringsSep "-" (pathOf a ++ [ key ]); # an identifier: interface, generator and file names use it
-        };
-      in
-      [ p ] ++ partsOf p
-    ) (b.attrNames ((a.kit.adds or (_: { })) a));
+  partsOf = a: b.concatMap (key: withParts (partOf a key)) (b.attrNames ((a.kit.adds or (_: { })) a));
+  withParts = p: [ p ] ++ partsOf p;
+  partOf =
+    a: key:
+    ((a.kit.adds or (_: { })) a).${key}
+    // {
+      kind = "assembly";
+      path = pathOf a ++ [ key ];
+      name = b.concatStringsSep "-" (pathOf a ++ [ key ]); # an identifier: interface, generator and file names use it
+    };
 in
 b.concatMap (a: [ a ] ++ partsOf a) own

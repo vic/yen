@@ -22,11 +22,10 @@ let
     "${toString (x / 16777216)}.${toString (mod (x / 65536) 256)}.${toString (mod (x / 256) 256)}.${toString (mod x 256)}";
   taken = a: b.any (x: x.address or null == a) members;
   skip = i: if i < usable && taken (dotted (net + 1 + i)) then skip (i + 1) else i;
-  step =
-    st: x:
-    let
-      i = skip st.next;
-    in
+  step = st: x: stepAt st x (skip st.next);
+  # i: the next free offset for a member without an address
+  stepAt =
+    st: x: i:
     if x.address or null != null then
       st // { out = st.out ++ [ { inherit (x) name address; } ]; }
     else if i >= usable then

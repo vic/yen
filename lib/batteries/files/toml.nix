@@ -25,15 +25,22 @@ let
     b.isAttrs v
     && !b.elem (join "." path) inline
     && (b.length path == 1 || b.any b.isAttrs (b.attrValues v));
-  table =
-    path: t:
-    let
-      ks = b.attrNames t;
-      subs = b.filter (k: isTable (path ++ [ k ]) t.${k}) ks;
-      own = b.filter (k: !b.elem k subs) ks;
-      head = if path == [ ] || own == [ ] && subs != [ ] then "" else "[${join "." (map key path)}]\n";
-      body = join "" (map (k: "${key k} = ${value t.${k}}\n") own);
-    in
-    join "\n" (b.filter (s: s != "") ([ (head + body) ] ++ map (k: table (path ++ [ k ]) t.${k}) subs));
+  table = path: t: tableOf path t (b.filter (k: isTable (path ++ [ k ]) t.${k}) (b.attrNames t));
+  # subs: the keys of t that are sub-tables
+  tableOf =
+    path: t: subs:
+    tableWith path t subs (b.filter (k: !b.elem k subs) (b.attrNames t));
+  # own: the keys of t that stay in this table
+  tableWith =
+    path: t: subs: own:
+    join "\n" (
+      b.filter (s: s != "") (
+        [ (headOf path own subs + join "" (map (k: "${key k} = ${value t.${k}}\n") own)) ]
+        ++ map (k: table (path ++ [ k ]) t.${k}) subs
+      )
+    );
+  headOf =
+    path: own: subs:
+    if path == [ ] || own == [ ] && subs != [ ] then "" else "[${join "." (map key path)}]\n";
 in
 v: table [ ] v

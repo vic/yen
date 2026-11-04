@@ -7,12 +7,9 @@ let
   lines = s: b.filter b.isString (b.split "\n" s);
   hasNewline = s: b.length (b.split "\n" s) > 1;
   # lib.removeSuffix "\n"
-  dropNewline =
-    s:
-    let
-      n = b.stringLength s;
-    in
-    if n > 0 && b.substring (n - 1) 1 s == "\n" then b.substring 0 (n - 1) s else s;
+  dropNewline = s: dropLast (b.stringLength s) s;
+  # n: the length of s
+  dropLast = n: s: if n > 0 && b.substring (n - 1) 1 s == "\n" then b.substring 0 (n - 1) s else s;
   # block style, `|` for multi-line strings, JSON-quoted scalars and keys
   yaml =
     ind: v:
