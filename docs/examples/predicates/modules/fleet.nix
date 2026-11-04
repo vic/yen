@@ -9,7 +9,7 @@
       cores = yen.lib.int;
       gpu = yen.lib.opt yen.lib.bool false;
     };
-    spawns.guest = yen.lib.pointing "on" yen.guest;
+    spawns.guest = yen.lib.pointing "on" yen.guest; # (1)
   };
   yen.kinds.guest.fields.on = yen.kinds.host;
 

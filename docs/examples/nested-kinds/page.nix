@@ -13,30 +13,40 @@
     }:
     [
       ''
-        A [kind](/model/kinds-fields/) can declare kinds inside it. A user of a host is a good example: it exists only
-        under its host. The nested kind `user` has no name of its own. There is no `yen.kinds.user`. Two hosts can each
-        have a user `vic`: they are two instances.
+        A [kind](/model/kinds-fields/) can declare kinds inside it. A nested kind has no name of its own at the top:
+        its instances live under one instance of the parent. A user of a host is a good example.
 
         You write the nested kind in the key `kinds` of the parent:
       ''
-      (docs.file "modules/host.nix")
+      (docs.fileNoted "" "modules/host.nix")
       ''
+        `(1)` declares the kind `user` inside `host`. There is no `yen.kinds.user`: the path is `yen.kinds.host.kinds.user`.
+
         ## Instances
 
-        You write the instances of a nested kind inside the instance of the parent: `yen.host.laptop.user.vic` is the
-        user `vic` of the host `laptop`. The host `server` has its own user `vic`. They are two instances.
+        You write the instances of a nested kind inside the instance of the parent:
       ''
-      (docs.file "modules/hosts.nix")
+      (docs.fileNoted "" "modules/hosts.nix")
       ''
+        `(1)` is the user `vic` of the host `laptop`: `yen.host.laptop.user.vic`. `(2)` is the user `vic` of the host `server`.
+        Two hosts can each have a user `vic`: they are two instances.
+
         ## Refs
 
-        A ref of a nested kind has the same path as its declaration: `yen.kinds.host.kinds.user`. The aspect below
-        gives one line per user. It reads the current [scope](/model/scopes/) with the arg `scope`. The arg `{ user, ... }` also works: a function arg may name a nested kind by its leaf name. The name is resolved up the ancestors only, never a sibling. The `id` of a scope shows
-        the parent: the scope of a user is a child of the scope of its host.
+        A ref of a nested kind has the same path as its declaration. The [aspect](/behavior/aspects/) below
+        gives one line per user:
       ''
-      (docs.file "modules/report.nix")
+      (docs.fileNoted "" "modules/report.nix")
       (docs.value result.flake.report)
       ''
+        `(1)` is the ref of the nested kind. `(2)` reads the current [scope](/model/scopes/) with the arg `scope`.
+        The `id` of a scope shows the parent: the scope of a user is a child of the scope of its host.
+
+        The arg `{ user, ... }` also works: a function arg may name a nested kind by its leaf name.
+        yen resolves the name up the ancestors only, never a sibling.
+        The root kind that collects `report` is in
+        [the example code](https://github.com/vic/yen/tree/main/docs/examples/nested-kinds/modules/fleet.nix).
+
         ## Spawns
 
         A kind spawns its nested kinds by default, from the key with the same name. Here `host` spawns the users that

@@ -9,5 +9,5 @@
     yen.kinds.host
     (yen.lib.not yen.aspects.left)
   ];
-  yen.aspects.typo.at = "host";
+  yen.aspects.typo.at = "host"; # (1)
 }

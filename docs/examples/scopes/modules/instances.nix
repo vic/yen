@@ -8,6 +8,6 @@
   yen.user.alice.hosts = [
     yen.host.web
     yen.host.box
-  ]; # one user, two scopes
+  ]; # (4) one user, two scopes
   yen.user.bob.hosts = [ yen.host.db ];
 }

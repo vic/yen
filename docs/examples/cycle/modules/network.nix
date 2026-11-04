@@ -3,14 +3,14 @@
 {
   yen.aspects.vm-network = {
     at = yen.lib.below yen.kinds.guest; # every host with a guest
-    cycle =
+    cycle = # (1)
       { tree, ... }:
       let
-        vms.children = yen.kinds.guest; # a request: the guest children
+        vms.children = yen.kinds.guest; # (2) a request: the guest children
       in
       {
-        tree = [ vms ];
-        bridges = map (g: "br-${g.name}") (builtins.head (tree.select vms)); # one element per guest
+        tree = [ vms ]; # (3)
+        bridges = map (g: "br-${g.name}") (builtins.head (tree.select vms)); # (4) one element per guest
         errors = [ ];
       };
   };

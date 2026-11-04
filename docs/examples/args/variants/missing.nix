@@ -3,6 +3,6 @@
 {
   yen.aspects.cluster-name = {
     at = yen.host.lb;
-    proxy = { cluster, ... }: cluster.name;
+    proxy = { cluster, ... }: cluster.name; # (1)
   };
 }

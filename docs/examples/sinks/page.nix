@@ -14,7 +14,15 @@
     [
       ''
         A sink on a [kind](/model/kinds-fields/) collects the elements that [aspects](/behavior/aspects/) give, and reduces them to one value.
-        `of` checks each element.
+        This host kind has one sink for each way to reduce. The root kind and the flake are in
+        [the example code](https://github.com/vic/yen/tree/main/docs/examples/sinks/modules/fleet.nix).
+      ''
+      (docs.fileNoted "" "modules/sinks.nix")
+      ''
+        A sink has a `reduce`. `(2)` and `(3)` also have `of`, which checks each element. `(4)` to `(8)` use another reduce each.
+        `(1)` is a function you write. The default `reduce` is `list`. The table lists what each reduce gives:
+
+        ## The reduces
       ''
       (docs.table
         [ "Reduce" "Value" "Error" ]
@@ -56,21 +64,28 @@
           ]
         ]
       )
-      (docs.fileWith "{12-15}" "modules/sinks.nix")
       ''
-        Two aspects give elements:
+        ## One host, all the reduces
+
+        Two [aspects](/behavior/aspects/) give elements to these sinks:
       ''
-      (docs.file "modules/aspects.nix")
+      (docs.fileNoted "" "modules/aspects.nix")
       ''
-        And each sink reduces them:
+        `(1)` and `(2)` give one element each. `(3)` gives a list element, and `flat` joins its items.
+        The host `web` gets the same port and the same packages again: `(4)` is a duplicate that `set` drops,
+        and `(5)` has duplicates that `flat` drops. Each sink reduces the elements it received:
       ''
       (docs.value result.flake.web)
       ''
         ## When a reduce fails
 
-        A failed reduce is an error record. The other sinks still work:
+        A failed reduce is an error record. The other sinks still work. This variant breaks one rule on each line:
       ''
-      (docs.file "variants/conflicts.nix")
+      (docs.fileNoted "" "variants/conflicts.nix")
+      ''
+        `(1)` gives a second admin to a `one` sink. `(2)` is not a port, so `of` rejects it. `(3)` is a leaf that
+        differs from another one at the same path, and `merge` rejects it. The records:
+      ''
       (docs.value (variant "variants/conflicts.nix").errors)
       ''
         ## Your own reduce

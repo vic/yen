@@ -13,16 +13,30 @@
     }:
     [
       ''
-        A [kind](/model/kinds-fields/) is also a type. A field of type `yen.kinds.environment` holds a ref to an environment instance:
-        `yen.environment.prod`, never the string `"prod"`.
+        A [kind](/model/kinds-fields/) is also a type. This file declares two kinds, and a field of one holds a ref to an instance of the other:
       ''
-      (docs.file "modules/kinds.nix")
-      (docs.fileWith "{6-7}" "modules/instances.nix")
+      (docs.fileNoted "" "modules/kinds.nix")
       ''
+        `(1)` declares the kind `environment`, with one field. `(2)` is a field of kind `environment`: it holds a ref to an
+        environment instance, never a string. `(3)` is a field that holds a ref to another `host`, or `null`.
+
+        The instances follow. `yen.environment.prod` is the ref that the field takes, never the string `"prod"`.
+      ''
+      (docs.fileNoted "{6-7}" "modules/instances.nix")
+      ''
+        `(1)` sets a field to the ref `yen.environment.prod`. `(2)` refs another host.
         Refs are lazy, so two hosts can point at each other. There is no cycle error.
-        Follow a ref like an attrset, and compare two instances with `yen.lib.same`:
+
+        Now follow the refs. An [aspect](/behavior/aspects/) reads them like an attrset, and `yen.lib.same` compares two instances.
+        The [cycle](/behavior/cycle/) key asks for the tree of hosts, and `report` is the element it gives
+        to the [sink](/behavior/sinks/) of that name. The root kind that collects `report` is in
+        [the example code](https://github.com/vic/yen/tree/main/docs/examples/instances-refs/modules/fleet.nix).
       ''
-      (docs.file "modules/report.nix")
+      (docs.fileNoted "" "modules/report.nix")
+      ''
+        `(1)` finds the other hosts in the same environment. `(2)` follows a ref and reads a field of the instance it points to.
+        `(3)` tests the ref for `null` and reads the name of the host it points to. The aspect gives this:
+      ''
       (docs.value result.flake.report)
       ''
         ## Data kinds

@@ -5,6 +5,7 @@ let
   peersOf =
     tree: host:
     lib.filter (h: !yen.lib.same h host && yen.lib.same h.environment host.environment) (
+      # (1)
       lib.head (tree.select hosts)
     );
 in
@@ -18,8 +19,8 @@ in
         report = [
           {
             ${scope.name} = {
-              fqdn = "${scope.name}.${scope.environment.domain}"; # follow a ref, read its fields
-              backup = if scope.backup == null then null else scope.backup.name;
+              fqdn = "${scope.name}.${scope.environment.domain}"; # (2)
+              backup = if scope.backup == null then null else scope.backup.name; # (3)
               peers = map (h: h.name) (peersOf tree scope);
             };
           }

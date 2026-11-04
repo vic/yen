@@ -8,14 +8,21 @@
     { docs, result, ... }:
     [
       ''
-        A scope is one instance at one place in the tree. The root [kind](/model/kinds-fields/) is the kind that no kind spawns.
+        A scope is one instance at one place in the tree. A [kind](/model/kinds-fields/) says which instances live under
+        it with `spawns.<kind>`. This file builds a tree of environments, hosts and users:
+      ''
+      (docs.fileNoted "" "modules/tree.nix")
+      ''
         `spawns.<kind>` is a function of the parent scope. It gives the instances that live under it.
-        Most children name their parent in a ref field: `yen.lib.pointing "hosts" yen.user` gives the users whose
-        `hosts` field holds the scope, as one ref or in a list.
+        `(1)` makes `fleet` spawn every environment. `fleet` is the root: no kind spawns it.
+        `(2)` and `(3)` find the children by a ref field. `yen.lib.pointing "hosts" yen.user` gives the users whose
+        `hosts` field holds the parent scope, as one ref or in a list.
+        The root `fleet` has the instance `yen.fleet.main`, and this data fills the tree:
       ''
-      (docs.fileWith "{4,5,8}" "modules/tree.nix")
-      (docs.file "modules/instances.nix")
+      (docs.fileNoted "" "modules/instances.nix")
       ''
+        `(4)` gives one user two hosts, so that user gets two scopes.
+
         The tree comes from the data. Nothing lists the children by hand:
       ''
       (docs.scopes result)
@@ -33,9 +40,12 @@
         ## Order
 
         A parent comes before its children. Siblings sort by the `order` sink (default `0`), then by name.
-        `web` comes before `db` because of this aspect:
+        This [aspect](/behavior/aspects/) gives the host `web` an `order` of `-1`:
       ''
       (docs.file "modules/order.nix")
+      ''
+        So `web` comes before `db`.
+      ''
       (docs.aside "tip" "Kinds without scopes" ''
         A kind that no kind spawns is data: its instances have no scope, and refs to them still work.
         See [Instances and refs](/model/instances-refs/#data-kinds).
@@ -43,9 +53,13 @@
       ''
         ## Read the tree inside the fleet
 
-        An aspect asks the tree for the whole fleet (`graph = true`) to read it. This example gives its scope ids as a flake output:
+        An aspect can read the tree. This example gives the scope ids as a flake output:
       ''
-      (docs.file "modules/outputs.nix")
+      (docs.fileNoted "" "modules/outputs.nix")
+      ''
+        `(1)` is a tree request: `graph = true` asks for the whole fleet. `(2)` reads the scopes of the answer.
+        The [cycle](/behavior/cycle/) page explains tree requests.
+      ''
     ];
 
   checks =

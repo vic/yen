@@ -8,7 +8,7 @@
     cycle =
       { ... }:
       {
-        out = [ { addr.server = yen.host.server.addr; } ];
+        out = [ { addr.server = yen.host.server.addr; } ]; # (1)
       };
   };
 }

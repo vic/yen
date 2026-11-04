@@ -3,17 +3,17 @@
 {
   yen.aspects.peers = {
     at = yen.kinds.host;
-    cycle =
+    cycle = # (1)
       { tree, scope, ... }:
       let
-        hosts.instances = yen.kinds.host;
+        hosts.instances = yen.kinds.host; # (2)
       in
       {
-        tree = [ hosts ];
+        tree = [ hosts ]; # (3)
         out = [
           {
             peers.${scope.name} = builtins.length (
-              builtins.filter (h: h.name != scope.name) (builtins.head (tree.select hosts))
+              builtins.filter (h: h.name != scope.name) (builtins.head (tree.select hosts)) # (4)
             );
           }
         ];

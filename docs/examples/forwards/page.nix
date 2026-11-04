@@ -9,17 +9,24 @@
     [
       ''
         The keys of a [sink](/behavior/sinks/), other than `reduce`, `of`, `at` and `out`, give elements to other sinks.
-        They run at the receiver, with the receiver's args. You already know one: `out` gives to the flake.
+        They run at the receiver, with the receiver's args. You already know one: `out` gives to the flake
+        (see [Flake outputs](/behavior/flake-outputs/)).
+
+        In this example a host has a guest. The kinds are in
+        [the example code](https://github.com/vic/yen/tree/main/docs/examples/forwards/modules/fleet.nix). These are the sinks:
       ''
-      (docs.fileWith "{8,15}" "modules/sinks.nix")
+      (docs.fileNoted "" "modules/sinks.nix")
       ''
-        - At a host, `ports` feeds `config`: aspects give port numbers, and the host turns them into firewall config.
-        - At a guest, `config` has a key with its own name. A sink cannot feed itself, so this forward goes strictly up:
+        - At a host, `(1)` makes `ports` feed `config`: aspects give port numbers, and the host turns them into firewall config.
+        - At a guest, `(2)` does the same.
+        - At a guest, `(3)` is a key of `config` with its own name. A sink cannot feed itself, so this forward goes strictly up:
           to the nearest `config` sink above the guest, the host's.
+
+        Aspects give the elements:
       ''
-      (docs.file "modules/fleet.nix")
-      (docs.file "modules/aspects.nix")
+      (docs.fileNoted "" "modules/aspects.nix")
       ''
+        `(1)` gives a port at every host. `(2)` is a `config` element at the guest `ci`.
         The guest's config arrives inside the host's config, under `vms.ci`:
       ''
       (docs.value result.flake.config)

@@ -4,7 +4,7 @@
   yen.aspects.open = {
     at = yen.host.lb;
     proxy =
-      { host, pkgs, ... }:
+      { host, pkgs, ... }: # (1)
       {
         name = host.name;
         shell = pkgs.bash;

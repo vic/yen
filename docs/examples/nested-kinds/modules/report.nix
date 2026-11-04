@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.report = {
-    at = yen.kinds.host.kinds.user;
-    report = { scope, ... }: "${scope.id} ${scope.shell}";
+    at = yen.kinds.host.kinds.user; # (1)
+    report = { scope, ... }: "${scope.id} ${scope.shell}"; # (2)
   };
 }
