@@ -2,39 +2,402 @@
 self:
 let
   inherit (self.tests._shared)
-    argsDown
-    argsInImports
-    argsMissing
-    argsSibling
-    argsTwo
-    argsTyped
     b
-    configLike
     deep
     diamond
     eq
     fleet
     gaps
-    gapsBadAt
+    gapsModule
     good
     has
     hostOf
     ids
-    importsLoop
-    importsRead
     logic
     msgs
     no
     ordered
-    q5
-    sinkArgs
-    treeAll
-    treeAllWith
-    treeHit
     wide
     yen
     yes
     ;
+
+  # Q5: an arg nobody answers; the component may emit on `errors`
+  q5 =
+    arg:
+    yen.eval (
+      { yen, ... }:
+      {
+        imports = [ (fleet { addr = "a"; }) ];
+        yen.kinds.cluster = { };
+        yen.aspects.k3s = {
+          at = yen.kinds.host;
+          nixos = arg;
+        };
+        yen.aspects.warn = {
+          at = yen.kinds.host;
+          cycle =
+            { tree, ... }:
+            let
+              c.nearest = yen.kinds.cluster;
+            in
+            {
+              tree = [ c ];
+              errors = if tree.select c == [ ] then [ "no cluster: k3s off" ] else [ ];
+            };
+        };
+      }
+    );
+
+  # imports nest; a key is a sink, an arg is a source, from any module
+  argsDown = yen.eval {
+    greeting = "hi";
+    imports = [
+      {
+        imports = [
+          (
+            { yen, greeting, ... }:
+            {
+              imports = [ (fleet { addr = greeting; }) ];
+            }
+          )
+        ];
+      }
+    ];
+  };
+  argsMissing = yen.eval { imports = [ ({ nope, ... }: { }) ]; };
+  # a sibling answers. `cfg` is declared with `reduce.merge`: two modules give it; `lib` has one giver
+  chanLib = {
+    id = x: x;
+  };
+  argsSibling = yen.eval {
+    imports = [
+      {
+        cfg.a = "x";
+        lib = chanLib;
+      }
+      (
+        { yen, ... }:
+        {
+          cfg.b = "y";
+          yen.sinks.cfg.reduce = yen.lib.reduce.merge;
+        }
+      )
+      (
+        { cfg, lib, ... }:
+        {
+          imports = [ (fleet { addr = lib.id (cfg.a + cfg.b); }) ];
+        }
+      )
+    ];
+  };
+  # key names load before any source: reading an arg there is an error, not a loop.
+  # `imports` may read a sink that modules outside its own imports give
+  argsInImports = yen.eval {
+    greeting = "hi";
+    imports = [
+      (
+        { greeting, ... }:
+        {
+          imports = if greeting == "hi" then [ ] else [ ];
+        }
+      )
+      (
+        { greeting, ... }:
+        {
+          ${greeting} = 1;
+        }
+      )
+    ];
+  };
+  # a kit from `inputs`, and a chain: the kit gives `more`, which another module imports (two rounds)
+  importsRead = yen.eval {
+    inputs.kit = {
+      more = fleet { addr = "kit"; };
+      yen.sinks.more = { };
+    };
+    yen.sinks.inputs = { };
+    imports = [
+      (
+        { inputs, ... }:
+        {
+          imports = [ inputs.kit ];
+        }
+      )
+      (
+        { more, ... }:
+        {
+          imports = [ more ];
+        }
+      )
+    ];
+  };
+  # a loop: `imports` reads `cfg`, and the module it imports gives `cfg`
+  importsLoop = yen.eval {
+    cfg = [ "root" ];
+    yen.sinks.cfg.reduce = yen.reduce.flat;
+    imports = [
+      (
+        { cfg, ... }:
+        {
+          imports = if b.length cfg == 1 then [ { cfg = [ "more" ]; } ] else [ ];
+        }
+      )
+    ];
+  };
+  # an undeclared sink is `reduce.one`: two givers are the error one
+  argsTwo = yen.eval {
+    imports = [
+      { cfg.a = "x"; }
+      { cfg.a = "y"; }
+      ({ cfg, ... }: { })
+    ];
+  };
+  # `of` checks each module's value; a declared sink with no giver reduces to its empty value
+  argsTyped = yen.eval {
+    imports = [
+      (
+        { yen, ... }:
+        {
+          yen.sinks.port.of = yen.lib.is builtins.isInt;
+          yen.sinks.extra.reduce = yen.lib.reduce.flat;
+          yen.sinks.none.reduce = yen.lib.reduce.list;
+          yen.sinks.bad.tpye = 1;
+          port = 22;
+          extra = [ "a" ];
+        }
+      )
+      {
+        port = "x";
+        extra = [ "b" ];
+      }
+      (
+        { extra, none, ... }:
+        {
+          imports = [ (fleet { addr = builtins.concatStringsSep "," (extra ++ none); }) ];
+        }
+      )
+    ];
+  };
+  # tree driver, positive: a node reads its nearest cluster
+  treeHit = yen.eval (
+    { yen, ... }:
+    {
+      yen.kinds.top.spawns.cluster = _: yen.cluster;
+      yen.kinds.cluster.spawns.node = _: { n1 = { }; };
+      yen.kinds.node.sinks.seen = { };
+      yen.top.t = { };
+      yen.cluster.c1 = { };
+      yen.aspects.see = {
+        at = yen.kinds.node;
+        cycle =
+          { tree, ... }:
+          let
+            c.nearest = yen.kinds.cluster;
+          in
+          {
+            tree = [ c ];
+            seen = map (c: c.name) (tree.select c);
+          };
+      };
+    }
+  );
+  # every tree request at one node: parent, a nearest with no answer, children, scopesOf, holds, one unknown
+  treeAll = treeAllWith false;
+  treeAllWith =
+    bogus:
+    yen.eval (
+      { yen, ... }:
+      {
+        yen.kinds.top.spawns.cluster = _: yen.cluster;
+        yen.kinds.cluster.spawns.node = _: { n1 = { }; };
+        yen.kinds.node.spawns.pod = _: {
+          p1 = { };
+          p2 = { };
+        };
+        yen.kinds.node.sinks.seen = { };
+        yen.kinds.pod = { };
+        yen.top.t = { };
+        yen.cluster.c1 = { };
+        yen.aspects.see = {
+          at = yen.kinds.node;
+          cycle =
+            { tree, ... }:
+            let
+              parent.parent = true;
+              none.nearest = yen.kinds.pod; # no pod above a node: no answer
+              kids.children = yen.kinds.pod;
+              same.scopesOf = yen.cluster.c1;
+              holds.holds = yen.kinds.node;
+              all.instances = yen.kinds.cluster;
+              bad = {
+                category = "bad"; # a name: refused, a request is selected by itself
+                holds = yen.kinds.pod;
+              };
+            in
+            {
+              tree = [
+                parent
+                none
+                kids
+                same
+                holds
+                all
+              ]
+              ++ b.filter (_: bogus) [ bad ];
+              seen = {
+                parent = map (s: s.id) (tree.select parent);
+                none = tree.select none;
+                kids = map (map (s: s.name)) (tree.select kids);
+                same = map (map (s: s.id)) (tree.select same);
+                holds = tree.select holds;
+                all = map (map (c: c.name)) (tree.select all);
+                bad = tree.select bad; # not asked: no answer
+              };
+            };
+        };
+      }
+    );
+  # what NixOS `config` (a fixpoint) expresses, in yen. Each line names the NixOS pattern.
+  configLike = yen.eval (
+    { yen, ... }:
+    let
+      one = yen.lib.reduce.one;
+    in
+    {
+      yen.kinds.fleet = {
+        spawns.host = _: yen.host;
+        sinks.addrs.reduce = yen.lib.reduce.merge; # a value every host gives, read by every host
+      };
+      yen.kinds.host = {
+        fields.addr = yen.lib.is builtins.isString;
+        fields.fqdn = yen.lib.derive (yen.lib.is builtins.isString) (i: "${i.name}.lan"); # default = f config
+        sinks = {
+          ports.reduce = yen.lib.reduce.set; # a list option many modules define
+          firewall.reduce = one;
+          settings.reduce = yen.lib.reduce.merge; # an attrset option, deep-merged
+          motd.reduce =
+            es: # mkForce / mkDefault: the lowest priority number wins
+            {
+              value = (builtins.head (builtins.sort (a: c: a.value.prio < c.value.prio) es)).value.text;
+              errors = [ ];
+            };
+          chain.reduce = one;
+          mid.reduce = one;
+          leaf.reduce = one;
+          peers.reduce = one;
+        };
+      };
+      yen.fleet.main = { };
+      yen.host = {
+        a.addr = "10.0.0.1";
+        b.addr = "10.0.0.2";
+      };
+      yen.aspects = {
+        # declared before what it reads: the order of definitions never matters
+        chain = {
+          at = yen.kinds.host;
+          chain = { mid, ... }: mid * 10;
+        };
+        mid = {
+          at = yen.kinds.host;
+          mid = { leaf, ... }: leaf + 1;
+        };
+        leaf = {
+          at = yen.kinds.host;
+          leaf = 1;
+        };
+        web = {
+          at = yen.host.a;
+          ports = 80;
+        };
+        ssh = {
+          at = yen.kinds.host;
+          ports = 22;
+        };
+        tls = {
+          at = yen.aspects.web; # mkIf config.services.web.enable
+          ports = 443;
+        };
+        fw = {
+          at = yen.kinds.host;
+          firewall = { ports, ... }: builtins.sort builtins.lessThan ports; # an option read from another option
+        };
+        base = {
+          at = yen.kinds.host;
+          settings.a = 1;
+          motd = {
+            prio = 1000;
+            text = "default";
+          };
+        };
+        tuned = {
+          at = yen.host.b;
+          settings.b.c = 2;
+          motd = {
+            prio = 50;
+            text = "forced";
+          };
+        };
+        addrs = {
+          at = yen.kinds.host;
+          addrs =
+            { host, ... }:
+            {
+              ${host.name} = host.addr;
+            };
+          peers = { host, addrs, ... }: removeAttrs addrs [ host.name ]; # nodes.<other>.config
+        };
+      };
+    }
+  );
+  # a function element that reads a sink: two givers whose sink values differ are two elements, not one
+  sinkArgs = yen.eval (
+    { yen, ... }:
+    {
+      yen.kinds.fleet = {
+        spawns.environment = _: yen.environment;
+        sinks.seen = { };
+      };
+      yen.kinds.environment = {
+        spawns.host =
+          s:
+          b.listToAttrs (
+            map (n: {
+              name = n;
+              value = yen.host.${n};
+            }) (b.filter (n: yen.host.${n}.environment.name == s.name) (b.attrNames yen.host))
+          );
+        sinks.tag.reduce = yen.lib.reduce.one;
+      };
+      yen.kinds.host.fields.environment = yen.kinds.environment;
+      yen.fleet.main = { };
+      yen.environment = {
+        prod = { };
+        staging = { };
+      };
+      yen.host = {
+        a.environment = yen.environment.prod;
+        b.environment = yen.environment.staging;
+        c.environment = yen.environment.prod;
+      };
+      yen.aspects.envtag = {
+        at = yen.kinds.environment;
+        tag = { environment, ... }: environment.name;
+      };
+      yen.aspects.report = {
+        at = yen.kinds.host;
+        seen = { tag, ... }: tag;
+      };
+    }
+  );
+  gapsBadAt = yen.eval {
+    imports = [
+      gapsModule
+      { yen.aspects.typo.at = "host"; }
+    ];
+  };
+
 in
 {
   # flat joins list elements and keeps scalars; the first of a duplicate stays, so the order is the order of arrival

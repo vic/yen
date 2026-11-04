@@ -4,24 +4,103 @@ let
   inherit (self.tests._shared)
     b
     codes
-    codesFix
     eq
     fwRules
     good
-    hasFw
     no
     nofw
     ports
     portsBase
-    rec1
-    rule2
     rung1
-    sshdWeb
-    tags
-    tagsWith
     yen
     yes
     ;
+
+  # one error per code: a module, spawns, an element, a sink `of`, an order
+  codesFix = yen.eval {
+    imports = [
+      (
+        { yen, ... }:
+        {
+          yen.kinds.top = {
+            spawns.host = _: {
+              a = { };
+              b = 3; # spawns: an instance that is no attrset
+            };
+            sinks.port.of = yen.lib.is builtins.isInt;
+          };
+          yen.kinds.host.spawns.svc = _: 1; # spawns: no attrset
+          yen.kinds.svc = { };
+          yen.top.t = { };
+          yen.aspects.bare = {
+            at = yen.kinds.top;
+            port = x: x; # bare-function
+          };
+          yen.aspects.treeArg = {
+            at = yen.kinds.top;
+            port = { tree, ... }: 1; # arg: `tree` is a cycle source
+          };
+          yen.aspects.noArg = {
+            at = yen.kinds.top;
+            port = { host, ... }: 1; # arg: no host above top
+          };
+          yen.aspects.badOf = {
+            at = yen.kinds.top;
+            port = "x"; # of
+          };
+          yen.aspects.ord = {
+            at = yen.kinds.top;
+            order = "first"; # order
+          };
+        }
+      )
+      ({ nope }: { }) # module
+    ];
+  };
+  hasFw = id: [
+    "has"
+    "firewall"
+    id
+  ];
+  # a violation on one host: web runs sshd
+  sshdWeb =
+    { yen, ... }:
+    {
+      yen.invariants.no = _: {
+        bad = [ ];
+        pos = [ (yen.facts.has yen.aspects.sshd "top:t/host:web") ];
+      };
+    };
+  # rung 2 fixture: hosts `a` (tag "b:1") and `a:b` (tag "2"); `ok` is a user relation of arity 1; `rules yen` names
+  # the invariants
+  tagsWith =
+    rules: hosts:
+    yen.eval (
+      { yen, ... }:
+      {
+        yen.kinds.top.spawns.host = _: yen.host;
+        yen.kinds.host.fields.tag = yen.lib.is (_: true);
+        yen.top.t = { };
+        yen.host = {
+          a.tag = "b:1";
+          "a:b".tag = "2";
+        }
+        // hosts;
+        yen.relations.ok = {
+          arity = 1;
+          check = ts: b.match "[0-9]+" (b.head ts) != null; # digits only: tag "b:1" fails, "2" passes
+        };
+        yen.invariants = rules yen;
+      }
+    );
+  tags = rules: tagsWith rules { };
+  rule2 =
+    r:
+    tags (_: {
+      inherit r;
+    });
+  rec1 = r: code: b.head (b.filter (e: e.code == code) r.errors);
+
 in
 {
   errors-v2-check =

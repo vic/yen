@@ -5,13 +5,28 @@ let
     b
     choice
     D
-    dag
     eq
-    G
     K
-    ring
     yen
     ;
+
+  G = yen.graphs;
+  ring = {
+    a = [ "b" ];
+    b = [ "c" ];
+    c = [ "a" ];
+    d = [ "a" ];
+  };
+  dag = {
+    app = [
+      "db"
+      "cache"
+    ];
+    cache = [ "net" ];
+    db = [ "net" ];
+    net = [ ];
+  };
+
 in
 {
   graphs-reach = {
