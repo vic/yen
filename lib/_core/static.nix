@@ -34,6 +34,9 @@ let
       mapAttrs (_: jsonSafe) v
     else
       v;
+  boundIn =
+    s: k: d:
+    if (s.${k} or null) == null then d else s.${k};
 in
 {
   reduce = reduceNamed;
@@ -167,10 +170,6 @@ in
   # valid time: an instance with validFrom / validTo (ISO dates) holds at a date the caller passes; no clock in pure eval
   #: lib.validAt :: date -> scope -> bool -- the scope instance holds at the ISO date (validFrom, validTo; absent is open)
   validAt =
-    date: s:
-    let
-      bound = k: d: if (s.${k} or null) == null then d else s.${k};
-    in
-    bound "validFrom" "0000-00-00" <= date && date <= bound "validTo" "9999-12-31"; # absent or null: open
+    date: s: boundIn s "validFrom" "0000-00-00" <= date && date <= boundIn s "validTo" "9999-12-31"; # absent or null: open
   inherit jsonSafe;
 }
