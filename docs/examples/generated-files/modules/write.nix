@@ -2,7 +2,7 @@
 { yen, lib, ... }:
 let
   whole.graph = true; # (1) a tree request: the whole fleet
-  fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
+  fleetOf = tree: tree.select whole; # the whole fleet, with its data
   hostsIn = fleet: lib.filter (s: fleet.lib.holds fleet.kinds.host s) fleet.lib.graph.scopes;
   hostsOf = tree: hostsIn (fleetOf tree);
 in

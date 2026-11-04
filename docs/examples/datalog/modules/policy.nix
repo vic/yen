@@ -70,7 +70,7 @@ in
       { tree, ... }:
       {
         tree = [ all ];
-        out = [ { serving = servingOf (lib.head (tree.select all)); } ];
+        out = [ { serving = servingOf (tree.select all); } ];
       };
   };
 }

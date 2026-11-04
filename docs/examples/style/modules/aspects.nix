@@ -23,7 +23,7 @@ in
       { tree, scope, ... }:
       {
         tree = [ hosts ];
-        nixos = [ { networking.hosts."10.0.0.1" = peersOf scope (builtins.head (tree.select hosts)); } ]; # (4)
+        nixos = [ { networking.hosts."10.0.0.1" = peersOf scope (tree.select hosts); } ]; # (4)
       };
   };
 }

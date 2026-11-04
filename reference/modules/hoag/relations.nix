@@ -29,8 +29,6 @@ in
   yen.host.stage.dependsOn = [ yen.host.web-1 ];
   yen.aspects.deploy-waves = {
     at = yen.fleet.main;
-    cycle =
-      { tree, ... }:
-      { tree = [ all ]; } // wavesFor (lib.filter (h: h ? addr) (lib.head (tree.select all)));
+    cycle = { tree, ... }: { tree = [ all ]; } // wavesFor (lib.filter (h: h ? addr) (tree.select all));
   };
 }

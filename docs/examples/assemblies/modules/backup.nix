@@ -24,8 +24,8 @@ in
         ];
         config = [
           {
-            backup.target = (lib.head (lib.head (tree.select nas))).addr;
-            backup.name = (lib.head (tree.select me)).name;
+            backup.target = (lib.head (tree.select nas)).addr;
+            backup.name = (tree.select me).name;
           }
         ];
       };

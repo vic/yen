@@ -26,6 +26,6 @@ in
 {
   yen.aspects.deploy-plan = {
     at = yen.kinds.fleet;
-    cycle = { tree, ... }: { tree = [ all ]; } // planFor (lib.head (tree.select all));
+    cycle = { tree, ... }: { tree = [ all ]; } // planFor (tree.select all);
   };
 }

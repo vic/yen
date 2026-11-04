@@ -16,7 +16,6 @@ let
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
   machineOf = s: if holds yen.kinds.member s then s.parent else s;
-  get = tree: q: lib.head (tree.select q);
 in
 {
   yen.kinds.fleet = {
@@ -88,8 +87,8 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = yen.lib.batteries.kits.assemblies (get tree assemblyTree);
-            machines = get tree hostTree;
+            assemblies = yen.lib.batteries.kits.assemblies (tree.select assemblyTree);
+            machines = tree.select hostTree;
             inherit holds;
           })
         ];

@@ -178,7 +178,7 @@ in
       {
         tree = [ guestsReq ];
       }
-      // memoryOf scope (memSearch (byName (lib.head (tree.select guestsReq))) scope);
+      // memoryOf scope (memSearch (byName (tree.select guestsReq)) scope);
   };
 
   yen.aspects.port-synthesis = {
@@ -198,7 +198,7 @@ in
       { tree, ... }:
       {
         tree = [ hostsReq ];
-        out = placementOf (lib.head (tree.select hostsReq)) (hostRows (lib.head (tree.select hostsReq)));
+        out = placementOf (tree.select hostsReq) (hostRows (tree.select hostsReq));
       };
   };
 }

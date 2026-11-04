@@ -26,9 +26,9 @@ in
             lib.filter (
               u:
               yen.helpers.meets (lib.filter (g: g.label == "oauth") (
-                yen.helpers.closure (lib.head (tree.select groups)) u.groups
+                yen.helpers.closure (tree.select groups) u.groups
               )) scope.grants
-            ) (lib.head (tree.select users))
+            ) (tree.select users)
           ))
         ];
       };
@@ -93,7 +93,7 @@ in
       tree = [ lb ];
       k8s-manifests = [
         (lib.optionalAttrs scope.settings.guard.enable {
-          applications.guard.hub = "${(lib.head (lib.head (tree.select lb))).system-owner.name}@lb";
+          applications.guard.hub = "${(lib.head (tree.select lb)).system-owner.name}@lb";
         })
       ];
     };

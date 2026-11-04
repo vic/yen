@@ -13,7 +13,7 @@
         out = [
           {
             peers.${scope.name} = builtins.length (
-              builtins.filter (h: h.name != scope.name) (builtins.head (tree.select hosts)) # (4)
+              builtins.filter (h: h.name != scope.name) (tree.select hosts) # (4)
             );
           }
         ];

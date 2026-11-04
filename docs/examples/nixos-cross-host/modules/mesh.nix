@@ -3,7 +3,7 @@
 { yen, lib, ... }:
 let
   all.instances = yen.kinds.host; # (1) a tree request: every host, with its data
-  othersOf = tree: scope: lib.filter (h: !yen.lib.same h scope) (lib.head (tree.select all)); # every host but this one
+  othersOf = tree: scope: lib.filter (h: !yen.lib.same h scope) (tree.select all); # every host but this one
 in
 {
   yen.aspects.mesh = {

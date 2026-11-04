@@ -431,7 +431,7 @@ let
             { tree, ... }:
             let
               whole.graph = true;
-              y = b.head (tree.select whole);
+              y = tree.select whole;
             in
             {
               tree = [ whole ];
@@ -479,7 +479,7 @@ let
             { tree, ... }:
             let
               whole.graph = true;
-              y = b.head (tree.select whole);
+              y = tree.select whole;
             in
             {
               tree = [ whole ];

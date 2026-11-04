@@ -175,9 +175,7 @@ in
         tree = [ allHosts ];
         nixos = [
           {
-            environment.etc."db/lockdown".text = lockdownOf (addressed (
-              lib.head (tree.select allHosts)
-            )) scope db-claims;
+            environment.etc."db/lockdown".text = lockdownOf (addressed (tree.select allHosts)) scope db-claims;
           }
         ];
       };
@@ -243,7 +241,7 @@ in
       { tree, ... }:
       {
         tree = [ allHosts ];
-        out = [ { visibleMotd = motdsOf (visible (addressed (lib.head (tree.select allHosts)))); } ];
+        out = [ { visibleMotd = motdsOf (visible (addressed (tree.select allHosts))); } ];
       };
   };
 

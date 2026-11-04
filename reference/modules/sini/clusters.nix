@@ -64,7 +64,7 @@ in
       {
         tree = [ clusters ];
         # a list literal: its length is known without reading k3s-nodes, which reduces from these very elements
-        nixos = [ (k3sOf scope (firstNode (lib.head (tree.select clusters)) scope (lib.head k3s-nodes))) ];
+        nixos = [ (k3sOf scope (firstNode (tree.select clusters) scope (lib.head k3s-nodes))) ];
       };
   };
   yen.aspects.k3s-registries = {

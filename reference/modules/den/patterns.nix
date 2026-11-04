@@ -39,9 +39,7 @@ in
           users
           pets
         ];
-        pairs = lib.concatMap (u: map (p: "${u.name}-${p.name}") (lib.head (tree.select pets))) (
-          lib.head (tree.select users)
-        ); # one response per request
+        pairs = lib.concatMap (u: map (p: "${u.name}-${p.name}") (tree.select pets)) (tree.select users); # one response per request
       };
   };
   yen.aspects.pet-toys = {

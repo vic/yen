@@ -36,7 +36,7 @@ in
       { tree, ... }:
       {
         tree = [ whole ];
-        out = [ (tablesOf (builtins.head (tree.select whole))) ];
+        out = [ (tablesOf (tree.select whole)) ];
       };
     # flake templates from the directories under templates/ that have a flake.nix
     out.templates = builtins.mapAttrs (_: t: t.description) (

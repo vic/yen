@@ -24,7 +24,8 @@
       ''
         ## Tree requests
 
-        A request is one question. `tree.select request` gives its answers: the request is its own name, so it has no
+        A request is one question. `tree.select request` gives its one answer, or `null` when nothing answers it or the
+        cycle did not ask it. The request is its own name, so it has no
         string to mistype. Bind it in a `let` and use it twice, as `vms` above. These are the requests:
       ''
       (docs.table
@@ -32,11 +33,11 @@
         [
           [
             "`nearest = yen.kinds.environment`"
-            "the nearest scope of that kind"
+            "the nearest scope of that kind, or `null`"
           ]
           [
             "`parent = true`"
-            "the parent scope"
+            "the parent scope, or `null` at a root"
           ]
           [
             "`children = predicate`"

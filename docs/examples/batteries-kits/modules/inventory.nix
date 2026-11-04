@@ -88,8 +88,8 @@ in
           errors = [
             (kits.contract {
               # (7)
-              assemblies = lib.head (tree.select allAssemblies);
-              machines = lib.head (tree.select allMachines);
+              assemblies = tree.select allAssemblies;
+              machines = tree.select allMachines;
               inherit holds;
             })
           ];

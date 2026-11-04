@@ -23,7 +23,7 @@ let
       (label (lib.attrValues vs)) # (7)
     ]);
   lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
-  appsOf = tree: (lib.head (lib.head (tree.select lb))).apps;
+  appsOf = tree: (lib.head (tree.select lb)).apps;
 in
 {
   yen.aspects.ports = {

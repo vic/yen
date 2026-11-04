@@ -20,7 +20,7 @@
             inside.${scope.name} = {
               packages = builtins.head packages; # (2) a sink arg: the reduced value of `packages` at its receiver
               parent = scope.parent.id; # (3)
-              users = map (u: u.name) (builtins.head (tree.select users));
+              users = map (u: u.name) (tree.select users);
               nginx = yen.lib.holds yen.aspects.nginx scope; # (4)
             };
           }

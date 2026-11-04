@@ -292,7 +292,7 @@ in
       }:
       let
         page = scope;
-        pages = pagesOf (lib.head (tree.select allPages));
+        pages = pagesOf (tree.select allPages);
         cmds = lib.concatLists (lib.head commands); # the reduced `commands` sink: each aspect gives a list
       in
       {
@@ -333,7 +333,7 @@ in
     cycle =
       { tree, commands, ... }:
       let
-        instances = lib.head (tree.select allPages);
+        instances = tree.select allPages;
         pages = pagesOf instances;
         cmds = lib.concatLists (lib.head commands);
         routes = map (p: if p.route == "index" then "/" else "/${p.route}/") pages;
@@ -369,7 +369,7 @@ in
         shown = lib.filter (e: e.item.slug != "index") (lib.head sidebar);
         bySection = lib.groupBy (e: e.section.name) shown;
         sections = lib.sort (a: b: a.order < b.order) (
-          lib.filter (s: bySection ? ${s.name}) (lib.head (tree.select allSections))
+          lib.filter (s: bySection ? ${s.name}) (tree.select allSections)
         );
       in
       {
