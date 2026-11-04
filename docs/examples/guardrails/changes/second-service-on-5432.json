@@ -1,0 +1,1 @@
+{ "yen": { "service": { "grafana": { "on": { "kind": "host", "name": "db1" }, "port": 5432, "reach": "lan" } } } }
