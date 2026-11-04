@@ -99,6 +99,7 @@ in
         | `docs.links { root; base; }` | a reduce: links to the first line that contains a needle; a gone needle is an error |
         | `docs.vocabulary { what; names; lines; }` | errors: a live name with no doc line, a doc line with no live name |
         | `docs.templates { root; description; }` | flake templates from the directories that have a flake.nix (these docs use it) |
+        | `docs.starlight { … }`, `docs.pages { … }`, `docs.starlight-writers { … }` | a whole docs site as a fleet; see [Starlight docs battery](/batteries/starlight/) |
       ''
     ];
 
