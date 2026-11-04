@@ -1,7 +1,7 @@
 # µKanren with finite domains: give each app a port in 8080..8083, all different, prometheus before grafana.
 { yen, lib, ... }:
 let
-  inherit (yen.lib.uKanren)
+  inherit (yen.lib.uKanren) # (1)
     run
     runAll
     freshNamed
@@ -15,11 +15,12 @@ let
   ports =
     apps: q:
     freshNamed apps (vs: [
-      (infd (lib.attrValues vs) 8080 8083)
-      (distinctfd (lib.attrValues vs))
-      (ltfd vs.prometheus vs.grafana)
-      (eq q vs)
-      (label (lib.attrValues vs))
+      # (2)
+      (infd (lib.attrValues vs) 8080 8083) # (3)
+      (distinctfd (lib.attrValues vs)) # (4)
+      (ltfd vs.prometheus vs.grafana) # (5)
+      (eq q vs) # (6)
+      (label (lib.attrValues vs)) # (7)
     ]);
   lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
   appsOf = tree: (lib.head (lib.head (tree.select lb))).apps;
@@ -34,15 +35,15 @@ in
         out = [
           {
             ports = {
-              first = run 1 (ports (appsOf tree)); # one answer
+              first = run 1 (ports (appsOf tree)); # (8) one answer
               count = lib.length (runAll (ports (appsOf tree))); # every answer
-              # the same relation, run backward: which app can take 8080?
+              # (9) the same relation, run backward: which app can take 8080?
               on8080 = lib.unique (
                 lib.concatMap (a: lib.attrNames (lib.filterAttrs (_: p: p == 8080) a)) (
                   runAll (ports (appsOf tree))
                 )
               );
-              # a bounded search: `complete = false` means "stopped", never "no answer"
+              # (10) a bounded search: `complete = false` means "stopped", never "no answer"
               bounded = removeAttrs (runFuel 1 5 (ports (appsOf tree))) [ "answers" ];
             };
           }

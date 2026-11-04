@@ -3,10 +3,11 @@
 { yen, lib, ... }:
 {
   yen.queries = {
+    # (1)
     aspectsOn = {
-      params.host = yen.kinds.host;
+      params.host = yen.kinds.host; # (2)
       answer =
-        { result, host }:
+        { result, host }: # (3)
         let
           s = lib.findFirst (yen.lib.same host) null result.scopes;
         in
@@ -17,8 +18,8 @@
     };
     hostsWith = {
       params = {
-        aspect = yen.lib.aspect;
-        kind = yen.lib.opt yen.lib.kind yen.kinds.host;
+        aspect = yen.lib.aspect; # (4)
+        kind = yen.lib.opt yen.lib.kind yen.kinds.host; # (5)
       };
       answer =
         {

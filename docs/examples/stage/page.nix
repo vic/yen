@@ -40,13 +40,20 @@ in
     }:
     [
       ''
-        Before you apply a change, stage it. `yen.lib.stage { base; change; rejected; grant; }` evaluates the fleet
-        without and with the change. Nothing is applied. `ok` is true only when nothing new is wrong.
+        Before you apply a change, stage it. Staging evaluates the fleet without and with the change. Nothing is applied.
 
         The fleet is the one from [Invariants](/query/invariants/). A change is plain data, so an agent can write it as JSON:
       ''
       (docs.file "changes/desktop-on-web.json")
-      (docs.file "stage.nix")
+      ''
+        This file stages the change. The marked lines are explained below.
+      ''
+      (docs.fileNoted "" "stage.nix")
+      ''
+        `(4)` calls `yen.lib.stage { base; change; rejected; grant; }`. `base` (`(3)`) is the fleet. `change` (`(5)`) is the JSON file.
+        `grant` (`(1)`) says where the change may reach, and `rejected` (`(2)`) lists the changes refused before.
+        The result has `ok`, which is true only when nothing new is wrong. Run it:
+      ''
       (docs.sh "nix eval --impure --json --file stage.nix --argstr change changes/desktop-on-web.json")
       (docs.value (stageOf inputs dir { change = "changes/desktop-on-web.json"; }))
       ''
@@ -55,7 +62,14 @@ in
 
         ## Grants only narrow
 
-        `yen.lib.grant { scopes; sinks ? null; }` says where a change may reach, by reference. A scope entry is an instance
+        A grant says where a change may reach. This change puts `postgres` on the `thinkpad`. The grant allows only the host `db`:
+      ''
+      (docs.file "changes/postgres-on-thinkpad.json")
+      (docs.nix ''
+        yen.lib.grant { scopes = [ { kind = "host"; name = "db"; } ]; }
+      '')
+      ''
+        `yen.lib.grant { scopes; sinks ? null; }` gives a grant, by reference. A scope entry is an instance
         (`yen.host.db`, or `{ kind; name; }` from outside the fleet): every scope that holds it and the scopes under them. Or
         it is a path `[ { kind; name; } … ]`: that scope and the scopes under it. A sink is a ref or `{ sink; }`. `narrow g h`
         keeps what both allow. No function makes a grant wider, and a scope written as a string covers nothing.
@@ -63,9 +77,8 @@ in
         An element reads other scopes only through its args and cycle `tree` requests, and yen records each of these reads.
         So `stage` knows the scopes a change reaches: the scopes whose reads get a changed value. yen refuses each of them
         that the grant does not cover, with `class = "authority"`: no edit by this author can fix it. A scope that the
-        change does not reach is not refused.
+        change does not reach is not refused. The refusals of this grant:
       ''
-      (docs.file "changes/postgres-on-thinkpad.json")
       (docs.value
         (stageOf inputs dir {
           change = "changes/postgres-on-thinkpad.json";

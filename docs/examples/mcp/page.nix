@@ -20,16 +20,18 @@ in
     { docs, inputs, ... }:
     [
       ''
-        Yen ships an MCP server: `mcp/` at the top of the repository, a small Rust binary.
-        `mcp/` is its own flake, written with Yen: `nix run github:vic/yen?dir=mcp` serves the fleet in the working
-        directory, and `packages.<system>.yen-mcp` is the package. It answers agents over stdio
-        (JSON-RPC 2.0, one message per line) by running yen [queries](/query/queries/) on the fleet. It serves the fleet in its directory.
+        yen ships an MCP server for [agents](/agents/agent-surface/). Run it in the directory of a fleet.
+        This example serves the [reference fleet](https://github.com/vic/yen/tree/main/reference):
       ''
       (docs.sh ''
         cd reference
         nix run github:vic/yen?dir=mcp
       '')
       ''
+        The server is [`mcp/`](https://github.com/vic/yen/tree/main/mcp) at the top of the repository, a small Rust binary.
+        `mcp/` is its own flake, written with yen: `packages.<system>.yen-mcp` is the package. It answers agents over stdio
+        (JSON-RPC 2.0, one message per line) by running yen [queries](/query/queries/) on the fleet in its directory.
+
         ## Tools
 
         This table is read from the tool list the server embeds (`mcp/src/tools.json`) (${toString (builtins.length (toolsOf inputs))} tools):
@@ -44,7 +46,7 @@ in
       ''
         Each answer is `{ complete; result }`, or `{ complete = false; error }`. A timeout is never an empty answer.
         The repository ships a skill that teaches agents the order of calls, the answer shapes and the refusals:
-        `skills/yen-mcp/SKILL.md`, at the top of the repository. This page checks that it names every tool,
+        [`skills/yen-mcp/SKILL.md`](https://github.com/vic/yen/blob/main/skills/yen-mcp/SKILL.md), at the top of the repository. This page checks that it names every tool,
         and no other.
         Arguments reach Nix through a file and `builtins.fromJSON`, never through string interpolation.
 
@@ -74,8 +76,10 @@ in
       )
       (docs.tip "Your own fleet" ''
         Nothing to copy into your fleet. Run the mcp flake from the fleet's directory, as above. The server needs only
-        the queries of the other agent pages: `schema`, `check`, `context`, `explain`, stored queries, `stage` and `program`.
-        `mcp/test.sh` drives every tool.
+        the queries of the other agent pages: `schema`, `context` and `explain` ([agent surface](/agents/agent-surface/)),
+        `check` ([invariants](/query/invariants/)), [stored queries](/query/stored-queries/), `stage` ([Stage](/agents/stage/))
+        and `program` ([Programs](/agents/programs/)).
+        [`mcp/test.sh`](https://github.com/vic/yen/blob/main/mcp/test.sh) drives every tool.
       '')
     ];
 
