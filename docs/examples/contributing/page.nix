@@ -134,6 +134,29 @@ in
 
         The test `style.one-let` holds every kit, template module, docs example module and reference fleet module to one `let`.
 
+        ## Batteries, kits and assemblies
+
+        [Batteries](/batteries/), [kits](/batteries/kits/) and [assemblies](/recipes/assemblies/) are pluggable and composable:
+        a fleet plugs each one in, and they work together without one knowing the others. Before you write or change one,
+        read how they work, and read at least two of each that are close to yours. Read the code and its docs page, not only this list:
+
+        - Batteries: `lib/batteries/github/workflow.nix`, `lib/batteries/devshell/numtide.nix`, `lib/batteries/perSystem/out.nix`
+          and `lib/batteries/kits/members.nix`.
+        - Kits: `lib/kits/borg.nix`, `lib/kits/dns.nix` and `lib/kits/base.nix`, which adds other kits.
+        - Assemblies: `lib/batteries/kits/assemblies.nix`, `lib/batteries/kits/contract.nix` and the [kits example](/batteries/kits/).
+
+        The rules for a battery, which a review checks:
+
+        - A battery is the value of one key of a fleet that exists (`files`, `out`, `nixos`, `cycle`, a `spawns` entry). It is a
+          function of refs, such as `from = yen.kinds.x.sinks.y`, and it reads a sink with `sinks.''${from.__sink}`.
+        - A battery never sets `yen.kinds`, `yen.helpers`, `yen.flake`, `yen.aspects` or any other name of the fleet. The fleet declares its
+          own kinds, sinks and flake. A kit adds only names under its own name, such as `yen.kit.borg`.
+        - A battery never evaluates the engine, never reads `flake.nix` or another file of the project, and never needs `import-tree`.
+          If it needs something loaded, the fleet gives it a function.
+        - A battery never produces a flake or a complete fleet.
+        - Code that several batteries share goes in a private file, `lib/_<name>.nix`, like `lib/_roles.nix`.
+        - A battery has a `#:` line, a test with a mutant, and a docs page that shows a real use.
+
         ## Set up
 
         `nix develop ./docs` from the repository root (or `nix develop` in `docs/`) gives a devshell with every command below.
