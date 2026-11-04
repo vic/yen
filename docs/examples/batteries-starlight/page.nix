@@ -72,21 +72,28 @@ in
     { docs, ... }:
     [
       ''
-        This documentation site is built by a [battery](/batteries/). `docs.starlight` turns a directory of pages into a
-        fleet: one [scope](/model/scopes/) per page, and for each page an `.mdx` file, a sidebar entry and
-        tests. It writes [Starlight](https://starlight.astro.build) pages and knows nothing of yen's own docs. These docs call it like this:
+        This documentation site is built from [batteries](/batteries/). They write [Starlight](https://starlight.astro.build)
+        pages and know nothing of yen's own docs. Like any battery, each is the value of one key of your fleet, and you keep the
+        words: the fleet declares its `page`, `section` and `site` [kinds](/model/kinds-fields/), one [scope](/model/scopes/)
+        for each page, and its sinks. These docs do it like this:
       ''
       (docs.repoFile "docs/modules/site.nix")
       ''
-        You give `pages`, the directory of pages, and `sections`, the groups of the sidebar. `repo`, `repoRoot` and
-        `pagesAt` build the edit and source links. `files` and `root` write the files. `load` reads a page directory: the battery
-        does not read page files or evaluate anything, so the fleet decides how (see below). The rest is optional. `ending` adds text
-        at the end of a page, `auto` gives every page its checks, `extra` adds writers to the body, and `linkExempt` names an
-        internal link that is not a page.
+        | Battery | Is the value of | Gives |
+        |---|---|---|
+        | `docs.starlight-page { … }` | what the `cycle` of an aspect at the page kind returns | the `.mdx` of the page to a files sink, its entry to a sidebar sink, its checks to a tests sink, with `links-resolve`: an internal link must name a page |
+        | `docs.starlight-sidebar { from; }` | `files` of the sidebar sink | `src/sidebar.json` |
+        | `docs.starlight-tests { from; }` | `out` of the tests sink | the flake output `tests.fast.<page>.<check>` and `tests.e2e.<page>.<check>`, for [fastest](https://github.com/denful/fastest) |
+        | `docs.starlight-writers { … }` | a function, for the page body | the writers `docs.<name>` below |
+
+        The sinks and the kinds are refs, as in every battery. The battery reads no page file and evaluates nothing: it takes
+        `load`, a function of a page directory that returns `{ page; args; }`. `page` is the `page.nix`, and `args` is what its
+        `body` and `checks` receive. The docs fleet above loads a page by evaluating its `modules/` and reading its `flake.nix`;
+        another site can load pages in any other way. `ending` adds text at the end of a page, and `auto` gives every page its checks.
 
         ## A page is a directory
 
-        Each directory of `pages` is one page. `page.nix` holds its prose and its checks. When the page has code, `modules/` is a
+        In these docs, each directory of `examples/` is one page. `page.nix` holds its prose and its checks. When the page has code, `modules/` is a
         fleet that the page queries, and `flake.nix` makes the directory a flake template. This is the shape of `page.nix`:
       ''
       (docs.nix ''
@@ -102,9 +109,7 @@ in
       ''
         `body` is a list of strings: prose, and the output of the writers. The writers read the page directory, so a
         code block is always a file that runs. `result` is the eval of `modules/`: a value you print is a value the
-        fleet computed. `load` gives a page these names. It returns `{ page; args; }`: `page` is the `page.nix`, and `args` is what `body` and
-        `checks` receive. The docs fleet above loads a page by evaluating its `modules/` and reading its `flake.nix`; another site
-        can load pages in any other way.
+        fleet computed.
 
         ## The writers
 
@@ -125,13 +130,8 @@ in
           `CONTRIBUTING.md`. A committed file like this has a check: it must match.
         - `tests.fast.<page>.<check>` and `tests.e2e.<page>.<check>`, for [fastest](https://github.com/denful/fastest).
           Every page gets `no-errors` when it has a fleet, and `inputs-known` and `flake-is-eval` when it is a
-          template. `site.links-resolve` fails when an internal link names no page.
+          template. `links-resolve` fails when an internal link names no page.
       ''
-      (docs.caution "Take the battery from inputs" ''
-        The engine reads the keys of a module before the `yen` argument exists. Call `inputs.yen.lib.batteries.docs.starlight`, not
-        `yen.lib.batteries.docs.starlight`, and give the keys of `yen` by name: `yen = { inherit (site.yen) kinds page; };`.
-        Otherwise the eval fails with `its keys read an arg`.
-      '')
     ];
 
   checks =
