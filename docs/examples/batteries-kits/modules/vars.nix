@@ -7,8 +7,9 @@ in
 {
   yen.kinds.fleet.sinks = {
     generators = {
-      reduce = vars.generators { inherit machineOf; };
+      reduce = vars.generators { inherit machineOf; }; # (1)
       out = vars.vars-plan {
+        # (2)
         from = yen.kinds.fleet.sinks.generators;
         machines = lib.attrNames yen.machine;
         recipientsOf = m: [ "age1admin" ];
@@ -29,7 +30,7 @@ in
     config =
       { scope, ... }:
       {
-        sshPub = vars.public-value { root = ../vars/per-machine; } scope.name "ssh" "key.pub" "absent";
+        sshPub = vars.public-value { root = ../vars/per-machine; } scope.name "ssh" "key.pub" "absent"; # (3)
       };
   };
   yen.aspects.borg-vars = {
@@ -48,6 +49,7 @@ in
   yen.aspects.secret-reads = {
     at = yen.kinds.fleet;
     errors = vars.secret-reads {
+      # (4)
       from = yen.kinds.fleet.sinks.generators;
       reads = yen.kinds.fleet.sinks.public-reads;
     };

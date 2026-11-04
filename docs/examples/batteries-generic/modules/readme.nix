@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.kinds.fleet.sinks.readme = {
-    reduce = yen.lib.batteries.ordered;
+    reduce = yen.lib.batteries.ordered; # (1)
     out =
       { sinks, ... }:
       {
@@ -20,11 +20,11 @@
     at = yen.kinds.fleet;
     readme = {
       name = "hosts";
-      after = [ "intro" ];
+      after = [ "intro" ]; # (2)
       value = "## Hosts";
     };
   };
-  # written later, in another file: it goes between the two
+  # (3) written later, in another file: it goes between the two
   yen.aspects.readme-usage = {
     at = yen.kinds.fleet;
     readme = {

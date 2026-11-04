@@ -4,9 +4,9 @@ let
   inherit (yen.lib.batteries) mesh;
 in
 {
-  yen.kinds.fleet.sinks.keys.reduce = yen.lib.reduce.elements; # an element knows which host gave it
+  yen.kinds.fleet.sinks.keys.reduce = yen.lib.reduce.elements; # (1) an element knows which host gave it
   yen.kinds.host.sinks.known = {
-    reduce = yen.lib.reduce.one;
+    reduce = yen.lib.reduce.one; # (2)
     out =
       { scope, sinks, ... }:
       {
@@ -21,6 +21,7 @@ in
   yen.aspects.known-hosts = {
     at = yen.kinds.host;
     known = mesh {
+      # (3)
       from = yen.kinds.fleet.sinks.keys;
       build = keys: builtins.sort builtins.lessThan keys;
     };

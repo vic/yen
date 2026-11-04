@@ -8,6 +8,7 @@
   yen.kinds.repo.sinks.flake-file = {
     reduce = yen.lib.reduce.merge;
     out = yen.lib.batteries.flake-file.write {
+      # (1)
       from = yen.kinds.repo.sinks.flake-file;
       inherit (inputs.nixpkgs-unstable) lib; # flake-file needs the unstable lib
       inherit inputs;

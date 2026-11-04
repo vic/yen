@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.kinds.fleet.sinks.addrs = {
-    reduce = yen.lib.batteries.claim { key = addr: addr; };
+    reduce = yen.lib.batteries.claim { key = addr: addr; }; # (1)
     out =
       { sinks, ... }:
       {
@@ -11,6 +11,6 @@
   };
   yen.aspects.addr = {
     at = yen.kinds.host;
-    addrs = { host, ... }: host.addr;
+    addrs = { host, ... }: host.addr; # (2)
   };
 }

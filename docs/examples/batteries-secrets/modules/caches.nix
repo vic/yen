@@ -4,8 +4,8 @@ let
   inherit (yen.lib.batteries) cachix github files;
 in
 {
-  yen.kinds.host.sinks.caches.nixos = cachix.caches { from = yen.kinds.host.sinks.caches; };
-  yen.kinds.repo.sinks.caches.out = cachix.flake-config { from = yen.kinds.repo.sinks.caches; };
+  yen.kinds.host.sinks.caches.nixos = cachix.caches { from = yen.kinds.host.sinks.caches; }; # (1)
+  yen.kinds.repo.sinks.caches.out = cachix.flake-config { from = yen.kinds.repo.sinks.caches; }; # (2)
   yen.aspects.caches = {
     at = [
       yen.kinds.host
@@ -20,6 +20,7 @@ in
   yen.kinds.repo.sinks.jobs = {
     reduce = yen.lib.reduce.merge;
     files = github.workflow {
+      # (3)
       from = yen.kinds.repo.sinks.jobs;
       path = ".github/workflows/build.yml";
       doc = {
@@ -34,7 +35,7 @@ in
     jobs.build = {
       runs-on = "ubuntu-latest";
       steps = [
-        (cachix.action { name = "my-cache"; })
+        (cachix.action { name = "my-cache"; }) # (4)
         { run = "nix build .#nixosConfigurations.build.config.system.build.toplevel"; }
       ];
     };

@@ -4,16 +4,17 @@ let
   inherit (yen.lib.batteries) files ordered;
 in
 {
-  yen.kinds.repo.sinks.readme.reduce = ordered;
+  yen.kinds.repo.sinks.readme.reduce = ordered; # (1)
   yen.aspects.readme = {
     at = yen.kinds.repo;
     files = files.document {
+      # (2)
       from = yen.kinds.repo.sinks.readme;
       path = "README.md";
     };
     readme = {
       name = "title";
-      value = "# my repo\n${files.comment "README.md" "Generated. Run nix run .#write-files."}";
+      value = "# my repo\n${files.comment "README.md" "Generated. Run nix run .#write-files."}"; # (3)
     };
   };
   yen.aspects.readme-usage = {

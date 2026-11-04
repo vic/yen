@@ -15,12 +15,13 @@ in
   yen.kinds.host = {
     spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out = nixos.system {
+      # (1)
       from = yen.kinds.host.sinks.nixos;
       inherit (inputs) nixpkgs;
     };
     # package names from any feature or user; one module per host allows them
-    sinks.unfree.nixos = nixos.unfree { from = yen.kinds.host.sinks.unfree; };
-    sinks.insecure.nixos = nixos.insecure { from = yen.kinds.host.sinks.insecure; };
+    sinks.unfree.nixos = nixos.unfree { from = yen.kinds.host.sinks.unfree; }; # (2)
+    sinks.insecure.nixos = nixos.insecure { from = yen.kinds.host.sinks.insecure; }; # (3)
   };
   yen.kinds.user.fields = {
     hosts = yen.lib.listOf yen.kinds.host;

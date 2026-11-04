@@ -5,7 +5,7 @@ let
   inherit (yen.lib) opt holds;
   attrs = yen.lib.attrs;
   # the fleet's assemblies and the parts their kits add (a part lives under its assembly)
-  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly);
+  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly); # (1)
   # tree requests: every assembly and host, with their data
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
@@ -17,9 +17,9 @@ in
     spawns.host = _: yen.host;
     sinks = {
       out.reduce = yen.lib.reduce.merge;
-      exports.reduce = kits.exports { isMember = holds yen.kinds.member; };
+      exports.reduce = kits.exports { isMember = holds yen.kinds.member; }; # (2)
       generators = {
-        reduce = yen.lib.batteries.vars.generators { inherit machineOf; };
+        reduce = yen.lib.batteries.vars.generators { inherit machineOf; }; # (3)
         out = yen.lib.batteries.vars.vars-plan {
           from = yen.kinds.fleet.sinks.generators;
           machines = lib.attrNames yen.host;
@@ -30,7 +30,7 @@ in
   };
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    spawns.member = kits.members { inherit assemblies holds; };
+    spawns.member = kits.members { inherit assemblies holds; }; # (4)
     # the NixOS keys of a host, as data
     sinks.nixos = {
       reduce = yen.lib.reduce.merge;
@@ -64,6 +64,7 @@ in
         ];
         errors = [
           (kits.contract {
+            # (5)
             assemblies = yen.lib.batteries.kits.assemblies (get tree assemblyTree);
             machines = get tree hostTree;
             inherit holds;
@@ -73,12 +74,12 @@ in
   };
   yen.aspects.settings-typed = {
     at = yen.kinds.member;
-    errors = kits.settings-typed;
+    errors = kits.settings-typed; # (6)
   };
   # a generator that an export carries goes to the machines of its `deploy` predicate
   yen.aspects.generators-from-exports = {
     at = yen.kinds.host;
-    generators = yen.lib.batteries.vars.from-exports { inherit holds; };
+    generators = yen.lib.batteries.vars.from-exports { inherit holds; }; # (7)
   };
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

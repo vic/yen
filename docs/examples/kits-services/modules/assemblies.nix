@@ -6,6 +6,7 @@ let
 in
 {
   imports = [
+    # (1)
     lib'.borg
     lib'.wifi
     lib'.remote-builders
@@ -13,7 +14,7 @@ in
     lib'.monitoring
     lib'.postgres
   ];
-  yen.kit.sshd.roles.server = { }; # borg adds an assembly of it
+  yen.kit.sshd.roles.server = { }; # (2) borg adds an assembly of it
   yen.host = {
     lb.addr = "10.0.0.1";
     web.addr = "10.0.0.2";
@@ -21,13 +22,13 @@ in
   };
   yen.assembly = {
     backup = {
-      kit = kit.borg;
+      kit = kit.borg; # (3)
       roles = {
         client = {
           at = host.web;
           settings.startAt = "02:00";
         };
-        server.at = host.nas;
+        server.at = host.nas; # (4)
       };
     };
     wifi = {
@@ -35,6 +36,7 @@ in
       roles.default = {
         at = host.web;
         settings.networks = {
+          # (5)
           home = { };
           office = { };
         };
@@ -79,7 +81,7 @@ in
         client = {
           at = host.web;
           settings = {
-            database = "shop";
+            database = "shop"; # (6)
             user = "shop";
           };
         };

@@ -21,23 +21,44 @@ in
     }:
     [
       ''
-        | Battery | Value of | Gives |
-        |---|---|---|
-        | `cachix.caches { from; }` | a NixOS, nix-darwin or home-manager key of a [sink](/behavior/sinks/) of caches | `nix.settings` substituters and trusted keys |
-        | `cachix.flake-config { from; }` | a flake-level key | flake `nixConfig` extra-substituters and keys |
-        | `cachix.action { name; authToken; version; }` | a workflow step | `cachix/cachix-action`, which pushes what the job builds |
-        | `secretspec.toml { from; project; defaults; providers; profiles; }` | a key that gives to the files sink | `secretspec.toml` ([cachix/secretspec](https://github.com/cachix/secretspec)) |
-        | `secrets.sops-config { from; path; }` | the same | `.sops.yaml` from a sink of creation rules |
-
-        A cache is `{ name; publicKey; url ? "https://<name>.cachix.org"; }`. A secret is `{ name; profile ? "default"; … }`
-        with any secretspec field. With a `claim` [reduce](/behavior/sinks/), a secret that two [scopes](/model/scopes/) declare is an error.
+        A cache and a secret are data. The host trusts a cache, the flake asks to trust it, and CI pushes to it.
+        A feature declares the secrets it needs, and a file lists them. [Batteries](/batteries/) write these from [sinks](/behavior/sinks/).
+        This fleet has one NixOS host and a repo root that writes files:
       ''
       (docs.file "modules/fleet.nix")
-      (docs.file "modules/caches.nix")
+      ''
+        Any [aspect](/behavior/aspects/) adds a cache to the sinks. The CI job that pushes to the cache:
+      ''
+      (docs.fileNoted "" "modules/caches.nix")
+      ''
+        A cache is `{ name; publicKey; url ? "https://<name>.cachix.org"; }`. `(1)` gives the host `nix.settings` substituters
+        and trusted keys. `(2)` gives the flake `nixConfig` extra-substituters and keys. At `(3)`, `github.workflow` writes
+        the workflow from a sink of jobs, as on [Repo batteries](/batteries/repo/). `(4)` is a workflow step: `cachix/cachix-action`,
+        which pushes what the job builds. This is the `nixConfig` of the flake:
+      ''
       (docs.value result.flake.nixConfig)
-      (docs.file "modules/secrets.nix")
+      ''
+        Secrets are declared by the features that need them. The values live in a provider, never in git:
+      ''
+      (docs.fileNoted "" "modules/secrets.nix")
+      ''
+        A secret is `{ name; profile ? "default"; … }` with any [secretspec](https://github.com/cachix/secretspec) field.
+        At `(1)`, `claim` is the [reduce](/batteries/generic/#one-owner-per-key): a secret that two [scopes](/model/scopes/) declare is an error.
+        `(2)` writes `secretspec.toml`. `(3)` writes `.sops.yaml` from a sink of creation rules. These are the files:
+      ''
       (docs.code "toml" (textsOf result)."secretspec.toml")
       (docs.code "yaml" (textsOf result).".sops.yaml")
+      ''
+        ## The batteries
+
+        | Battery | Value of | Gives |
+        |---|---|---|
+        | `cachix.caches { from; }` | a NixOS, nix-darwin or home-manager key of a sink of caches | `nix.settings` substituters and trusted keys |
+        | `cachix.flake-config { from; }` | a flake-level key | flake `nixConfig` extra-substituters and keys |
+        | `cachix.action { name; authToken; version; }` | a workflow step | `cachix/cachix-action`, which pushes what the job builds |
+        | `secretspec.toml { from; project; defaults; providers; profiles; }` | a key that gives to the files sink | `secretspec.toml` |
+        | `secrets.sops-config { from; path; }` | the same | `.sops.yaml` from a sink of creation rules |
+      ''
     ];
 
   checks =

@@ -12,7 +12,7 @@
   };
   yen.aspects.settings-typed = {
     at = yen.kinds.member;
-    errors = yen.lib.batteries.kits.settings-typed;
+    errors = yen.lib.batteries.kits.settings-typed; # (1)
   };
 
   yen.assembly = {
@@ -22,7 +22,7 @@
         at = yen.host.lb;
         settings = {
           device = "/dev/sda";
-          layout = yen.kit.disko.layouts.single-ext4;
+          layout = yen.kit.disko.layouts.single-ext4; # (2)
         };
       };
     };
@@ -50,7 +50,7 @@
       kit = yen.kit.facter;
       roles.default = {
         at = yen.host.lb;
-        settings.dir = ../hardware;
+        settings.dir = ../hardware; # (3)
       };
     };
   };

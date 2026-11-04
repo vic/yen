@@ -9,8 +9,33 @@
     { docs, ... }:
     [
       ''
-        Each platform is a [kind](/model/kinds-fields/) you declare, with a [sink](/behavior/sinks/) that collects its modules. One battery turns the sink into the
+        Each platform is a [kind](/model/kinds-fields/) you declare, with a [sink](/behavior/sinks/) that collects its modules. A battery turns the sink into the
         flake output. The builders and `pkgs` are roles that read the [scope](/model/scopes/), so each machine can use its own channel.
+        This fleet has a NixOS host with a guest, a mac, a phone and a standalone home:
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        - `(1)` builds `nixosConfigurations.<name>` from the `nixos` sink of a host.
+        - `(2)` turns a sink of modules into one module. A user's home goes into the NixOS host this way.
+        - `(3)` is a guest. Its NixOS config goes into its host as `microvm.vms.<guest>`.
+        - `(4)` builds `darwinConfigurations.<name>`.
+        - `(5)` builds `nixOnDroidConfigurations.<name>`, and `(6)` gives the phone's home-manager config to it.
+        - `(7)` builds `homeConfigurations.<name>` for a standalone home.
+        - `(8)` gives a user's home to the machine the user is on, as `home-manager.users.<user>.imports`.
+
+        The machines, and the aspects that give them their configuration:
+      ''
+      (docs.fileNoted "" "modules/machines.nix")
+      ''
+        `(1)` is a battery too: it gives the NixOS host home-manager with the machine's `pkgs`. `(2)` sets `system.primaryUser` on the mac.
+        `(3)` installs homebrew casks, brews and masApps from a sink.
+      ''
+      (docs.note "What the checks prove" ''
+        Each output evaluates for real. ana's git is on in her home inside the NixOS host, inside the mac and on her
+        laptop. The guest is a microvm of the host. The mac installs firefox with homebrew and its primary user is ana.
+      '')
+      ''
+        ## The batteries
 
         | Battery | Value of | Gives |
         |---|---|---|
@@ -24,13 +49,9 @@
         | `droid.system { from; nixOnDroidConfiguration; pkgs; }`, `droid.home { from; }` | phone sinks | `nixOnDroidConfigurations.<name>`, its home-manager config |
         | `microvm.guest { from; pkgs; }` | a guest sink's key that gives to the host | `microvm.vms.<guest>` of the host |
         | `imports { from; }` | a sink's key | the sink's modules as one module |
+
+        `configurations` is the generic battery behind the platform builders. See [Generic batteries](/batteries/generic/).
       ''
-      (docs.file "modules/fleet.nix")
-      (docs.file "modules/machines.nix")
-      (docs.note "What the checks prove" ''
-        Each output evaluates for real. ana's git is on in her home inside the NixOS host, inside the mac and on her
-        laptop. The guest is a microvm of the host. The mac installs firefox with homebrew and its primary user is ana.
-      '')
     ];
 
   checks =

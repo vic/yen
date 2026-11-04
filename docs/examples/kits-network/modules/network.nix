@@ -12,7 +12,7 @@ let
 in
 {
   imports = [
-    (inputs.yen.lib.kits.wireguard { inherit root; })
+    (inputs.yen.lib.kits.wireguard { inherit root; }) # (1)
     (inputs.yen.lib.kits.zerotier { inherit root; })
     inputs.yen.lib.kits.dns
   ];
@@ -24,6 +24,7 @@ in
 
   # wireguard: lb is the hub, web and db are peers; addresses come from the prefix, in member order
   yen.assembly.vpn = {
+    # (2)
     kit = kit.wireguard;
     roles = {
       controller = {
@@ -31,7 +32,7 @@ in
         settings.prefix = "10.8.0.0/24";
       };
       peer = {
-        at = m: same m machine.web || same m machine.db;
+        at = m: same m machine.web || same m machine.db; # (3)
         settings = {
           prefix = "10.8.0.0/24";
           port = 51821;
@@ -41,6 +42,7 @@ in
   };
   # zerotier: one controller, up to four moons, any machine as a peer
   yen.assembly.lan = {
+    # (4)
     kit = kit.zerotier;
     roles = {
       controller.at = machine.lb;
@@ -51,6 +53,7 @@ in
 
   # a kit that gives endpoints; dns reads them
   yen.kit.site = {
+    # (5)
     roles.default = { };
     exports = [ "endpoints" ];
   };
@@ -59,6 +62,7 @@ in
     roles.default.at = machine.web;
   };
   yen.aspects.site = {
+    # (6)
     at = yen.lib.all [
       yen.kinds.member
       (s: same (s.kit or null) kit.site)

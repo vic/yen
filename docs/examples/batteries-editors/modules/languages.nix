@@ -7,10 +7,11 @@ in
   yen.aspects.nix-lang = {
     at = yen.kinds.home;
     vscode = {
+      # (1)
       extensions = [ pkgs.vscode-extensions.jnoortheen.nix-ide ];
       settings."nix.enableLanguageServer" = true;
     };
-    zed.extensions = [ "nix" ];
+    zed.extensions = [ "nix" ]; # (2)
   };
   yen.aspects.go-lang = {
     at = yen.kinds.home;
@@ -21,6 +22,7 @@ in
   yen.aspects.agents = {
     at = yen.kinds.home;
     agent-ext = yen.lib.batteries.ai.skills ../skills ++ [
+      # (3)
       {
         type = "mcp";
         name = "github";

@@ -25,7 +25,7 @@ in
     at = yen.host.server;
     nixos = {
       imports = [
-        (yen.lib.batteries.home-manager.module inputs.home-manager.nixosModules.home-manager) # useGlobalPkgs too
+        (yen.lib.batteries.home-manager.module inputs.home-manager.nixosModules.home-manager) # (1) useGlobalPkgs too
         inputs.microvm.nixosModules.host
       ];
       boot.loader.grub.device = "nodev";
@@ -60,13 +60,13 @@ in
   };
   yen.aspects.mac-owner = {
     at = yen.mac.studio;
-    darwin = darwin.primary-user { user = _: "ana"; };
+    darwin = darwin.primary-user { user = _: "ana"; }; # (2)
   };
   yen.aspects.brew = {
     at = yen.mac.studio;
     brew.casks = [ "firefox" ];
   };
-  yen.kinds.mac.sinks.brew.darwin = darwin.homebrew { from = yen.kinds.mac.sinks.brew; };
+  yen.kinds.mac.sinks.brew.darwin = darwin.homebrew { from = yen.kinds.mac.sinks.brew; }; # (3)
   yen.aspects.pixel = {
     at = yen.phone.pixel;
     droid.system.stateVersion = "24.05";

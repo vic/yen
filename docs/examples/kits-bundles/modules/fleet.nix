@@ -5,7 +5,7 @@ let
   inherit (yen.lib) opt holds;
   attrs = yen.lib.attrs;
   # the fleet's assemblies and the parts their kits add (a part lives under its assembly)
-  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly);
+  assemblies = yen.lib.batteries.kits.assemblies (lib.attrValues yen.assembly); # (1)
   # tree requests: every assembly and host, with their data
   assemblyTree.instances = yen.kinds.assembly;
   hostTree.instances = yen.kinds.host;
@@ -30,10 +30,10 @@ in
   };
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    spawns.member = kits.members { inherit assemblies holds; };
+    spawns.member = kits.members { inherit assemblies holds; }; # (2)
     # the NixOS keys of a host, as data
     sinks.disks.reduce = yen.lib.reduce.merge; # kit disko gives disks here
-    # a kit's `os` keys (sshd's server) are the host's NixOS; without this sink they are dropped
+    # (3) a kit's `os` keys (sshd's server) are the host's NixOS; without this sink they are dropped
     sinks.os.nixos =
       { os, ... }:
       {
@@ -71,6 +71,7 @@ in
         ];
         errors = [
           (kits.contract {
+            # (4)
             assemblies = yen.lib.batteries.kits.assemblies (get tree assemblyTree);
             machines = get tree hostTree;
             inherit holds;
@@ -80,12 +81,12 @@ in
   };
   yen.aspects.settings-typed = {
     at = yen.kinds.member;
-    errors = kits.settings-typed;
+    errors = kits.settings-typed; # (5)
   };
   # a generator that an export carries goes to the machines of its `deploy` predicate
   yen.aspects.generators-from-exports = {
     at = yen.kinds.host;
-    generators = yen.lib.batteries.vars.from-exports { inherit holds; };
+    generators = yen.lib.batteries.vars.from-exports { inherit holds; }; # (6)
   };
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

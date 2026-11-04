@@ -13,6 +13,7 @@ let
 in
 {
   imports = [
+    # (1)
     inputs.yen.lib.kits.disko
     inputs.yen.lib.kits.facter
   ];
@@ -44,6 +45,7 @@ in
       disks = {
         reduce = yen.lib.reduce.merge;
         out = b.install.apps {
+          # (2)
           from = yen.kinds.host.sinks.disks;
           inherit pkgs;
           report = h: "./hardware/${h.name}.json";
@@ -54,6 +56,7 @@ in
       deploy = {
         reduce = yen.lib.reduce.one;
         out = b.deploy.rebuild {
+          # (3)
           from = yen.kinds.host.sinks.deploy;
           inherit pkgs;
         };
@@ -77,7 +80,7 @@ in
   yen.aspects = {
     nixos-disko = {
       at = yen.kinds.host;
-      nixos = b.disko { from = yen.kinds.host.sinks.disks; };
+      nixos = b.disko { from = yen.kinds.host.sinks.disks; }; # (4)
     };
     deploy-target = {
       at = yen.host.web;

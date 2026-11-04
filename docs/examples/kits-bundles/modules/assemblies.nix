@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    # (1)
     k.homelab
     k.base
     k.disko
@@ -25,16 +26,17 @@ in
     nas.addr = "10.0.0.3";
   };
   yen.assembly.lab = {
-    kit = kit.homelab;
+    kit = kit.homelab; # (2)
     roles = {
       server = {
         at = host.nas;
         settings = shared // {
           device = "/dev/sda /dev/sdb";
-          layout = yen.kit.disko.layouts.zfs-mirror;
+          layout = yen.kit.disko.layouts.zfs-mirror; # (3)
         };
       };
       node = {
+        # (4)
         at = [
           host.lb
           host.web

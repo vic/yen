@@ -27,10 +27,11 @@ in
       guest = yen.lib.pointing "on" yen.guest;
     };
     sinks.nixos.out = b.nixos.system {
+      # (1)
       from = yen.kinds.host.sinks.nixos;
       inherit (inputs) nixpkgs;
     };
-    sinks.os.nixos = b.imports { from = yen.kinds.host.sinks.os; }; # a user's home (os) into NixOS
+    sinks.os.nixos = b.imports { from = yen.kinds.host.sinks.os; }; # (2) a user's home (os) into NixOS
   };
   yen.kinds.guest = {
     fields = {
@@ -39,6 +40,7 @@ in
     };
     # a guest's NixOS goes into its host as microvm.vms.<guest>
     sinks.nixos.nixos = b.microvm.guest {
+      # (3)
       from = yen.kinds.guest.sinks.nixos;
       pkgs = pkgsOf;
     };
@@ -46,6 +48,7 @@ in
   yen.kinds.mac = machine // {
     fields.system = yen.lib.str;
     sinks.darwin.out = b.darwin.system {
+      # (4)
       from = yen.kinds.mac.sinks.darwin;
       darwinSystem = _: inputs.nix-darwin.lib.darwinSystem;
       system = m: m.system;
@@ -55,12 +58,13 @@ in
   yen.kinds.phone = {
     fields.system = yen.lib.str;
     sinks.droid.out = b.droid.system {
+      # (5)
       from = yen.kinds.phone.sinks.droid;
       inherit (inputs.nix-on-droid.lib) nixOnDroidConfiguration;
       # nix-on-droid pins its own nixpkgs: newer nixpkgs dropped lib.mdDoc, which it still uses
       pkgs = s: import inputs.nix-on-droid.inputs.nixpkgs { inherit (s) system; };
     };
-    sinks.homeManager.droid = b.droid.home { from = yen.kinds.phone.sinks.homeManager; };
+    sinks.homeManager.droid = b.droid.home { from = yen.kinds.phone.sinks.homeManager; }; # (6)
   };
   yen.kinds.home = {
     fields = {
@@ -68,6 +72,7 @@ in
       system = yen.lib.str;
     };
     sinks.homeManager.out = b.home-manager.system {
+      # (7)
       from = yen.kinds.home.sinks.homeManager;
       homeManagerConfiguration = _: inputs.home-manager.lib.homeManagerConfiguration;
       pkgs = pkgsOf;
@@ -81,7 +86,7 @@ in
       ]
     );
     # a user's home goes into the machine it is on
-    sinks.homeManager.os = b.home-manager.into-host { from = yen.kinds.user.sinks.homeManager; };
+    sinks.homeManager.os = b.home-manager.into-host { from = yen.kinds.user.sinks.homeManager; }; # (8)
   };
   yen.fleet.main = { };
   yen.flake = { out, ... }: out;

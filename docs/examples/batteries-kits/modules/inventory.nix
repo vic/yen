@@ -17,7 +17,7 @@ in
   yen.kinds.machine = {
     fields.storage = opt yen.lib.bool false;
     # one member scope per (assembly, role) the machine takes
-    spawns.member = kits.members { inherit assemblies holds; };
+    spawns.member = kits.members { inherit assemblies holds; }; # (1)
     sinks.config = {
       reduce = yen.lib.reduce.merge;
       out =
@@ -29,16 +29,18 @@ in
   };
   yen.kinds.member = { };
   yen.kinds.kit.fields = {
+    # (2)
     roles = opt attrs { };
     constraints = opt attrs { };
     exports = opt (yen.lib.listOf yen.lib.str) [ ];
   };
   yen.kinds.assembly.fields = {
+    # (3)
     kit = yen.kinds.kit;
     roles = opt attrs { };
   };
   yen.kinds.fleet.sinks.exports = {
-    reduce = kits.exports { isMember = holds yen.kinds.member; };
+    reduce = kits.exports { isMember = holds yen.kinds.member; }; # (4)
     out =
       { sinks, ... }:
       {
@@ -54,6 +56,7 @@ in
 
   # what a kit is: its roles, a typed interface per role, limits, the exports it may give
   yen.kit.borg = {
+    # (5)
     roles.server = { };
     roles.client.interface.dir = {
       type = yen.lib.str;
@@ -63,6 +66,7 @@ in
     exports = [ "endpoint" ];
   };
   yen.assembly.daily = {
+    # (6)
     kit = yen.kit.borg;
     roles.server.at = m: m.storage;
     roles.client = {
@@ -83,6 +87,7 @@ in
           ];
           errors = [
             (kits.contract {
+              # (7)
               assemblies = lib.head (tree.select allAssemblies);
               machines = lib.head (tree.select allMachines);
               inherit holds;
@@ -92,7 +97,7 @@ in
     };
     settings-typed = {
       at = yen.kinds.member;
-      errors = kits.settings-typed;
+      errors = kits.settings-typed; # (8)
     };
     # once per member. The server exports its endpoint; clients read it back.
     borg-server = {
@@ -100,7 +105,7 @@ in
         yen.kinds.member
         (s: same s.kit yen.kit.borg && s.role == "server")
       ];
-      exports =
+      exports = # (9)
         { scope, ... }:
         {
           endpoint = "${scope.parent.name}:22";
@@ -111,7 +116,7 @@ in
         yen.kinds.member
         (s: same s.kit yen.kit.borg && s.role == "client")
       ];
-      config =
+      config = # (10)
         { scope, exports, ... }:
         {
           backup.${scope.assembly.name} = {

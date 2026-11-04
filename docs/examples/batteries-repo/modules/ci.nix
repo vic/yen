@@ -8,18 +8,20 @@ in
     jobs = {
       reduce = yen.lib.reduce.merge;
       files = github.workflow {
+        # (1)
         from = yen.kinds.repo.sinks.jobs;
         path = ".github/workflows/ci.yml";
         doc = {
           name = "ci";
           on.push = { };
         };
-        header = jobs: files.comment "ci.yml" "Generated. Jobs: ${toString jobs}";
+        header = jobs: files.comment "ci.yml" "Generated. Jobs: ${toString jobs}"; # (2)
       };
     };
     targets = {
       reduce = yen.lib.reduce.merge;
       files = files.json {
+        # (3)
         from = yen.kinds.repo.sinks.targets;
         path = "ci.json";
         value = builtins.attrValues;

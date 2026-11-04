@@ -3,12 +3,12 @@
 {
   yen.assembly = {
     ssh = {
-      kit = yen.kit.sshd;
+      kit = yen.kit.sshd; # (1)
       roles = {
-        server.at = yen.machine.db;
+        server.at = yen.machine.db; # (2)
         client = {
           at = yen.machine.web;
-          settings.root = ../vars/per-machine; # where the public host keys are read from
+          settings.root = ../vars/per-machine; # (3) where the public host keys are read from
         };
       };
     };
@@ -17,6 +17,7 @@
       roles.default = {
         at = yen.machine.web;
         settings = {
+          # (4)
           user = "ops";
           groups = [ "wheel" ];
         };
@@ -26,7 +27,7 @@
       kit = yen.kit.emergency-access;
       roles.default = {
         at = yen.machine.db;
-        settings.authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBreakGlassKeyNotReal admin" ];
+        settings.authorizedKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBreakGlassKeyNotReal admin" ]; # (5)
       };
     };
   };

@@ -6,6 +6,7 @@ in
 {
   # each host collects service settings as modules; eval-modules merges them with the module system
   yen.kinds.host.sinks.settings.out = configurations {
+    # (1)
     from = yen.kinds.host.sinks.settings;
     output = "settings";
     build =
@@ -16,6 +17,7 @@ in
   };
   # the same with eval-modules, at the fleet: one report from every host's report module
   yen.kinds.fleet.sinks.report.out = eval-modules {
+    # (2)
     from = yen.kinds.fleet.sinks.report;
     inherit lib;
     modules = [ { options.hosts = lib.mkOption { type = lib.types.listOf lib.types.str; }; } ];
@@ -25,7 +27,7 @@ in
   yen.kinds.fleet.sinks.notes.out =
     { sinks, ... }:
     {
-      notes = imports { from = yen.kinds.fleet.sinks.notes; } { inherit sinks; };
+      notes = imports { from = yen.kinds.fleet.sinks.notes; } { inherit sinks; }; # (3)
     };
 
   yen.aspects.ssh-settings = {
