@@ -5,19 +5,17 @@
 # the text of one flowchart, without the ``` fence. A node that others name as `group` is a subgraph around them.
 # `shapes` is keyed by a node's `kind`; other nodes are boxes.
 _:
-let
-  b = builtins;
-  # md5 ids: any label is safe, and one id gets the same node in every view
-  node = id: "n${b.substring 0 10 (b.hashString "md5" id)}";
-  q = l: ''"${b.replaceStrings [ "\"" ] [ "'" ] l}"'';
-  plain = l: "[${l}]";
-in
 {
   direction ? "LR",
   shapes ? { },
 }:
 view:
 let
+  b = builtins;
+  # md5 ids: any label is safe, and one id gets the same node in every view
+  node = id: "n${b.substring 0 10 (b.hashString "md5" id)}";
+  q = l: ''"${b.replaceStrings [ "\"" ] [ "'" ] l}"'';
+  plain = l: "[${l}]";
   # a nested kind is a path, not a shape key: its node is a plain box
   shape = n: if b.isString (n.kind or "") then shapes.${n.kind or ""} or plain else plain;
   box = n: node n.id + shape n (q n.label);

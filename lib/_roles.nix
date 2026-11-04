@@ -5,6 +5,9 @@ let
   merge =
     a: c:
     a // b.mapAttrs (k: v: if b.isAttrs v && b.isAttrs (a.${k} or null) then merge a.${k} v else v) c;
+  settingsWith =
+    d: m: s:
+    merge d (if b.isFunction s then s m else s);
 in
 {
   takes =
@@ -13,10 +16,7 @@ in
   # interface defaults, then the role's settings: attrs, or a function of the machine
   settingsOf =
     a: r: m:
-    let
-      s = a.roles.${r}.settings or { };
-    in
-    merge (b.mapAttrs (_: o: o.default or null) (a.kit.roles.${r}.interface or { })) (
-      if b.isFunction s then s m else s
+    settingsWith (b.mapAttrs (_: o: o.default or null) (a.kit.roles.${r}.interface or { })) m (
+      a.roles.${r}.settings or { }
     );
 }

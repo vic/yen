@@ -6,6 +6,9 @@
 self:
 let
   inherit (self.batteries.github) yaml;
+  textOf =
+    header: doc: jobs:
+    header (builtins.attrNames jobs) + yaml (doc // { inherit jobs; });
 in
 {
   from,
@@ -14,9 +17,6 @@ in
   header ? _: "",
 }:
 { sinks, ... }:
-let
-  jobs = sinks.${from.__sink};
-in
 {
-  files.file.${path}.text = header (builtins.attrNames jobs) + yaml (doc // { inherit jobs; });
+  files.file.${path}.text = textOf header doc sinks.${from.__sink};
 }

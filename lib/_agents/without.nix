@@ -10,15 +10,13 @@ let
       path,
       args ? { },
     }:
-    let
-      mk = fs: args // { imports = fs; };
-      hit = (eval (mk files)).declaredIn path;
-      keep = filter (f: !elem (toString f) hit) files;
-    in
-    {
-      dropped = filter (f: elem (toString f) hit) files;
-      result = eval (mk keep);
-    };
+    withoutHit files args ((eval (withFiles args files)).declaredIn path);
+  withFiles = args: fs: args // { imports = fs; };
+  # hit: the files that declare the path
+  withoutHit = files: args: hit: {
+    dropped = filter (f: elem (toString f) hit) files;
+    result = eval (withFiles args (filter (f: !elem (toString f) hit) files));
+  };
 in
 {
   inherit

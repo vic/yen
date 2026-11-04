@@ -11,26 +11,22 @@ let
   inherit (self._engine) eval;
   # field changes between two `data` answers: [ { path; old; new; } ], sorted by path
   #: lib.diffData :: data -> data -> [ { path; old; new; } ] -- the field changes between two data answers, sorted by path
-  diffData =
-    d0: d1:
-    let
-      keys = a: c: names (attrNames a ++ attrNames c);
-      go =
-        p: x: y:
-        if isAttrs x && isAttrs y then
-          concatMap (k: go (p ++ [ k ]) (x.${k} or null) (y.${k} or null)) (keys x y)
-        else if x == y then
-          [ ]
-        else
-          [
-            {
-              path = p;
-              old = x;
-              new = y;
-            }
-          ];
-    in
-    go [ ] d0 d1;
+  diffData = d0: d1: diffAt [ ] d0 d1;
+  keysOf = a: c: names (attrNames a ++ attrNames c);
+  diffAt =
+    p: x: y:
+    if isAttrs x && isAttrs y then
+      concatMap (k: diffAt (p ++ [ k ]) (x.${k} or null) (y.${k} or null)) (keysOf x y)
+    else if x == y then
+      [ ]
+    else
+      [
+        {
+          path = p;
+          old = x;
+          new = y;
+        }
+      ];
   # the fleet at a git revision (transaction time): `module` is the fleet module path inside the repository
   #: lib.asOf :: { url; rev; module; } -> result -- the fleet at a git revision
   asOf =
@@ -47,9 +43,10 @@ let
       revs,
       module,
     }:
-    let
-      r = b.elemAt (map (rev: asOf { inherit url rev module; }) revs); # one eval per revision
-    in
+    historyOf revs (b.elemAt (map (rev: asOf { inherit url rev module; }) revs)); # one eval per revision
+  # r: the result at the revision of each index
+  historyOf =
+    revs: r:
     b.genList (i: {
       rev = b.elemAt revs i;
       errors = length (r i).errors;

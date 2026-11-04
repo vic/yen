@@ -15,19 +15,17 @@ let
       prefix = (b.head es).value.prefix; # the same in every member: a difference is an error (check)
       members = map (name: { inherit name; }) (lib.unique (map (x: x.machine.name) es));
     };
+  # p: the first member; every member must have its prefix
+  differ = p: b.any (x: x.value.prefix != p.value.prefix);
 in
 {
   inherit alloc;
   check =
     es:
-    let
-      p = b.head es;
-      differ = b.any (x: x.value.prefix != p.value.prefix) es;
-    in
     (alloc es).errors
     ++ (
-      if differ then
-        [ { error = "wireguard: assembly ${p.assembly.name} members disagree on prefix"; } ]
+      if differ (b.head es) es then
+        [ { error = "wireguard: assembly ${(b.head es).assembly.name} members disagree on prefix"; } ]
       else
         [ ]
     )

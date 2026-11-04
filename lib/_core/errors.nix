@@ -19,20 +19,21 @@ let
   # edit distance (Levenshtein), for `near`: the known names a typo was probably meant to be
   dist =
     a: c:
-    let
-      n = builtins.stringLength c;
-      ch = s: i: builtins.substring i 1 s;
-      min = x: y: if x < y then x else y;
-      range = builtins.genList (x: x);
-      # deletion or insertion (+1), else substitution (+1 unless the characters match)
-      cell =
-        prev: r: i: j:
-        min (min (builtins.elemAt prev (j + 1)) (builtins.elemAt r j) + 1) (
-          builtins.elemAt prev j + (if ch a i == ch c j then 0 else 1)
-        );
-      row = prev: i: foldl' (r: j: r ++ [ (cell prev r i j) ]) [ (i + 1) ] (range n);
-    in
-    builtins.elemAt (foldl' row (range (n + 1)) (range (builtins.stringLength a))) n;
+    builtins.elemAt (foldl' (distRow a c) (range (builtins.stringLength c + 1)) (
+      range (builtins.stringLength a)
+    )) (builtins.stringLength c);
+  ch = s: i: builtins.substring i 1 s;
+  min = x: y: if x < y then x else y;
+  range = builtins.genList (x: x);
+  # deletion or insertion (+1), else substitution (+1 unless the characters match)
+  distCell =
+    a: c: prev: r: i: j:
+    min (min (builtins.elemAt prev (j + 1)) (builtins.elemAt r j) + 1) (
+      builtins.elemAt prev j + (if ch a i == ch c j then 0 else 1)
+    );
+  distRow =
+    a: c: prev: i:
+    foldl' (r: j: r ++ [ (distCell a c prev r i j) ]) [ (i + 1) ] (range (builtins.stringLength c));
   near =
     x: cs:
     map (p: p.c) (

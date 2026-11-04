@@ -8,6 +8,19 @@ let
     genericClosure
     intersectAttrs
     ;
+  # n: the aspect an edge of origin "aspect <n>" comes from
+  floorAt =
+    labels: t: e: n:
+    optional
+      (builtins.substring 0 7 e.origin == "aspect " && labels ? ${n} && (labels.${n}.trust or 0) < t)
+      (
+        {
+          edge = e;
+          aspect = n;
+          inherit (labels.${n}) trust file prefix;
+        }
+        // intersectAttrs { by = null; } labels.${n}
+      );
 in
 {
   # s occurs in x, as text (no regex)
@@ -20,19 +33,7 @@ in
   floorOf =
     labels: edges: t:
     concatMap (
-      e:
-      let
-        n = builtins.substring 7 (builtins.stringLength e.origin) e.origin;
-        l = labels.${n};
-      in
-      optional (builtins.substring 0 7 e.origin == "aspect " && labels ? ${n} && (l.trust or 0) < t) (
-        {
-          edge = e;
-          aspect = n;
-          inherit (l) trust file prefix;
-        }
-        // intersectAttrs { by = null; } l
-      )
+      e: floorAt labels t e (builtins.substring 7 (builtins.stringLength e.origin) e.origin)
     ) edges;
   uniqueBy =
     key: xs:

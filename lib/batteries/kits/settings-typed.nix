@@ -10,15 +10,12 @@ let
   # yen types name themselves with an article ("a string"); kind refs and nixpkgs types do not ("host ref")
   named = t: if b.match "(a|an|any) .*" (typeName t) != null then typeName t else "a ${typeName t}";
   iface = scope.kit.roles.${scope.role}.interface or { };
+  # o: the option k of the interface, v: its setting
+  check =
+    k: o: v:
+    if v == null || !checkOf o.type v then
+      [ "kits: ${scope.assembly.name}.${scope.role}: setting ${k} is not ${named o.type}" ]
+    else
+      [ ];
 in
-b.concatMap (
-  k:
-  let
-    o = iface.${k};
-    v = scope.settings.${k};
-  in
-  if v == null || !checkOf o.type v then
-    [ "kits: ${scope.assembly.name}.${scope.role}: setting ${k} is not ${named o.type}" ]
-  else
-    [ ]
-) (b.attrNames iface)
+b.concatMap (k: check k iface.${k} scope.settings.${k}) (b.attrNames iface)

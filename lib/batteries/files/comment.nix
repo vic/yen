@@ -5,11 +5,8 @@
 _: path: text:
 let
   b = builtins;
-  ext =
-    let
-      m = b.match ".*\\.([^./]+)" path;
-    in
-    if m == null then "" else b.head m;
+  ext = extOf (b.match ".*\\.([^./]+)" path);
+  extOf = m: if m == null then "" else b.head m;
   hash = [
     "nix"
     "sh"

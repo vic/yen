@@ -12,13 +12,13 @@ es:
 let
   b = builtins;
   lineOf =
-    file: needle:
-    let
-      lines = b.filter b.isString (b.split "\n" (b.readFile (root + "/${file}")));
-      has = l: b.replaceStrings [ needle ] [ "" ] l != l; # literal substring, no regex
-      hits = b.filter (i: has (b.elemAt lines i)) (b.genList (i: i) (b.length lines));
-    in
-    if hits == [ ] then null else b.head hits + 1;
+    file: needle: hitLine needle (b.filter b.isString (b.split "\n" (b.readFile (root + "/${file}"))));
+  hitLine =
+    needle: lines:
+    firstLine (b.filter (i: has needle (b.elemAt lines i)) (b.genList (i: i) (b.length lines)));
+  has = needle: l: b.replaceStrings [ needle ] [ "" ] l != l; # literal substring, no regex
+  # hits: the 0-based indexes of the matching lines
+  firstLine = hits: if hits == [ ] then null else b.head hits + 1;
   found = map (e: e.value // { line = lineOf e.value.file e.value.needle; }) es;
   ok = b.filter (l: l.line != null) found;
 in

@@ -10,11 +10,11 @@ let
     ;
 in
 {
-  # #59: a kit or a template module has one top-level `let` (its bindings), never a nested one
+  # #59: every lib file and every template module has one top-level `let` (its bindings), never a nested one
   # and so has every module of a docs example and of the reference fleet (#59)
   one-let = eq (map toString (
     b.filter (f: letsIn f > 1) (
-      nixUnder ../lib/kits
+      nixUnder ../lib
       ++ modulesIn ../templates
       ++ modulesIn ../docs/examples
       ++ nixUnder ../reference/modules

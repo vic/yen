@@ -19,22 +19,14 @@ let
     inherit (e) value;
   }) (b.filter (e: isMember e.from) es);
   hit = x: o: same o.assembly x.assembly && o.role == x.role && same o.machine x.machine;
-  over =
-    x:
-    let
-      hits = b.filter (hit x) overrides;
-    in
-    if hits == [ ] then null else b.head hits;
+  over = x: firstOf (b.filter (hit x) overrides);
+  firstOf = hits: if hits == [ ] then null else b.head hits;
+  # o: the override of x, or null
+  withOver = x: o: if o != null then x // { inherit (o) value; } else x;
   where = x: "${x.assembly.name}.${x.role}@${x.machine.name}";
 in
 {
-  value = map (
-    x:
-    let
-      o = over x;
-    in
-    if o != null then x // { inherit (o) value; } else x
-  ) own;
+  value = map (x: withOver x (over x)) own;
   errors = b.concatMap (
     x:
     map (k: { error = "kits: ${where x}: kit ${x.kit.name} does not export ${k}"; }) (

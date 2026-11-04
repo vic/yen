@@ -3,6 +3,11 @@
 # picks one highest. value: { <key> = value; }
 #   sinks.addrs.reduce = claim { key = v: v.addr; };
 _:
+{
+  key,
+  rank ? null,
+}:
+es:
 let
   b = builtins;
   pair = name: value: { inherit name value; };
@@ -10,22 +15,15 @@ let
   # one element per distinct giver, the first it gave
   byGiver = es: b.attrValues (b.listToAttrs (map (e: pair e.from.id e) (reverse es)));
   reverse = xs: b.genList (i: b.elemAt xs (b.length xs - 1 - i)) (b.length xs);
-in
-{
-  key,
-  rank ? null,
-}:
-es:
-let
   groups = b.groupBy (e: key e.value) es;
-  pick =
-    k: g:
-    let
-      gs = byGiver g;
-      top = if rank == null then gs else b.filter (e: rank e.value == maxOf gs) gs;
-      maxOf =
-        xs: b.foldl' (m: e: if rank e.value > m then rank e.value else m) (rank (b.head xs).value) xs;
-    in
+  pick = k: g: pickOf k (byGiver g);
+  # gs: the givers of key k, one element each
+  pickOf = k: gs: pickTop k (if rank == null then gs else b.filter (e: rank e.value == maxOf gs) gs);
+  maxOf =
+    xs: b.foldl' (m: e: if rank e.value > m then rank e.value else m) (rank (b.head xs).value) xs;
+  # top: the elements left owning key k
+  pickTop =
+    k: top:
     if b.length top == 1 then
       {
         value = (b.head top).value;

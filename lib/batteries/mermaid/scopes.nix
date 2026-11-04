@@ -4,25 +4,20 @@
 #   as a subgraph, or null · edge: draw the edge from its parent (default: when it has no group)
 #   mermaid.flowchart { } (mermaid.scopes { group = s: if holds yen.kinds.host s then s.system.id else null; } yen.lib.graph)
 self:
-let
-  b = builtins;
-  inherit (self._core.helpers) renderId;
-  parentOf =
-    id:
-    let
-      parts = b.filter b.isString (b.split "/" id);
-    in
-    b.concatStringsSep "/" (b.genList (b.elemAt parts) (b.length parts - 1));
-  isUnder = s: b.match ".*/.*" s.id != null;
-in
 {
   keep ? _: true,
-  label ? s: "${renderId s.kind} ${s.name}",
+  label ? s: "${self._core.helpers.renderId s.kind} ${s.name}",
   group ? _: null,
   edge ? s: group s == null,
 }:
 g:
 let
+  b = builtins;
+  inherit (self._core.helpers) renderId;
+  parentOf = id: initOf (b.filter b.isString (b.split "/" id));
+  # parts: the path segments of an id, without the last
+  initOf = parts: b.concatStringsSep "/" (b.genList (b.elemAt parts) (b.length parts - 1));
+  isUnder = s: b.match ".*/.*" s.id != null;
   kept = b.filter keep g.scopes;
   ids = map (s: s.id) kept;
 in

@@ -3,22 +3,19 @@
 # `out` to the flake outputs (labelled with the receivers that build them). Reads `schema` and `graph` of `yen.lib`.
 #   mermaid.flowchart { } (mermaid.sinks yen.lib)
 _:
+{ schema, graph, ... }:
 let
   b = builtins;
   sorted =
     xs: b.sort b.lessThan (b.foldl' (acc: x: if b.elem x acc then acc else acc ++ [ x ]) [ ] xs);
   take = n: xs: b.genList (b.elemAt xs) (if b.length xs < n then b.length xs else n);
   # at most six names, then how many more
-  short =
-    xs:
-    let
-      s = sorted xs;
-    in
+  short = xs: shortOf (sorted xs);
+  # s: the sorted names
+  shortOf =
+    s:
     b.concatStringsSep ", " (take 6 s)
     + (if b.length s > 6 then ", +${toString (b.length s - 6)}" else "");
-in
-{ schema, graph, ... }:
-let
   nameOf = b.listToAttrs (
     map (s: {
       name = s.id;
