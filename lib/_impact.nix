@@ -13,24 +13,25 @@ let
       whole ? [ ],
       seeds,
     }:
-    let
-      readers = b.foldl' (
-        acc: e: b.foldl' (a: r: a // { ${key r} = (a.${key r} or [ ]) ++ [ e.out ]; }) acc e.reads
-      ) { } edges;
-      reached = b.genericClosure {
-        startSet = map (t: {
-          key = key t;
-          inherit t;
-        }) (seeds ++ (if seeds == [ ] then [ ] else whole));
-        operator =
-          i:
-          map (t: {
-            key = key t;
-            inherit t;
-          }) (readers.${i.key} or [ ]);
-      };
-    in
-    map (i: i.t) (b.sort (x: y: x.key < y.key) reached);
+    impactFrom (readersOf edges) (seeds ++ (if seeds == [ ] then [ ] else whole));
+  # the outs that read each token, by its key
+  readersOf = b.foldl' (
+    acc: e: b.foldl' (a: r: a // { ${key r} = (a.${key r} or [ ]) ++ [ e.out ]; }) acc e.reads
+  ) { };
+  token = t: {
+    key = key t;
+    inherit t;
+  };
+  impactFrom =
+    readers: start:
+    map (i: i.t) (
+      b.sort (x: y: x.key < y.key) (
+        b.genericClosure {
+          startSet = map token start;
+          operator = i: map token (readers.${i.key} or [ ]);
+        }
+      )
+    );
 in
 {
   inherit impactOf;
