@@ -42,7 +42,6 @@ let
       };
       yen.kinds.cluster = {
         fields.hosts = yen.lib.listOf yen.kinds.host;
-        spawns = { };
       }; # a link: refs, not containment
       yen.lib.listOf = yen.lib.listOf;
       yen.fleet.main = { };

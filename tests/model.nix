@@ -204,7 +204,6 @@ in
         { yen, ... }:
         {
           yen.kinds.x = {
-            spawns = { }; # a root: the flake needs one scope
             kinds.y = { };
           };
           yen.x.a = { };
@@ -311,7 +310,7 @@ in
             fields.d = yen.lib.is b.isAttrs;
             spawns.d = s: s.d;
           };
-          yen.kinds.d.spawns = { };
+          yen.kinds.d = { };
           yen.x.a.y.b.d.e = { };
           yen.d.e = { };
         }

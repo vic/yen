@@ -608,7 +608,6 @@ in
         { yen, ... }:
         {
           yen.kinds.top = {
-            spawns = { };
             sinks.many.reduce = yen.lib.reduce.list;
           };
           yen.top.t = { };
