@@ -42,7 +42,7 @@
       in
       {
         tree = [ whole ];
-        out = [ { docs.mermaid = yen.helpers.mermaid (lib.head (tree.select whole)).lib.graph; } ];
+        out = [ { docs.mermaid = yen.helpers.mermaid (tree.select whole).lib.graph; } ];
       };
   };
 }

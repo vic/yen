@@ -43,7 +43,7 @@ let
             in
             {
               tree = [ c ];
-              errors = if tree.select c == [ ] then [ "no cluster: k3s off" ] else [ ];
+              errors = if tree.select c == null then [ "no cluster: k3s off" ] else [ ];
             };
         };
       }
@@ -197,7 +197,7 @@ let
           in
           {
             tree = [ c ];
-            seen = map (c: c.name) (tree.select c);
+            seen = (tree.select c).name;
           };
       };
     }
@@ -246,13 +246,13 @@ let
               ]
               ++ b.filter (_: bogus) [ bad ];
               seen = {
-                parent = map (s: s.id) (tree.select parent);
+                parent = (tree.select parent).id;
                 none = tree.select none;
-                kids = map (map (s: s.name)) (tree.select kids);
-                same = map (map (s: s.id)) (tree.select same);
+                kids = map (s: s.name) (tree.select kids);
+                same = map (s: s.id) (tree.select same);
                 holds = tree.select holds;
-                all = map (map (c: c.name)) (tree.select all);
-                bad = tree.select bad; # not asked: no answer
+                all = map (c: c.name) (tree.select all);
+                bad = tree.select bad; # not asked: null
               };
             };
         };
@@ -631,24 +631,22 @@ in
         "c"
       ]);
   tree-nearest = {
-    t1 = eq (treeHit.reduced.seen."top:t/cluster:c1/node:n1" or null) ([ "c1" ]);
+    t1 = eq (treeHit.reduced.seen."top:t/cluster:c1/node:n1" or null) [ "c1" ];
     t2 = eq (map (e: e.error) treeHit.errors) ([ ]);
   };
   tree-requests = {
     t1 = eq (treeAll.reduced.seen."top:t/cluster:c1/node:n1") ([
       {
-        parent = [ "top:t/cluster:c1" ];
-        none = [ ];
+        parent = "top:t/cluster:c1";
+        none = null;
         kids = [
-          [
-            "p1"
-            "p2"
-          ]
+          "p1"
+          "p2"
         ];
-        same = [ [ "top:t/cluster:c1" ] ];
-        holds = [ true ];
-        all = [ [ "c1" ] ];
-        bad = [ ];
+        same = [ "top:t/cluster:c1" ];
+        holds = true;
+        all = [ "c1" ];
+        bad = null;
       }
     ]);
     t2 = eq (treeAll.errors) ([ ]);
@@ -703,7 +701,7 @@ in
               in
               {
                 tree = [ kids ];
-                kids = [ (map (c: c.name) (b.head (tree.select kids))) ];
+                kids = [ (map (c: c.name) (tree.select kids)) ];
               };
           };
         }

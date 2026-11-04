@@ -27,7 +27,6 @@ let
     mapAttrs
     memo
     nestedRef
-    orNull
     outAt
     receiverIn
     reduceAt
@@ -44,24 +43,24 @@ let
   kindArgs = uniq (map leafOf kindIds);
   nearestArg = n: s: first (x: leafOf x.kind == n) s.rup;
   nearest = k: s: first (x: x.kind == k) s.rup;
-  # what a tree request answers at a scope: a list, empty when nothing answers (Cycle: no source, no emission)
+  # what a tree request answers at a scope: its one answer, null when nothing answers (Cycle: no source, no emission)
   answer =
     s: q:
     if q ? nearest then
-      orNull (nearest q.nearest.__kind s)
+      nearest q.nearest.__kind s
     else if q ? parent then
-      orNull s.parent
+      s.parent
     else if q ? children then
-      [ (lib.children q.children s) ]
+      lib.children q.children s
     else if q ? scopesOf then
-      [ (lib.scopesOf q.scopesOf) ]
+      lib.scopesOf q.scopesOf
     else if q ? instances then
-      [ (b.attrValues instances.${q.instances.__kind}) ]
+      b.attrValues instances.${q.instances.__kind}
     # the whole fleet: a reader of it (docs, diagrams) is reached by every change, and only it
     else if q ? graph then
-      [ yen ] # instances with their data, and every structure query in yen.lib
+      yen # instances with their data, and every structure query in yen.lib
     else
-      [ (holds q.holds s) ];
+      holds q.holds s;
   # a request is selected by itself: the same question on the same refs (kind, sink, aspect, instance), never a name
   refKey =
     v:
@@ -86,7 +85,7 @@ let
     s: requests:
     {
       scope = s;
-      tree.select = q: if any (r: known r && reqKey r == reqKey q) requests then answer s q else [ ];
+      tree.select = q: if any (r: known r && reqKey r == reqKey q) requests then answer s q else null; # one answer; null: not asked, or nothing answers
     }
     // genAttrs sinkNames (n: elementAt n (receiverIn n s.rup));
   # the element of sink n at its receiver r; a receiver with no element yet reduces to its empty value

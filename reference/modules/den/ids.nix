@@ -14,7 +14,7 @@ in
           {
             services.openssh.enable = true;
             services.openssh.ports = [
-              (2200 + (yen.helpers.ids (builtins.head (tree.select whole))).${scope.name})
+              (2200 + (yen.helpers.ids (tree.select whole)).${scope.name})
             ];
           }
         ];

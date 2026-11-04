@@ -31,8 +31,7 @@ let
       scope.settings.guard.enable = true;
       inherit tree;
     };
-  publicEnvs =
-    tree: lib.length (lib.filter (e: e.dns.publicIPv4 != null) (lib.head (tree.select envs)));
+  publicEnvs = tree: lib.length (lib.filter (e: e.dns.publicIPv4 != null) (tree.select envs));
 in
 {
   # served-domains ⋈ gateway-upstreams by host, in the cluster's environment; `exclude` drops names.
@@ -91,7 +90,7 @@ in
       {
         tree = [ guests ];
         nixos.environment.etc."vfio/ids".text = lib.concatStringsSep "," (
-          lib.concatMap (g: g.passthrough) (lib.head (tree.select guests))
+          lib.concatMap (g: g.passthrough) (tree.select guests)
         );
       };
   };

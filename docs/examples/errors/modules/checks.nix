@@ -22,7 +22,7 @@ in
                 path = [ "addr" ];
                 got = a;
               }
-            ) (lib.groupBy (h: h.addr) (lib.head (tree.select hosts)))
+            ) (lib.groupBy (h: h.addr) (tree.select hosts))
           ))
         ];
       };

@@ -10,7 +10,7 @@
       in
       {
         tree = [ vms ]; # (3)
-        bridges = map (g: "br-${g.name}") (builtins.head (tree.select vms)); # (4) one element per guest
+        bridges = map (g: "br-${g.name}") (tree.select vms); # (4) one element per guest
         errors = [ ];
       };
   };

@@ -38,7 +38,7 @@ in
       { tree, ... }:
       {
         tree = [ whole ]; # (6)
-        out = [ { diagrams = diagramsOf (builtins.head (tree.select whole)); } ];
+        out = [ { diagrams = diagramsOf (tree.select whole); } ];
       };
   };
 }

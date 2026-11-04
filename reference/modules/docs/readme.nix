@@ -20,7 +20,7 @@ let
         readme = [
           {
             inherit name;
-            value = f (view (lib.head (tree.select whole))) sources;
+            value = f (view (tree.select whole)) sources;
             after = [ prev ];
           }
         ];

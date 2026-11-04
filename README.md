@@ -357,7 +357,7 @@ let
       (label (builtins.attrValues vs))
     ]);
   lb.scopesOf = yen.host.lb; # a tree request: lb, with its data
-  appsOf = tree: (builtins.head (builtins.head (tree.select lb))).apps;
+  appsOf = tree: (builtins.head (tree.select lb)).apps;
 in
 {
   yen.kinds.world.spawns.host = _: yen.host;

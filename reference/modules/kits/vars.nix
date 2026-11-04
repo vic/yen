@@ -18,7 +18,7 @@ let
   macs.instances = yen.kinds.mac;
   machinesOf =
     tree:
-    lib.concatMap (q: lib.head (tree.select q)) [
+    lib.concatMap (q: tree.select q) [
       hosts
       macs
     ]; # every host and mac, with its data

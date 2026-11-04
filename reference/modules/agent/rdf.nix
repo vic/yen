@@ -17,7 +17,7 @@ in
           {
             rdfPack =
               removeAttrs (yen.lib.rdf.share {
-                graph = (builtins.head (tree.select whole)).lib.graph;
+                graph = (tree.select whole).lib.graph;
                 active = { };
                 errors = [ ];
               }) [ "ntriples" ]

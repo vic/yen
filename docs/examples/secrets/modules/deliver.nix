@@ -10,7 +10,7 @@ in
       { tree, scope, ... }:
       {
         tree = [ secrets ]; # (1)
-        secrets = lib.filter (s: lib.any (yen.lib.same scope) s.owners) (lib.head (tree.select secrets)); # (2)
+        secrets = lib.filter (s: lib.any (yen.lib.same scope) s.owners) (tree.select secrets); # (2)
       };
   };
   # (3) a secret that no host owns is an error, not a silent leftover
@@ -23,7 +23,7 @@ in
         errors = [
           # (4)
           (map (s: "secret ${s.name} (${s.file}) has no owner") (
-            lib.filter (s: s.owners == [ ]) (lib.head (tree.select secrets))
+            lib.filter (s: s.owners == [ ]) (tree.select secrets)
           ))
         ]; # one element: the list
       };

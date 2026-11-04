@@ -68,7 +68,7 @@
           {
             networking.hosts."10.0.0.1" =
               with builtins;
-              map (p: p.name) (filter (p: p.name != scope.name && p.env == scope.env) (head (tree.select hosts)));
+              map (p: p.name) (filter (p: p.name != scope.name && p.env == scope.env) (tree.select hosts));
           }
         ];
       };

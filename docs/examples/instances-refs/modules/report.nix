@@ -6,7 +6,7 @@ let
     tree: host:
     lib.filter (h: !yen.lib.same h host && yen.lib.same h.environment host.environment) (
       # (1)
-      lib.head (tree.select hosts)
+      tree.select hosts
     );
 in
 {

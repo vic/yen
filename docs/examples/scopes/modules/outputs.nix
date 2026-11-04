@@ -2,7 +2,7 @@
 { yen, ... }:
 let
   whole.graph = true; # (1) a tree request: the whole fleet
-  fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
+  fleetOf = tree: tree.select whole; # the whole fleet, with its data
 in
 {
   yen.kinds.fleet.sinks.out.reduce = yen.lib.reduce.merge;

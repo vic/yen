@@ -705,7 +705,7 @@ in
                 in
                 {
                   tree = [ hosts ];
-                  fw = [ (toString (map (h: h.port) (b.head (tree.select hosts)))) ];
+                  fw = [ (toString (map (h: h.port) (tree.select hosts))) ];
                 };
             };
           }

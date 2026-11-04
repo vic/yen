@@ -63,7 +63,7 @@ let
       {
         tree = [ whole ];
       }
-      // f (policy (lib.head (tree.select whole)));
+      // f (policy (tree.select whole));
   };
 in
 {

@@ -17,7 +17,6 @@ let
   hosts.instances = yen.kinds.host;
   macs.instances = yen.kinds.mac;
   membersOf = kits.members { inherit assemblies holds; };
-  get = tree: q: lib.head (tree.select q); # the answer of one tree request
 in
 {
   yen.kinds.kit.fields = {
@@ -52,8 +51,8 @@ in
         ];
         errors = [
           (kits.contract {
-            assemblies = withAdded (get tree own);
-            machines = get tree hosts ++ get tree macs;
+            assemblies = withAdded (tree.select own);
+            machines = tree.select hosts ++ tree.select macs;
             inherit holds;
           })
         ];
