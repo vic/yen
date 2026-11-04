@@ -79,9 +79,10 @@ in
       (docs.repoFile "docs/modules/site.nix")
       ''
         You give `pages`, the directory of pages, and `sections`, the groups of the sidebar. `repo`, `repoRoot` and
-        `pagesAt` build the edit and source links. `engine` evaluates the fleet of a page, and `read` loads a Nix
-        file. The rest is optional. `runIt` ends each template page with an aside, `extra` adds
-        writers to the body, and `linkExempt` names an internal link that is not a page.
+        `pagesAt` build the edit and source links. `files` and `root` write the files. `load` reads a page directory: the battery
+        does not read page files or evaluate anything, so the fleet decides how (see below). The rest is optional. `ending` adds text
+        at the end of a page, `auto` gives every page its checks, `extra` adds writers to the body, and `linkExempt` names an
+        internal link that is not a page.
 
         ## A page is a directory
 
@@ -101,8 +102,9 @@ in
       ''
         `body` is a list of strings: prose, and the output of the writers. The writers read the page directory, so a
         code block is always a file that runs. `result` is the eval of `modules/`: a value you print is a value the
-        fleet computed. The loader `docs.pages` gives a page these names, and `docs.pages dir` is also the way to read any page
-        directory as data.
+        fleet computed. `load` gives a page these names. It returns `{ page; args; }`: `page` is the `page.nix`, and `args` is what `body` and
+        `checks` receive. The docs fleet above loads a page by evaluating its `modules/` and reading its `flake.nix`; another site
+        can load pages in any other way.
 
         ## The writers
 

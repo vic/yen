@@ -1,33 +1,37 @@
-#: lib.batteries.docs.starlight :: { yen; lib; inputs; pkgs; repo; repoRoot; pages; pagesAt; sections; engine; read; ... } -> module -- a Starlight docs site as a fleet: one page per directory of `pages`
-# A module for the docs fleet. Each directory of `pages` is a page (docs.pages): `page.nix` (title, description, section,
-# order, body and checks) and, when the page has code, `modules/` and `flake.nix`. The site spawns one scope per page.
-# A page gives its `.mdx`, its sidebar entry and its tests; the site reduces them to `src/sidebar.json`,
-# `packages.write-files` and `tests.{fast,e2e}.<page>.<check>` (github:denful/fastest).
-#   `sections`: `{ <name> = { title; order; }; }`, the sidebar groups; `engine`: what a page's `eval` comes from;
-#   `read`: loads a Nix file (`import`); `inputs`: needs `nixpkgs`, `import-tree`, `files`, `self`;
-#   `extra`: more body writers (docs.starlight-writers); `runIt page writers`: the aside a template page ends with;
-#   `linkExempt path`: an internal link that is not a page.
+#: lib.batteries.docs.starlight :: { yen; lib; pkgs; files; root; repo; repoRoot; pages; pagesAt; sections; load; ... } -> module -- a Starlight docs site as a fleet: one page per directory of `pages`
+# A module for the docs fleet. Each directory of `pages` is a page. The site spawns one scope per page. A page gives its
+# `.mdx`, its sidebar entry and its tests; the site reduces them to `src/sidebar.json`, `packages.write-files` and
+# `tests.{fast,e2e}.<page>.<check>` (github:denful/fastest). The battery reads no page file and evaluates nothing: the
+# fleet gives `load`, a function of a page directory that returns `{ page; args; }`. `page` is the page's data (`title`,
+# `description`, `section`, `order`, `body`, and optionally `checks`, `e2e`, `badge`, `route`, `frontmatter`, `alsoAt`,
+# `readmeOnly`, `plainTitle`), `args` what its `body` and `checks` receive besides `docs`, `lib`, `commands` and `pages`.
+#   `sections`: `{ <name> = { title; order; }; }`, the sidebar groups; `files`: github:sini/files; `root`: the repository;
+#   `extra`: more body writers (docs.starlight-writers); `ending page x writers`: more text at the end of a page, a list;
+#   `auto { eq; yes; no; } x`: the checks every page gets; `linkExempt path`: an internal link that is not a page.
 # The engine reads a module's keys before the `yen` arg exists: take the battery from `inputs.yen.lib`, and give the
 # module's `yen` keys by name: `yen = { inherit (site.yen) kinds page; };`.
-#   site = inputs.yen.lib.batteries.docs.starlight { inherit yen lib inputs pkgs; read = import; repo = "https://github.com/me/proj";
-#     repoRoot = ../..; pages = ./pages; pagesAt = "docs/pages"; sections = { start = { title = "Start"; order = 1; }; };
-#     engine = inputs.yen.lib; };
+#   site = inputs.yen.lib.batteries.docs.starlight { inherit yen lib pkgs load; files = inputs.files; root = inputs.self;
+#     repo = "https://github.com/me/proj"; repoRoot = ../..; pages = ./pages; pagesAt = "docs/pages";
+#     sections = { start = { title = "Start"; order = 1; }; }; };
 self:
 {
   yen,
   lib,
-  inputs,
   pkgs,
+  files,
+  root,
   repo,
   repoRoot,
   pages,
   pagesAt,
   sections,
-  engine,
-  read,
+  load,
   relativeRoot ? null,
   extra ? _: { },
-  runIt ? null,
+  ending ?
+    _: _: _:
+    [ ],
+  auto ? _: _: { },
   linkExempt ? _: false,
 }:
 let
@@ -44,7 +48,6 @@ let
       extra
       ;
   };
-  load = self.batteries.docs.pages { inherit inputs engine read; };
 
   dirs = b.readDir pages;
   slugs = b.filter (n: dirs.${n} == "directory") (b.attrNames dirs);
@@ -95,24 +98,17 @@ let
         // (x.page.frontmatter or { })
       )
     }\n---";
-  # x: the page as data (docs.pages), d: its writers
+  # x: the page as `load` gives it, d: its writers
   bodyWith =
     commands: pageList: page: x:
-    x.page.body {
-      docs = writers page.dir;
-      inherit (x)
-        result
-        flake
-        variant
-        only
-        dir
-        inputs
-        module
-        engine
-        ;
-      inherit lib commands;
-      pages = pageList;
-    };
+    x.page.body (
+      x.args
+      // {
+        docs = writers page.dir;
+        inherit lib commands;
+        pages = pageList;
+      }
+    );
   renderWith =
     commands: pageList: page: x: d:
     b.concatStringsSep "\n\n" (
@@ -121,7 +117,7 @@ let
         imports
       ]
       ++ bodyWith commands pageList page x
-      ++ (if x.template && runIt != null then [ (runIt page d) ] else [ ])
+      ++ ending page x d
     )
     + "\n";
   # a page can also be a plain markdown repo file (CONTRIBUTING.md): its body only, so it must not use MDX components
@@ -141,42 +137,26 @@ let
     commands: pageList: page:
     renderWith commands pageList page (load page.dir) (writers page.dir);
 
-  argsOf = commands: pageList: page: x: {
-    inherit (x)
-      result
-      flake
-      variant
-      only
-      dir
-      inputs
-      module
-      engine
-      ;
-    inherit (writers page.dir) notesOf;
-    inherit
-      lib
-      commands
-      eq
-      yes
-      no
-      ;
-    pages = pageList;
-  };
-  # the checks every page gets: its eval has no errors, its template is a flake that evaluates
-  autoOf =
-    x:
-    when (x.result != null) {
-      no-errors = if x.page.errors or false then yes true else eq (map (e: e.error) x.result.errors) [ ];
-    }
-    // when x.template {
-      inputs-known = yes x.inputsKnown;
-      # `checks` aside: yen-lean comes from the inputs a flake gives mkFlake, and the harness gives every one
-      flake-is-eval = eq (b.attrNames (removeAttrs x.flake [ "checks" ])) (
-        b.attrNames (removeAttrs x.result.flake [ "checks" ])
-      );
+  argsOf =
+    commands: pageList: page: x:
+    x.args
+    // {
+      inherit (writers page.dir) notesOf;
+      inherit
+        lib
+        commands
+        eq
+        yes
+        no
+        ;
+      pages = pageList;
     };
   testsWith = commands: pageList: page: x: {
-    fast = autoOf x // (x.page.checks or (_: { })) (argsOf commands pageList page x);
+    fast =
+      auto {
+        inherit eq yes no;
+      } x
+      // (x.page.checks or (_: { })) (argsOf commands pageList page x);
     e2e = (x.page.e2e or (_: { })) (argsOf commands pageList page x);
   };
 
@@ -253,7 +233,7 @@ let
 
   linksOf = instances: commands: linksFor instances (pagesOf instances) commands;
 
-  pageMeta = slug: read (pages + "/${slug}/page.nix");
+  pageMeta = slug: (load (pages + "/${slug}")).page;
   pageOf =
     slug: p:
     {
@@ -266,7 +246,6 @@ let
 in
 {
   yen.helpers.docs = writers;
-  yen.helpers.pages = load;
 
   yen.kinds.section.fields = {
     title = yen.lib.str;
@@ -301,9 +280,8 @@ in
       # the site pages and sidebar are a build output, not a source: written, never committed, so they get no check
       files.out = yen.lib.batteries.files.writer {
         from = yen.kinds.site.sinks.files;
-        inherit (inputs) files;
+        inherit files root;
         inherit lib pkgs relativeRoot;
-        root = inputs.self;
         unchecked = p: b.substring 0 17 p == "src/content/docs/" || p == "src/sidebar.json";
       };
     };
