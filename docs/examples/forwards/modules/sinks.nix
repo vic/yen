@@ -9,7 +9,7 @@ in
       { ports, ... }:
       {
         firewall.allowedTCPPorts = ports;
-      }; # ports feed config
+      }; # (1) ports feed config
     config = {
       reduce = merge;
       out =
@@ -24,14 +24,14 @@ in
       { ports, ... }:
       {
         firewall.allowedTCPPorts = ports;
-      };
+      }; # (2)
     config = {
       reduce = merge;
       config =
         { guest, config, ... }:
         {
           vms.${guest.name} = config;
-        }; # its own name: a forward up, to the host
+        }; # (3) its own name: a forward up, to the host
     };
   };
 }

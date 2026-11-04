@@ -9,14 +9,14 @@ in
   };
   yen.kinds.environment = {
     spawns.host = under;
-    sinks.backends = { }; # hosts give their address; a wall: it stays at the environment
+    sinks.backends = { }; # (1) hosts give their address; a wall: it stays at the environment
   };
   yen.kinds.host = {
     fields = {
       environment = yen.kinds.environment;
       addr = yen.lib.str;
     };
-    sinks.proxy.out =
+    sinks.proxy.out = # (2)
       { host, proxy, ... }:
       {
         proxy.${host.name} = proxy;

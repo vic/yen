@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.nginx = {
-    at = yen.host.web;
+    at = yen.host.web; # (1)
     packages = "nginx";
   };
 }

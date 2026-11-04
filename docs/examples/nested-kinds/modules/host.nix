@@ -3,6 +3,6 @@
 {
   yen.kinds.host = {
     fields.addr = yen.lib.str;
-    kinds.user.fields.shell = yen.lib.str;
+    kinds.user.fields.shell = yen.lib.str; # (1)
   };
 }

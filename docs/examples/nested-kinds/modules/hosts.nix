@@ -3,11 +3,11 @@
 {
   yen.host.laptop = {
     addr = "10.0.0.1";
-    user.vic.shell = "fish";
+    user.vic.shell = "fish"; # (1)
     user.ann.shell = "bash";
   };
   yen.host.server = {
     addr = "10.0.0.2";
-    user.vic.shell = "zsh";
+    user.vic.shell = "zsh"; # (2)
   };
 }

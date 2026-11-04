@@ -7,7 +7,7 @@
   };
   yen.kinds.host = {
     spawns.user = yen.lib.pointing "hosts" yen.user;
-    sinks.packages.out =
+    sinks.packages.out = # (1)
       { host, packages, ... }:
       {
         packages.${host.name} = packages;

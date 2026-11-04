@@ -12,9 +12,9 @@
   yen.aspects.inventory = {
     at = yen.kinds.fleet;
     out =
-      { out, ... }:
+      { out, ... }: # (1)
       {
-        inventory = lib.concatLists (lib.attrValues out.services);
+        inventory = lib.concatLists (lib.attrValues out.services); # (2)
       };
   };
 }

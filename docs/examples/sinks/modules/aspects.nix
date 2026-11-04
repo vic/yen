@@ -2,12 +2,12 @@
 {
   yen.aspects.base = {
     at = yen.kinds.host;
-    motd = "welcome";
-    ports = 22;
+    motd = "welcome"; # (1)
+    ports = 22; # (2)
     packages = [
       "git"
       "curl"
-    ]; # `flat` joins list elements
+    ]; # (3) `flat` joins list elements
     admin = "alice";
     nginx.http.gzip = true;
     owners = "ops";
@@ -16,11 +16,11 @@
   yen.aspects.web = {
     at = yen.host.web;
     motd = "this host serves web";
-    ports = 22; # a duplicate: `set` keeps one
+    ports = 22; # (4) a duplicate: `set` keeps one
     packages = [
       "nginx"
       "git"
-    ]; # a duplicate: `flat` keeps one, in order of arrival
+    ]; # (5) a duplicate: `flat` keeps one, in order of arrival
     nginx.http.servers.www.port = 80; # `merge` joins the attrsets
     groups = "audio";
   };

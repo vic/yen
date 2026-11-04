@@ -6,7 +6,7 @@
     {
       packages.${host.name} = packages;
     };
-  yen.kinds.home.sinks.packages = { };
+  yen.kinds.home.sinks.packages = { }; # (1)
   yen.aspects.editor = {
     at = [
       yen.kinds.user

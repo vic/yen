@@ -12,23 +12,25 @@ let
   sorted = es: {
     value = lib.sort (a: b: a < b) (map (e: e.value) es);
     errors = [ ];
-  }; # your own reduce
+  }; # (1) your own reduce
 in
 {
   yen.kinds.host.sinks = {
     motd = {
+      # (2)
       reduce = list;
       of = yen.lib.str;
     };
     ports = {
+      # (3)
       reduce = set;
       of = yen.lib.port;
     };
-    packages.reduce = flat;
-    admin.reduce = one;
-    nginx.reduce = merge;
-    owners.reduce = elements;
-    groups.reduce = sorted;
+    packages.reduce = flat; # (4)
+    admin.reduce = one; # (5)
+    nginx.reduce = merge; # (6)
+    owners.reduce = elements; # (7)
+    groups.reduce = sorted; # (8)
   };
   # every sink of a host, read as args, to one flake output
   yen.aspects.report = {

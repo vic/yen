@@ -1,7 +1,7 @@
 # The flake gives the scope ids. An aspect asks the tree for the whole fleet (`graph = true`) to read them.
 { yen, ... }:
 let
-  whole.graph = true; # a tree request: the whole fleet
+  whole.graph = true; # (1) a tree request: the whole fleet
   fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
 in
 {
@@ -15,7 +15,7 @@ in
         tree = [ whole ];
         out = [
           {
-            scopes = map (s: s.id) (fleetOf tree).lib.graph.scopes;
+            scopes = map (s: s.id) (fleetOf tree).lib.graph.scopes; # (2)
           }
         ];
       };

@@ -11,13 +11,13 @@ in
       { dns, ... }:
       {
         dns.fleet = dns;
-      }; # the fallback receiver
+      }; # (1) the fallback receiver
   };
   yen.kinds.environment = {
     fields.public = opt yen.lib.bool false;
     spawns.host = yen.lib.pointing "environment" yen.host;
     sinks.dns = {
-      at = s: s.public; # a conditional receiver: only public environments
+      at = s: s.public; # (2) a conditional receiver: only public environments
       out =
         { environment, dns, ... }:
         {
@@ -31,7 +31,7 @@ in
       user = yen.lib.pointing "on" yen.user;
       home = yen.lib.pointing "on" yen.home;
     };
-    sinks.os.out =
+    sinks.os.out = # (3)
       { host, os, ... }:
       {
         os.${host.name} = os;
@@ -44,7 +44,7 @@ in
       { home, os, ... }:
       {
         os.${home.name} = os;
-      }; # a home builds its own config
+      }; # (4) a home builds its own config
   };
 
   yen.fleet.main = { };

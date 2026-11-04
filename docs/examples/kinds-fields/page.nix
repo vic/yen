@@ -13,19 +13,31 @@
     }:
     [
       ''
-        A kind is a type of thing: `host`, `user`, `environment`. yen has no built-in kinds. You declare each one.
-        The `fields` of a kind are the data of each of its instances.
+        A kind is a type of thing, such as a machine or a person. yen has no built-in kinds: you declare each one.
+        The `fields` of a kind are the data of each of its instances. This file declares a kind with two fields.
       ''
-      (docs.file "modules/host.nix")
+      (docs.fileNoted "" "modules/host.nix")
       ''
-        An instance is `yen.<kind>.<name>`. The attribute name is the instance name. Any file can declare instances.
+        The kind `host` has two fields. `(1)` is `addr`, a string: `yen.lib.str` is its type. `(2)` is `cores`, an integer.
+        [Types](/model/types/) lists the types.
+
+        Now declare some instances. Any file can do this:
       ''
-      (docs.file "modules/hosts.nix")
+      (docs.fileNoted "" "modules/hosts.nix")
       ''
-        An aspect reads the fields. Here, each host gives one line to a `report` sink on the fleet
-        ([Sinks](/behavior/sinks/) explains how):
+        An instance is `yen.<kind>.<name>`: `yen.host.web` is the instance `web` of kind `host`.
+        `(1)` sets its `addr` and `(2)` sets its `cores`.
+
+        Next, an [aspect](/behavior/aspects/) reads the fields. It gives one line per host to a
+        [sink](/behavior/sinks/). The root kind of the example collects these lines.
+        You find it in [the example code](https://github.com/vic/yen/tree/main/docs/examples/kinds-fields/modules/fleet.nix).
+        The [glossary](/reference/glossary/) defines the words.
       ''
-      (docs.file "modules/report.nix")
+      (docs.fileNoted "" "modules/report.nix")
+      ''
+        `(1)` says where the aspect is active: at every `host`. `(2)` asks yen for the nearest host, and `(3)` reads its fields.
+        The key `report` gives the element to the sink of the same name. This is what the flake gets:
+      ''
       (docs.value result.flake.report)
       ''
         ## Fields are strict
@@ -36,14 +48,17 @@
       ''
       (docs.file "variants/typo.nix")
       ''
-        `result.errors` now has three records. `near` names the field you probably meant:
+        `result.errors` now has three records:
       ''
       (docs.value (variant "variants/typo.nix").errors)
+      ''
+        `near` names the field you probably meant.
+      ''
+      (docs.value result.schema.kinds.host.fields)
       (docs.tip "Ask the schema" ''
-        `result.schema` describes every kind as data: fields with their type names, spawns and sinks.
+        The value above is part of `result.schema`. It describes every kind as data: fields with their type names, spawns and sinks.
         `result.data` gives every instance. Both print as JSON, for tools and agents.
       '')
-      (docs.value result.schema.kinds.host.fields)
     ];
 
   checks =

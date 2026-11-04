@@ -5,18 +5,16 @@
       yen.kinds.host
       (s: s.name != "lb")
     ];
-    backends = { host, ... }: host.addr; # a kind arg: the nearest host
+    backends = { host, ... }: host.addr; # (1) a kind arg: the nearest host
   };
   yen.aspects.balancer = {
     at = yen.host.lb;
-    # a sink arg: the reduced value at its nearest receiver (the environment);
-    # `scope` is the scope itself; `cluster ? null` is optional, and this fleet has no cluster
     proxy =
       {
-        environment,
-        backends,
-        scope,
-        cluster ? null,
+        environment, # (2) a kind arg: the nearest environment
+        backends, # (3) a sink arg: the reduced value at its nearest receiver (the environment)
+        scope, # (4) the scope itself
+        cluster ? null, # (5) optional: this fleet has no cluster
         ...
       }:
       {

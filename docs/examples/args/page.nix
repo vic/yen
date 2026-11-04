@@ -13,7 +13,25 @@
     }:
     [
       ''
-        An element can be a function with named args. yen fills the args it knows:
+        An element can be a function with named args. yen fills the args it knows.
+        In this example, a load balancer reads the addresses that its environment collects.
+        First the [kinds](/model/kinds-fields/) and [sinks](/behavior/sinks/) it reads:
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        `(1)` is the sink `backends` of `environment`. Hosts give their address to it. `(2)` is the sink `proxy` of `host`.
+        Now the [aspects](/behavior/aspects/). Their elements are functions with args:
+      ''
+      (docs.fileNoted "" "modules/aspects.nix")
+      ''
+        `(1)` asks for `host`, the name of a kind. `(2)` also names a kind. `(3)` names a sink.
+        `(4)` is `scope`. `(5)` has a default, so it is optional. This is what the balancer gives:
+      ''
+      (docs.value result.flake.proxy)
+      ''
+        ## The args yen fills
+
+        These are the rules:
       ''
       (docs.table
         [ "Arg" "Value" ]
@@ -37,26 +55,26 @@
         ]
       )
       ''
-        A load balancer reads the addresses that its environment collects:
-      ''
-      (docs.file "modules/fleet.nix")
-      (docs.fileWith "{8,17}" "modules/aspects.nix")
-      (docs.value result.flake.proxy)
-      ''
         ## Optional and missing args
 
         `{ cluster ? null, ... }` makes an arg optional. Without a default, an arg with no answer means the element
-        is not given, and `errors` says why:
+        is not given. Add this file to the example:
       ''
-      (docs.file "variants/missing.nix")
+      (docs.fileNoted "" "variants/missing.nix")
+      ''
+        `(1)` needs a `cluster`, and no scope here is under one. `errors` says why:
+      ''
       (docs.value (variant "variants/missing.nix").errors)
       ''
         ## Open args: modules for NixOS and home-manager
 
-        Args that yen does not know stay open. This is how a `nixos` element is a NixOS module: yen fills `host`,
-        and NixOS fills `pkgs`, `config` and `lib` later.
+        Args that yen does not know stay open. This is how a `nixos` element is a NixOS module. In this file, yen
+        fills `host` and the element stays a function of `pkgs`. NixOS fills `pkgs`, `config` and `lib` later.
       ''
-      (docs.file "variants/open.nix")
+      (docs.fileNoted "" "variants/open.nix")
+      ''
+        `(1)` has the arg `host`, which yen fills, and the arg `pkgs`, which stays open.
+      ''
       (docs.caution "Overlays" ''
         A bare `final: prev:` is a function of `final`, and yen has no `final`. That is an error.
         Wrap it: `{ ... }: final: prev: …`.

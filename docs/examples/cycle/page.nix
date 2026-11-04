@@ -10,10 +10,14 @@
       ''
         Each key of an [aspect](/behavior/aspects/) gives one element. For 0 to n elements, or to ask the tree for data, give the aspect a
         `cycle`. As in [Cycle.js](https://cycle.js.org), a cycle is a function from sources to [sinks](/behavior/sinks/).
-        Its sources are `tree`, `scope` and one source for each sink. It returns sinks by name, and `tree` requests.
+        This one gives one bridge for each guest of a host. The kinds `host` and `guest` are in
+        [the example code](https://github.com/vic/yen/tree/main/docs/examples/cycle/modules/fleet.nix).
       ''
-      (docs.file "modules/network.nix")
+      (docs.fileNoted "" "modules/network.nix")
       ''
+        `(1)` is the cycle. Its sources are `tree`, `scope` and one source for each sink. It returns sinks by name, and `tree` requests.
+        `(2)` is a request: the children of this scope that are guests. `(3)` sends the request to the tree.
+        `(4)` reads the answer, with `tree.select`, and gives one element for each guest.
         The host has two guests, so the cycle gives two bridges:
       ''
       (docs.value result.flake.bridges)
@@ -21,7 +25,7 @@
         ## Tree requests
 
         A request is one question. `tree.select request` gives its answers: the request is its own name, so it has no
-        string to mistype. Bind it in a `let` and use it twice.
+        string to mistype. Bind it in a `let` and use it twice, as `vms` above. These are the requests:
       ''
       (docs.table
         [ "Request" "Answer" ]
@@ -64,20 +68,23 @@
         ## What an element can read
 
         An element reads its args: its scope, the kinds it asks for, and the values its sinks give. To read another
-        instance, it asks the tree. It never reads that instance's fields directly. Yen knows what every element reads,
+        instance, it asks the tree. It never reads that instance's fields directly. yen knows what every element reads,
         so a change is refused only where it reaches. Here a host asks for every host and counts the other ones:
       ''
-      (docs.file "modules/reads.nix")
+      (docs.fileNoted "" "modules/reads.nix")
       ''
+        `(1)` is the cycle. `(2)` is a request for every host. `(3)` sends it to the tree, and `(4)` reads the answer.
         The fleet has one host, so it has no peers:
       ''
       (docs.value result.flake.peers)
       ''
-        An element that reads a field of another instance is refused. The variant below does that. The error names the
-        fix: "yen.host.server.addr: an aspect reads instance data only through its args: take `host` as an arg, or follow
-        a ref field of an arg".
+        An element that reads a field of another instance is refused. This variant does that at `(1)`:
       ''
-      (docs.file "variants/read-addr.nix")
+      (docs.fileNoted "" "variants/read-addr.nix")
+      ''
+        The error names the fix: "yen.host.server.addr: an aspect reads instance data only through its args: take `host`
+        as an arg, or follow a ref field of an arg".
+      ''
     ];
 
   checks =

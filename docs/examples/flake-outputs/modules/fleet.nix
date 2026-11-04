@@ -3,9 +3,9 @@
 {
   yen.kinds.fleet = {
     spawns.host = _: yen.host;
-    sinks.out.reduce = yen.lib.reduce.merge;
+    sinks.out.reduce = yen.lib.reduce.merge; # (1)
   };
-  yen.kinds.host.sinks.services.out =
+  yen.kinds.host.sinks.services.out = # (2)
     { host, services, ... }:
     {
       services.${host.name} = services;
@@ -13,5 +13,5 @@
   yen.fleet.main = { };
   yen.host.web = { };
   yen.host.db = { };
-  yen.flake = { out, ... }: out;
+  yen.flake = { out, ... }: out; # (3)
 }

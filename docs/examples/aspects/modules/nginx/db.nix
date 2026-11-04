@@ -1,7 +1,7 @@
 { yen, ... }:
 {
   yen.aspects.nginx = {
-    at = yen.host.db;
+    at = yen.host.db; # (2)
     packages = { host, ... }: "nginx-conf-${host.name}"; # a function under the same key: one more element
   };
 }
