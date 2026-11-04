@@ -20,19 +20,31 @@
           each host feature adds its own device to a shared NixOS module. It works, but every host gets every
           contribution, its own included.
 
-        In yen a host's public facts are fields of its instance. An aspect reads the other hosts through a tree request
-        (`instances = yen.kinds.host`): it is data, so nothing evaluates a NixOS system to read it, and `stage` sees the read.
+        In yen a host's public facts are [fields](/model/kinds-fields/) of its instance. Here are three hosts and
+        their facts:
       ''
-      (docs.file "modules/fleet.nix")
-      (docs.file "modules/mesh.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
       ''
+        `(1)` declares the facts as fields of the `host` kind. `(2)` gives their values for each host.
+
+        An aspect reads the other hosts through a tree request, a form of the [cycle](/behavior/cycle/):
+      ''
+      (docs.fileNoted "" "modules/mesh.nix")
+      ''
+        `(1)` is the tree request: every host, with its data. `(2)` is the `mesh` aspect. At `(3)` it asks the tree for
+        that request. The request is data, so nothing evaluates a NixOS system to read it, and
+        [`stage`](/agents/stage/) sees the read.
+
         ## Facts that only some hosts have
 
         A Syncthing device id exists only on hosts that run Syncthing. Each of them gives its id to the
-        `syncthing-device` sink of the fleet. A host has no such sink, so the id goes up to the fleet. A Syncthing
-        host then reads the sink as an arg. `elements` keeps who gave each id, so a host can leave out its own.
+        `syncthing-device` sink of the fleet. A host has no such sink, so the id goes up to the fleet.
       ''
-      (docs.file "modules/syncthing.nix")
+      (docs.fileNoted "" "modules/syncthing.nix")
+      ''
+        `(1)` is the sink of the fleet. Its `reduce` is `elements`, which keeps who gave each id. `(2)` is a Syncthing
+        host: it reads the sink as an arg, and leaves out its own id. `(3)` is one host that gives its id.
+      ''
       (docs.note "Why there is no recursion" ''
         The hosts a tree request gives and the `syncthing-device` sink are yen data. They exist before any NixOS module runs. A NixOS
         module reads them, and never reads another host's NixOS `config`.

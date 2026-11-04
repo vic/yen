@@ -8,7 +8,7 @@
 let
   np = inputs.nixpkgs;
   # the leader of the host's group: the first sharing host of its system. `system` is data, so `==`; `same` compares refs only
-  leaderOf =
+  leaderOf = # (1)
     host: shared-pkgs:
     lib.head (
       lib.sort (a: b: a < b) (
@@ -18,6 +18,7 @@ let
   isFollower = host: shared-pkgs: host.sharedPkgs && leaderOf host shared-pkgs != host.name;
   # the leader's built pkgs, read through the `out` arg, lazily
   readOnlyOf = out: leader: [
+    # (2)
     np.nixosModules.readOnlyPkgs
     { options.nixpkgs.system = lib.mkOption { internal = true; }; }
     { nixpkgs.pkgs = out.nixosConfigurations.${leader}.pkgs; }
@@ -40,13 +41,13 @@ in
   yen.kinds.host = {
     fields = {
       system = yen.lib.opt yen.lib.str "x86_64-linux";
-      sharedPkgs = yen.lib.opt yen.lib.bool false;
+      sharedPkgs = yen.lib.opt yen.lib.bool false; # (3)
     };
     sinks.nixos.out =
       {
         host,
         nixos,
-        out,
+        out, # (4)
         shared-pkgs,
         ...
       }:
@@ -54,7 +55,7 @@ in
         nixosConfigurations.${host.name} = np.lib.nixosSystem {
           inherit (host) system;
           modules =
-            nixos ++ lib.optionals (isFollower host shared-pkgs) (readOnlyOf out (leaderOf host shared-pkgs));
+            nixos ++ lib.optionals (isFollower host shared-pkgs) (readOnlyOf out (leaderOf host shared-pkgs)); # (5)
         };
         sharedLeader.${host.name} =
           if isFollower host shared-pkgs then leaderOf host shared-pkgs else null; # whose pkgs this host reuses

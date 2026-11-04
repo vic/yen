@@ -2,11 +2,11 @@
 { yen, ... }:
 {
   yen.aspects.base = {
-    at = yen.kinds.host;
+    at = yen.kinds.host; # (1)
     nixos =
       { host, ... }:
       {
-        networking.hostName = host.name; # no specialArgs.hostname: the host is an arg
+        networking.hostName = host.name; # (2) no specialArgs.hostname: the host is an arg
         nixpkgs.hostPlatform = host.system;
         nix.settings.experimental-features = [
           "nix-command"
@@ -17,7 +17,7 @@
   };
   # per arch: `at` reads a field
   yen.aspects.arm = {
-    at = s: (s.system or null) == "aarch64-linux";
+    at = s: (s.system or null) == "aarch64-linux"; # (3)
     nixos.boot.loader.generic-extlinux-compatible.enable = true;
   };
   yen.aspects.laptop = {

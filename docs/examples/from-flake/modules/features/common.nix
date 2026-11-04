@@ -2,7 +2,7 @@
 { yen, inputs, ... }:
 {
   yen.aspects.common = {
-    at = yen.kinds.host;
+    at = yen.kinds.host; # (1)
     nixos =
       { host, pkgs, ... }:
       {
@@ -15,7 +15,7 @@
       };
   };
   yen.aspects.home-manager = {
-    at = yen.lib.below yen.kinds.user; # only hosts with users
+    at = yen.lib.below yen.kinds.user; # (2) only hosts with users
     nixos = {
       imports = [ inputs.home-manager.nixosModules.home-manager ];
       home-manager.useGlobalPkgs = true;

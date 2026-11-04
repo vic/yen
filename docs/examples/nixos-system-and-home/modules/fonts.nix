@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.fonts-system = {
-    at = yen.kinds.host;
+    at = yen.kinds.host; # (1)
     nixos =
       { pkgs, ... }:
       {
@@ -10,7 +10,7 @@
       };
   };
   yen.aspects.fonts-home = {
-    at = yen.kinds.home;
+    at = yen.kinds.home; # (2)
     homeManager =
       { pkgs, ... }:
       {

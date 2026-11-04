@@ -25,9 +25,51 @@
         );
       '')
       ''
-        In yen a host is an instance of a kind. The kind builds the NixOS system once. Shared configuration is an aspect
-        at the kind. Host values are typed fields with defaults, and every NixOS module of an aspect can read them as
-        the `host` arg.
+        In yen a host is an instance of a [kind](/model/kinds-fields/). The kind builds the NixOS system once. Shared
+        configuration is an [aspect](/behavior/aspects/) at the kind. Host values are typed fields with defaults, and every
+        NixOS module of an aspect can read them as an [arg](/behavior/args/). The files below show each part. A table
+        after them maps each usual pattern to its yen form.
+
+        ## The kind
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        `(1)` is what a `vars.nix` file held: typed fields with defaults. `(2)` is the `nixos` [sink](/behavior/sinks/):
+        it builds one NixOS system for each host.
+
+        A wrong value fails at the instance that sets it, not deep in `nixpkgs.hostPlatform`. With
+        `yen.host.tower.system = "x86-64-linux"`, the result has this error, as data:
+      ''
+      (docs.value (map (e: removeAttrs e [ "value" ]) (variant "variants/typo.nix").errors))
+      ''
+        ## The base, per arch, per form
+      ''
+      (docs.fileNoted "" "modules/base.nix")
+      ''
+        `(1)` makes `base` active at every host. `(2)` reads the host through the `host` arg. `(3)` makes `arm` active
+        where the `system` field is `aarch64-linux`. See [Predicates](/behavior/predicates/).
+
+        ## One file per host
+      ''
+      (docs.tabs [
+        {
+          label = "tower.nix";
+          body = docs.fileNoted "" "modules/hosts/tower.nix";
+        }
+        {
+          label = "thinkpad.nix";
+          body = docs.file "modules/hosts/thinkpad.nix";
+        }
+        {
+          label = "pi.nix";
+          body = docs.file "modules/hosts/pi.nix";
+        }
+      ])
+      ''
+        In `tower.nix`, `(1)` declares the instance and `(2)` is the aspect for this host only. A real host file
+        usually imports its `hardware-configuration.nix` in its `nixos` key, next to the instance.
+
+        ## The usual patterns in yen
       ''
       (docs.table
         [ "Usual pattern" "yen" ]
@@ -58,39 +100,6 @@
           ]
         ]
       )
-      ''
-        ## The kind
-      ''
-      (docs.file "modules/fleet.nix")
-      ''
-        A wrong value fails at the instance that sets it, not deep in `nixpkgs.hostPlatform`. With
-        `yen.host.tower.system = "x86-64-linux"`, the result has this error, as data:
-      ''
-      (docs.value (map (e: removeAttrs e [ "value" ]) (variant "variants/typo.nix").errors))
-      ''
-        ## The base, per arch, per form
-      ''
-      (docs.file "modules/base.nix")
-      ''
-        ## One file per host
-      ''
-      (docs.tabs [
-        {
-          label = "tower.nix";
-          body = docs.file "modules/hosts/tower.nix";
-        }
-        {
-          label = "thinkpad.nix";
-          body = docs.file "modules/hosts/thinkpad.nix";
-        }
-        {
-          label = "pi.nix";
-          body = docs.file "modules/hosts/pi.nix";
-        }
-      ])
-      ''
-        A real host file usually imports its `hardware-configuration.nix` in its `nixos` key, next to the instance.
-      ''
       (docs.note "What you stop writing" ''
         - The `mkHost` function, and the list of shared modules that every host repeats.
         - `specialArgs` and `extraSpecialArgs`: the `host` arg is in every module of an aspect, and in home-manager too.

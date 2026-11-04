@@ -6,6 +6,7 @@ in
 {
   # Simple aspect: one feature, for every host.
   yen.aspects.basic-packages = {
+    # (1)
     at = yen.kinds.host;
     nixos =
       { pkgs, ... }:
@@ -17,6 +18,7 @@ in
   # Inheritance aspect: system-desktop extends system-cli. system-cli applies wherever system-desktop does.
   # There is no `imports`, so a parent included by two children is still given once.
   yen.aspects.system-cli = {
+    # (2)
     at = [
       yen.host.srv
       yen.aspects.system-desktop
@@ -39,13 +41,13 @@ in
 
   # Conditional aspect: no lib.mkIf inside a module. `at` tests a fact, and can exclude.
   yen.aspects.nvidia = {
-    at = s: (s.gpu or null) == "nvidia";
+    at = s: (s.gpu or null) == "nvidia"; # (3)
     nixos.services.xserver.videoDrivers = [ "nvidia" ];
   };
   yen.aspects.headless = {
     at = all [
       yen.kinds.host
-      (not yen.aspects.system-desktop)
+      (not yen.aspects.system-desktop) # (4)
     ];
     nixos.documentation.enable = false;
   };
@@ -56,7 +58,7 @@ in
     nixos =
       { fleet, ... }:
       {
-        security.acme.defaults.email = fleet.adminEmail;
+        security.acme.defaults.email = fleet.adminEmail; # (5)
       };
   };
 
@@ -68,7 +70,7 @@ in
       {
         users.users.${user.name} = {
           isNormalUser = true;
-          extraGroups = if user.admin then [ "wheel" ] else [ ];
+          extraGroups = if user.admin then [ "wheel" ] else [ ]; # (6)
         };
       };
   };

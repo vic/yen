@@ -116,19 +116,26 @@
       ''
         ## Parameters are fields
 
-        `user-shell "fish"` and `tty-autologin "ana"` take an argument. In yen the argument is data on the instance,
-        with a type. A typo such as `shell = "fsh"` is an error at `yen.user.ana.shell`, and `autologin` must be a user
-        that exists.
+        `user-shell "fish"` and `tty-autologin "ana"` take an argument. In yen the argument is a typed
+        [field](/model/kinds-fields/) on the instance. This file declares the Den schema, with both fields.
       ''
-      (docs.file "modules/fleet.nix")
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        `(1)` is the `autologin` field of a host. Its type is a user or nothing, so `autologin` must be a user
+        that exists. `(2)` is the `shell` field of a user. Its type is one of three names, and the default is `bash`.
+        A typo such as `shell = "fsh"` is an error at `yen.user.ana.shell`.
+
+        Each battery below is an [aspect](/behavior/aspects/). Its `at` says where it applies, and its `nixos` key
+        gives a NixOS module to the [sink](/behavior/sinks/) of that name.
+      ''
       (docs.file "modules/batteries.nix")
       ''
         ## Insecure packages need a sink too
 
         `permittedInsecurePackages` is a list, but it is in `nixpkgs.config`, and `nixpkgs.config` does not merge lists.
         When two NixOS modules set it, only one list survives, with no error. We wrote this page first without the
-        sink, on NixOS 25.05, and bob's entry was lost. The fix is the same as for `unfree`: a sink of names, and one
-        module that sets the option.
+        sink, on NixOS 25.05, and bob's entry was lost. The fix is the same as for `unfree`
+        ([Unfree packages from many files](/nixos/unfree/)): a sink of names, and one module that sets the option.
       ''
       (docs.file "modules/insecure.nix")
       (docs.tip "As a battery" ''

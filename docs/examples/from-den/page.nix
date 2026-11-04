@@ -32,46 +32,9 @@ in
         plain Nix, and every rule of how content moves is a [sink](/behavior/sinks/) you can read.
 
         This page moves Den's default template to yen. The docs evaluate both and check that the host gets the same
-        account, groups, home, packages and state versions.
-      ''
-      (docs.table
-        [ "Den" "yen" ]
-        [
-          [
-            "`den.hosts.x86_64-linux.igloo.users.tux`"
-            "instances: `yen.host.igloo`, `yen.user.tux` with `hosts = [ … ]`"
-          ]
-          [
-            "`den.aspects.igloo.nixos`"
-            "an aspect with `at = yen.host.igloo` and a `nixos` key"
-          ]
-          [
-            "`den.default.nixos`"
-            "an aspect with `at = yen.kinds.host`"
-          ]
-          [
-            "`includes = [ den.batteries.x ]`"
-            "the included aspect's `at` names the includer, from any file"
-          ]
-          [
-            "`provides.to-users.homeManager`"
-            "an aspect at the users `within` the host"
-          ]
-          [
-            "`hasAspect`"
-            "`yen.lib.holds`, and `result.graph` edges with `origin`"
-          ]
-          [
-            "context pipes, `osConfig`"
-            "args: a kind, a sink or `out` (the built flake)"
-          ]
-          [
-            "`den.schema.*`"
-            "`yen.kinds.<kind>.fields`"
-          ]
-        ]
-      )
-      ''
+        account, groups, home, packages and state versions. The code comes first. A table of Den forms and yen forms
+        follows it.
+
         ## The template, side by side
       ''
       (docs.tabs [
@@ -81,12 +44,17 @@ in
         }
         {
           label = "yen: fleet.nix";
-          body = docs.file "modules/fleet.nix";
+          body = docs.fileNoted "" "modules/fleet.nix";
         }
       ])
       ''
-        Den's schema is built in. In yen, `fleet.nix` says the same in one short file: hosts build NixOS, users live under their
-        hosts, a user's `homeManager` content goes into the host, and home-manager is active where a user lives.
+        Den's schema is built in. In yen, `fleet.nix` says the same in one short file:
+
+        - `(1)`: users live under the hosts in their `hosts` field ([scopes](/model/scopes/)).
+        - `(2)`: hosts build NixOS from the modules of their `nixos` sink.
+        - `(3)`: a user's `homeManager` content goes into the host, as `home-manager.users.<name>`.
+        - `(4)`: home-manager is active where a user lives. The `at` is true at every scope below a user
+          ([predicates](/behavior/predicates/)).
       ''
       (docs.tabs [
         {
@@ -109,10 +77,52 @@ in
         }
       ])
       ''
+        ## Den forms and yen forms
+
+        The files above use these yen forms:
+      ''
+      (docs.table
+        [ "Den" "yen" ]
+        [
+          [
+            "`den.hosts.x86_64-linux.igloo.users.tux`"
+            "instances: `yen.host.igloo`, `yen.user.tux` with `hosts = [ … ]`"
+          ]
+          [
+            "`den.aspects.igloo.nixos`"
+            "an aspect with `at = yen.host.igloo` and a `nixos` key"
+          ]
+          [
+            "`den.default.nixos`"
+            "an aspect with `at = yen.kinds.host`"
+          ]
+          [
+            "`includes = [ den.batteries.x ]`"
+            "the included aspect's `at` names the includer, from any file"
+          ]
+          [
+            "`provides.to-users.homeManager`"
+            "an aspect at the users `within` the host; see [Predicates](/behavior/predicates/)"
+          ]
+          [
+            "`hasAspect`"
+            "`yen.lib.holds`, and `result.graph` edges with `origin`"
+          ]
+          [
+            "context pipes, `osConfig`"
+            "[args](/behavior/args/): a kind, a sink or `out` (the built flake)"
+          ]
+          [
+            "`den.schema.*`"
+            "`yen.kinds.<kind>.fields`"
+          ]
+        ]
+      )
+      ''
         ## Batteries are aspects
 
-        A battery is an aspect that you include. In yen you write the aspect once, without `at`, and each user of it
-        adds itself to `at`. `at` from several files is a union.
+        A battery is an aspect that you include. In yen you write the aspect once, without an `at`, and each user of it
+        adds itself to `at` (see `tux.nix` above). `at` from several files is a union.
       ''
       (docs.tabs [
         {
@@ -143,11 +153,15 @@ in
         };
       '')
       ''
-        In yen a quirk is a sink. Where its values land is the tree: an element goes up to the nearest scope that has the sink.
-        A user's ports reach its host with no policy, which is Den's `pipe.expose`. `elements` keeps who gave each value, so a
-        filter or a rename is a plain function in the reader:
+        In yen a quirk is a sink. This file is the firewall example:
       ''
-      (docs.fileWith "{6-13,22}" "modules/quirks.nix")
+      (docs.fileNoted "{6-14,23}" "modules/quirks.nix")
+      ''
+        `(1)` is the quirk: a `firewall` sink on the host. Where its values land is the tree: an element goes up to the
+        nearest scope that has the sink. At `(3)` a user gives ports. The user has no `firewall` sink, so they reach
+        its host with no policy. This is Den's `pipe.expose`. `(2)` is the `reduce` of the sink: `elements` keeps who
+        gave each value, so a filter or a rename is a plain function in the reader.
+      ''
       (docs.table
         [ "Den" "yen" ]
         [

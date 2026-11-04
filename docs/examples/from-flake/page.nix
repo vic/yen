@@ -37,22 +37,28 @@
       ''
         ## The helper becomes a kind
 
-        `mkHost` knew how to build a host. In yen, the `host` kind knows it: its `nixos` sink builds the system.
-        A user's `homeManager` sink forwards to `nixos` on each host the user lives under.
+        `mkHost` knew how to build a host. In yen, a [kind](/model/kinds-fields/) knows it:
       ''
-      (docs.fileWith "{14-18,22-26}" "modules/fleet.nix")
+      (docs.fileNoted "{14-18,22-26}" "modules/fleet.nix")
       ''
+        At `(1)`, the `nixos` [sink](/behavior/sinks/) of the `host` kind builds the system. At `(2)`, the
+        `homeManager` sink of the `user` kind forwards to `nixos` on each host the user lives under
+        ([forwards](/behavior/forwards/)).
+
         ## Shared modules become aspects
 
-        `common.nix` was in every host's list. As an aspect it is active at every host. home-manager is active only
+        `common.nix` was in every host's list. As an [aspect](/behavior/aspects/) it is active at every host. home-manager is active only
         where a user lives:
       ''
-      (docs.fileWith "{5,17}" "modules/features/common.nix")
+      (docs.fileNoted "{5,17}" "modules/features/common.nix")
       ''
+        `(1)` makes `common` active at every host. `(2)` makes `home-manager` active at every scope below a user, so
+        only hosts with users get it.
+
         ## Host files hold data and hardware
 
         A host file declares the instance and the parts only that host has. Features that only one host uses are
-        aspects with that host in `at`:
+        aspects with that host in `at`, as `nginx` is at `(1)` in `features/roles.nix`:
       ''
       (docs.tabs [
         {
@@ -65,7 +71,7 @@
         }
         {
           label = "features/roles.nix";
-          body = docs.file "modules/features/roles.nix";
+          body = docs.fileNoted "" "modules/features/roles.nix";
         }
       ])
       ''
@@ -74,7 +80,11 @@
         `home-manager.users.alice` was written in the flake for every host. Now alice is data: she says which hosts
         she uses, and her aspect gives her account and her home:
       ''
-      (docs.file "modules/alice.nix")
+      (docs.fileNoted "" "modules/alice.nix")
+      ''
+        `(1)` makes the aspect active at alice. `(2)` is her `nixos` module: yen fills `user` with her. `(3)` is her
+        home, which goes to the `homeManager` sink of each host she lives under.
+      ''
       (docs.note "Adding a host" ''
         Before: add a line to the flake, and maybe a parameter to `mkHost`. After: add `yen.host.<name>` in its own file,
         and add it to the `hosts` of its users. Nothing else changes.

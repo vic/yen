@@ -23,7 +23,7 @@
   yen.kinds.user = {
     fields.hosts = yen.lib.listOf yen.kinds.host;
     # a user's home-manager content goes into each NixOS host it lives on
-    sinks.homeManager.nixos =
+    sinks.homeManager.nixos = # (1)
       { user, homeManager, ... }:
       {
         home-manager.users.${user.name}.imports = homeManager;
@@ -34,7 +34,7 @@
       user = yen.kinds.user;
       system = yen.lib.str;
     };
-    sinks.homeManager.out =
+    sinks.homeManager.out = # (2)
       { home, homeManager, ... }:
       {
         homeConfigurations.${home.name} = inputs.home-manager.lib.homeManagerConfiguration {

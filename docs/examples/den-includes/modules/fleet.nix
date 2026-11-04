@@ -16,7 +16,7 @@ in
   yen.kinds.host = {
     fields = {
       system = opt yen.lib.str "x86_64-linux";
-      shares = opt strs [ ]; # parameters of a parametric aspect
+      shares = opt strs [ ]; # (1) parameters of a parametric aspect
     };
     spawns.user = yen.lib.pointing "hosts" yen.user;
     sinks.nixos.out =
@@ -27,7 +27,7 @@ in
   };
   yen.kinds.user.fields = {
     hosts = yen.lib.listOf yen.kinds.host;
-    fullname = yen.lib.str;
+    fullname = yen.lib.str; # (2)
     authorizedKeys = opt strs [ ];
   };
 

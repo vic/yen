@@ -26,7 +26,54 @@
         ## What changes
 
         A `configuration.nix` mixes three things: data (the host name, the users), features (ssh, tools),
-        and generated hardware. yen keeps them apart:
+        and generated hardware. yen keeps them apart. The steps below show each part, and a table after them
+        maps each line of `configuration.nix` to its yen form.
+      ''
+      (docs.steps [
+        ''
+          Get the template, and copy your two files over the ones in `machines/laptop/`:
+
+          ${docs.sh "nix flake init -t github:vic/yen#from-configuration-nix"}
+        ''
+        ''
+          Declare the fleet:
+
+          ${docs.fileNoted "" "modules/fleet.nix"}
+
+          `(1)` says that a user lives under the hosts in its `hosts` field ([scopes](/model/scopes/)).
+          `(2)` is the `nixos` [sink](/behavior/sinks/) of a host. It builds the NixOS system from the modules it
+          collected. `(3)` is a [field](/model/kinds-fields/) of the user: a list of group names, empty by default.
+        ''
+        ''
+          Declare your machine and your people as data:
+
+          ${docs.file "modules/laptop.nix"}
+        ''
+        ''
+          Move each part of `configuration.nix` to an [aspect](/behavior/aspects/). Each one is active at every host:
+
+          ${docs.file "modules/features/machine.nix"}
+
+          ${docs.file "modules/features/ssh.nix"}
+
+          ${docs.file "modules/features/tools.nix"}
+        ''
+        ''
+          Give accounts from user data:
+
+          ${docs.fileNoted "" "modules/features/accounts.nix"}
+
+          `(1)` makes the aspect active at every user. `(2)` is the user: yen fills `user` with the nearest user.
+          A user has no `nixos` sink, so the account goes up to the host.
+        ''
+        ''
+          Switch:
+
+          ${docs.sh "sudo nixos-rebuild switch --flake .#laptop"}
+        ''
+      ])
+      ''
+        ## Where each line went
       ''
       (docs.table
         [ "In configuration.nix" "In yen" ]
@@ -49,42 +96,6 @@
           ]
         ]
       )
-      (docs.steps [
-        ''
-          Get the template, and copy your two files over the ones in `machines/laptop/`:
-
-          ${docs.sh "nix flake init -t github:vic/yen#from-configuration-nix"}
-        ''
-        ''
-          Declare the fleet. A host builds NixOS from its `nixos` sink. A user lives under the hosts it logs in to.
-
-          ${docs.file "modules/fleet.nix"}
-        ''
-        ''
-          Declare your machine and your people as data:
-
-          ${docs.file "modules/laptop.nix"}
-        ''
-        ''
-          Move each part of `configuration.nix` to an aspect. Each one is active at every host:
-
-          ${docs.file "modules/features/machine.nix"}
-
-          ${docs.file "modules/features/ssh.nix"}
-
-          ${docs.file "modules/features/tools.nix"}
-        ''
-        ''
-          Give accounts from user data. A user has no `nixos` sink, so the account goes up to the host:
-
-          ${docs.file "modules/features/accounts.nix"}
-        ''
-        ''
-          Switch:
-
-          ${docs.sh "sudo nixos-rebuild switch --flake .#laptop"}
-        ''
-      ])
       (docs.tip "Do it in two steps" ''
         You do not have to split everything on day one. One aspect can give the whole old file.
         With only `modules/fleet.nix` and `modules/laptop.nix`, this builds the same system too:

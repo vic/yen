@@ -6,7 +6,7 @@
     nixos =
       { host, ... }:
       {
-        imports = [ (../../machines + "/${host.name}/hardware-configuration.nix") ];
+        imports = [ (../../machines + "/${host.name}/hardware-configuration.nix") ]; # (1)
         networking.hostName = host.name;
         boot.loader.systemd-boot.enable = true;
         time.timeZone = "Europe/Berlin";

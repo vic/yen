@@ -2,7 +2,7 @@
 # every Syncthing host reads them back and adds the others as devices.
 { yen, lib, ... }:
 {
-  yen.kinds.fleet.sinks.syncthing-device.reduce = yen.lib.reduce.elements; # each id with the host that gave it
+  yen.kinds.fleet.sinks.syncthing-device.reduce = yen.lib.reduce.elements; # (1) each id with the host that gave it
 
   yen.aspects.syncthing = {
     at = [
@@ -10,7 +10,7 @@
       yen.host.desk
     ];
     nixos =
-      { host, syncthing-device, ... }:
+      { host, syncthing-device, ... }: # (2)
       {
         services.syncthing = {
           enable = true;
@@ -24,6 +24,7 @@
   };
   # the ids, in each host's own file in a real fleet
   yen.aspects.nas-id = {
+    # (3)
     at = yen.host.nas;
     syncthing-device.id = "NAS1111-1111111-1111111-1111111-1111111-1111111-1111111-1111111";
   };

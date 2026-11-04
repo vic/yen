@@ -4,10 +4,10 @@
   yen.aspects.prompt = {
     at = yen.lib.all [
       yen.kinds.user
-      (yen.lib.within yen.kinds.host)
+      (yen.lib.within yen.kinds.host) # (1)
     ];
     homeManager =
-      { host, user, ... }:
+      { host, user, ... }: # (2)
       {
         home.sessionVariables.PROMPT_TAG = "${user.name}@${host.name}";
       };

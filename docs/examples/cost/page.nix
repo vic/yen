@@ -31,7 +31,8 @@
         ]
       )
       ''
-        A memo is invisible to an eval, so the oracle bounds Nix's own counters (`NIX_SHOW_STATS`), not wall time.
+        A memo is invisible to an eval, so the oracle ([tests/cost.sh](https://github.com/vic/yen/tree/main/tests/cost.sh))
+        bounds Nix's own counters (`NIX_SHOW_STATS`), not wall time.
         The engine evaluates 10,000 modules in about 20 s.
       ''
       (docs.sh ''

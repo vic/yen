@@ -2,13 +2,14 @@
 # Features add routes to the LAN without knowing the interface name.
 { yen, lib, ... }:
 {
-  yen.kinds.host.sinks.lan.nixos =
+  yen.kinds.host.sinks.lan.nixos = # (1)
     { host, lan, ... }:
     {
-      networking.interfaces.${host.lan} = lib.mkMerge lan;
+      networking.interfaces.${host.lan} = lib.mkMerge lan; # (2)
     };
 
   yen.aspects.subnet-a = {
+    # (3)
     at = yen.kinds.host;
     lan.ipv4.routes = [
       {
