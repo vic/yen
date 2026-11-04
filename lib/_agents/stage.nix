@@ -10,6 +10,7 @@ let
     elem
     errWith
     filter
+    fix
     floorOf
     genAttrs
     groupBy
@@ -50,7 +51,32 @@ let
       id ? null, # the change's content hash, when the caller knows it (a program); else from a path or data
       baseResult ? eval base,
     }: # baseResult: the base already evaluated. The invariants always run: the law is not optional
-    let
+    stageOut (
+      fix (stageCtx {
+        inherit
+          base
+          change
+          rejected
+          grant
+          by
+          id
+          baseResult
+          ;
+      })
+    );
+  # the values of one stage, each computed once: `c` is this record
+  stageCtx =
+    {
+      base,
+      change,
+      rejected,
+      grant,
+      by,
+      id,
+      baseResult,
+    }:
+    c: {
+      inherit baseResult change;
       changedResult = eval {
         imports = [
           base
@@ -61,13 +87,10 @@ let
       keyG = e: "${e.sink}|${e.from}|${e.to}|${e.origin}";
       minus =
         k: xs: ys:
-        let
-          has = keySet (map k ys);
-        in
-        filter (x: !(has ? ${k x})) xs;
+        minusBy k xs (keySet (map k ys));
       delta = k: f: {
-        added = minus k (f changedResult) (f baseResult);
-        removed = minus k (f baseResult) (f changedResult);
+        added = c.minus k (f c.changedResult) (f baseResult);
+        removed = c.minus k (f baseResult) (f c.changedResult);
       };
       ids = r: map (s: s.id) r.scopes;
       activeList =
@@ -85,25 +108,25 @@ let
         else
           null;
       diff = {
-        scopes = delta (x: x) ids;
-        edges = delta keyG (r: r.graph.edges);
-        active = delta (x: x) activeList;
+        scopes = c.delta (x: x) c.ids;
+        edges = c.delta c.keyG (r: r.graph.edges);
+        active = c.delta (x: x) c.activeList;
       };
       # what the change itself declares: no value comparison (reduced values can hold functions and cycles)
       declared = eval change;
       # .20 .13: every aspect the change declares carries its submitter's label, whatever file (or inline program op)
       # holds it, so a floor sees the agent
       labels =
-        changedResult.labels
+        c.changedResult.labels
         //
           genAttrs
             (filter (
               n:
-              declared.declaredIn [
+              c.declared.declaredIn [
                 "aspects"
                 n
               ] != [ ]
-            ) (attrNames changedResult.active))
+            ) (attrNames c.changedResult.active))
             (_: {
               trust = by.trust or 0;
               by = by.name or null;
@@ -111,14 +134,14 @@ let
               file = null;
             });
       # D14 exact: a change reaches what its seeds reach through reads, in either eval (lib/_impact.nix, vic/r-yen.md)
-      declares = path: declared.declaredIn path != [ ];
+      declares = path: c.declared.declaredIn path != [ ];
       impactOf = _impact.impactOf;
       instT = k: n: {
         instance = k;
         name = n;
       };
-      both = f: f baseResult ++ f changedResult;
-      edgesBoth = both (r: r.graph.edges);
+      both = f: f baseResult ++ f c.changedResult;
+      edgesBoth = c.both (r: r.graph.edges);
       outOf = e: {
         inherit (e) sink;
         at = e.to;
@@ -129,10 +152,10 @@ let
         map (s: {
           name = s.id;
           value = s.kind;
-        }) (both (r: r.graph.scopes))
+        }) (c.both (r: r.graph.scopes))
       );
-      kindsBoth = names (both (r: attrNames r.schema.kinds));
-      instancesOf = k: names (both (r: attrNames (r.data.${k} or { })));
+      kindsBoth = names (c.both (r: attrNames r.schema.kinds));
+      instancesOf = k: names (c.both (r: attrNames (r.data.${k} or { })));
       activePairs =
         r:
         concatMap (
@@ -142,71 +165,71 @@ let
             at = id;
           }) (filter (id: r.active.${n}.${id}) (attrNames r.active.${n}))
         ) (attrNames r.active);
-      activeDelta = delta b.toJSON activePairs;
-      inBoth = filter (id: elem id (ids baseResult)) (ids changedResult);
+      activeDelta = c.delta b.toJSON c.activePairs;
+      inBoth = filter (id: elem id (c.ids baseResult)) (c.ids c.changedResult);
       # S8: the same edges into one receiver, in another order (a list reduction sees the order)
       orderOf =
         r: other:
-        mapAttrs (_: map keyG) (
-          groupBy (e: b.toJSON (outOf e)) (
-            filter (e: elem (keyG e) (map keyG other.graph.edges)) r.graph.edges
+        mapAttrs (_: map c.keyG) (
+          groupBy (e: b.toJSON (c.outOf e)) (
+            filter (e: elem (c.keyG e) (map c.keyG other.graph.edges)) r.graph.edges
           )
         );
-      ordered = orderOf baseResult changedResult;
-      reordered = orderOf changedResult baseResult;
+      ordered = c.orderOf baseResult c.changedResult;
+      reordered = c.orderOf c.changedResult baseResult;
       seeds =
-        map outOf (diff.edges.added ++ diff.edges.removed) # S1
+        map c.outOf (c.diff.edges.added ++ c.diff.edges.removed) # S1
         ++ concatMap (
           k:
-          map (n: instT k n) (
+          map (n: c.instT k n) (
             filter (
               n:
-              declares [
+              c.declares [
                 k
                 n
               ]
-            ) (instancesOf k)
+            ) (c.instancesOf k)
           )
-        ) kindsBoth # S2
-        ++ map outOf (
+        ) c.kindsBoth # S2
+        ++ map c.outOf (
           filter (
             e:
-            aspectOf e.origin != null
-            && declares [
+            c.aspectOf e.origin != null
+            && c.declares [
               "aspects"
-              (aspectOf e.origin)
+              (c.aspectOf e.origin)
             ]
-          ) edgesBoth
+          ) c.edgesBoth
         ) # S3
-        ++ map (id: { data = id; }) (diff.scopes.added ++ diff.scopes.removed) # S4
+        ++ map (id: { data = id; }) (c.diff.scopes.added ++ c.diff.scopes.removed) # S4
         ++ concatMap (
-          p: [ p ] ++ map outOf (filter (e: e.from == p.at && aspectOf e.origin == p.aspect) edgesBoth)
-        ) (activeDelta.added ++ activeDelta.removed) # S5
+          p: [ p ] ++ map c.outOf (filter (e: e.from == p.at && c.aspectOf e.origin == p.aspect) c.edgesBoth)
+        ) (c.activeDelta.added ++ c.activeDelta.removed) # S5
         ++ concatMap (
           k:
           if
-            declares [
+            c.declares [
               "kinds"
               k
             ]
           then
-            map (id: { data = id; }) (filter (id: kindAt.${id} == k) (attrNames kindAt))
-            ++ map (instT k) (instancesOf k)
-            ++ map outOf (filter (e: kindAt.${e.to} == k || kindAt.${e.from} == k) edgesBoth)
+            map (id: { data = id; }) (filter (id: c.kindAt.${id} == k) (attrNames c.kindAt))
+            ++ map (c.instT k) (c.instancesOf k)
+            ++ map c.outOf (filter (e: c.kindAt.${e.to} == k || c.kindAt.${e.from} == k) c.edgesBoth)
           else
             [ ]
-        ) kindsBoth # S6
+        ) c.kindsBoth # S6
         ++ map (id: { data = id; }) (
-          filter (id: baseResult.reads.data.${id} != changedResult.reads.data.${id}) inBoth
-        ) # S7: a scope's data, spawned or declared
-        ++ map b.fromJSON (filter (k: ordered.${k} != reordered.${k} or [ ]) (attrNames ordered)); # S8
-      dirty = impactOf {
-        edges = both (r: r.reads.edges);
-        whole = both (r: r.reads.whole);
-        inherit seeds;
+          filter (id: baseResult.reads.data.${id} != c.changedResult.reads.data.${id}) c.inBoth
+        ) # S7: a scope's data, spawned or c.declared
+        ++ map b.fromJSON (filter (k: c.ordered.${k} != c.reordered.${k} or [ ]) (attrNames c.ordered)); # S8
+      dirty = c.impactOf {
+        edges = c.both (r: r.reads.edges);
+        whole = c.both (r: r.reads.whole);
+        inherit (c) seeds;
       };
       # helpers and queries are code every module can call: a change to them reaches every scope
-      everywhere = any (k: declares [ k ]) (words "helpers queries");
+      everywhere = any (k: c.declares [ k ]) (words "helpers queries");
       # a scope id of either eval as its path of identities: the grant compares paths, never id strings
       pathById = listToAttrs (
         concatMap
@@ -219,7 +242,7 @@ let
           )
           [
             baseResult
-            changedResult
+            c.changedResult
           ]
       );
       allowedT =
@@ -227,27 +250,27 @@ let
         if t ? sink then
           grants.allowed grant {
             sink.sink = t.sink;
-            to = pathById.${t.at};
+            to = c.pathById.${t.at};
           }
         else
-          any (p: covers p pathById.${t.data or t.at}) grant.scopes;
+          any (p: covers p c.pathById.${t.data or t.at}) grant.scopes;
       reached =
-        if everywhere then
-          filter (id: !any (p: covers p pathById.${id}) grant.scopes) (
-            attrNames (keySet (ids baseResult ++ ids changedResult))
+        if c.everywhere then
+          filter (id: !any (p: covers p c.pathById.${id}) grant.scopes) (
+            attrNames (keySet (c.ids baseResult ++ c.ids c.changedResult))
           )
         else
-          names (map (t: t.data or t.at) (filter (t: !(t ? instance) && !allowedT t) dirty));
+          names (map (t: t.data or t.at) (filter (t: !(t ? instance) && !c.allowedT t) c.dirty));
       outside =
         id:
         errWith "stage"
           "the change can reach ${
-            concatStringsSep "/" (map (x: "${renderId x.kind} ${x.name}") pathById.${id})
+            concatStringsSep "/" (map (x: "${renderId x.kind} ${x.name}") c.pathById.${id})
           }, outside the grant"
           {
             code = "outside-grant";
             class = "authority";
-            got = pathById.${id};
+            got = c.pathById.${id};
           };
       # a grant entry that is no ref covers nothing; say so, so a typo is never a silent refusal
       notScope = map (
@@ -260,16 +283,16 @@ let
         }
       ) (filter (e: e ? invalid) (if grant == null then [ ] else grant.scopes));
       lawKeys = words "invariants relations labels flake";
-      law = filter (k: declared.declaredIn [ k ] != [ ]) lawKeys;
-      errors = minus keyE changedResult.errors baseResult.errors;
-      violations = filter (a: !elem a baseResult.check.violations) changedResult.check.violations;
-      incomplete = filter (a: !elem a baseResult.check.incomplete) changedResult.check.incomplete;
+      law = filter (k: c.declared.declaredIn [ k ] != [ ]) c.lawKeys;
+      errors = c.minus c.keyE c.changedResult.errors baseResult.errors;
+      violations = filter (a: !elem a baseResult.check.violations) c.changedResult.check.violations;
+      incomplete = filter (a: !elem a baseResult.check.incomplete) c.changedResult.check.incomplete;
       refused =
-        optional (sha != null && elem sha rejected) (
+        optional (c.sha != null && elem c.sha rejected) (
           errWith "stage" "this change was rejected before" {
             code = "rejected";
             class = "authority";
-            got = sha;
+            got = c.sha;
           }
         )
         ++ map (
@@ -279,30 +302,33 @@ let
             class = "authority";
             path = [ k ];
           }
-        ) law
+        ) c.law
         # one refusal per scope, before or after the change, where it reaches outside the grant
-        ++ map outside (if grant == null then [ ] else reached)
-        ++ notScope;
-    in
-    {
-      inherit
-        errors
-        refused
-        sha
-        violations
-        incomplete
-        diff
-        labels
-        ;
-      floor = floorOf labels changedResult.graph.edges;
-      # both verdicts for the Lean checker: `yen-cert-check --change base staged`
-      lean = {
-        base = baseResult.check.lean;
-        staged = changedResult.check.lean;
-      };
-      ok = errors == [ ] && violations == [ ] && incomplete == [ ] && refused == [ ];
-      render = if isData change then b.toJSON change else null; # read back with builtins.fromJSON
+        ++ map c.outside (if grant == null then [ ] else c.reached)
+        ++ c.notScope;
     };
+  minusBy =
+    k: xs: has:
+    filter (x: !(has ? ${k x})) xs;
+  stageOut = c: {
+    inherit (c)
+      errors
+      refused
+      sha
+      violations
+      incomplete
+      diff
+      labels
+      ;
+    floor = floorOf c.labels c.changedResult.graph.edges;
+    # both verdicts for the Lean checker: `yen-cert-check --change base staged`
+    lean = {
+      base = c.baseResult.check.lean;
+      staged = c.changedResult.check.lean;
+    };
+    ok = c.errors == [ ] && c.violations == [ ] && c.incomplete == [ ] && c.refused == [ ];
+    render = if isData c.change then b.toJSON c.change else null; # read back with builtins.fromJSON
+  };
 in
 {
   inherit
