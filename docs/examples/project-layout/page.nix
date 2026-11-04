@@ -11,16 +11,20 @@ in
     { docs, ... }:
     [
       ''
-        yen reads one [module](/principles/modules/). A module is a path, a function or an attrset. Its keys are `imports`, `yen` and [sinks](/behavior/sinks/).
-        yen does not know what `inputs` or `lib` are. The root module gives them as sinks, and declares them in `yen.sinks`.
-        Any file asks for them as args.
+        A yen project is one directory of files. This is the layout of the template:
       ''
       docs.tree
       ''
-        `modules/` is the fleet. Every file there is a module: put each [kind](/model/kinds-fields/), feature or host in its own file,
-        and move files freely. File order never changes a result.
+        `modules/` is the fleet. Every file there is a [module](/principles/modules/): put each [kind](/model/kinds-fields/),
+        feature or host in its own file, and move files freely. File order never changes a result.
+
+        yen reads one module. A module is a path, a function or an attrset. Its keys are `imports`, `yen` and [sinks](/behavior/sinks/).
+        yen does not know what `inputs` or `lib` are. The root module gives them as sinks, and declares them in `yen.sinks`
+        (you see this in `default.nix` below). Any file asks for them as args. See the [glossary](/reference/glossary/) for each term.
 
         ## Two entry points
+
+        The same `modules/` has two entry points:
       ''
       (docs.tabs [
         {
@@ -47,7 +51,10 @@ in
         `nixpkgs.lib.nixosSystem` exists only on the nixpkgs flake. `nixos/lib/eval-config.nix` works with a flake input
         and with a plain path, so one host file serves both entry points:
       ''
-      (docs.fileWith "{7}" "modules/host.nix")
+      (docs.fileNoted "" "modules/host.nix")
+      ''
+        At `(1)`, the host imports `eval-config.nix` from the `nixpkgs` input. This works when `nixpkgs` is a flake input or a plain path.
+      ''
       (docs.caution "Args are explicit" ''
         yen gives a module only `yen` and the sinks that modules give or declare. A file that asks for `pkgs` at the top level gets an error record:
         `pkgs` belongs to NixOS. Ask for it inside a `nixos` element.

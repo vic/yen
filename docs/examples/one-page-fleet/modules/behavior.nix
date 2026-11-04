@@ -6,7 +6,7 @@ let
 in
 {
   yen.aspects.names = {
-    at = yen.kinds.host;
+    at = yen.kinds.host; # (1)
     os =
       { host, env, ... }:
       {
@@ -25,12 +25,12 @@ in
       };
   };
   yen.aspects.postgres = {
-    at = s: lib.any (h: same h.db s) (lib.attrValues yen.host); # a fact: some host uses me as its db
+    at = s: lib.any (h: same h.db s) (lib.attrValues yen.host); # (2)
     os.services.postgresql.enable = true;
   };
   # a rule across machines, checked before deploy: a host's db lives in its own environment.
   # H uses D as its db, H is in environment E, and D is not.
-  yen.invariants.db-same-env =
+  yen.invariants.db-same-env = # (3)
     {
       H,
       D,

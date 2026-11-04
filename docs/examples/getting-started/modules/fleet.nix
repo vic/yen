@@ -2,9 +2,9 @@
 { yen, ... }:
 {
   yen.kinds.fleet = {
-    spawns.host = _: yen.host; # every host lives under the fleet
-    sinks.out.reduce = yen.lib.reduce.merge;
+    spawns.host = _: yen.host; # (1)
+    sinks.out.reduce = yen.lib.reduce.merge; # (2)
   };
   yen.fleet.main = { };
-  yen.flake = { out, ... }: out;
+  yen.flake = { out, ... }: out; # (3)
 }

@@ -2,9 +2,9 @@
 { yen, ... }:
 {
   yen.aspects.base = {
-    at = yen.kinds.host;
-    nixos =
-      { host, ... }:
+    at = yen.kinds.host; # (1)
+    nixos = # (2)
+      { host, ... }: # (3)
       {
         networking.hostName = host.name;
         boot.loader.grub.device = "nodev";
@@ -17,7 +17,7 @@
   };
 
   yen.aspects.motd = {
-    at = yen.host.laptop;
+    at = yen.host.laptop; # (4)
     nixos.environment.etc.motd.text = "managed by yen";
   };
 }

@@ -43,28 +43,29 @@
       ''
         **yen is a verified language for Nix configurations.** You write plain Nix data and behavior.
         yen checks it and answers: the NixOS, nix-darwin and home-manager systems to build, the errors,
-        the graph of who gives what to whom, and whether your rules hold.
+        the graph of who gives what to whom, and whether your [rules](/query/invariants/) hold.
+        The [overview](/start/overview/) explains the four words. The [glossary](/reference/glossary/) lists every term.
       ''
       (docs.cards [
         {
           title = "Data is queried, not merged";
           icon = "magnifier";
-          body = "[Kinds](/model/kinds-fields/), instances and typed fields are data. Content in many files never overwrites itself.";
+          body = "[Kinds](/model/kinds-fields/), [instances](/model/instances-refs/) and typed fields are data. Content in many files never overwrites itself. See [queried, not merged](/principles/queried-not-merged/).";
         }
         {
           title = "Behavior lands where you say";
           icon = "puzzle";
-          body = "An [aspect](/behavior/aspects/) is active where its predicate holds. Its elements go to the nearest [scope](/model/scopes/) that collects them.";
+          body = "An [aspect](/behavior/aspects/) is active where its predicate holds. Its elements go to the nearest [scope](/model/scopes/) that collects them, in a [sink](/behavior/sinks/).";
         }
         {
           title = "Questions have answers";
           icon = "approve-check";
-          body = "Graphs, Datalog with a well-founded semantics, and µKanren with constraints. All pure Nix.";
+          body = "[Graphs](/query/graphs/), [Datalog](/query/datalog/) with a well-founded semantics, and [µKanren](/query/ukanren/) with constraints. All pure Nix.";
         }
         {
           title = "Safe for agents";
           icon = "warning";
-          body = "A change is staged, checked against your rules across machines, and refused with its reason. An MCP server answers agents.";
+          body = "A change is [staged](/agents/stage/), checked against your rules across machines, and refused with its reason. An [MCP server](/agents/mcp/) answers agents.";
         }
       ])
       ''

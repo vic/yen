@@ -206,7 +206,9 @@ in
       ))
       ''
         Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
-        `reference` is the showcase template. Read it, but do not start from it: its `yen` input is this repository.
+        `noflake` needs no flake: [Project layout](/start/project-layout/) explains both entry points.
+        `reference` is the [showcase template](https://github.com/vic/yen/tree/main/reference). Read it, but do not start from it: its `yen` input is this repository.
+        New to the words in the table? Read the [overview](/start/overview/) and the [glossary](/reference/glossary/).
       ''
     ];
 

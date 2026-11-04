@@ -2,15 +2,15 @@
 { yen, ... }:
 {
   yen.aspects.basics = {
-    at = yen.kinds.machine; # every machine
+    at = yen.kinds.machine; # (1)
     packages = "git";
   };
   yen.aspects.design = {
-    at = yen.machine.studio; # one machine
+    at = yen.machine.studio; # (2)
     packages = "gimp";
   };
   yen.aspects.versioned-assets = {
-    at = yen.aspects.design; # wherever `design` is active
-    packages = "git"; # `set` keeps one copy
+    at = yen.aspects.design; # (3)
+    packages = "git"; # (4)
   };
 }

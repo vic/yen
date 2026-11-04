@@ -66,7 +66,8 @@ What to expect:
 ## Yen Flake example
 
 Yen is inspired by [Cycle.js](https://cycle.js.org) `source->sink` value propagation and built on four concepts:
-**kinds**, **scopes**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**.
+**[kinds](https://yen.oeiuwq.com/model/kinds-fields/)**, **[scopes](https://yen.oeiuwq.com/model/scopes/)**, **[aspects](https://yen.oeiuwq.com/behavior/aspects/)** and **[sinks](https://yen.oeiuwq.com/behavior/sinks/)**.
+The [glossary](https://yen.oeiuwq.com/reference/glossary/) lists every term.
 The Yen kernel knows nothing about NixOS. It can describe fleets over any configuration domain: NixOS, nix-darwin,
 home-manager, clusters, terraform, k8s, or anything else you can model as Nix values.
 
@@ -261,10 +262,7 @@ builds nothing until it is fixed.
 
 ## Answers come with a reason
 
-Logic questions about your fleet get answers you can read. `result.check.why` gives the rules that make a violation
-true. `result.check.whyNot` works the other way. For an atom that is not true, it gives each rule with that head, and
-the body atoms that stop it. For an atom that is true, it gives nothing. A question is a literal, by reference:
-`result.check.bad.<invariant> host`, with the host an instance (or `{ kind; name; }` from outside the fleet).
+Logic questions about your fleet get answers you can read. This fleet has one rule, `no-desktop-on-servers`:
 
 
 ```nix title="variants/invariant.nix"
@@ -297,6 +295,11 @@ in
 }
 ```
 
+`result.check.why` gives the rules that make a violation
+true. `result.check.whyNot` works the other way. For an atom that is not true, it gives each rule with that head, and
+the body atoms that stop it. For an atom that is true, it gives nothing. A question is a literal, by reference:
+`result.check.bad.<invariant> host`, with the host an instance (or `{ kind; name; }` from outside the fleet).
+<sup>[docs](https://yen.oeiuwq.com/query/invariants/)</sup>
 
 Here `web` breaks the rule, and `db` does not. The violation for `web`:
 
@@ -327,7 +330,7 @@ is not even a candidate at `db`.
 
 ## Values from constraints
 
-`yen.lib.uKanren` finds values that fit your constraints, and a relation can run backward.
+`yen.lib.uKanren` finds values that fit your constraints, and a relation can run backward. <sup>[docs](https://yen.oeiuwq.com/query/ukanren/)</sup>
 
 
 ```nix title="variants/ports.nix"
@@ -405,7 +408,7 @@ Yen checks the whole fleet before a change reaches a file. A rule is a function 
 breaks. A rule can hold across machines, so a mistake that involves two hosts gets caught too. These are easy to make in a
 homelab: a desktop on a server, or two hosts with the same address.
 
-A change is staged before it is written. `yen.lib.stage` evaluates the fleet without the change and with it. `ok` is true
+A change is staged before it is written <sup>[docs](https://yen.oeiuwq.com/agents/stage/)</sup>. `yen.lib.stage` evaluates the fleet without the change and with it. `ok` is true
 only when nothing new is wrong. A grant made with `yen.lib.grant` limits the scopes a change may reach, and a grant can only narrow.
 
 Each verdict can come with a certificate. `yen.lib.datalog.checkCertificate` is a small checker. After evaluation,
