@@ -14,19 +14,19 @@
         Advanced and complex fleets, that a person can still read and understand.
 
         yen also treats agents as first-class members of the team that runs the infrastructure. An agent reads the same
-        [queries](/query/queries/) as a person: the schema, the errors, why an [aspect](/behavior/aspects/) is active. It proposes a change as data, the fleet
-        stages it, checks the rules across machines, and refuses it with the reason. Nothing reaches a machine unchecked.
+        [queries](/query/queries/) as a person: the [schema](/agents/agent-surface/), the errors, why an [aspect](/behavior/aspects/) is active. It proposes a change as data, the fleet
+        [stages](/agents/stage/) it, checks the rules across machines, and refuses it with the reason. Nothing reaches a machine unchecked.
       ''
       (docs.cards [
         {
           title = "For people";
           icon = "open-book";
-          body = "Four words: [kinds](/model/kinds-fields/), [scopes](/model/scopes/), aspects, [sinks](/behavior/sinks/). Plain Nix data. Every rule of how content moves is a sink you can read.";
+          body = "Four words (see the [glossary](/reference/glossary/)): [kinds](/model/kinds-fields/), [scopes](/model/scopes/), [aspects](/behavior/aspects/), [sinks](/behavior/sinks/). Plain Nix data. Every rule of how content moves is a sink you can read.";
         }
         {
           title = "For agents";
           icon = "rocket";
-          body = "Every answer is JSON-safe data. Changes are staged, checked by [invariants](/query/invariants/), and limited by grants. An MCP server answers.";
+          body = "Every answer is JSON-safe data. Changes are staged, checked by [invariants](/query/invariants/), and limited by grants (see [Stage a change](/agents/stage/)). An [MCP server](/agents/mcp/) answers.";
         }
       ])
       ''
@@ -73,7 +73,7 @@
           ]
           [
             "vic/yen"
-            "queries instead of merges, Cycle.js sources and sinks, Nix builtins only"
+            "[queries instead of merges](/principles/queried-not-merged/), [Cycle.js sources and sinks](/behavior/cycle/), Nix builtins only"
           ]
         ]
       )

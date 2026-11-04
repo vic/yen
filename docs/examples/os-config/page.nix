@@ -8,17 +8,25 @@
     { docs, ... }:
     [
       ''
-        A home-manager module often needs its host's NixOS config: `{ osConfig, pkgs, ... }:`.
+        A home-manager module often needs its host's NixOS config: `{ osConfig, pkgs, ... }:`. See [NixOS system and home](/nixos/system-and-home/) for the basics.
         In yen, `osConfig` is a [sink](/behavior/sinks/). Each host gives its realized config to it, and a module names it like any sink arg.
         `pkgs` stays open, so home-manager fills its own `pkgs`.
       ''
-      (docs.fileWith "{12-24,54-57}" "modules/fleet.nix")
+      (docs.fileNoted "{12-24,54-57}" "modules/fleet.nix")
       ''
-        - The `os-config` aspect gives `out.nixosConfigurations.<host>.config`. It is lazy: Nix reads it only when a module asks.
-        - A home has `on`, so it lives under that host. It reads the host's sinks like any child, and still builds `homeConfigurations`.
+        - At `(1)`, a host spawns its users and its homes. At `(2)`, the sink `osConfig` takes one value.
+        - At `(3)`, a user gives `homeManager` modules to the NixOS of its host. At `(4)`, a standalone home builds `homeConfigurations`.
+        - At `(5)`, the aspect `home-manager` adds the home-manager module to NixOS, below users.
+        - At `(6)`, the [aspect](/behavior/aspects/) `os-config` gives `out.nixosConfigurations.<host>.config`. It is lazy: Nix reads it only when a module asks.
+
+        This file declares alice and her home:
       ''
-      (docs.fileWith "{22-33}" "modules/alice.nix")
+      (docs.fileNoted "{23-32}" "modules/alice.nix")
       ''
+        At `(1)`, alice lives on the host `server`. At `(2)`, her standalone home has `on`, so it lives under that host. It reads
+        the host's sinks like any child, and still builds `homeConfigurations`. At `(3)`, one `at` list holds alice and her homes.
+        At `(4)`, the module asks for `osConfig` from the sink, and for the `pkgs` of home-manager.
+
         `editors` lands in two places: in the server's NixOS (`home-manager.users.alice`) and in `homeConfigurations."alice@server"`.
         Both read the same `osConfig`.
       ''

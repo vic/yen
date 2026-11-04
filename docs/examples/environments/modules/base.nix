@@ -4,6 +4,7 @@ let
   setting =
     path: host:
     yen.lib.cascade path [
+      # (1)
       host
       host.environment
       (host.environment.base or null)
@@ -19,7 +20,7 @@ in
           hostName = host.name;
           domain = environment.domain;
         };
-        time.timeZone = setting [ "settings" "timeZone" ] host;
+        time.timeZone = setting [ "settings" "timeZone" ] host; # (2)
         boot.loader.grub.device = "nodev";
         fileSystems."/" = {
           device = "/dev/sda1";
@@ -31,14 +32,14 @@ in
   };
   yen.aspects.time-zones = {
     at = yen.kinds.host;
-    out =
+    out = # (3)
       { host, ... }:
       {
         timeZones.${host.name} = setting [ "settings" "timeZone" ] host;
       }; # goes up to the fleet
   };
   yen.aspects.account = {
-    at = yen.kinds.user;
+    at = yen.kinds.user; # (4)
     nixos =
       { user, ... }:
       {

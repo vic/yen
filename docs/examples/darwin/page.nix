@@ -9,12 +9,24 @@
     [
       ''
         Many options mean the same on NixOS and nix-darwin: `networking.hostName`, `environment.systemPackages`,
-        `nix.settings`. Write them once. A `host` forwards its `os` [sink](/behavior/sinks/) to `nixos`, and a `mac` forwards it to `darwin`.
+        `nix.settings`. Write them once. The kinds `host` and `mac` have an `os` [sink](/behavior/sinks/) each, and each one
+        forwards ([forwards](/behavior/forwards/)) to the sink of its platform:
       ''
-      (docs.fileWith "{12-13,24-25}" "modules/platforms.nix")
-      (docs.file "modules/shared.nix")
-      (docs.file "modules/machines.nix")
+      (docs.fileNoted "{12-13,24-25}" "modules/platforms.nix")
       ''
+        At `(1)`, a `host` forwards its `os` sink to `nixos`. At `(2)`, the `nixos` sink gives `nixosConfigurations`.
+        At `(3)`, a `mac` forwards its `os` sink to `darwin`. At `(4)`, the `darwin` sink gives `darwinConfigurations`.
+
+        This [aspect](/behavior/aspects/) writes `os` once:
+      ''
+      (docs.fileNoted "" "modules/shared.nix")
+      ''
+        At `(1)`, it is active at both kinds. At `(2)`, `os` holds the options that NixOS and nix-darwin share.
+        These are the two machines:
+      ''
+      (docs.fileNoted "" "modules/machines.nix")
+      ''
+        `(1)` is a NixOS machine and `(2)` is a mac. Each has its own aspect with the options of its platform.
         The routes: `shared` gives `os` at each machine, and each `os` sink feeds its platform's sink:
       ''
       (docs.routes result)

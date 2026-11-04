@@ -1,21 +1,22 @@
 # An aspect key `errors` gives error records, or plain messages. Nothing throws. `from` is always the giving scope.
 { yen, lib, ... }:
 let
-  hosts.instances = yen.kinds.host; # a tree request: every host, with its data
+  hosts.instances = yen.kinds.host; # (1) a tree request: every host, with its data
 in
 {
   yen.aspects.unique-addr = {
-    at = yen.kinds.fleet;
+    at = yen.kinds.fleet; # (2)
     cycle =
       { tree, ... }:
       {
         tree = [ hosts ];
         errors = [
+          # (3)
           (lib.concatLists (
             lib.mapAttrsToList (
               a: hs:
               lib.optional (lib.length hs > 1) {
-                code = "duplicate-addr";
+                code = "duplicate-addr"; # (4)
                 error = "${a} is the address of ${lib.concatMapStringsSep " and " (h: h.name) hs}";
                 fix = "give each host its own addr";
                 path = [ "addr" ];
@@ -31,6 +32,6 @@ in
       yen.kinds.host
       (s: !s.backup)
     ];
-    warnings = { host, ... }: "${host.name} has no backup";
+    warnings = { host, ... }: "${host.name} has no backup"; # (5)
   };
 }

@@ -11,12 +11,18 @@
         A person uses several machines. Some run NixOS, some only home-manager. In yen the person is data,
         and their home is one [aspect](/behavior/aspects/) that is active in both places.
       ''
-      (docs.fileWith "{11,16}" "modules/fleet.nix")
+      (docs.fileNoted "{11,16}" "modules/fleet.nix")
       ''
-        - A `user` lives under each host in its `hosts`. Its `homeManager` sink forwards into the host's NixOS.
-        - A `home` lives under the fleet. Its `homeManager` sink builds `homeConfigurations.<name>`.
+        - At `(2)`, a `user` lives under each host in its `hosts`. At `(3)`, its `homeManager` sink forwards into the host's NixOS.
+        - At `(1)`, a `home` lives under the fleet. At `(4)`, its `homeManager` sink builds `homeConfigurations.<name>`.
+
+        This file declares alice, her home and her aspects:
       ''
-      (docs.fileWith "{6-8}" "modules/alice.nix")
+      (docs.fileNoted "{6-8}" "modules/alice.nix")
+      ''
+        At `(1)`, alice lives on the host `server`. At `(2)`, her home `alice@laptop` has no host. At `(3)`, `alice-home` is
+        active at her scopes and at her homes, and it gives one `homeManager` module. This is the host:
+      ''
       (docs.file "modules/machines.nix")
       ''
         `alice-home` is active at alice's user scope and at her home:

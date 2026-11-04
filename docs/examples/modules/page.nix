@@ -27,32 +27,33 @@ in
       ''
         A yen module looks like a NixOS module: a path, a function or an attrset, with `imports`. It is not one.
         yen does not use the NixOS module system and does not depend on nixpkgs: it uses Nix builtins only.
-        A module is a function `sources -> sinks`, as in [Cycle](/behavior/cycle/). Its keys:
-
-        - `imports`: more yen modules.
-        - `yen`: every declaration.
-        - any other key: a module sink, such as `lib` or `inputs`. Any module reads a sink as an arg.
+        A module is a function `sources -> sinks`, as in [Cycle](/behavior/cycle/). This module has the three kinds of key:
+      ''
+      (docs.fileNoted "" "variants/module-sinks.nix")
+      ''
+        - `imports` `(4)`: more yen modules.
+        - `yen` `(1)`: every declaration. Here it declares a sink.
+        - any other key `(5)`: a module sink, such as `admins`, `lib` or `inputs`. Any module reads a sink as an arg, as at `(6)`.
 
         There is no `options` and no `config`. A sink that no module reads or declares is an error. So is a
-        key that yen does not read inside `yen` or inside a [kind](/model/kinds-fields/):
+        key that yen does not read inside `yen` or inside a [kind](/model/kinds-fields/). This NixOS module has both keys:
       ''
       (docs.file "variants/nixos-style.nix")
       (docs.value (map (e: { inherit (e) code error path; }) (variant "variants/nixos-style.nix").errors))
       ''
         ## Module sinks: the options of a module
 
-        `yen.sinks.<name>` declares a module sink, as a top-level `options` does in NixOS. Its keys are the
-        keys of a kind's sink: `of` is the type that checks each module's value, and `reduce` is the merge
-        strategy. A sink with no `reduce` takes `one` value, which an arg gets as it is. A declared sink that
-        no module gives reduces to its empty value.
+        `yen.sinks.<name>` declares a module sink, as a top-level `options` does in NixOS. In the module above, `(1)` declares
+        `admins`. Its keys are the keys of a kind's [sink](/behavior/sinks/): `of` `(2)` is the type that checks each module's
+        value, and `reduce` `(3)` is the merge strategy. A sink with no `reduce` takes `one` value, which an arg gets as it is.
+        A declared sink that no module gives reduces to its empty value. The two `admins` lists reach the aspect `wheel` as one list:
       ''
-      (docs.file "variants/module-sinks.nix")
       (docs.value (variant "variants/module-sinks.nix").reduced.nixos."fleet:main/host:web".users)
       ''
         Key names load before any arg has an answer: a key name that reads an arg is an error record. `imports` can read
         a sink, such as `inputs`, when modules outside its own imports give it. yen loads such imports in rounds.
-        `result.modules` shows what each module asks, gives and declares. A cycle in it is `import-loop`, an error record,
-        not an infinite recursion.
+        `result.modules` (see [Queries](/query/queries/)) shows what each module asks, gives and declares. A cycle in it is
+        `import-loop`, an error record, not an infinite recursion.
       ''
       ''
         ## What yen gets from not using nixpkgs modules
@@ -139,8 +140,18 @@ in
 
         The kinds hold what NixOS `options` hold. The instances hold what `config` holds:
       ''
-      (docs.file "modules/kinds.nix")
-      (docs.file "modules/fleet.nix")
+      (docs.fileNoted "" "modules/kinds.nix")
+      ''
+        At `(1)`, `addr` is a field, as an option has a type. At `(2)`, a nested field with a default is the answer to
+        `mkEnableOption`. At `(3)`, `listOf` checks every item. At `(4)`, `spawns.user` makes each user a scope under its host.
+        At `(5)`, the sink `nixos` collects the NixOS modules. At `(6)`, `on` is a ref from a user to its host.
+        The instances hold the `config`:
+      ''
+      (docs.fileNoted "" "modules/fleet.nix")
+      ''
+        At `(1)`, the flake has no outputs, because this page reads the eval result. At `(2)` and `(3)`, instance data
+        takes the place of `config`. At `(4)`, `at` takes the place of `mkIf`. This table lists each NixOS pattern:
+      ''
       (docs.table
         [ "NixOS" "yen" ]
         [

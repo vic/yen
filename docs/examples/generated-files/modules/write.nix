@@ -1,7 +1,7 @@
 # README.md and the CI workflow, generated from fleet data by github:sini/files.
 { yen, lib, ... }:
 let
-  whole.graph = true; # a tree request: the whole fleet
+  whole.graph = true; # (1) a tree request: the whole fleet
   fleetOf = tree: builtins.head (tree.select whole); # the whole fleet, with its data
   hostsIn = fleet: lib.filter (s: fleet.lib.holds fleet.kinds.host s) fleet.lib.graph.scopes;
   hostsOf = tree: hostsIn (fleetOf tree);
@@ -12,8 +12,9 @@ in
     cycle =
       { tree, ... }:
       {
-        tree = [ whole ];
+        tree = [ whole ]; # (2)
         files = [
+          # (3)
           {
             files.file."README.md".text = ''
               # My fleet

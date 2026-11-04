@@ -4,7 +4,7 @@
   yen.aspects = {
     fw = {
       at = yen.kinds.host;
-      firewall = { ports, ... }: builtins.sort builtins.lessThan ports; # reads another option: config.ports
+      firewall = { ports, ... }: builtins.sort builtins.lessThan ports; # (1) reads another option: config.ports
     };
     ssh = {
       at = yen.kinds.host;
@@ -15,7 +15,7 @@
       ports = 80;
     };
     tls = {
-      at = yen.aspects.web; # mkIf: active where web is
+      at = yen.aspects.web; # (2) mkIf: active where web is
       ports = 443;
     };
     base = {
@@ -36,12 +36,12 @@
     };
     addrs = {
       at = yen.kinds.host;
-      addrs =
+      addrs = # (3) every host gives its address to the fleet
         { host, ... }:
         {
           ${host.name} = host.addr;
         };
-      peers = { host, addrs, ... }: removeAttrs addrs [ host.name ]; # the other nodes, through the fleet
+      peers = { host, addrs, ... }: removeAttrs addrs [ host.name ]; # (4) the other nodes, through the fleet
     };
   };
 }

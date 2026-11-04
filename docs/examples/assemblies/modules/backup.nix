@@ -6,7 +6,7 @@ let
     r:
     yen.lib.all [
       yen.kinds.member
-      (s: same s.assembly yen.assembly.backup && s.role == r)
+      (s: same s.assembly yen.assembly.backup && s.role == r) # (1)
     ];
   nas.scopesOf = yen.host.nas; # a tree request: nas, with its data
   me.nearest = yen.kinds.host; # a tree request: the host this member sits on
@@ -14,7 +14,7 @@ in
 {
   yen.aspects.backup-client = {
     at = role "client";
-    exports = { host, ... }: host.addr; # published by the member scope: the engine sets `from`
+    exports = { host, ... }: host.addr; # (2) published by the member scope: the engine sets `from`
     cycle =
       { tree, ... }:
       {

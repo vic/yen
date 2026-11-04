@@ -1,7 +1,7 @@
 { yen, ... }:
 {
   yen.host.box = { };
-  yen.guest.web.on = yen.host.box;
+  yen.guest.web.on = yen.host.box; # (1)
   yen.guest.db.on = yen.host.box;
 
   yen.aspects.box = {

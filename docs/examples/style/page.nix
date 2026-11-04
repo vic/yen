@@ -53,16 +53,18 @@ in
         and selects it by the same name. `(3)` A function of the host and of the request's answer, with a comment that
         says what it gives. `(4)` The cycle only calls it.
 
-        An expensive value (a `nixosSystem`, a stage, a graph) is computed once: pass it as an argument to the
+        An expensive value (a `nixosSystem`, a [stage](/agents/stage/), a [graph](/query/graphs/)) is computed once: pass it as an argument to the
         function that reads it, and do not call the function that makes it twice.
 
         ## Refs, not names
 
-        The data says which instance it means with a ref, `yen.env.prod`, not with the string `"prod"`. A ref has no
-        typo to make: a wrong one is an [error record](/principles/errors/).
+        The data says which instance it means with a ref, not with a string:
       ''
-      (docs.file "modules/instances.nix")
+      (docs.fileNoted "" "modules/instances.nix")
       ''
+        At `(1)`, `yen.env.prod` is a [ref](/model/instances-refs/), not the string `"prod"`. At `(2)`, a user lists refs to hosts.
+        A ref has no typo to make: a wrong one is an [error record](/principles/errors/).
+
         ## The style to avoid
 
         Here is the same fleet in one file. It works, and it gives the same configuration:

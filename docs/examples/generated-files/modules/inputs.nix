@@ -2,7 +2,7 @@
 { yen, ... }:
 {
   yen.aspects.core-inputs = {
-    at = yen.kinds.fleet;
+    at = yen.kinds.fleet; # (1)
     flake-file = {
       description = "A fleet that writes its own flake.nix, README.md and CI workflow";
       outputs = ''
@@ -13,6 +13,7 @@
         } (inputs.import-tree ./modules)
       '';
       inputs = {
+        # (2)
         yen.url = "github:vic/yen";
         import-tree.url = "github:denful/import-tree";
         flake-file.url = "github:denful/flake-file";
@@ -23,7 +24,7 @@
   };
   yen.aspects.web = {
     at = yen.host.web;
-    flake-file.inputs.nixpkgs.url = "https://nixos.org/channels/nixos-25.05/nixexprs.tar.xz"; # goes up to the fleet's `flake-file` sink
+    flake-file.inputs.nixpkgs.url = "https://nixos.org/channels/nixos-25.05/nixexprs.tar.xz"; # (3) goes up to the fleet's `flake-file` sink
     nixos = {
       services.nginx.enable = true;
       boot.loader.grub.device = "nodev";

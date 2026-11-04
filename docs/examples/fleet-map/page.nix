@@ -28,7 +28,7 @@
     [
       ''
         [`reference`](https://github.com/vic/yen/tree/main/reference) is a complete running specification of yen.
-        It models every capability of Den, den-hoag and clan, and the advanced cases of several real fleets. Each pattern has a check.
+        It models every capability of [Den](/migrate/from-den/), den-hoag and clan, and the advanced cases of several real fleets. Each pattern has a check.
         It is big on purpose: read these docs first, then use the fleet to look up how a pattern looks at scale.
 
         This index is read from the fleet's files: each row is a [module](/principles/modules/) and its first comment line.

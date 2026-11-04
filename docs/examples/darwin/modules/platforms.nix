@@ -9,24 +9,24 @@
     sinks.out.reduce = yen.lib.reduce.merge;
   };
   yen.kinds.host.sinks = {
-    os.nixos =
+    os.nixos = # (1)
       { os, ... }:
       {
         imports = os;
       };
-    nixos.out =
+    nixos.out = # (2)
       { host, nixos, ... }:
       {
         nixosConfigurations.${host.name} = inputs.nixpkgs.lib.nixosSystem { modules = nixos; };
       };
   };
   yen.kinds.mac.sinks = {
-    os.darwin =
+    os.darwin = # (3)
       { os, ... }:
       {
         imports = os;
       };
-    darwin.out =
+    darwin.out = # (4)
       { mac, darwin, ... }:
       {
         darwinConfigurations.${mac.name} = inputs.nix-darwin.lib.darwinSystem { modules = darwin; };

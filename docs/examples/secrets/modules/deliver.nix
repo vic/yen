@@ -9,11 +9,11 @@ in
     cycle =
       { tree, scope, ... }:
       {
-        tree = [ secrets ];
-        secrets = lib.filter (s: lib.any (yen.lib.same scope) s.owners) (lib.head (tree.select secrets));
+        tree = [ secrets ]; # (1)
+        secrets = lib.filter (s: lib.any (yen.lib.same scope) s.owners) (lib.head (tree.select secrets)); # (2)
       };
   };
-  # a secret that no host owns is an error, not a silent leftover
+  # (3) a secret that no host owns is an error, not a silent leftover
   yen.aspects.orphans = {
     at = yen.kinds.fleet;
     cycle =
@@ -21,6 +21,7 @@ in
       {
         tree = [ secrets ];
         errors = [
+          # (4)
           (map (s: "secret ${s.name} (${s.file}) has no owner") (
             lib.filter (s: s.owners == [ ]) (lib.head (tree.select secrets))
           ))
