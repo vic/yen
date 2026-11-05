@@ -160,7 +160,7 @@ let
     # reduced sink values to build them from by hand (D13)
     #: result.reduced :: { sink = { scope id = value; }; } or null -- each sink reduced at each receiver; null when the fleet is not clean
     reduced = if clean then reduced else null;
-    #: result.flake :: flake or { invalid-flake-errors = { errors; violations; incomplete; }; } -- the flake outputs; the reason instead when the fleet is not clean; with inputs.nixpkgs, always checks.<system>.yen-lean (lib.batteries.lean.verify)
+    #: result.flake :: flake or { invalid-flake-errors = { errors; violations; incomplete; }; } -- the flake outputs ({ } for a fleet with no `yen.flake`, null with no fleet); the reason instead when the fleet is not clean; with inputs.nixpkgs, always checks.<system>.yen-lean (lib.batteries.lean.verify)
     # its flake is the reason instead: a build finds no output, and `nix eval .#invalid-flake-errors` says why
     flake = withLean (
       if clean then

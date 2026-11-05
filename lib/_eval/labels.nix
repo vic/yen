@@ -345,7 +345,14 @@ let
       aspects.${v.aspect} or v
     else
       v;
-  flakeFill = if top ? flake && scopes != [ ] then fill (head scopes) top.flake else { ok = null; };
+  # no fleet has no flake; a fleet with no `yen.flake` has no outputs of its own, but it still gets its check (`withLean`)
+  flakeFill =
+    if scopes == [ ] then
+      { ok = null; }
+    else if top ? flake then
+      fill (head scopes) top.flake
+    else
+      { ok = { }; };
   clean = errorsAll == [ ] && check.ok;
   # `checks.<system>.yen-lean` in every flake, clean or not, when `inputs.nixpkgs` is a module sink: the Lean checker
   # on the verdict, failing on a violation or an error. Not when a rule reads a relation decided by a Nix function:
