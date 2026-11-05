@@ -50,7 +50,7 @@ in
         > Only a valid fleet can exist as flake outputs. - This question is similar to asking the difference between
         > throws at runtime in code, unit-tests, property-testing and formal verification. Yen lands on the last of these,
         > since certificates and the fleet model+invariants were produced by Nix as json but can be re-checked without Yen.
-        
+
 
         ## Things you can do with Yen
 
@@ -83,7 +83,7 @@ in
         Invariants are key to verifying that machine-generated configs are sound. 
         An example could be dynamic vm-guests memory must always be a proportion of their host memory according to client plan, or
         find another suitable vm-host for it.
-        
+
 
         **Deploys in the right order.** Yen sorts your machines into waves, each read is a tracked dependency so Yen knows what depends on what without cycles.  ${doc "/query/graphs/"}
 
