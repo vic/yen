@@ -29,35 +29,35 @@ in
     [
       ''
         An invariant is a rule about the whole fleet: "no server runs a desktop", "no two hosts share an address".
-        The rules are [Datalog](/query/datalog/) rules over the facts of the fleet. This fleet has three hosts, a
+        The rules are [Datalog](/query/datalog/) rules over the fleet's facts. This fleet has three hosts, a
         `desktop` aspect for laptops and a `postgres` aspect for the database.
       ''
       (docs.file "modules/fleet.nix")
       ''
         ## The rules
 
-        Each invariant is a rule. A rule that holds gives a violation. The marked lines are explained below.
+        Each invariant is a rule, and a rule that holds gives a violation. The marked lines are explained below.
       ''
       (docs.fileNoted "" "modules/invariants.nix")
       ''
         `(1)` takes the literals from `yen.facts`. `yen.invariants.<name>` is a rule, and a rule is a function of its
-        variables (`(2)`): each argument is a variable. At `(3)`, `bad = H` makes the violation `[ "bad" <invariant> H ]`.
-        A true `[ "bad" … ]` atom is a violation. The literals at `(4)` and `(5)` say: `H` is a host whose form is `"server"`,
-        and the `desktop` aspect is active at `H`. `lt` at `(6)` compares two bound terms, so only one of each pair of hosts is reported.
+        variables (`(2)`), where each argument is a variable. At `(3)`, `bad = H` makes the violation `[ "bad" <invariant> H ]`,
+        and a true `[ "bad" … ]` atom is a violation. The literals at `(4)` and `(5)` say that `H` is a host whose form is `"server"`
+        and that the `desktop` aspect is active at `H`. `lt` at `(6)` compares two bound terms, so each pair of hosts is reported only once.
 
         A rule is `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. A literal comes by reference from `yen.facts`, never by name: `host.addr A X` (a field holds X; for a ref
-        field, X is a scope of the instance it refers to, and a ref such as `yen.env.prod` is a constant), `kind yen.kinds.host H`,
+        field, X is a scope of the instance it refers to, and a ref like `yen.env.prod` is a constant), `kind yen.kinds.host H`,
         `has yen.aspects.desktop H`, `instance H yen.host.db`, `parent H P`, and `lt` and `neq`, which compare two bound terms.
-        A string, an int or a bool is a constant. A typo in a field,
-        an aspect or a variable is an evaluation error, so a rule can never silently match nothing.
+        A string, an int or a bool is a constant. A typo in a field, an aspect or a variable is an evaluation error, so a
+        rule can never silently match nothing.
 
-        A relation you derive is declared with its arity and an optional `check` on its terms:
+        You declare a relation you derive with its arity and an optional `check` on its terms, like
         `yen.relations.reach.arity = 2;`. Call it by reference, `yen.relations.reach A B`, as a literal or as a rule's
-        `head`. A derived tuple that fails the check is the error `relation-check`.
-        A relation can also be decided by a function on bound terms: `yen.relations.digits = { arity = 1; holds = ts: …; }`,
-        or by a type: `yen.relations.port.type = yen.kinds.host.fields.port;`, true when the term passes the type's check.
-        Such a relation is never a fact and never a rule head, and its variables must be bound by other atoms. A
-        `holds` answer that is not a bool is the error `external-not-bool`. The facts the literals read:
+        `head`. A derived tuple that fails the check is the `relation-check` error.
+        A relation can also be decided by a function on bound terms, `yen.relations.digits = { arity = 1; holds = ts: …; }`,
+        or by a type, `yen.relations.port.type = yen.kinds.host.fields.port;`, which is true when the term passes the type's check.
+        Such a relation is never a fact and never a rule head, and other atoms must bind its variables. A
+        `holds` answer that isn't a bool is the `external-not-bool` error. These are the facts the literals read:
       ''
       (docs.table
         [ "Fact" "Holds when" ]
@@ -109,20 +109,20 @@ in
       (docs.file "variants/mistakes.nix")
       (docs.value { inherit ((variant "variants/mistakes.nix").check) ok violations; })
       ''
-        `result.check.why literal` gives the rules that prove a violation. `whyNot` and `proof` work as in Datalog. The question is
-        a literal by reference: `result.check.bad.<invariant> terms`, each term an instance (`{ kind; name; }` from outside the fleet)
+        `result.check.why literal` gives the rules that prove a violation, and `whyNot` and `proof` work like in Datalog. The question is
+        a literal by reference, `result.check.bad.<invariant> terms`, where each term is an instance (`{ kind; name; }` from outside the fleet)
         or a [scope](/model/scopes/):
       ''
       (docs.value (whyUnique (variant "variants/mistakes.nix").check))
       (docs.caution "Incomplete is not a pass" ''
-        A `bad` atom on a cycle through `not` is undefined. It goes to `incomplete`, and `ok` is false.
+        A `bad` atom on a cycle through `not` is undefined, so it goes to `incomplete` and `ok` is false.
       '')
       ''
         ## A certificate with every verdict
 
         `result.check.certificate` gives each decided atom its stage in the well-founded model, and each true atom the
         rule that proves it (Van Gelder, Ross, Schlipf 1991). A small checker in plain Nix,
-        `yen.lib.datalog.checkCertificate`, accepts it only when every true atom has a rule decided before it and every
+        `yen.lib.datalog.checkCertificate`, accepts it only when every true atom has a rule decided before it, and every
         rule of a false atom is blocked by an atom decided no later. `result.check.certified` is true when the checker
         accepts the certificate and it states the same verdict. No stratification is needed, and an undefined `bad`
         atom is in neither list.
@@ -131,17 +131,17 @@ in
       ''
         `result.check.seal` binds the verdict and its certificate to hashes of the engine, the rules and the facts.
         Anyone can check it by evaluating the fleet again: `result.check.verify seal` gives `{ ok = true; }`, or
-        `{ ok = false; why; }` with `why` one of `engine`, `rules`, `facts`, `certificate` or `verdict`.
-        `result.check.from literal` tells where a fact comes from: the files that declare it, or an edge's origin. Its literals
+        `{ ok = false; why; }` where `why` is one of `engine`, `rules`, `facts`, `certificate` or `verdict`.
+        `result.check.from literal` tells you where a fact comes from: the files that declare it, or an edge's origin. Its literals
         are `result.check.facts` and `result.check.relations`, the same as `yen.facts` and `yen.relations`.
         Where a fact comes from is never part of the fact.
 
         A field that holds an attrset gives no `val` fact. When a rule reads that field through an even number of
         `not` from `bad`, a missing fact could hide a violation, so `result.check.opaque` names the field and its scopes
-        and `ok` is false. Read under one `not`, a missing fact can only add a violation, so it is safe.
+        and `ok` is false. Read under one `not`, a missing fact can only add a violation, so that's safe.
       ''
       (docs.tip "Gate changes on it" ''
-        [Stage](/agents/stage/) evaluates a change and refuses it when it adds a violation. CI can fail on `check.ok == false`.
+        [Stage](/agents/stage/) evaluates a change and refuses it when it adds a violation, and CI can fail on `check.ok == false`.
       '')
     ];
 

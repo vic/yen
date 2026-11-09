@@ -10,8 +10,8 @@
     [
       ''
         Most flakes with more than one machine grow a `mkHost` function. It takes a host name, imports a shared module
-        and `./hosts/''${name}`, sets `networking.hostName`, and passes values in `specialArgs`. When there are many hosts,
-        a `vars.nix` file merges defaults, then category values, then host values. Tools such as
+        and `./hosts/''${name}`, sets `networking.hostName`, and passes values in `specialArgs`. Once there are many hosts,
+        a `vars.nix` file merges defaults, then category values, then host values. Tools like
         [easy-hosts](https://github.com/tgirlcloud/easy-hosts) add modules per class, per arch and per tag.
       ''
       (docs.nix ''
@@ -25,19 +25,19 @@
         );
       '')
       ''
-        In yen a host is an instance of a [kind](/model/kinds-fields/). The kind builds the NixOS system once. Shared
+        In Yen a host is an instance of a [kind](/model/kinds-fields/), and the kind builds the NixOS system once. Shared
         configuration is an [aspect](/behavior/aspects/) at the kind. Host values are typed fields with defaults, and every
-        NixOS module of an aspect can read them as an [arg](/behavior/args/). The files below show each part. A table
-        after them maps each usual pattern to its yen form.
+        NixOS module of an aspect can read them as an [arg](/behavior/args/). The files below show each part, and the table
+        after them maps each usual pattern to its Yen form.
 
         ## The kind
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` is what a `vars.nix` file held: typed fields with defaults. `(2)` is the `nixos` [sink](/behavior/sinks/):
-        it builds one NixOS system for each host.
+        `(1)` is what a `vars.nix` file used to hold: typed fields with defaults. `(2)` is the `nixos` [sink](/behavior/sinks/),
+        which builds one NixOS system for each host.
 
-        A wrong value fails at the instance that sets it, not deep in `nixpkgs.hostPlatform`. With
+        A wrong value fails at the instance that sets it, not deep inside `nixpkgs.hostPlatform`. With
         `yen.host.tower.system = "x86-64-linux"`, the result has this error, as data:
       ''
       (docs.value (map (e: removeAttrs e [ "value" ]) (variant "variants/typo.nix").errors))
@@ -46,8 +46,8 @@
       ''
       (docs.fileNoted "" "modules/base.nix")
       ''
-        `(1)` makes `base` active at every host. `(2)` reads the host through the `host` arg. `(3)` makes `arm` active
-        where the `system` field is `aarch64-linux`. See [Predicates](/behavior/predicates/).
+        `(1)` makes `base` active at every host, and `(2)` reads the host through the `host` arg. `(3)` makes `arm` active
+        where the `system` field is `aarch64-linux` (see [Predicates](/behavior/predicates/)).
 
         ## One file per host
       ''
@@ -69,10 +69,10 @@
         In `tower.nix`, `(1)` declares the instance and `(2)` is the aspect for this host only. A real host file
         usually imports its `hardware-configuration.nix` in its `nixos` key, next to the instance.
 
-        ## The usual patterns in yen
+        ## The usual patterns in Yen
       ''
       (docs.table
-        [ "Usual pattern" "yen" ]
+        [ "Usual pattern" "Yen" ]
         [
           [
             "`mkHost \"tower\"`"
@@ -101,13 +101,13 @@
         ]
       )
       (docs.note "What you stop writing" ''
-        - The `mkHost` function, and the list of shared modules that every host repeats.
-        - `specialArgs` and `extraSpecialArgs`: the `host` arg is in every module of an aspect, and in home-manager too.
-        - `lib.mkIf (hostname == "pi")` in shared modules: the aspect's `at` says where it applies.
+        - The `mkHost` function, and the list of shared modules every host repeats.
+        - `specialArgs` and `extraSpecialArgs`, since the `host` arg is in every module of an aspect, and in home-manager too.
+        - `lib.mkIf (hostname == "pi")` in shared modules, since the aspect's `at` says where it applies.
       '')
       (docs.tip "As a battery" ''
-        The kind that builds NixOS and the hostname rule are ready as `yen.lib.batteries.nixos.system` and
-        `hostname`: see [NixOS batteries](/batteries/nixos/). This page writes them by hand, so you can change them.
+        The kind that builds NixOS and the hostname rule come ready as `yen.lib.batteries.nixos.system` and
+        `hostname` (see [NixOS batteries](/batteries/nixos/)). This page writes them by hand so you can change them.
       '')
     ];
 

@@ -1,6 +1,6 @@
 {
   title = "NixOS batteries";
-  description = "yen.lib.batteries.nixos: system, accounts, shells, autologin, unfree, firewall, hosts, builders, persist, facter. NixOS options are the domain; yen keys are yours.";
+  description = "yen.lib.batteries.nixos: system, accounts, shells, autologin, unfree, firewall, hosts, builders, persist, facter. They set NixOS options; the Yen keys are yours.";
   section = "batteries";
   route = "batteries/nixos";
   order = 3;
@@ -9,40 +9,40 @@
     { docs, ... }:
     [
       ''
-        `yen.lib.batteries.nixos` holds the NixOS rules that most fleets write. NixOS is the domain of these batteries:
-        they set NixOS options. They still name no yen [kind](/model/kinds-fields/), [sink](/behavior/sinks/) or [aspect](/behavior/aspects/).
-        You write `yen.kinds.host`, the sinks and every aspect, in your own words. This is a fleet of hosts that hold users:
+        `yen.lib.batteries.nixos` holds the NixOS rules most fleets end up writing. NixOS is their domain, so they set
+        NixOS options, but they still name no Yen [kind](/model/kinds-fields/), [sink](/behavior/sinks/) or [aspect](/behavior/aspects/).
+        You write `yen.kinds.host`, the sinks and every aspect in your own words. Here's a fleet of hosts that hold users:
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        - `(1)` is `system`, the `out` key of the sink that collects NixOS modules. It builds `nixosConfigurations.<host>`.
-        - `(2)` and `(3)` are the NixOS keys of two sinks of package names. One module per host allows or marks them.
+        - `(1)` is `system`, the `out` key of the sink that collects NixOS modules, and it builds `nixosConfigurations.<host>`.
+        - `(2)` and `(3)` are the NixOS keys of two sinks of package names, where one module per host allows or marks them.
           Any aspect can give names to these sinks.
 
-        These are the data of the fleet and the aspect that gives the NixOS base to the hosts:
+        Next, the fleet data and the aspect that gives the hosts their NixOS base:
       ''
       (docs.file "modules/machines.nix")
       ''
-        The aspects that set the host name, the users and their shells:
+        These aspects set the host name, the users and their shells:
       ''
       (docs.fileNoted "" "modules/aspects.nix")
       ''
-        Each battery is the value of the `nixos` key of an aspect. `(1)` sets the host name from the name of the [scope](/model/scopes/).
-        `(2)` defines a user's account. The kind `user` has no `nixos` sink, so the account goes into each of its hosts.
-        `(3)` makes `ana` the primary user. `(4)` reads the `shell` field that you name. At `(5)`, `user` reads a ref or a name.
+        Each battery is the value of an aspect's `nixos` key. `(1)` sets the host name from the [scope](/model/scopes/) name.
+        `(2)` defines a user's account, and since the `user` kind has no `nixos` sink, the account goes into each of its hosts.
+        `(3)` makes `ana` the primary user, `(4)` reads the `shell` field you name, and at `(5)` `user` reads a ref or a name.
 
-        Ports, peers and builders:
+        Then ports, peers and builders:
       ''
       (docs.fileNoted "" "modules/network.nix")
       ''
-        `(1)` opens the ports that aspects give: `22`, or `{ tcp; udp; }`. At `(2)` and `(3)`, every host gives a record to the fleet, and each
-        host reads the records of the other machines: `/etc/hosts` and `known_hosts`, and `nix.buildMachines`.
+        `(1)` opens the ports aspects give, `22` or `{ tcp; udp; }`. At `(2)` and `(3)` every host gives a record to the fleet,
+        and each host reads the other machines' records for `/etc/hosts`, `known_hosts` and `nix.buildMachines`.
 
-        Paths that survive a reboot, and hardware:
+        Finally, paths that survive a reboot, and hardware:
       ''
       (docs.fileNoted "" "modules/storage.nix")
       ''
-        `(1)` collects paths from any aspect, for impermanence. A path from a user goes up to each of her hosts. `(2)` adds a
+        `(1)` collects paths from any aspect, for impermanence. A user's path goes up to each of its hosts. `(2)` adds a
         facter module only at hosts that have a report.
 
         ## The batteries
@@ -63,9 +63,9 @@
         | `persist { from; root; hideMounts; }` | the NixOS key of a sink of paths (impermanence) | quirks `persist` |
         | `facter { report; module; }` | a NixOS key, at hosts that have a report | `den.aspects.facter` |
 
-        `mesh` is a [generic battery](/batteries/generic/). Each battery is a few lines. The pages [Every Den battery](/den/batteries/) and
-        [Unfree packages from many files](/nixos/unfree/) write the same rules by hand. When a battery does not fit your
-        fleet, copy those lines and change them: see [Write your own](/batteries/generic/#write-your-own).
+        `mesh` is a [generic battery](/batteries/generic/). Each battery is only a few lines, and the pages [Every Den battery](/den/batteries/) and
+        [Unfree packages from many files](/nixos/unfree/) write the same rules by hand. When a battery doesn't fit your
+        fleet, copy those lines and change them (see [Write your own](/batteries/generic/#write-your-own)).
       ''
     ];
 

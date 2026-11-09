@@ -1,6 +1,6 @@
 {
   title = "The dendritic aspect patterns";
-  description = "The eight aspect patterns of the dendritic design guide, and the yen form of each, with the pitfalls that go away.";
+  description = "The eight aspect patterns of the dendritic design guide, and the Yen form of each, with the pitfalls that go away.";
   section = "den";
   route = "den/dendritic";
   order = 2;
@@ -11,14 +11,14 @@
       ''
         Den is one way to write dendritic Nix. The
         [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects)
-        names eight [aspect](/behavior/aspects/) patterns that recur in dendritic configurations. Most Den users know them, by these names or
-        by others. This page gives the yen form of each.
+        names eight [aspect](/behavior/aspects/) patterns that keep coming back in dendritic configurations. Most Den users know them, by these
+        names or by others, and this page gives the Yen form of each.
 
-        In the guide, each pattern is a different way to write `flake.modules.<class>.<aspect>` and its `imports`. In yen
-        each pattern is an aspect. What changes is its `at` (a [predicate](/behavior/predicates/)), or the data it reads.
+        In the guide, each pattern is a different way to write `flake.modules.<class>.<aspect>` and its `imports`. In Yen
+        each pattern is an aspect, and what changes is its `at` (a [predicate](/behavior/predicates/)) or the data it reads.
       ''
       (docs.table
-        [ "Pattern" "Guide" "yen" ]
+        [ "Pattern" "Guide" "Yen" ]
         [
           [
             "Simple"
@@ -63,16 +63,16 @@
         ]
       )
       ''
-        ## The patterns in yen
+        ## The patterns in Yen
 
-        One file holds the aspects. The `fleet.nix` tab declares the hosts and users they apply to.
+        One file holds the aspects, and the `fleet.nix` tab declares the hosts and users they apply to.
       ''
       (docs.fileNoted "" "modules/patterns.nix")
       ''
         `(1)` is the simple pattern: `at` is the `host` kind, so the aspect is active at every host.
         `(2)` is inheritance: `system-cli` is active at `srv`, and wherever `system-desktop` or `system-dev` is active.
-        `(3)` is the conditional pattern: `at` is a function that tests the `gpu` field of the scope.
-        `(4)` excludes: `headless` is active at every host where `system-desktop` is not active.
+        `(3)` is the conditional pattern: `at` is a function that tests the scope's `gpu` field.
+        `(4)` excludes: `headless` is active at every host where `system-desktop` isn't active.
         `(5)` is the constants pattern: `fleet` is the arg that holds the fleet, and `adminEmail` is its field.
         `(6)` is the factory pattern: `admin` is a field of the `user` kind, so each user is one call of the factory.
       ''
@@ -85,18 +85,18 @@
       ''
         ## Pitfalls that go away
 
-        The guide warns about these. In yen they cannot happen, or they have no cause:
+        The guide warns about these. In Yen they can't happen, or they have no cause:
       ''
       (docs.table
-        [ "Guide warning" "In yen" ]
+        [ "Guide warning" "In Yen" ]
         [
           [
             "Use `lib.mkMerge`, not `//`, to merge aspect parts"
-            "An aspect written in many files is read from all of them. Nothing is merged with `//`."
+            "An aspect written in many files is read from all of them, and nothing is merged with `//`."
           ]
           [
-            "Multi context plus inheritance can add the same module to `sharedModules` two times"
-            "An element has one id per receiver. A parent reached by two children is given once."
+            "Multi context plus inheritance can add the same module to `sharedModules` twice"
+            "An element has one id per receiver, so a parent reached by two children is given once."
           ]
           [
             "Never use `lib.mkIf` around `imports`: infinite recursion"

@@ -23,13 +23,13 @@ in
     }:
     [
       ''
-        Writing Nix is a poor interface for an agent: it can write anything, and a typo is a parse error.
-        A change program writes a change as data: a list of ops. This one adds a host `cache` to the fleet of the
+        Writing Nix is a poor interface for an agent, since it can write anything and a typo is a parse error.
+        A change program writes a change as data, a list of ops. This one adds a `cache` host to the fleet from the
         [invariants](/query/invariants/) page and places the `postgres` [aspect](/behavior/aspects/) on it:
       ''
       (docs.file "programs/new-cache.json")
       ''
-        Four ops cover a fleet change:
+        Four ops are enough for a fleet change:
       ''
       (docs.table
         [ "Op" "Effect" ]
@@ -55,22 +55,22 @@ in
       ''
         ## Dry run
 
-        An agent runs a program with `dryRun`. Nothing is applied. The fleet is the
-        [working example](https://github.com/vic/yen/tree/main/docs/examples/programs) in `modules/`.
-        The marked lines are explained below.
+        An agent runs a program with `dryRun`, and nothing is applied. The fleet is the
+        [working example](https://github.com/vic/yen/tree/main/docs/examples/programs) in `modules/`, and the marked
+        lines are explained below.
       ''
       (docs.fileNoted "" "dry-run.nix")
       ''
-        `(1)` calls `dryRun` of `yen.lib.program`. `(2)` is the fleet to change: its modules and `lib`.
-        `(3)` reads the program from a JSON file. The answer of the dry run for `new-cache.json`:
+        `(1)` calls `yen.lib.program`'s `dryRun`, `(2)` is the fleet to change (its modules and `lib`), and `(3)` reads
+        the program from a JSON file. Here's what the dry run answers for `new-cache.json`:
       ''
       (docs.value (dryRunOf inputs dir "programs/new-cache.json"))
       ''
         ## Checked against the schema
 
-        `validate result prog` checks each op before anything runs: kinds, fields and aspects must exist, with `near` for typos.
-        `dryRun` validates first, and [stages](/agents/stage/) only a valid program. This program has a typo in a field
-        and in an aspect:
+        `validate result prog` checks each op before anything runs: kinds, fields and aspects must exist, and typos get a `near`.
+        `dryRun` validates first and only [stages](/agents/stage/) a valid program. This program has a typo in a field
+        and another in an aspect:
       ''
       (docs.file "programs/typos.json")
       (docs.value (dryRunOf inputs dir "programs/typos.json"))
@@ -83,7 +83,7 @@ in
           ]
           [
             "`toModule prog`"
-            "the program as a yen module, to import"
+            "the program as a Yen module, to import"
           ]
           [
             "`dryRun { base; prog; grant; rejected; }`"

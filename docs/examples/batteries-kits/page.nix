@@ -14,58 +14,58 @@
     }:
     [
       ''
-        A kit is data: it has roles, each role has typed settings, members export values to each other, and kits
-        declare the secrets they generate. An assembly is one use of a kit: its `kit` is a ref, and each role takes the
+        A kit is data. It has roles, each role has typed settings, members export values to each other, and the kit
+        declares the secrets it generates. An assembly is one use of a kit: its `kit` is a ref, and each role takes the
         machines where its `at` predicate holds, the same predicates an [aspect](/behavior/aspects/) uses. See
-        [Assemblies and roles](/recipes/assemblies/) for the model by hand, and the [glossary](/reference/glossary/) for the words.
-        You keep the words: here the machine [kind](/model/kinds-fields/) is `machine` and the member kind is `member`.
+        [Assemblies and roles](/recipes/assemblies/) for the model written by hand, and the [glossary](/reference/glossary/) for the words.
+        The words stay yours: here the machine [kind](/model/kinds-fields/) is `machine` and the member kind is `member`.
 
         This example has a `borg` backup kit with a server and clients, one assembly of it, and the rules that connect them.
       ''
       (docs.fileNoted "" "modules/inventory.nix")
       ''
-        - `(1)` gives each machine one `member` [scope](/model/scopes/) for each (assembly, role) it takes. Settings are layered: the interface default, then the role's.
-        - `(2)` and `(3)` are the fields of a kit and of an assembly. The `kit` of an assembly is a ref.
-        - `(4)` is the `reduce` of the `exports` [sink](/behavior/sinks/). Members write their own element, and an export that the kit does not list is an error.
-        - `(5)` is the kit. It has two roles, a typed interface for the client, a limit of one server, and the export `endpoint`.
-        - `(6)` is the assembly. The server is any machine with `storage`. The `settings` of the client role are a function of the machine.
-        - `(7)` checks the kits, assemblies and machines. It reports a kit that is no kit, an unknown role, an `at` that is no predicate, and a role with too many or too few machines.
-        - `(8)` checks that every setting of a member is set and has its type.
-        - At `(9)`, the server exports its endpoint. At `(10)`, each client reads the exports of its own assembly.
+        - `(1)` gives each machine one `member` [scope](/model/scopes/) for each (assembly, role) it takes. Settings are layered: first the interface default, then the role's.
+        - `(2)` and `(3)` are the fields of a kit and of an assembly. An assembly's `kit` is a ref.
+        - `(4)` is the `reduce` of the `exports` [sink](/behavior/sinks/). Members write their own element, and an export the kit doesn't list is an error.
+        - `(5)` is the kit, with two roles, a typed interface for the client, a limit of one server, and the `endpoint` export.
+        - `(6)` is the assembly. The server is any machine with `storage`, and the client role's `settings` are a function of the machine.
+        - `(7)` checks the kits, assemblies and machines. It reports a kit that isn't a kit, an unknown role, an `at` that isn't a predicate, and a role with too many or too few machines.
+        - `(8)` checks that every member setting is set and has its type.
+        - At `(9)` the server exports its endpoint, and at `(10)` each client reads the exports of its own assembly.
 
-        A kit adds no name outside itself: its data are values of the kit (`yen.kit.disko.layouts`), its aspects live
+        A kit adds no name outside itself. Its data are values of the kit (`yen.kit.disko.layouts`), its aspects live
         in the kit ([`yen.kit.sshd.aspects.server`](/behavior/aspects/#aspects-a-kind-or-an-instance-owns)), and the
-        assemblies it adds are parts of the assembly that adds them. Each client reads the server's endpoint from the exports of its assembly, with its own settings:
+        assemblies it adds are parts of the assembly that adds them. Each client reads the server's endpoint from its assembly's exports, with its own settings:
       ''
       (docs.value result.flake.config)
       ''
         ## Vars
 
-        A kit also declares the secrets it generates. A generator says which files a secret has, and which are secret.
-        The plan says, for each machine, where each file goes and who can read it.
+        A kit also declares the secrets it generates. A generator says which files a secret has and which of them are
+        secret, and the plan says, for each machine, where each file goes and who can read it.
       ''
       (docs.fileNoted "" "modules/vars.nix")
       ''
-        `(1)` reduces the generators of every machine: a shared generator once, the rest for each machine. A missing dependency is an error.
+        `(1)` reduces the generators of every machine, with a shared generator once and the rest for each machine. A missing dependency is an error.
         `(2)` is the plan for each machine: secret files with their paths, recipients and generation order. `(3)` reads a public var at eval time, with a default.
-        `(4)` reports an eval-time read of a secret file. This is the plan of `web`:
+        `(4)` reports an eval-time read of a secret file. Here's the plan of `web`:
       ''
       (docs.value result.flake.varsPlan.web.files)
       ''
         ## The contract
 
-        borg allows one server. A second machine with `storage` makes two:
+        borg allows one server, so a second machine with `storage` makes two:
       ''
       (docs.value (map (e: e.error) (variant "variants/two-servers.nix").errors))
       ''
-        A name is not a ref. A string where the kit goes, and a string where a role's machines go, are errors:
+        A name isn't a ref. A string where the kit goes, or where a role's machines go, is an error:
       ''
       (docs.file "variants/by-name.nix")
       (docs.value (map (e: e.error) (variant "variants/by-name.nix").errors))
       ''
         ## The batteries
 
-        The batteries of `yen.lib.batteries.kits`:
+        The batteries in `yen.lib.batteries.kits`:
 
         | Battery | Value of | Does |
         |---|---|---|
@@ -75,7 +75,7 @@
         | `assemblies own` | a list of assemblies | the assemblies and every part their kits add, at every depth: each part has a `path` and a `name` (the path joined by `-`) |
         | `settings-typed` | `errors` at a member | every interface setting is set and has its type |
 
-        The batteries of `yen.lib.batteries.vars`:
+        The batteries in `yen.lib.batteries.vars`:
 
         | Battery | Value of | Does |
         |---|---|---|
@@ -84,7 +84,7 @@
         | `secret-reads { from; reads; }` | `errors` | an eval-time read of a secret file |
         | `public-value { root; }` | a function | a public var read at eval time, with a default |
 
-        Working kits that use these batteries: [Kits for services](/batteries/kits-services/), [Bundles](/batteries/kits-bundles/)
+        You can find working kits that use these batteries in [Kits for services](/batteries/kits-services/), [Bundles](/batteries/kits-bundles/)
         and the templates [kits-base](https://github.com/vic/yen/tree/main/templates/kits-base) and
         [kits-homelab](https://github.com/vic/yen/tree/main/templates/kits-homelab).
       ''

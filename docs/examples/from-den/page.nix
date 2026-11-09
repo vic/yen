@@ -19,7 +19,7 @@ let
 in
 {
   title = "From Den";
-  description = "Den's hosts, users, aspects, includes, defaults and batteries, in yen's four words.";
+  description = "Den's hosts, users, aspects, includes, defaults and batteries, in Yen's four words.";
   section = "migrate";
   order = 3;
 
@@ -27,13 +27,13 @@ in
     { docs, ... }:
     [
       ''
-        [Den](https://github.com/denful/den) and yen share the [aspect](/behavior/aspects/) idea. The difference is where structure comes from.
-        Den gives you a schema: `den.hosts`, users, homes and context pipes. In yen you declare those [kinds](/model/kinds-fields/) yourself, in
+        [Den](https://github.com/denful/den) and Yen share the [aspect](/behavior/aspects/) idea. The difference is where structure comes from.
+        Den gives you a schema: `den.hosts`, users, homes and context pipes. In Yen you declare those [kinds](/model/kinds-fields/) yourself, in
         plain Nix, and every rule of how content moves is a [sink](/behavior/sinks/) you can read.
 
-        This page moves Den's default template to yen. The docs evaluate both and check that the host gets the same
-        account, groups, home, packages and state versions. The code comes first. A table of Den forms and yen forms
-        follows it.
+        This page moves Den's default template to Yen. The docs evaluate both and check that the host gets the same
+        account, groups, home, packages and state versions. The code comes first, followed by a table of Den forms and
+        Yen forms.
 
         ## The template, side by side
       ''
@@ -43,17 +43,17 @@ in
           body = docs.file "before/modules/den.nix";
         }
         {
-          label = "yen: fleet.nix";
+          label = "Yen: fleet.nix";
           body = docs.fileNoted "" "modules/fleet.nix";
         }
       ])
       ''
-        Den's schema is built in. In yen, `fleet.nix` says the same in one short file:
+        Den's schema is built in, while in Yen, `fleet.nix` says the same in one short file:
 
         - `(1)`: users live under the hosts in their `hosts` field ([scopes](/model/scopes/)).
-        - `(2)`: hosts build NixOS from the modules of their `nixos` sink.
+        - `(2)`: hosts build NixOS from the modules in their `nixos` sink.
         - `(3)`: a user's `homeManager` content goes into the host, as `home-manager.users.<name>`.
-        - `(4)`: home-manager is active where a user lives. The `at` is true at every scope below a user
+        - `(4)`: home-manager is active where a user lives, since the `at` is true at every scope below a user
           ([predicates](/behavior/predicates/)).
       ''
       (docs.tabs [
@@ -62,7 +62,7 @@ in
           body = docs.file "before/modules/igloo.nix";
         }
         {
-          label = "yen: igloo.nix";
+          label = "Yen: igloo.nix";
           body = docs.file "modules/igloo.nix";
         }
       ])
@@ -72,14 +72,14 @@ in
           body = docs.file "before/modules/tux.nix";
         }
         {
-          label = "yen: tux.nix";
+          label = "Yen: tux.nix";
           body = docs.file "modules/tux.nix";
         }
       ])
       ''
-        ## Den forms and yen forms
+        ## Den forms and Yen forms
 
-        The files above use these yen forms:
+        The files above use these Yen forms:
       ''
       (docs.table
         [ "Den" "yen" ]
@@ -121,8 +121,8 @@ in
       ''
         ## Batteries are aspects
 
-        A battery is an aspect that you include. In yen you write the aspect once, without an `at`, and each user of it
-        adds itself to `at` (see `tux.nix` above). `at` from several files is a union.
+        A battery is an aspect you include. In Yen you write the aspect once, without an `at`, and each user of it
+        adds itself to `at` (see `tux.nix` above), since `at` from several files is a union.
       ''
       (docs.tabs [
         {
@@ -153,13 +153,13 @@ in
         };
       '')
       ''
-        In yen a quirk is a sink. This file is the firewall example:
+        In Yen a quirk is a sink. Here's the firewall example:
       ''
       (docs.fileNoted "{6-14,23}" "modules/quirks.nix")
       ''
-        `(1)` is the quirk: a `firewall` sink on the host. Where its values land is the tree: an element goes up to the
-        nearest scope that has the sink. At `(3)` a user gives ports. The user has no `firewall` sink, so they reach
-        its host with no policy. This is Den's `pipe.expose`. `(2)` is the `reduce` of the sink: `elements` keeps who
+        `(1)` is the quirk, a `firewall` sink on the host. The tree decides where its values land: an element goes up to the
+        nearest scope that has the sink. At `(3)` a user gives ports, and since the user has no `firewall` sink, the ports reach
+        its host with no policy. That's Den's `pipe.expose`. `(2)` is the sink's `reduce`: `elements` keeps who
         gave each value, so a filter or a rename is a plain function in the reader.
       ''
       (docs.table
@@ -198,28 +198,28 @@ in
       ''
         ## Policies are `spawns`
 
-        A Den policy is a function from context to effects, such as `host-to-users` that resolves each user under its host.
-        The policy graph (flake, system, host, user, home) is Den's structure. In yen you write that structure as `spawns`:
-        `yen.kinds.host.spawns.user` in `fleet.nix` above is Den's `host-to-users`. Conditional policies are a `spawns`
-        that reads data or `yen.lib.holds`. Include and exclude effects are `at`, and `not`.
+        A Den policy is a function from context to effects, like `host-to-users`, which resolves each user under its host.
+        The policy graph (flake, system, host, user, home) is Den's structure. In Yen you write that structure as `spawns`,
+        so `yen.kinds.host.spawns.user` in `fleet.nix` above is Den's `host-to-users`. A conditional policy is a `spawns`
+        that reads data or `yen.lib.holds`, and include and exclude effects are `at` and `not`.
       ''
-      (docs.note "Three Den bug families that cannot happen" ''
+      (docs.note "Three Den bug families that can't happen" ''
         - **Double delivery.** An element has one id per receiver.
-        - **Lost content when one aspect is in two files.** A read queries all files. Nothing merges early.
+        - **Lost content when one aspect is in two files.** A read queries all files, and nothing merges early.
         - **A host's home content leaking to its users.** Elements go up the tree, never down.
       '')
       (docs.tip "Every Den capability" ''
         The [reference fleet](https://github.com/vic/yen/tree/main/reference) shows every capability that Den's CI tests pin
-        (168 patterns), and den-hoag's laws, each with a check. See ${
+        (168 patterns), plus den-hoag's laws, each with a check. See ${
           docs.fleet "modules/den/patterns.nix" null "den/patterns.nix"
         }.
 
-        For the shapes that real Den configurations use (every battery, `includes` and `provides`, custom classes, the
-        dendritic aspect patterns), see [Den patterns in yen](/den/).
+        For the shapes real Den configurations use (every battery, `includes` and `provides`, custom classes, the
+        dendritic aspect patterns), see [Den patterns in Yen](/den/).
       '')
       (docs.tip "As a battery" ''
-        yen has batteries too, as plain values for keys you write: see [Battery packs](/batteries/). This page writes
-        them by hand, so you can see that a battery is only an aspect.
+        Yen has batteries too, as plain values for keys you write (see [Battery packs](/batteries/)). This page writes
+        them by hand so you can see that a battery is only an aspect.
       '')
     ];
 

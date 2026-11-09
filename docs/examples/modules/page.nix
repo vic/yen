@@ -11,7 +11,7 @@ let
 in
 {
   title = "Yen modules are not NixOS modules";
-  description = "A yen module has `imports`, `yen` and sinks. yen does not use nixpkgs. Each NixOS pattern, and how to write it in yen.";
+  description = "A Yen module has `imports`, `yen` and sinks, and Yen doesn't use nixpkgs. Each NixOS pattern, and how to write it in Yen.";
   section = "principles";
   order = 4;
 
@@ -25,76 +25,76 @@ in
     }:
     [
       ''
-        A yen module looks like a NixOS module: a path, a function or an attrset, with `imports`. It is not one.
-        yen does not use the NixOS module system and does not depend on nixpkgs: it uses Nix builtins only.
-        A module is a function `sources -> sinks`, as in [Cycle](/behavior/cycle/). This module has the three kinds of key:
+        A Yen module looks like a NixOS module (a path, a function or an attrset, with `imports`), but it isn't one.
+        Yen doesn't use the NixOS module system and doesn't depend on nixpkgs; it uses only Nix builtins.
+        A module is a function `sources -> sinks`, like in [Cycle](/behavior/cycle/). This module has all three kinds of key:
       ''
       (docs.fileNoted "" "variants/module-sinks.nix")
       ''
-        - `imports` `(4)`: more yen modules.
+        - `imports` `(4)`: more Yen modules.
         - `yen` `(1)`: every declaration. Here it declares a sink.
-        - any other key `(5)`: a module sink, such as `admins`, `lib` or `inputs`. Any module reads a sink as an arg, as at `(6)`.
+        - any other key `(5)`: a module sink, like `admins`, `lib` or `inputs`. Any module reads a sink as an arg, as at `(6)`.
 
-        There is no `options` and no `config`. A sink that no module reads or declares is an error. So is a
-        key that yen does not read inside `yen` or inside a [kind](/model/kinds-fields/). This NixOS module has both keys:
+        There's no `options` and no `config`. A sink that no module reads or declares is an error, and so is a
+        key Yen doesn't read inside `yen` or inside a [kind](/model/kinds-fields/). This NixOS module has both keys:
       ''
       (docs.file "variants/nixos-style.nix")
       (docs.value (map (e: { inherit (e) code error path; }) (variant "variants/nixos-style.nix").errors))
       ''
         ## Module sinks: the options of a module
 
-        `yen.sinks.<name>` declares a module sink, as a top-level `options` does in NixOS. In the module above, `(1)` declares
-        `admins`. Its keys are the keys of a kind's [sink](/behavior/sinks/): `of` `(2)` is the type that checks each module's
-        value, and `reduce` `(3)` is the merge strategy. A sink with no `reduce` takes `one` value, which an arg gets as it is.
-        A declared sink that no module gives reduces to its empty value. The two `admins` lists reach the aspect `wheel` as one list:
+        `yen.sinks.<name>` declares a module sink, like a top-level `options` does in NixOS. In the module above, `(1)` declares
+        `admins`. Its keys are the same as a kind's [sink](/behavior/sinks/): `of` `(2)` is the type that checks each module's
+        value, and `reduce` `(3)` is the merge strategy. A sink with no `reduce` takes `one` value, which an arg gets as it is,
+        and a declared sink that no module gives reduces to its empty value. The two `admins` lists reach the `wheel` aspect as one list:
       ''
       (docs.value (variant "variants/module-sinks.nix").reduced.nixos."fleet:main/host:web".users)
       ''
-        Key names load before any arg has an answer: a key name that reads an arg is an error record. `imports` can read
-        a sink, such as `inputs`, when modules outside its own imports give it. yen loads such imports in rounds.
+        Key names load before any arg has an answer, so a key name that reads an arg is an error record. `imports` can read
+        a sink like `inputs` when modules outside its own imports give it, and Yen loads such imports in rounds.
         `result.modules` (see [Queries](/query/queries/)) shows what each module asks, gives and declares. A cycle in it is
         `import-loop`, an error record, not an infinite recursion.
       ''
       ''
-        ## What yen gets from not using nixpkgs modules
+        ## What Yen gets from not using nixpkgs modules
 
         - **A loop is data.** In nixpkgs, a module whose `imports` reads `config` stops the evaluation with
-          `infinite recursion encountered`. In yen, an `imports` that asks a sink that its own imports give is an
+          `infinite recursion encountered`. In Yen, an `imports` that asks a sink its own imports give is an
           `import-loop` error record, and the rest of the fleet still evaluates.
-        - **A type error is data, and it names the file.** In nixpkgs, a wrong value throws, and only the first throw
-          shows. In yen, a value that fails `of` is an error record with the module that gave it, and yen drops that value
-          and continues. You see every error in one pass.
+        - **A type error is data, and it names the file.** In nixpkgs a wrong value throws, and only the first throw
+          shows. In Yen a value that fails `of` is an error record with the module that gave it, and Yen drops that value
+          and keeps going, so you see every error in one pass.
         - **Validation is apart from merging.** `of` only checks and `reduce` only merges. A nixpkgs type does both,
-          and a composite type checks its items only in `merge` (see the caution below).
-        - **No priorities.** There is no `mkDefault` or `mkForce`. Two different answers are an error with a `fix`:
+          and a composite type only checks its items in `merge` (see the caution below).
+        - **No priorities.** There's no `mkDefault` or `mkForce`. Two different answers are an error with a `fix`, because
           data never overrides data.
         - **One concept for args and options.** `specialArgs`, `_module.args` and `options` are all module sinks. A sink
-          without a declaration gives its value as it is, such as `lib` or `inputs`.
+          without a declaration gives its value as it is, like `lib` or `inputs`.
         - **The loader is data.** `result.modules` shows what each module asks, gives and declares, and which module
-          imports it. Yen queries and graphs read it.
-        - **No dependency.** yen modules use Nix builtins only. They do not need nixpkgs `lib`.
+          imports it, and Yen queries and graphs read it.
+        - **No dependency.** Yen modules use only Nix builtins, so they don't need nixpkgs `lib`.
 
-        nixpkgs modules still have more: NixOS, home-manager and nix-darwin are written for them, and yen uses those
-        modules inside sink elements. nixpkgs also has `mkIf` on `config`, where yen has the `at` of an aspect.
+        nixpkgs modules still have more: NixOS, home-manager and nix-darwin are written for them, and Yen uses those
+        modules inside sink elements. nixpkgs also has `mkIf` on `config`, where Yen has an aspect's `at`.
 
         ## Types: anything with `check`
 
-        A field type is any value with `check = v: bool`. yen ships the common ones, and needs no nixpkgs:
+        A field type is any value with `check = v: bool`. Yen ships the common ones and needs no nixpkgs:
 
         - `yen.lib.str`, `int`, `bool`, `port`, `path`, `attrs`, `any`, and `enum`, `maybe`, `listOf`, `attrsOf`,
-          `functionTo`. A field checks the shape of a list, an attrset or a function; `result.deep` checks the parts.
+          `functionTo`. A field checks the shape of a list, an attrset or a function, and `result.deep` checks the parts.
         - `yen.lib.is f`: any predicate, for example `yen.lib.is builtins.isString`.
-        - nixpkgs types work as a predicate, but not for composites. Read the warning below.
+        - nixpkgs types work as a predicate, but not for composites (read the warning below).
         - [nix-effects](https://github.com/kleisli-io/nix-effects) types: `Int`, `ListOf`, `Record`, refinements.
         - [gen-types](https://github.com/sini/gen) checkers, through their `verify`.
 
-        yen keeps validation apart from merging. A type only checks a value. How many values become one is the
-        sink's `reduce`, its merge strategy: see [Sinks](/behavior/sinks/). A nixpkgs type does both, in `check` and
-        `merge`. yen calls only `check`.
+        Yen keeps validation apart from merging. A type only checks a value, and how many values become one is the
+        sink's `reduce`, its merge strategy (see [Sinks](/behavior/sinks/)). A nixpkgs type does both, in `check` and
+        `merge`, and Yen only calls `check`.
       ''
-      (docs.caution "nixpkgs composite types do not check their items" ''
-        In nixpkgs, `listOf`, `attrsOf`, `submodule` and `functionTo` check only the outer shape. The items are
-        checked in `merge`, which yen never calls. So in nixpkgs, `(lib.types.listOf lib.types.int).check` accepts a list of
+      (docs.caution "nixpkgs composite types don't check their items" ''
+        In nixpkgs, `listOf`, `attrsOf`, `submodule` and `functionTo` only check the outer shape. The items are
+        checked in `merge`, which Yen never calls. So in nixpkgs, `(lib.types.listOf lib.types.int).check` accepts a list of
         strings:
 
         ${docs.nix ''
@@ -108,7 +108,7 @@ in
       '')
       ''
         nix-effects types check deep, and the kernel can build a check for you: `verified.verify` type-checks an
-        implementation against its specification and gives a plain Nix function. That function is a check:
+        implementation against its specification and gives a plain Nix function, and that function is a check:
       ''
       (docs.nix ''
         let
@@ -130,30 +130,30 @@ in
       '')
       ''
         A gen-types checker has `verify`, which gives `null` or the reason a value fails. Its `check` follows the
-        nixpkgs protocol and is not `v: bool`, so give yen a check made from `verify`:
+        nixpkgs protocol and isn't `v: bool`, so give Yen a check made from `verify`:
       ''
       (docs.nix ''
         yen.kinds.host.fields.ports = yen.lib.is (v: (gen.listOf gen.int).verify v == null);
       '')
       ''
-        ## Each NixOS pattern, in yen
+        ## Each NixOS pattern, in Yen
 
-        The kinds hold what NixOS `options` hold. The instances hold what `config` holds:
+        The kinds hold what NixOS `options` hold, and the instances hold what `config` holds:
       ''
       (docs.fileNoted "" "modules/kinds.nix")
       ''
-        At `(1)`, `addr` is a field, as an option has a type. At `(2)`, a nested field with a default is the answer to
-        `mkEnableOption`. At `(3)`, `listOf` checks every item. At `(4)`, `spawns.user` makes each user a scope under its host.
-        At `(5)`, the sink `nixos` collects the NixOS modules. At `(6)`, `on` is a ref from a user to its host.
+        At `(1)`, `addr` is a field, just like an option has a type. At `(2)`, a nested field with a default is the answer to
+        `mkEnableOption`. At `(3)`, `listOf` checks every item, and at `(4)`, `spawns.user` makes each user a scope under its host.
+        At `(5)` the `nixos` sink collects the NixOS modules, and at `(6)` `on` is a ref from a user to its host.
         The instances hold the `config`:
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        At `(1)`, the flake has no outputs, because this page reads the eval result. At `(2)` and `(3)`, instance data
-        takes the place of `config`. At `(4)`, `at` takes the place of `mkIf`. This table lists each NixOS pattern:
+        At `(1)` the flake has no outputs, because this page reads the eval result. At `(2)` and `(3)` instance data
+        takes the place of `config`, and at `(4)` `at` takes the place of `mkIf`. This table lists each NixOS pattern:
       ''
       (docs.table
-        [ "NixOS" "yen" ]
+        [ "NixOS" "Yen" ]
         [
           [
             "`options.x = mkOption { type; default; }`"
@@ -203,8 +203,8 @@ in
       )
       (docs.value result.reduced.nixos)
       (docs.note "Guard `at` with the kind" ''
-        `at` runs at every scope. `s: s.firewall.enable` alone fails at the fleet scope, which has no `firewall`.
-        `yen.lib.all [ yen.kinds.host … ]` reads the field only on hosts.
+        `at` runs at every scope, so `s: s.firewall.enable` alone fails at the fleet scope, which has no `firewall`.
+        `yen.lib.all [ yen.kinds.host … ]` only reads the field on hosts.
       '')
       ''
         ## Submodules
@@ -213,14 +213,14 @@ in
         a module inside each value, with its own options. `submoduleWith` adds args and more modules to each one.
         Each value is merged into one attrset, and it has no identity outside its parent.
 
-        In yen, a named submodule is a kind. `user` above is one: each user is an instance with a name, a ref to
+        In Yen, a named submodule is a kind, like `user` above. Each user is an instance with a name, a ref to
         its host (`on = yen.kinds.host`), defaults (`shell`), and its own errors with a path. `spawns` makes each
-        user a scope under its host, so aspects can be active on users, and queries can find them:
+        user a scope under its host, so aspects can be active on users and queries can find them:
       ''
       (docs.value (map (s: s.id) result.scopes))
       ''
-        A submodule with no names, like `services.nginx`, is a nested field. `firewall.enable` and `firewall.ports`
-        above are one. For how `config` as a fixpoint compares, see [Fixpoints and dependencies](/principles/fixpoints/).
+        A submodule with no names, like `services.nginx`, is a nested field, as `firewall.enable` and `firewall.ports`
+        are above. To see how `config` as a fixpoint compares, read [Fixpoints and dependencies](/principles/fixpoints/).
       ''
     ];
 

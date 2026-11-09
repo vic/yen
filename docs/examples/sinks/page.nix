@@ -13,14 +13,14 @@
     }:
     [
       ''
-        A sink on a [kind](/model/kinds-fields/) collects the elements that [aspects](/behavior/aspects/) give, and reduces them to one value.
+        A sink on a [kind](/model/kinds-fields/) collects the elements [aspects](/behavior/aspects/) give and reduces them to one value.
         This host kind has one sink for each way to reduce. The root kind and the flake are in
         [the example code](https://github.com/vic/yen/tree/main/docs/examples/sinks/modules/fleet.nix).
       ''
       (docs.fileNoted "" "modules/sinks.nix")
       ''
-        A sink has a `reduce`. `(2)` and `(3)` also have `of`, which checks each element. `(4)` to `(8)` use another reduce each.
-        `(1)` is a function you write. The default `reduce` is `list`. The table lists what each reduce gives:
+        Every sink has a `reduce`. `(2)` and `(3)` also have `of`, which checks each element, and `(4)` to `(8)` each use a
+        different reduce. `(1)` is a function you write. The default `reduce` is `list`, and the table shows what each reduce gives:
 
         ## The reduces
       ''
@@ -72,19 +72,19 @@
       (docs.fileNoted "" "modules/aspects.nix")
       ''
         `(1)` and `(2)` give one element each. `(3)` gives a list element, and `flat` joins its items.
-        The host `web` gets the same port and the same packages again: `(4)` is a duplicate that `set` drops,
+        The host `web` gets the same port and the same packages twice: `(4)` is a duplicate that `set` drops,
         and `(5)` has duplicates that `flat` drops. Each sink reduces the elements it received:
       ''
       (docs.value result.flake.web)
       ''
         ## When a reduce fails
 
-        A failed reduce is an error record. The other sinks still work. This variant breaks one rule on each line:
+        A failed reduce is an error record, and the other sinks keep working. This variant breaks one rule on each line:
       ''
       (docs.fileNoted "" "variants/conflicts.nix")
       ''
-        `(1)` gives a second admin to a `one` sink. `(2)` is not a port, so `of` rejects it. `(3)` is a leaf that
-        differs from another one at the same path, and `merge` rejects it. The records:
+        `(1)` gives a second admin to a `one` sink. `(2)` isn't a port, so `of` rejects it. `(3)` is a leaf that
+        differs from another one at the same path, so `merge` rejects it. Here are the records:
       ''
       (docs.value (variant "variants/conflicts.nix").errors)
       ''
@@ -92,14 +92,14 @@
 
         A reduce is any function from `[ { from; value; } ]` to `{ value; errors; }`. Write one when the merge order
         is the point: ranked layers, per-key strategies with provenance, or an export store where a scope can only write
-        its own elements. The engine sets `from`. An element cannot say where it comes from, so a scope cannot write for another.
+        its own elements. The engine sets `from`, and an element can't say where it comes from, so a scope can't write for another.
       ''
       (docs.tip "Errors and warnings as data" ''
-        A sink such as `warnings` with `reduce = list` holds messages that do not fail the fleet.
+        A sink like `warnings` with `reduce = list` holds messages that don't fail the fleet.
         See [Errors as data](/principles/errors/).
       '')
       (docs.caution "Names" ''
-        Do not give a sink the name of a field or an arg. A sink `tags` and a field `tags` read as one arg.
+        Don't give a sink the same name as a field or an arg: a sink `tags` and a field `tags` read as one arg.
       '')
     ];
 

@@ -13,21 +13,21 @@
     }:
     [
       ''
-        yen has no type system of its own. A type is any value with `check = value: bool`.
+        Yen has no type system of its own: a type is any value with `check = value: bool`.
         A `lib.types` value from nixpkgs works, a [kind](/model/kinds-fields/) works (see [Instances and refs](/model/instances-refs/)),
-        and a check function can make a type. The `fields` of a kind use types, and some types add defaults.
+        and a check function can make a type. A kind's `fields` use types, and some types add defaults.
         This kind has one field of each form:
       ''
       (docs.fileNoted "" "modules/host.nix")
       ''
-        Each field has a type. `(1)` is required: it has no default. `(2)` has the default `22`.
-        `(3)` is `null` when an instance does not set it. `(4)` computes its default from the instance itself.
-        `(5)` makes a type from your own check function. `(6)` is an attrset whose values are strings.
-        `(7)` is one of a list of values, and the field sits in a nested path: `settings.kernel.channel`.
+        Each field has a type. `(1)` is required because it has no default, and `(2)` defaults to `22`.
+        `(3)` is `null` when an instance doesn't set it, and `(4)` computes its default from the instance itself.
+        `(5)` makes a type from your own check function, and `(6)` is an attrset whose values are strings.
+        `(7)` is one of a list of values, and the field sits at a nested path, `settings.kernel.channel`.
 
         ## The constructors
 
-        The constructors of the types above, with the default of each:
+        Here are the constructors of the types above, with each one's default:
       ''
       (docs.table
         [ "Constructor" "Default" ]
@@ -67,41 +67,41 @@
         ]
       )
       (docs.caution "WARNING: use `yen.lib.listOf` and `yen.lib.attrsOf`, not nixpkgs" ''
-        nixpkgs `listOf` and `attrsOf` check only the outer shape. Their items are checked in `merge`, which yen
-        never calls. So `(nixpkgs.lib.listOf x).check [ "a" ]` is `true` when `x` is an int, and the same holds for
-        `attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item: the shape when a field reads the value, the
+        nixpkgs `listOf` and `attrsOf` only check the outer shape. Their items are checked in `merge`, which Yen
+        never calls, so `(nixpkgs.lib.listOf x).check [ "a" ]` is `true` when `x` is an int, and the same goes for
+        `attrsOf`. `yen.lib.listOf` and `yen.lib.attrsOf` check every item: the shape when a field reads the value, and the
         items in `result.deep`. See
         [the caution on nixpkgs composite types](/principles/modules/#types-anything-with-check).
       '')
       ''
-        A field at a path, such as `settings.kernel.channel`, has its own type and default.
-        An instance gives only what it needs. The [aspect](/behavior/aspects/) that prints the report is in
+        A field at a path, like `settings.kernel.channel`, has its own type and default, and an instance gives only
+        what it needs. The [aspect](/behavior/aspects/) that prints the report is in
         [the example code](https://github.com/vic/yen/tree/main/docs/examples/types/modules/report.nix).
       ''
       (docs.fileNoted "" "modules/hosts.nix")
       ''
-        `(1)` sets `vpn` by hand, so the `derive` default of `vpn` does not apply to `db`.
-        The read of a field looks at the instance first, then at the default, then checks the value:
+        `(1)` sets `vpn` by hand, so the `derive` default of `vpn` doesn't apply to `db`.
+        Reading a field looks at the instance first, then at the default, and then checks the value:
       ''
       (docs.value result.flake.report)
       ''
         ## Values that fail a type
 
-        Add this file to the example. It sets a channel that is not in the list, and a label that is not a string:
+        Add this file to the example. It sets a channel that isn't in the list, and a label that isn't a string:
       ''
       (docs.file "variants/bad-values.nix")
       ''
-        A value that fails its type is an error record that names the field. A field reads only the shape of its
-        value: a list, an attrset, a function. The parts are checked later, by `result.deep`, after the fleet
-        evaluated: so building one host never forces the list elements of another, and a part that throws is an
+        A value that fails its type is an error record that names the field. A field reads only its value's shape
+        (a list, an attrset, a function), and `result.deep` checks the parts later, after the fleet is
+        evaluated. That way building one host never forces another host's list elements, and a part that throws is an
         error record, not a crash. `nix flake check` fails on both (`checks.<system>.yen-lean`).
-        These are the `errors`, then the `deep` records:
+        Here are the `errors`, then the `deep` records:
       ''
       (docs.value (variant "variants/bad-values.nix").errors)
       (docs.value (variant "variants/bad-values.nix").deep)
       (docs.note "Derived defaults" ''
         `derive` gets the instance as `self`, so a default can read other fields or the instance name.
-        An explicit value always wins: `db` sets its own `vpn`.
+        An explicit value always wins, as when `db` sets its own `vpn`.
       '')
     ];
 

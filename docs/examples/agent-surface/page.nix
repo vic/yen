@@ -16,45 +16,45 @@ in
     [
       ''
         An agent that manages a fleet works through [queries](/query/queries/). Every answer is data that `builtins.toJSON` prints,
-        so a tool, a script or a model reads it the same way. This page uses a fleet of three hosts with a `desktop`
-        aspect for laptops and a `postgres` aspect for the database. It is the fleet of the [invariants](/query/invariants/) page.
+        so a tool, a script or a model reads it the same way. This page uses a fleet of three hosts, with a `desktop`
+        aspect for laptops and a `postgres` aspect for the database. It's the same fleet as the [invariants](/query/invariants/) page.
       ''
       (docs.file "modules/fleet.nix")
       ''
         ## One call to start
 
-        `result.agent` is the schema, the errors, the [invariant](/query/invariants/) check and the counts, JSON-safe:
+        `result.agent` gives you the schema, the errors, the [invariant](/query/invariants/) check and the counts, all JSON-safe:
       ''
       (docs.value result.agent)
       ''
         ## Why is an aspect active, or not?
 
-        `result.explain aspect scope depth` traces `at` at one scope: the value of each node of the predicate, what the aspect gives
-        there, and its files. Past the depth, `kids = "cut"`. Both are refs: `yen.aspects.postgres` and `yen.host.web` in the fleet,
-        `{ aspect; }` and `{ kind; name; }` from outside it. The answer names every aspect, kind, instance and scope the same way,
-        so you can pass any of them back.
+        `result.explain aspect scope depth` traces `at` at one scope: the value of each predicate node, what the aspect gives
+        there, and its files. Past the depth you get `kids = "cut"`. Both arguments are refs, `yen.aspects.postgres` and
+        `yen.host.web` inside the fleet, or `{ aspect; }` and `{ kind; name; }` from outside it. The answer names every
+        aspect, kind, instance and scope the same way, so you can pass any of them back.
       ''
       (docs.value (result.explain { aspect = "postgres"; } web 2))
       ''
-        An unknown aspect or scope is an error record with `near`: the refs it was probably meant to be. A name string is no ref:
-        it is an error too.
+        An unknown aspect or scope is an error record with `near`, the refs it probably meant. A name string isn't a ref,
+        so it's an error too.
 
         ## Trust labels
 
-        A label gives a trust level to the content of the files whose path contains a path part.
-        Here, the files under `agent/` are written by an agent. The aspect `metrics` is declared in one of them:
+        A label gives a trust level to the content of the files whose path contains a given path part.
+        Here an agent writes the files under `agent/`, and the `metrics` aspect is declared in one of them:
       ''
       (docs.fileNoted "" "modules/labels.nix")
       (docs.file "modules/agent/metrics.nix")
       ''
-        `yen.labels."<path part>" = { trust = n; }` is the form (`(1)`, `(2)`). A path part is plain text, never a pattern.
-        An aspect declared in several files takes the lowest trust of them.
-        When a fleet has labels, an aspect that no label covers has trust 0: unknown origin is never above a floor.
+        The form is `yen.labels."<path part>" = { trust = n; }` (`(1)`, `(2)`), where a path part is plain text, never a pattern.
+        An aspect declared in several files takes the lowest trust among them. When a fleet has labels, an aspect no label
+        covers has trust 0, so an unknown origin is never above a floor.
         A staged change takes its submitter's label: `stage { by = { name = "bot"; trust = 1; }; … }` (see [Stage](/agents/stage/))
         gives every aspect the change declares that trust, and `stage.floor n` lists them, even for program ops that live in no file.
 
         `result.labels` gives each labelled aspect. `result.floor 3` lists every routed element of an aspect below trust 3,
-        with its file: what a reviewer reads first.
+        with its file, which is what a reviewer reads first.
       ''
       (docs.value (
         map (x: {

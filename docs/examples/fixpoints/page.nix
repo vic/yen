@@ -1,6 +1,6 @@
 {
   title = "Fixpoints and dependencies";
-  description = "Like NixOS `config`, a yen fleet is a fixpoint. Unlike `config`, every dependency is a routed edge you can prove.";
+  description = "Like NixOS `config`, a Yen fleet is a fixpoint. Unlike `config`, every dependency is a routed edge you can prove.";
   section = "principles";
   order = 3;
 
@@ -14,33 +14,33 @@
     [
       ''
         In NixOS, `config` is a fixpoint: every module reads the final `config`, and Nix laziness computes each value
-        when something reads it. A yen fleet is a fixpoint too, in two layers:
+        when something reads it. A Yen fleet is a fixpoint too, in two layers:
 
         - **Declarations.** Every module gets `yen`, which is computed from the declarations of all modules,
-          its own too. A module reads the data of any file through `yen`, as a NixOS module reads `config.x`.
-        - **Results.** An element reads the reduced value of a [sink](/behavior/sinks/) through an arg. That value can hold elements
-          that read other sinks. Sinks feed [sources](/behavior/cycle/) and sources feed sinks; laziness closes the loop.
+          its own included. A module reads any file's data through `yen`, the way a NixOS module reads `config.x`.
+        - **Results.** An element reads a [sink](/behavior/sinks/)'s reduced value through an arg, and that value can hold elements
+          that read other sinks. Sinks feed [sources](/behavior/cycle/), sources feed sinks, and laziness closes the loop.
 
         The order of the files and of the definitions never matters.
 
-        ## Each NixOS pattern, in yen
+        ## Each NixOS pattern, in Yen
 
-        This fleet has two hosts. Each sink plays the part of one NixOS option:
+        This fleet has two hosts, and each sink plays the part of one NixOS option:
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        At `(1)`, a sink of the fleet: every host gives to it, every host reads it. At `(2)`, `yen.lib.derive` makes a default
-        from the instance, as a NixOS default reads `config`. At `(3)`, a `reduce` you write picks one value. At `(4)`, the flake
+        At `(1)` there's a fleet sink that every host gives to and every host reads. At `(2)`, `yen.lib.derive` makes a default
+        from the instance, like a NixOS default reads `config`. At `(3)` a `reduce` you write picks one value, and at `(4)` the flake
         outputs read a sink too. The [aspects](/behavior/aspects/) give the elements:
       ''
       (docs.fileNoted "" "modules/aspects.nix")
       ''
-        At `(1)`, `firewall` reads the sink `ports`, as a NixOS option reads another option. At `(2)`, `at` names an aspect,
-        so `tls` is active where `web` is. At `(3)` and `(4)`, each host gives its address to the fleet, and `peers` reads
+        At `(1)`, `firewall` reads the `ports` sink, like a NixOS option reads another option. At `(2)`, `at` names an aspect,
+        so `tls` is active wherever `web` is. At `(3)` and `(4)` each host gives its address to the fleet, and `peers` reads
         what the other hosts gave. This table maps each pattern to its name in this fleet:
       ''
       (docs.table
-        [ "NixOS" "yen" "Here" ]
+        [ "NixOS" "Yen" "Here" ]
         [
           [
             "a list option many modules define"
@@ -83,13 +83,13 @@
       ''
         ## Dependencies are edges
 
-        In NixOS, any module can read any option, so a dependency is a read hidden in a function. Nothing lists it,
+        In NixOS any module can read any option, so a dependency is a read hidden in a function. Nothing lists it,
         and "what changes if I change this?" has no answer before you evaluate.
 
-        In yen, an element reads only what reaches its [scope](/model/scopes/): its own scope, the nearest scope of a kind, and the
-        sinks of its receivers. A value goes from one scope to another only as a [routed](/behavior/routing/) element, and each routed
-        element is an edge of the [graph](/query/graphs/), with the aspect that gave it. Here are the edges of the sink `addrs`.
-        `peers` on `a` reads what `b` gave to the fleet:
+        In Yen, an element reads only what reaches its [scope](/model/scopes/): its own scope, the nearest scope of a kind, and its
+        receivers' sinks. A value goes from one scope to another only as a [routed](/behavior/routing/) element, and each routed
+        element is an edge of the [graph](/query/graphs/), with the aspect that gave it. Here are the edges of the `addrs` sink,
+        where `peers` on `a` reads what `b` gave to the fleet:
       ''
       (docs.value (builtins.filter (e: e.sink == "addrs") result.graph.edges))
       ''
@@ -98,26 +98,26 @@
         Because the edges are the dependencies, these questions are [queries](/query/queries/), not a search:
 
         - `result.impact scope { }`: the scopes a scope's elements reach, by depth. See [History](/agents/history/).
-        - `result.explain aspect scope depth`: why an aspect is or is not active at a scope.
-        - A grant limits the scopes and sinks a change may give to. It can check a change because every new
+        - `result.explain aspect scope depth`: why an aspect is or isn't active at a scope.
+        - A grant limits the scopes and sinks a change can give to. It can check a change because every new
           dependency is a new edge. See [Stage a change](/agents/stage/).
         - Labels: an element carries the trust of the files that declare its aspect. See
           [Agent surface](/agents/agent-surface/).
 
-        A read of any value of any scope would add dependencies that are not edges, and these answers would miss
-        them. So yen has no such read. To read another host's value, give it to a sink of a scope above both hosts,
-        as `addrs` does.
+        Reading any value of any scope would add dependencies that aren't edges, and these answers would miss
+        them, so Yen has no such read. To read another host's value, give it to a sink of a scope above both hosts,
+        like `addrs` does.
 
-        ## What yen does not do
+        ## What Yen doesn't do
 
-        NixOS resolves two values for one option with priorities: `mkForce` wins. yen never overrides data: two
+        NixOS resolves two values for one option with priorities, so `mkForce` wins. Yen never overrides data: two
         different values for one declared leaf are an error, and you keep one. For values that many files give,
-        the sink's `reduce` decides, as `motd` does above.
+        the sink's `reduce` decides, like `motd` does above.
       ''
       (docs.file "variants/override.nix")
       (docs.value (map (e: { inherit (e) code path; }) (variant "variants/override.nix").errors))
       (docs.note "Structure from results" ''
-        In NixOS, `imports` cannot depend on `config`. In yen, `spawns` can depend on whether an aspect holds:
+        In NixOS, `imports` can't depend on `config`. In Yen, `spawns` can depend on whether an aspect holds, with
         `yen.lib.holds`. See [Predicates](/behavior/predicates/).
       '')
     ];

@@ -17,32 +17,32 @@
     in
     [
       ''
-        A bundle is a kit whose assemblies make more assemblies. One `homelab` assembly names the server and the nodes,
-        and the base, wireguard, borg, monitoring and dns assemblies follow from those two roles. See
-        [Kits batteries](/batteries/kits/) for kits, assemblies and roles. You import the kits a bundle uses, then write one assembly:
+        A bundle is a kit whose assemblies make more assemblies. You write one `homelab` assembly that names the server
+        and the nodes, and the base, wireguard, borg, monitoring and dns assemblies follow from those two roles. (See
+        [Kits batteries](/batteries/kits/) for kits, assemblies and roles.) Import the kits the bundle uses, then write one assembly:
       ''
       (docs.fileNoted "" "modules/assemblies.nix")
       ''
-        - `(1)` imports the bundle `homelab` and the kits it uses. The parts of `base` and `borg` come with them: `homelab` lists only its own.
-        - `(2)` is the kit of the assembly. `lab` is the only assembly the fleet writes.
-        - `(3)` is a setting of the server role: one of the layouts of the kit `disko`. A role's `settings` may also be a function of the machine, for a device per machine.
-        - `(4)` is the role `node`. Its machines are `lb` and `web`.
+        - `(1)` imports the `homelab` bundle and the kits it uses. The parts of `base` and `borg` come along with them, so `homelab` lists only its own.
+        - `(2)` is the assembly's kit. `lab` is the only assembly the fleet writes.
+        - `(3)` is a server role setting, one of the `disko` kit's layouts. A role's `settings` can also be a function of the machine, if you need a device per machine.
+        - `(4)` is the `node` role, with the machines `lb` and `web`.
 
-        The fleet's words: hosts with an address, members of assemblies, and the sinks the library kits write to.
+        The fleet brings its own words: hosts with an address, members of assemblies, and the sinks the library kits write to.
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        - `(1)` expands the assemblies at every depth with the battery `kits.assemblies`. The parts of a bundle live under its assembly,
-          keyed by a short name (`base`, `wg`), and are not names in the fleet.
+        - `(1)` expands the assemblies at every depth with the `kits.assemblies` battery. A bundle's parts live under its assembly,
+          keyed by a short name (`base`, `wg`), so they aren't names in the fleet.
         - `(2)` gives each host one member scope for each (assembly, role) it takes.
-        - `(3)` is the `nixos` sink of the host. A kit's `os` keys go into it.
-        - `(4)` is `kits.contract`. It refuses two assemblies with one name. `(5)` checks the types of the settings.
+        - `(3)` is the host's `nixos` sink, where a kit's `os` keys go.
+        - `(4)` is `kits.contract`, which refuses two assemblies with the same name, and `(5)` checks the setting types.
         - `(6)` gives a generator that an export carries to the machines of its `deploy` predicate.
       ''
       ''
         ## The result
 
-        The members of each machine (a part is named by its path joined by `-`: `lab-base-disko` is part `disko` of part `base` of `lab`):
+        Here are the members of each machine. A part is named by its path joined with `-`, so `lab-base-disko` is part `disko` of part `base` of `lab`:
       ''
 
       (docs.value (
@@ -60,18 +60,18 @@
         )
       ))
       ''
-        What the members export:
+        And what they export:
       ''
       (docs.value members.exports)
       ''
         ## The contract
 
-        `homelab` allows exactly one server. Two:
+        `homelab` allows exactly one server. With two:
       ''
       (docs.file "variants/two-servers.nix")
       (docs.value (map (e: e.error) (variant "variants/two-servers.nix").errors))
       ''
-        And none:
+        And with none:
       ''
       (docs.file "variants/no-server.nix")
       (docs.value (map (e: e.error) (variant "variants/no-server.nix").errors))
@@ -83,8 +83,8 @@
         | `base` | `default` with `device`, `layout` (one of `yen.kit.disko.layouts`), `authorizedKeys`, `hardware` | disko, facter, emergency-access, and sshd as server, on the same machines. No users: a user needs a name per machine |
         | `homelab` | `server` (exactly 1), `node`; the settings of `base` and `prefix` | base on both roles; wireguard (server controller, nodes peers); borg (server backs up); monitoring (server scrapes); dns on the server |
 
-        The templates [kits-homelab](https://github.com/vic/yen/tree/main/templates/kits-homelab) and
-        [kits-base](https://github.com/vic/yen/tree/main/templates/kits-base) are working examples.
+        For working examples, see the [kits-homelab](https://github.com/vic/yen/tree/main/templates/kits-homelab) and
+        [kits-base](https://github.com/vic/yen/tree/main/templates/kits-base) templates.
       ''
     ];
 

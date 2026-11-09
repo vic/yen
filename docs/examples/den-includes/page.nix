@@ -1,6 +1,6 @@
 {
   title = "includes, provides and meta";
-  description = "How large Den configurations are written, and the same structure in yen: features in many files, hosts that pick features, user meta.";
+  description = "How large Den configurations are written, and the same structure in Yen: features in many files, hosts that pick features, user meta.";
   section = "den";
   route = "den/includes";
   order = 1;
@@ -11,23 +11,23 @@
       ''
         This page follows the structure of [drupol/infra](https://github.com/drupol/infra), one of the largest public
         Den configurations: ten hosts, one user on most of them, and about a hundred feature files. The same shapes
-        appear in most Den configurations on GitHub. Each section shows the yen files first. A table at the end
-        maps each Den form to its yen form.
+        show up in most Den configurations on GitHub. Each section shows the Yen files first, and a table at the end
+        maps each Den form to its Yen form.
 
         ## The fleet
 
-        First the schema. Den keeps data in a free-form `meta` and in aspect arguments. yen declares them as typed
+        First, the schema. Den keeps data in a free-form `meta` and in aspect arguments, while Yen declares them as typed
         [fields](/model/kinds-fields/) of a [kind](/model/kinds-fields/).
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` is the `shares` field of a host: a list of strings, empty by default. A parametric Den aspect, such as
-        `mount-cifs "//nas/media"`, takes its argument from this field. `(2)` is the `fullname` field of a user. A
+        `(1)` is a host's `shares` field, a list of strings that's empty by default. A parametric Den aspect like
+        `mount-cifs "//nas/media"` takes its argument from this field. `(2)` is a user's `fullname` field, and a
         user without it is an error.
 
         ## One feature in many files
 
-        Each file under `modules/base/` writes part of the `base` [aspect](/behavior/aspects/). yen reads all of them.
+        Each file under `modules/base/` writes part of the `base` [aspect](/behavior/aspects/), and Yen reads all of them.
         A NixOS module from each file reaches every host, because of the `at` at `(1)`.
       ''
       (docs.tabs [
@@ -47,9 +47,9 @@
       ''
         ## Hosts pick features
 
-        In Den, a host file lists the features it includes. In yen a feature has no `at` of its own, and each host file
+        In Den, a host file lists the features it includes. In Yen a feature has no `at` of its own, and each host file
         adds the host to the `at` of the features it wants. `at` from several files is a union, so the list stays in the
-        host file, as in Den. The first file declares the features. The tabs are two host files.
+        host file, just like in Den. The first file declares the features, and the tabs are two host files.
       ''
       (docs.fileNoted "" "modules/features.nix")
       (docs.tabs [
@@ -63,27 +63,27 @@
         }
       ])
       ''
-        In `features.nix`, `(1)` is the aspect `shares`. Its `at` is true where the `shares` field is not empty, so it
+        In `features.nix`, `(1)` is the `shares` aspect. Its `at` is true where the `shares` field isn't empty, so it
         needs no host list. `desktop` and `openssh` have no `at` here.
 
         In `hosts/x280.nix`, `(1)` adds `x280` to the `at` of `openssh`. `hosts/rpi4.nix` does the same for `rpi4`, and
-        the two lists join. `(2)` is the `provides` of Den: the aspect is active at the user `pol` only where `pol` is
+        the two lists join. `(2)` is Den's `provides`: the aspect is active at the user `pol` only where `pol` is
         within the host `x280`.
 
         ## User meta is fields
 
-        Den users often keep a free-form `meta` attribute set and read it back with `config.meta`. In yen these are
+        Den users often keep a free-form `meta` attribute set and read it back with `config.meta`. In Yen these are
         fields of the user kind, declared in `fleet.nix` above. A missing `fullname` is an error at the user, and every
         file can read the value.
       ''
       (docs.file "modules/users/pol.nix")
       ''
-        ## From Den to yen
+        ## From Den to Yen
 
-        Each row is a Den form and the yen form of it.
+        Each row is a Den form and its Yen form.
       ''
       (docs.table
-        [ "Den" "yen" ]
+        [ "Den" "Yen" ]
         [
           [
             "`den.aspects.base` written in 26 files"

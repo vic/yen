@@ -20,18 +20,18 @@ in
     }:
     [
       ''
-        yen answers questions about a fleet. A fleet is a set of [kinds](/model/kinds-fields/), [scopes](/model/scopes/),
-        [aspects](/behavior/aspects/) and [sinks](/behavior/sinks/). This small fleet has one host with one user.
-        Two aspects give packages to a `packages` sink. The queries below read it.
+        Yen answers questions about a fleet, which is a set of [kinds](/model/kinds-fields/), [scopes](/model/scopes/),
+        [aspects](/behavior/aspects/) and [sinks](/behavior/sinks/). This small fleet has one host with one user, and
+        two aspects give packages to a `packages` sink. The queries below read it.
       ''
       (docs.file "modules/fleet.nix")
       ''
         ## The queries
 
-        `result = (import yen).lib.eval module` gives a set of queries. Each one is lazy: you pay only for what you read
+        `result = (import yen).lib.eval module` gives you a set of queries. Each one is lazy, so you only pay for what you read
         (see [Data is queried, not merged](/principles/queried-not-merged/)).
-        `result` exists outside the fleet: in a script, a test, the CLI or an agent. Inside the fleet, see [below](#inside-the-fleet).
-        Every answer is plain data, so `builtins.toJSON` prints it. Each query answers for the fleet above:
+        `result` exists outside the fleet: in a script, a test, the CLI or an agent. For inside the fleet, see [below](#inside-the-fleet).
+        Every answer is plain data that `builtins.toJSON` prints. Here's what each query answers for the fleet above:
       ''
       (docs.table
         [ "Query" "Answer" ]
@@ -54,7 +54,7 @@ in
           ]
           [
             "`undefined`"
-            "aspects that `at` cannot decide (a cycle through `not`)"
+            "aspects that `at` can't decide (a cycle through `not`)"
           ]
           [
             "`reduced`"
@@ -107,15 +107,15 @@ in
       ''
         ## One scope in context
 
-        `result.context scope { maxEdges; maxAspects; }` is what an agent or a person reads first about a scope. The scope is a ref,
-        `{ kind; name; }` from outside the fleet; the answer names parent, children, aspects and edges as refs too.
-        Each list says how much it shows of how much there is:
+        `result.context scope { maxEdges; maxAspects; }` is what an agent or a person reads first about a scope. The scope is a ref
+        (`{ kind; name; }` from outside the fleet), and the answer names the parent, children, aspects and edges as refs too.
+        Each list says how much of the total it shows:
       ''
       (docs.value (result.context web { }))
       ''
         ## Which aspects reach this host?
 
-        Each edge of `graph` has `origin`: the aspect that gave the element. "Which aspects reach `web`" is a filter,
+        Each `graph` edge has an `origin`, the aspect that gave the element. So "which aspects reach `web`" is a filter,
         not a registry: `map (e: e.origin) (filter (e: e.to == "fleet:main/host:web") result.graph.edges)`.
       ''
       (docs.sh ''
@@ -129,8 +129,8 @@ in
       ''
         ## Inside the fleet
 
-        A module never gets `result`: the fleet is what `result` is computed from. An element reads results through its
-        [args](/behavior/args/). A [cycle](/behavior/cycle/) asks the tree for the rest:
+        A module never gets `result`, because the fleet is what `result` is computed from. Instead, an element reads results
+        through its [args](/behavior/args/), and a [cycle](/behavior/cycle/) asks the tree for the rest:
       ''
       (docs.table
         [ "To read" "Inside the fleet" ]
@@ -170,14 +170,14 @@ in
       ''
       (docs.fileNoted "" "variants/inside.nix")
       ''
-        `(1)` asks the tree for the users under this host. `(2)` reads the reduced value of the `packages` sink.
-        `(3)` reads the parent scope. `(4)` asks whether the `nginx` aspect holds here. This is what it gives:
+        `(1)` asks the tree for the users under this host, `(2)` reads the `packages` sink's reduced value,
+        `(3)` reads the parent scope, and `(4)` asks whether the `nginx` aspect holds here. Here's what it gives:
       ''
       (docs.value (variant "variants/inside.nix").reduced.out."fleet:main".inside)
       (docs.note "Not inside" ''
         `errors`, `check`, `context`, `explain` and `impact` read the errors, and an element that reads the errors
-        could change them. They exist only on `result`. A stored query gets `result` when it is asked from outside:
-        see [Stored queries](/query/stored-queries/). A [cycle](/behavior/cycle/) also asks the tree with `tree`.
+        could change them, so they exist only on `result`. A stored query gets `result` when it's asked from outside
+        (see [Stored queries](/query/stored-queries/)). A [cycle](/behavior/cycle/) also asks the tree with `tree`.
       '')
     ];
 

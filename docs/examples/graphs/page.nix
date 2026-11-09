@@ -13,20 +13,20 @@
     }:
     [
       ''
-        Fleet data is plain Nix, so a question about it is a function. A graph question is one kind of question:
+        Fleet data is plain Nix, so a question about it is a function. Graph questions are one kind of question:
         which hosts come first, which hosts break when one is down, is there a cycle. Here, hosts depend on hosts:
       ''
       (docs.file "modules/fleet.nix")
       ''
         ## The deploy plan
 
-        The `deploy-plan` aspect asks the graph questions. The marked lines are explained below.
+        The `deploy-plan` aspect asks the graph questions, and the marked lines are explained below.
       ''
       (docs.fileNoted "" "modules/deploy.nix")
       ''
-        `(1)` is the graph library, `yen.lib.graphs`. `(2)` is a [tree request](/behavior/cycle/): every host, with its data.
-        `(7)` builds the graph from the hosts and the hosts each one depends on. It is a graph over instances,
-        so its answers are refs `{ kind; name; }`: a host is never named by a string.
+        `(1)` is the graph library, `yen.lib.graphs`, and `(2)` is a [tree request](/behavior/cycle/) for every host with its data.
+        `(7)` builds the graph from the hosts and the hosts each one depends on. It's a graph over instances,
+        so its answers are refs `{ kind; name; }` and a host is never named by a string.
         `(3)` gives the deploy waves, `(4)` the hosts that break when one host is down, and `(5)` the shortest path between two hosts.
         `(6)` finds the strongly connected components, which the cycle check below uses.
         The aspect is active at the root kind, in a [cycle](/behavior/cycle/).
@@ -35,8 +35,8 @@
       ''
         ## The library
 
-        Every function sorts, so the order the data is written in never changes an answer.
-        Plain functions take `succ`, an attrset from a node to its successors. `of nodes next` builds a graph over instances.
+        Every function sorts, so the order you write the data in never changes an answer.
+        Plain functions take `succ`, an attrset from a node to its successors, and `of nodes next` builds a graph over instances.
       ''
       (docs.table
         [ "Function" "Answer" ]
@@ -82,7 +82,7 @@
       ''
         ## The waves as a diagram
 
-        The deploy waves, from the same data:
+        Here are the deploy waves, drawn from the same data:
       ''
       (docs.mermaid (
         builtins.concatStringsSep "\n" (
@@ -100,7 +100,7 @@
       ''
         ## A cycle is an error
 
-        A cycle is data, not a hang. `sccs` finds it, and the aspect gives an error record:
+        A cycle is data, not a hang: `sccs` finds it, and the aspect gives an error record:
       ''
       (docs.file "variants/cycle.nix")
       (docs.value (map (e: e.error) (variant "variants/cycle.nix").errors))

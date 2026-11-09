@@ -194,8 +194,8 @@ in
     { docs, ... }:
     [
       ''
-        These are small projects for you to copy and grow. The examples in these docs show one idea each;
-        a template is a whole project. Each one here is evaluated in our CI.
+        These are small projects for you to copy and grow. The examples in these docs show one idea each, while
+        a template is a whole project, and our CI evaluates each one here.
       ''
       (docs.table [ "Template" "What it is" "Start" ] (
         map (n: [
@@ -205,9 +205,9 @@ in
         ]) names
       ))
       ''
-        Not sure which one? Take `minimal`. [Getting started](/start/getting-started/) is the same host with a step-by-step page.
-        `noflake` needs no flake: [Project layout](/start/project-layout/) explains both entry points.
-        `reference` is the [showcase template](https://github.com/vic/yen/tree/main/reference). Read it, but do not start from it: its `yen` input is this repository.
+        Not sure which one? Take `minimal`, and [Getting started](/start/getting-started/) walks through the same host step by step.
+        `noflake` needs no flake, and [Project layout](/start/project-layout/) explains both entry points.
+        `reference` is the [showcase template](https://github.com/vic/yen/tree/main/reference). Read it, but don't start from it, since its `yen` input is this repository.
         New to the words in the table? Read the [overview](/start/overview/) and the [glossary](/reference/glossary/).
       ''
     ];

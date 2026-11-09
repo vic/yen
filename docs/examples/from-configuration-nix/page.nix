@@ -1,6 +1,6 @@
 {
   title = "From configuration.nix";
-  description = "Move a single /etc/nixos/configuration.nix to yen, and build the same system.";
+  description = "Move a single /etc/nixos/configuration.nix to Yen and build the same system.";
   section = "migrate";
   order = 1;
   badge = "start here";
@@ -9,8 +9,8 @@
     { docs, ... }:
     [
       ''
-        You have one machine and one `configuration.nix`. This page moves it to yen. The result builds the
-        **same system**: the docs check that both give one toplevel `drvPath`.
+        You have one machine and one `configuration.nix`, and this page moves it to Yen. The result builds the
+        **same system**: the docs check that both give the same toplevel `drvPath`.
       ''
       (docs.tabs [
         {
@@ -26,8 +26,8 @@
         ## What changes
 
         A `configuration.nix` mixes three things: data (the host name, the users), features (ssh, tools),
-        and generated hardware. yen keeps them apart. The steps below show each part, and a table after them
-        maps each line of `configuration.nix` to its yen form.
+        and generated hardware. Yen keeps them apart. The steps below show each part, and the table after them
+        maps each line of `configuration.nix` to its Yen form.
       ''
       (docs.steps [
         ''
@@ -40,9 +40,9 @@
 
           ${docs.fileNoted "" "modules/fleet.nix"}
 
-          `(1)` says that a user lives under the hosts in its `hosts` field ([scopes](/model/scopes/)).
-          `(2)` is the `nixos` [sink](/behavior/sinks/) of a host. It builds the NixOS system from the modules it
-          collected. `(3)` is a [field](/model/kinds-fields/) of the user: a list of group names, empty by default.
+          `(1)` says a user lives under the hosts in its `hosts` field ([scopes](/model/scopes/)).
+          `(2)` is a host's `nixos` [sink](/behavior/sinks/), which builds the NixOS system from the modules it
+          collected. `(3)` is a user [field](/model/kinds-fields/), a list of group names that's empty by default.
         ''
         ''
           Declare your machine and your people as data:
@@ -50,7 +50,7 @@
           ${docs.file "modules/laptop.nix"}
         ''
         ''
-          Move each part of `configuration.nix` to an [aspect](/behavior/aspects/). Each one is active at every host:
+          Move each part of `configuration.nix` to an [aspect](/behavior/aspects/), each one active at every host:
 
           ${docs.file "modules/features/machine.nix"}
 
@@ -63,7 +63,7 @@
 
           ${docs.fileNoted "" "modules/features/accounts.nix"}
 
-          `(1)` makes the aspect active at every user. `(2)` is the user: yen fills `user` with the nearest user.
+          `(1)` makes the aspect active at every user. `(2)` is the user, since Yen fills `user` with the nearest user.
           A user has no `nixos` sink, so the account goes up to the host.
         ''
         ''
@@ -76,7 +76,7 @@
         ## Where each line went
       ''
       (docs.table
-        [ "In configuration.nix" "In yen" ]
+        [ "In configuration.nix" "In Yen" ]
         [
           [
             "`networking.hostName = \"laptop\"`"
@@ -97,7 +97,7 @@
         ]
       )
       (docs.tip "Do it in two steps" ''
-        You do not have to split everything on day one. One aspect can give the whole old file.
+        You don't have to split everything on day one, because one aspect can give the whole old file.
         With only `modules/fleet.nix` and `modules/laptop.nix`, this builds the same system too:
 
         ${docs.file "variants/legacy.nix"}
@@ -108,7 +108,7 @@
         ## Your second machine
 
         Add `yen.host.desktop = { };`, its `machines/desktop/hardware-configuration.nix`, and `yen.host.desktop`
-        to the `hosts` of each user. Every aspect above is active there too. Continue with [From a flake](/migrate/from-flake/).
+        to each user's `hosts`. Every aspect above is active there too. Next, read [From a flake](/migrate/from-flake/).
       ''
     ];
 

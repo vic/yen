@@ -1,6 +1,6 @@
 {
   title = "Every Den battery";
-  description = "Each den.batteries.* entry, in yen: an aspect, a field, a sink, or nothing at all.";
+  description = "Each den.batteries.* entry, in Yen: an aspect, a field, a sink, or nothing at all.";
   section = "den";
   route = "den/batteries";
   order = 3;
@@ -9,15 +9,15 @@
     { docs, ... }:
     [
       ''
-        A Den battery is an [aspect](/behavior/aspects/) that Den ships. You include it, sometimes with an argument:
-        `(den.batteries.user-shell "fish")`. In yen there is nothing to ship. The argument becomes a typed field of
+        A Den battery is an [aspect](/behavior/aspects/) that Den ships. You include it, sometimes with an argument, like
+        `(den.batteries.user-shell "fish")`. In Yen there's nothing to ship: the argument becomes a typed field of
         the host or the user, and the battery is a short aspect whose `at` says where it applies.
 
-        The table lists every battery in Den's `modules/aspects/batteries/`. The count is how often each one appears in
+        The table lists every battery in Den's `modules/aspects/batteries/`. The count is how often each one shows up in
         the 20 most starred public Den configurations on GitHub (October 2026).
       ''
       (docs.table
-        [ "Den battery" "Uses" "yen" ]
+        [ "Den battery" "Uses" "Yen" ]
         [
           [
             "`unfree [ … ]`"
@@ -52,12 +52,12 @@
           [
             "`inputs'`, `self'`"
             "21"
-            "`inputs` is an arg of every yen [module](/principles/modules/); per system: `inputs.x.packages.\${pkgs.stdenv.hostPlatform.system}`"
+            "`inputs` is an arg of every Yen [module](/principles/modules/); per system: `inputs.x.packages.\${pkgs.stdenv.hostPlatform.system}`"
           ]
           [
             "`flake-scope`"
             "–"
-            "nothing: `yen`, `lib` and `inputs` are args of every yen module"
+            "nothing: `yen`, `lib` and `inputs` are args of every Yen module"
           ]
           [
             "`host-aspects`"
@@ -67,7 +67,7 @@
           [
             "`mutual-provider`"
             "6"
-            "nothing: in Den it is inert; in yen `within` routes both ways"
+            "nothing: in Den it's inert; in Yen `within` routes both ways"
           ]
           [
             "`tty-autologin \"ana\"`, `vm-autologin`"
@@ -77,12 +77,12 @@
           [
             "`insecure [ … ]`"
             "5"
-            "`nixos.insecure`, or by hand below: `nixpkgs.config` does not merge lists"
+            "`nixos.insecure`, or by hand below: `nixpkgs.config` doesn't merge lists"
           ]
           [
             "`import-tree ./dir`"
             "2"
-            "the yen template already loads `modules/` with import-tree; plain NixOS files go in a `nixos.imports`"
+            "the Yen template already loads `modules/` with import-tree; plain NixOS files go in a `nixos.imports`"
           ]
           [
             "`os` class (os-class)"
@@ -116,31 +116,31 @@
       ''
         ## Parameters are fields
 
-        `user-shell "fish"` and `tty-autologin "ana"` take an argument. In yen the argument is a typed
-        [field](/model/kinds-fields/) on the instance. This file declares the Den schema, with both fields.
+        `user-shell "fish"` and `tty-autologin "ana"` take an argument. In Yen the argument is a typed
+        [field](/model/kinds-fields/) on the instance. This file declares the Den schema with both fields.
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` is the `autologin` field of a host. Its type is a user or nothing, so `autologin` must be a user
-        that exists. `(2)` is the `shell` field of a user. Its type is one of three names, and the default is `bash`.
-        A typo such as `shell = "fsh"` is an error at `yen.user.ana.shell`.
+        `(1)` is a host's `autologin` field. Its type is a user or nothing, so `autologin` must be a user
+        that exists. `(2)` is a user's `shell` field, whose type is one of three names, with `bash` as the default.
+        A typo like `shell = "fsh"` is an error at `yen.user.ana.shell`.
 
         Each battery below is an [aspect](/behavior/aspects/). Its `at` says where it applies, and its `nixos` key
-        gives a NixOS module to the [sink](/behavior/sinks/) of that name.
+        gives a NixOS module to the [sink](/behavior/sinks/) with that name.
       ''
       (docs.file "modules/batteries.nix")
       ''
         ## Insecure packages need a sink too
 
-        `permittedInsecurePackages` is a list, but it is in `nixpkgs.config`, and `nixpkgs.config` does not merge lists.
-        When two NixOS modules set it, only one list survives, with no error. We wrote this page first without the
+        `permittedInsecurePackages` is a list, but it lives in `nixpkgs.config`, and `nixpkgs.config` doesn't merge lists.
+        When two NixOS modules set it, only one list survives, with no error. We first wrote this page without the
         sink, on NixOS 25.05, and bob's entry was lost. The fix is the same as for `unfree`
         ([Unfree packages from many files](/nixos/unfree/)): a sink of names, and one module that sets the option.
       ''
       (docs.file "modules/insecure.nix")
       (docs.tip "As a battery" ''
-        This page writes each battery by hand. `hostname`, `define-user`, `primary-user`, `unfree` and `insecure` are
-        ready in `yen.lib.batteries.nixos`: see [NixOS batteries](/batteries/nixos/). Write your own for the others.
+        This page writes each battery by hand. `hostname`, `define-user`, `primary-user`, `unfree` and `insecure` come
+        ready in `yen.lib.batteries.nixos` (see [NixOS batteries](/batteries/nixos/)), and you can write your own for the others.
       '')
     ];
 

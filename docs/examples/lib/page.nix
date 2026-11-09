@@ -124,12 +124,12 @@ let
     docs: engine: d: apis:
     [
       ''
-        This page is extracted from the source when the docs are written. Each API has one line above its
-        definition: `#: <where> :: <takes> -> <returns> -- <purpose>`. A check fails when an API has no line, so the
-        page always lists every function. Each API name links to its definition on GitHub. [Contributing](/project/contributing/#coding-standards) says how to write the line.
+        This page is extracted from the source each time the docs are written. Each API has one line above its
+        definition, `#: <where> :: <takes> -> <returns> -- <purpose>`, and a check fails when an API has no line, so the
+        page always lists every function. Each API name links to its definition on GitHub, and [Contributing](/project/contributing/#coding-standards) says how to write the line.
 
-        Words in the signatures: *key value*, *out value*, *reduce* and *predicate* are in the [Glossary](/reference/glossary/).
-        A *module* is a module of the target system; a *view* is `{ nodes; edges; }` for `mermaid.flowchart`; `succ` is a
+        About the words in the signatures: *key value*, *out value*, *reduce* and *predicate* are in the [Glossary](/reference/glossary/).
+        A *module* is a module of the target system, a *view* is `{ nodes; edges; }` for `mermaid.flowchart`, and `succ` is a
         graph, an attrset from a node to its successors.
 
         ## Outside a fleet: `(import yen).lib`
@@ -144,15 +144,15 @@ let
       ''
         ## Inside a fleet: `yen.lib`
 
-        Modules get the same lib, plus these predicates and queries bound to the fleet. They have no `result`: see
-        [Inside the fleet](/query/queries/#inside-the-fleet). A query that an eval result also has is listed here
+        Modules get the same lib, plus these predicates and queries bound to the fleet. They have no `result` (see
+        [Inside the fleet](/query/queries/#inside-the-fleet)). A query that an eval result also has is listed here
         once, with its `result` name next to it.
       ''
       (table docs d apis.fleet)
       ''
         ## Rules: `yen.facts` and `yen.relations`
 
-        A rule is a function of its variables, `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`. Its literals come
+        A rule is a function of its variables, `{ H }: { bad = H; pos = [ … ]; neg = [ … ]; }`, and its literals come
         from these references, never from strings. See [Invariants](/query/invariants/).
       ''
       (table docs d apis.rules)
@@ -169,7 +169,7 @@ let
         {
           title = "Error codes";
           href = "/reference/errors/";
-          description = "Every error record yen can give.";
+          description = "Every error record Yen can give.";
         }
       ])
     ];
@@ -181,7 +181,7 @@ let
 in
 {
   title = "API reference";
-  description = "Every function and query of yen: where it is, what it takes, what it returns, and what it is for. Extracted from the source.";
+  description = "Every function and query of Yen: where it is, what it takes, what it returns, and what it's for. Extracted from the source.";
   section = "reference";
   order = 2;
 

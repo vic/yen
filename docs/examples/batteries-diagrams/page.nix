@@ -17,25 +17,25 @@ in
     }:
     [
       ''
-        Docs drift when they are written by hand. [Batteries](/batteries/) make diagrams, tables and links from the fleet itself:
-        a renamed [kind](/model/kinds-fields/), a new host or a moved line shows up in the next `nix run .#write-files`, or fails the eval.
-        This example is a small fleet to draw: environments hold hosts, and a host may refer to its database host.
+        Docs drift when you write them by hand. [Batteries](/batteries/) make diagrams, tables and links from the fleet itself,
+        so a renamed [kind](/model/kinds-fields/), a new host or a moved line shows up in the next `nix run .#write-files`, or fails the eval.
+        This example is a small fleet to draw: environments hold hosts, and a host can refer to its database host.
       ''
       (docs.file "modules/fleet.nix")
       ''
-        The diagrams are values of the fleet. The aspect `diagrams` asks yen for the whole fleet with a tree request
+        The diagrams are values of the fleet. The `diagrams` aspect asks Yen for the whole fleet with a tree request
         and draws each view from it.
       ''
       (docs.fileNoted "" "modules/diagrams.nix")
       ''
         A view is plain data, `{ nodes; edges; }`, and `flowchart` renders it as text. At `(1)`, `group` puts each host in a
-        subgraph named by its environment. `(2)` draws the kinds, `(3)` the aspects that other aspects name in `at`, and `(4)` who
+        subgraph named after its environment. `(2)` draws the kinds, `(3)` the aspects other aspects name in `at`, and `(4)` who
         gives what to whom. At `(5)`, `routing` counts at kind level and `sinks` shows the [sinks](/behavior/sinks/) that give to sinks and to
         flake outputs. At `(6)`, `tree = [ whole ]` is the tree request.
 
         ## Scopes, grouped by environment
 
-        A [scope](/model/scopes/) is drawn under its parent. The environments are subgraphs:
+        Each [scope](/model/scopes/) is drawn under its parent, and the environments are subgraphs:
       ''
       (docs.mermaid result.flake.diagrams.scopes)
       ''
@@ -64,7 +64,7 @@ in
       ''
         ## Tables, links and a vocabulary
 
-        Tables, links that follow edits, and doc lines checked against the live names come from the same fleet:
+        Tables, links that follow edits, and doc lines checked against the live names all come from the same fleet:
       ''
       (docs.fileNoted "" "modules/docs.nix")
       ''
@@ -72,12 +72,12 @@ in
       ''
       result.flake.kinds
       ''
-        Any table works the same way: the hosts and their environment.
+        Any table works the same way, like this one of the hosts and their environment.
       ''
       result.flake.hosts
       ''
-        `(2)` and `(3)` make a link to the first line of `fleet.nix` that holds the needle `db = maybe`. The [reduce](/behavior/sinks/) of the sink
-        gives the links by `name`. A flake template for each directory that has a `flake.nix`:
+        `(2)` and `(3)` make a link to the first line of `fleet.nix` that holds the needle `db = maybe`, and the sink's
+        [reduce](/behavior/sinks/) gives the links by `name`. Here's a flake template for each directory that has a `flake.nix`:
       ''
       (docs.value result.flake.templates)
       ''

@@ -1,6 +1,6 @@
 {
   title = "Glossary";
-  description = "Each yen word, in one line, with the page that explains it.";
+  description = "Each Yen word, in one line, with the page that explains it.";
   section = "reference";
   order = 1;
 
@@ -97,7 +97,7 @@
           ]
           [
             "wall"
-            "a sink with no keys: elements stop there"
+            "a sink with no keys, where elements stop"
             "[Routing and walls](/behavior/routing/#walls)"
           ]
           [
@@ -142,7 +142,7 @@
           ]
           [
             "grant"
-            "where a change may reach; grants only narrow"
+            "where a change can reach; grants only narrow"
             "[Stage a change](/agents/stage/#grants-only-narrow)"
           ]
           [

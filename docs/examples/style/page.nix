@@ -17,8 +17,8 @@ in
     }:
     [
       ''
-        A fleet is many small [modules](/principles/modules/). Each one is short when it does one job and names
-        each value once. This page shows one small fleet in the style the docs and templates use, then the same fleet
+        A fleet is many small [modules](/principles/modules/), and each one stays short when it does one job and names
+        each value once. This page shows a small fleet in the style the docs and templates use, then the same fleet
         written in the style to avoid. Both give the same configuration, and a check on this page compares them.
 
         ## Name the words
@@ -27,47 +27,47 @@ in
       ''
       (docs.fileNoted "" "modules/kinds.nix")
       ''
-        `(1)` A host names its environment in its `env` field, so `spawns` does not filter by hand.
+        `(1)` A host names its environment in its `env` field, so `spawns` doesn't filter by hand.
         `yen.lib.pointing "env" yen.host` gives the hosts whose `env` field holds the [scope](/model/scopes/), as one
-        ref or in a list. `(2)` The field type is the kind itself: the field holds a [ref](/model/instances-refs/),
-        never a name. `(3)` Use the [types](/model/types/) of `yen.lib`. A nixpkgs composite type checks only the outer shape.
+        ref or in a list. `(2)` The field type is the kind itself, so the field holds a [ref](/model/instances-refs/),
+        never a name. `(3)` Use the `yen.lib` [types](/model/types/), since a nixpkgs composite type only checks the outer shape.
 
         ## Name your combinators once
 
-        A value that two files use goes in `yen.helpers`. Any module reads it from its `yen` arg:
+        A value that two files use goes in `yen.helpers`, and any module reads it from its `yen` arg:
       ''
       (docs.fileNoted "" "modules/helpers.nix")
       ''
         `(1)` A [predicate](/behavior/predicates/) built from the combinators `all`, `within` and `below`: a host in
         prod that has a user. Name it once, and every `at` that needs it reads `servesPeople`.
-        `(2)` A function that gives a NixOS value. An aspect calls it with its own data.
+        `(2)` A function that gives a NixOS value, which an aspect calls with its own data.
 
         ## One `let`, at the top
 
-        Each file has one `let`, before its attributes. A binding that needs a value of an element (a `scope`, a
-        `host`, a tree answer) is a function of that value. The attributes below the `let` only assign:
+        Each file has one `let`, before its attributes. A binding that needs a value from an element (a `scope`, a
+        `host`, a tree answer) is a function of that value, and the attributes below the `let` only assign:
       ''
       (docs.fileNoted "" "modules/aspects.nix")
       ''
-        `(1)` Read the helpers. `(2)` A [tree request](/behavior/cycle/) is data, so it is a binding: the cycle asks it
-        and selects it by the same name. `(3)` A function of the host and of the request's answer, with a comment that
+        `(1)` Read the helpers. `(2)` A [tree request](/behavior/cycle/) is data, so it's a binding: the cycle asks it
+        and selects it by the same name. `(3)` A function of the host and the request's answer, with a comment that
         says what it gives. `(4)` The cycle only calls it.
 
         An expensive value (a `nixosSystem`, a [stage](/agents/stage/), a [graph](/query/graphs/)) is computed once: pass it as an argument to the
-        function that reads it, and do not call the function that makes it twice.
+        function that reads it, and don't call the function that makes it twice.
 
         ## Refs, not names
 
-        The data says which instance it means with a ref, not with a string:
+        The data says which instance it means with a ref, not a string:
       ''
       (docs.fileNoted "" "modules/instances.nix")
       ''
-        At `(1)`, `yen.env.prod` is a [ref](/model/instances-refs/), not the string `"prod"`. At `(2)`, a user lists refs to hosts.
-        A ref has no typo to make: a wrong one is an [error record](/principles/errors/).
+        At `(1)`, `yen.env.prod` is a [ref](/model/instances-refs/), not the string `"prod"`, and at `(2)` a user lists refs to hosts.
+        A ref leaves no room for typos, because a wrong one is an [error record](/principles/errors/).
 
         ## The style to avoid
 
-        Here is the same fleet in one file. It works, and it gives the same configuration:
+        Here's the same fleet in one file. It works, and it gives the same configuration:
       ''
       (docs.file "before/fleet.nix")
       (docs.value (configOf (only [ "before/fleet.nix" ])))
@@ -104,9 +104,9 @@ in
           ]
         ]
       )
-      (docs.tip "Code in yen itself" ''
-        The engine and its libraries follow the same rules, and a few more: see
-        [Contributing](/project/contributing/#coding-standards).
+      (docs.tip "Code in Yen itself" ''
+        The engine and its libraries follow the same rules, plus a few more (see
+        [Contributing](/project/contributing/#coding-standards)).
       '')
     ];
 

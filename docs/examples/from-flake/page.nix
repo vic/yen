@@ -1,6 +1,6 @@
 {
   title = "From a flake";
-  description = "Move a flake with a mkHost helper, shared modules and home-manager to yen. Same systems, no helper.";
+  description = "Move a flake with a mkHost helper, shared modules and home-manager to Yen: the same systems, with no helper.";
   section = "migrate";
   order = 2;
 
@@ -9,7 +9,7 @@
     [
       ''
         Most flakes grow the same shape: a `mkHost` helper, a `common.nix`, one file per host, and home-manager
-        as a NixOS module. This page moves that shape to yen. The docs check that each host gives the same toplevel
+        as a NixOS module. This page moves that shape to Yen, and the docs check that each host gives the same toplevel
         `drvPath` before and after.
       ''
       (docs.tabs [
@@ -37,18 +37,18 @@
       ''
         ## The helper becomes a kind
 
-        `mkHost` knew how to build a host. In yen, a [kind](/model/kinds-fields/) knows it:
+        `mkHost` knew how to build a host. In Yen, a [kind](/model/kinds-fields/) knows it:
       ''
       (docs.fileNoted "{14-18,22-26}" "modules/fleet.nix")
       ''
-        At `(1)`, the `nixos` [sink](/behavior/sinks/) of the `host` kind builds the system. At `(2)`, the
-        `homeManager` sink of the `user` kind forwards to `nixos` on each host the user lives under
+        At `(1)` the `host` kind's `nixos` [sink](/behavior/sinks/) builds the system, and at `(2)` the `user` kind's
+        `homeManager` sink forwards to `nixos` on each host the user lives under
         ([forwards](/behavior/forwards/)).
 
         ## Shared modules become aspects
 
-        `common.nix` was in every host's list. As an [aspect](/behavior/aspects/) it is active at every host. home-manager is active only
-        where a user lives:
+        `common.nix` was in every host's list. As an [aspect](/behavior/aspects/) it's active at every host, while
+        home-manager is active only where a user lives:
       ''
       (docs.fileNoted "{5,17}" "modules/features/common.nix")
       ''
@@ -57,8 +57,8 @@
 
         ## Host files hold data and hardware
 
-        A host file declares the instance and the parts only that host has. Features that only one host uses are
-        aspects with that host in `at`, as `nginx` is at `(1)` in `features/roles.nix`:
+        A host file declares the instance plus the parts only that host has. A feature only one host uses is an
+        aspect with that host in `at`, like `nginx` at `(1)` in `features/roles.nix`:
       ''
       (docs.tabs [
         {
@@ -77,17 +77,17 @@
       ''
         ## People own their homes
 
-        `home-manager.users.alice` was written in the flake for every host. Now alice is data: she says which hosts
-        she uses, and her aspect gives her account and her home:
+        The flake used to write `home-manager.users.alice` for every host. Now alice is data that says which hosts
+        alice uses, and alice's aspect gives the account and the home:
       ''
       (docs.fileNoted "" "modules/alice.nix")
       ''
-        `(1)` makes the aspect active at alice. `(2)` is her `nixos` module: yen fills `user` with her. `(3)` is her
-        home, which goes to the `homeManager` sink of each host she lives under.
+        `(1)` makes the aspect active at alice. `(2)` is alice's `nixos` module, where Yen fills `user` with alice.
+        `(3)` is the home, which goes to the `homeManager` sink of each host alice lives under.
       ''
       (docs.note "Adding a host" ''
-        Before: add a line to the flake, and maybe a parameter to `mkHost`. After: add `yen.host.<name>` in its own file,
-        and add it to the `hosts` of its users. Nothing else changes.
+        Before, you added a line to the flake, and maybe a parameter to `mkHost`. Now you add `yen.host.<name>` in its own
+        file and add it to its users' `hosts`. Nothing else changes.
       '')
       (docs.links [
         {
