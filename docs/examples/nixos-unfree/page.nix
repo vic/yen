@@ -9,28 +9,28 @@
     { docs, result, ... }:
     [
       ''
-        `nixpkgs.config.allowUnfree = true` allows every unfree package. To allow only some, nixpkgs has
-        `allowUnfreePredicate`. It is a function, so the module system cannot merge it: when two modules set it, they
+        `nixpkgs.config.allowUnfree = true` allows every unfree package. To allow only some of them, nixpkgs has
+        `allowUnfreePredicate`. But it's a function, so the module system can't merge it, and two modules that set it
         conflict ([nixpkgs#55674](https://github.com/NixOS/nixpkgs/issues/55674),
         [discourse](https://discourse.nixos.org/t/appending-entries-to-nixpkgs-config-allowunfreepredicate/55844)).
         The usual fix declares a list option and sets the predicate once from it. Den ships the same fix as
         `den.batteries.unfree`, its most used battery ([Every Den battery](/den/batteries/)).
 
-        In yen the list option is a [sink](/behavior/sinks/). This file declares it on the host kind:
+        In Yen that list option is a [sink](/behavior/sinks/). This file declares it on the host kind:
       ''
       (docs.fileNoted "" "modules/unfree.nix")
       ''
-        `(1)` is the sink. `(2)` is its `nixos` key: one predicate that reads every name the sink collected. `(3)` is
-        its `out` key: the list of each host becomes a flake output, so you can see it.
+        `(1)` is the sink. `(2)` is its `nixos` key, a single predicate that reads every name the sink collected. `(3)` is
+        its `out` key, which turns each host's list into a flake output so you can see it.
 
-        A feature gives the names that it needs, next to the packages. A user can give names too: they go up to each
-        host of the user.
+        A feature gives the names it needs right next to its packages. A user can give names too, and they go up to each
+        of the user's hosts.
       ''
       (docs.fileNoted "" "modules/features.nix")
       ''
-        `(1)` gives the names of the `gaming` [aspect](/behavior/aspects/). `(2)` gives the names from a user. The
-        `server` host has no names, so its sink gives nothing: nixpkgs refuses every unfree package there, as by
-        default. The flake output shows the list of each host:
+        `(1)` gives the names for the `gaming` [aspect](/behavior/aspects/), and `(2)` gives names from a user. The
+        `server` host has no names, so its sink gives nothing, and nixpkgs refuses every unfree package there, just like
+        the default. The flake output shows each host's list:
       ''
       (docs.value result.flake.unfree)
       (docs.tabs [
@@ -44,8 +44,8 @@
         home packages too. For a standalone home, give the home kind the same sink with a `homeManager` key.
       '')
       (docs.tip "As a battery" ''
-        This page writes the rule by hand. It is ready as `yen.lib.batteries.nixos.unfree` (and `insecure`):
-        see [NixOS batteries](/batteries/nixos/). When it does not fit, keep your own copy of the lines above.
+        This page writes the rule by hand, but it's ready-made as `yen.lib.batteries.nixos.unfree` (and `insecure`),
+        see [NixOS batteries](/batteries/nixos/). When it doesn't fit, keep your own copy of the lines above.
       '')
     ];
 

@@ -15,23 +15,24 @@ in
     { docs, result, ... }:
     [
       ''
-        A stored [query](/query/queries/) names a question about a fleet. Here, the fleet has one host `web`, one user `ana`
-        and two [aspects](/behavior/aspects/), `git` and `nginx`
-        ([working example](https://github.com/vic/yen/tree/main/docs/examples/stored-queries)). Two stored queries ask about it.
-        The marked lines are explained below.
+        A stored [query](/query/queries/) gives a name to a question about your fleet. Here the fleet has one host `web`,
+        one user `ana` and two [aspects](/behavior/aspects/), `git` and `nginx`
+        ([working example](https://github.com/vic/yen/tree/main/docs/examples/stored-queries)), and two stored queries
+        ask about it. The marked lines are explained below.
       ''
       (docs.fileNoted "" "modules/queries.nix")
       ''
-        `(1)` is the set of stored queries. Each is `{ params; answer; }`. Each parameter has a type (`(2)`), and it is optional when
-        the type has a default (`yen.lib.opt`, `(5)`). `answer` (`(3)`) gets the parameters and `result`, the same eval result as outside the fleet.
-        A parameter that names a [kind](/model/kinds-fields/), an instance or an aspect is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`, `(4)`), never a name.
+        `(1)` is the set of stored queries, each one `{ params; answer; }`. Every parameter has a type (`(2)`), and it's
+        optional when the type has a default (`yen.lib.opt`, `(5)`). `answer` (`(3)`) gets the parameters and `result`,
+        the same eval result you get outside the fleet. A parameter that names a [kind](/model/kinds-fields/), an
+        instance or an aspect is a ref (`yen.kinds.host`, `yen.lib.kind`, `yen.lib.aspect`, `(4)`), never a name.
 
         `result.queries` lists them with their parameters and types:
       ''
       (docs.value result.queries)
       ''
-        `result.ask name args` checks each parameter, then answers. From JSON (the CLI, an agent), a ref is its identity:
-        `{ kind; name; }` an instance, `{ kind; }` a kind, `{ aspect; }` an aspect.
+        `result.ask name args` checks each parameter, then answers. From JSON (the CLI or an agent), a ref is its
+        identity: `{ kind; name; }` for an instance, `{ kind; }` for a kind, `{ aspect; }` for an aspect.
       ''
       (docs.tabs [
         {
@@ -49,8 +50,8 @@ in
         }
       ])
       ''
-        A wrong call is an error record, never a throw: a missing parameter, an unknown one, a name where a ref belongs, or an
-        unknown query with `near`.
+        A wrong call gives an error record, never a throw: a missing parameter, an unknown one, a name where a ref
+        belongs, or an unknown query (with `near`).
       ''
       (docs.tabs [
         {
@@ -68,8 +69,9 @@ in
       ])
       (docs.sh ''nix eval --impure --json --expr '(import ./query.nix).ask "aspectsOn" { host = { kind = "host"; name = "web"; }; }' '')
       (docs.tip "Queries that synthesize" ''
-        A stored query can return values that already meet your rules: a free port from [uKanren](/query/ukanren/), or the hosts where an
-        aspect is safe from [Stage](/agents/stage/). The [MCP server](/agents/mcp/) serves stored queries to agents.
+        A stored query can return values that already meet your rules, like a free port from [uKanren](/query/ukanren/),
+        or the hosts where an aspect is safe from [Stage](/agents/stage/). The [MCP server](/agents/mcp/) serves stored
+        queries to agents.
       '')
     ];
 

@@ -8,27 +8,28 @@
     { docs, ... }:
     [
       ''
-        A home-manager module often needs its host's NixOS config: `{ osConfig, pkgs, ... }:`. See [NixOS system and home](/nixos/system-and-home/) for the basics.
-        In yen, `osConfig` is a [sink](/behavior/sinks/). Each host gives its realized config to it, and a module names it like any sink arg.
-        `pkgs` stays open, so home-manager fills its own `pkgs`.
+        A home-manager module often needs its host's NixOS config: `{ osConfig, pkgs, ... }:`. For the basics, see
+        [NixOS system and home](/nixos/system-and-home/). In Yen, `osConfig` is a [sink](/behavior/sinks/): each host
+        gives its realized config to it, and a module asks for it like any other sink arg. `pkgs` stays open, so
+        home-manager fills in its own `pkgs`.
       ''
       (docs.fileNoted "{12-24,54-57}" "modules/fleet.nix")
       ''
-        - At `(1)`, a host spawns its users and its homes. At `(2)`, the sink `osConfig` takes one value.
-        - At `(3)`, a user gives `homeManager` modules to the NixOS of its host. At `(4)`, a standalone home builds `homeConfigurations`.
-        - At `(5)`, the aspect `home-manager` adds the home-manager module to NixOS, below users.
-        - At `(6)`, the [aspect](/behavior/aspects/) `os-config` gives `out.nixosConfigurations.<host>.config`. It is lazy: Nix reads it only when a module asks.
+        - At `(1)`, a host spawns its users and homes. At `(2)`, the `osConfig` sink takes one value.
+        - At `(3)`, a user gives `homeManager` modules to its host's NixOS. At `(4)`, a standalone home builds `homeConfigurations`.
+        - At `(5)`, the `home-manager` aspect adds the home-manager module to NixOS, below users.
+        - At `(6)`, the `os-config` [aspect](/behavior/aspects/) gives `out.nixosConfigurations.<host>.config`. It's lazy, so Nix reads it only when a module asks.
 
         This file declares alice and her home:
       ''
       (docs.fileNoted "{23-32}" "modules/alice.nix")
       ''
-        At `(1)`, alice lives on the host `server`. At `(2)`, her standalone home has `on`, so it lives under that host. It reads
-        the host's sinks like any child, and still builds `homeConfigurations`. At `(3)`, one `at` list holds alice and her homes.
-        At `(4)`, the module asks for `osConfig` from the sink, and for the `pkgs` of home-manager.
+        At `(1)`, alice lives on the host `server`. At `(2)`, her standalone home has `on`, so it lives under that host:
+        it reads the host's sinks like any child and still builds `homeConfigurations`. At `(3)`, one `at` list holds
+        alice and her homes. At `(4)`, the module asks for `osConfig` from the sink and for home-manager's `pkgs`.
 
-        `editors` lands in two places: in the server's NixOS (`home-manager.users.alice`) and in `homeConfigurations."alice@server"`.
-        Both read the same `osConfig`.
+        `editors` lands in two places, the server's NixOS (`home-manager.users.alice`) and
+        `homeConfigurations."alice@server"`, and both read the same `osConfig`.
       ''
       (docs.sh ''
         sudo nixos-rebuild switch --flake .#server

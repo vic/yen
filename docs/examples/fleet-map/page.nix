@@ -1,6 +1,6 @@
 {
   title = "The reference fleet";
-  description = "Every module of reference, the running specification of yen, with what it shows.";
+  description = "Every module of the reference fleet, Yen's running specification, and what each one shows.";
   section = "reference";
   order = 4;
 
@@ -27,11 +27,12 @@
     in
     [
       ''
-        [`reference`](https://github.com/vic/yen/tree/main/reference) is a complete running specification of yen.
-        It models every capability of [Den](/migrate/from-den/), den-hoag and clan, and the advanced cases of several real fleets. Each pattern has a check.
-        It is big on purpose: read these docs first, then use the fleet to look up how a pattern looks at scale.
+        [`reference`](https://github.com/vic/yen/tree/main/reference) is a complete, running specification of Yen. It
+        models everything [Den](/migrate/from-den/), den-hoag and clan can do, plus the advanced cases of several real
+        fleets, and each pattern has a check. It is big on purpose: read these docs first, then come here to see how a
+        pattern looks at scale.
 
-        This index is read from the fleet's files: each row is a [module](/principles/modules/) and its first comment line.
+        This index is built from the fleet's own files. Each row is a [module](/principles/modules/) and its first comment line.
       ''
       (docs.sh ''
         git clone https://github.com/vic/yen && cd yen/reference

@@ -8,40 +8,41 @@
     { docs, result, ... }:
     [
       ''
-        yen does not know what a flake is. The root [kind](/model/kinds-fields/) declares an `out` [sink](/behavior/sinks/),
-        and `yen.flake` gives the flake's outputs. Each sink with an `out` key gives its part.
+        Yen doesn't know what a flake is. The root [kind](/model/kinds-fields/) declares an `out` [sink](/behavior/sinks/),
+        `yen.flake` gives the flake's outputs, and each sink with an `out` key adds its part.
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` declares the `out` sink of the root, and it merges what it receives. `(2)` is a sink with an `out` key:
-        it gives `services` to the flake. `(3)` makes the flake the value of that `out` sink.
+        `(1)` declares the root's `out` sink, which merges whatever it receives. `(2)` is a sink with an `out` key, so it
+        gives `services` to the flake. `(3)` makes the flake the value of that `out` sink.
 
         ## Read the outputs
 
-        The `out` arg is the flake itself, read lazily. An [aspect](/behavior/aspects/) can build on other outputs without `inputs.self`:
+        The `out` arg is the flake itself, read lazily, so an [aspect](/behavior/aspects/) can build on other outputs
+        without `inputs.self`:
       ''
       (docs.fileNoted "" "modules/aspects.nix")
       ''
-        `(1)` asks for `out`, the [arg](/behavior/args/) that holds the flake. `(2)` reads the `services` output of the hosts.
-        This is the flake:
+        `(1)` asks for `out`, the [arg](/behavior/args/) that holds the flake, and `(2)` reads the hosts' `services` output.
+        Here is the flake:
       ''
       (docs.value result.flake)
       ''
-        `checks.<system>.yen-lean` is in every flake whose `inputs` has `nixpkgs`: the [Lean checker](/query/lean/) on the
-        fleet's verdict, so `nix flake check` always checks the rules.
+        Every flake whose `inputs` has `nixpkgs` gets `checks.<system>.yen-lean`: the [Lean checker](/query/lean/) run on
+        the fleet's verdict, so `nix flake check` always checks your rules.
 
         ## With or without flakes
 
         `(import yen).lib.mkFlake sinks module` gives the flake outputs. `(import yen).lib.eval module` gives every query,
         and `flake` is one of them. Each key of `sinks` is a module sink: `mkFlake sinks m` is the `flake` of a root module
-        that imports `sinks` and `m`, and declares each key of `sinks` in `yen.sinks`.
+        that imports `sinks` and `m` and declares each key of `sinks` in `yen.sinks`.
 
-        [Project layout](/start/project-layout/) shows both ways in a project. The `out` sink above uses `merge`;
-        [Sinks](/behavior/sinks/) lists the reducers.
+        [Project layout](/start/project-layout/) shows both ways in a real project. The `out` sink above uses `merge`, and
+        [Sinks](/behavior/sinks/) lists the other reducers.
       ''
       (docs.note "Laziness closes the loop" ''
-        `inventory` reads `out` and gives to `out`. There is no fixpoint to run: Nix computes a value only when something reads it,
-        and `inventory` never reads itself.
+        `inventory` reads `out` and also gives to `out`. There's no fixpoint to run: Nix computes a value only when
+        something reads it, and `inventory` never reads itself.
       '')
     ];
 

@@ -41,16 +41,16 @@
     { docs, ... }:
     [
       ''
-        **yen is a verified language for Nix configurations.** You write plain Nix data and behavior.
-        yen checks it and answers: the NixOS, nix-darwin and home-manager systems to build, the errors,
-        the graph of who gives what to whom, and whether your [rules](/query/invariants/) hold.
-        The [overview](/start/overview/) explains the four words. The [glossary](/reference/glossary/) lists every term.
+        **Yen is a verified language for Nix configurations.** You write plain Nix data and behavior, and Yen checks it
+        and answers: the NixOS, nix-darwin and home-manager systems to build, the errors, the graph of who gives what to
+        whom, and whether your [rules](/query/invariants/) hold. The [overview](/start/overview/) explains the four core
+        words, and the [glossary](/reference/glossary/) lists every term.
       ''
       (docs.cards [
         {
           title = "Data is queried, not merged";
           icon = "magnifier";
-          body = "[Kinds](/model/kinds-fields/), [instances](/model/instances-refs/) and typed fields are data. Content in many files never overwrites itself. See [queried, not merged](/principles/queried-not-merged/).";
+          body = "[Kinds](/model/kinds-fields/), [instances](/model/instances-refs/) and typed fields are data. Content spread over many files never silently overwrites itself. See [queried, not merged](/principles/queried-not-merged/).";
         }
         {
           title = "Behavior lands where you say";
@@ -65,16 +65,16 @@
         {
           title = "Safe for agents";
           icon = "warning";
-          body = "A change is [staged](/agents/stage/), checked against your rules across machines, and refused with its reason. An [MCP server](/agents/mcp/) answers agents.";
+          body = "A change is [staged](/agents/stage/) and checked against your rules across machines, and if it breaks one it's refused with the reason. An [MCP server](/agents/mcp/) answers agents.";
         }
       ])
       ''
         ---
       ''
       (docs.note "Every page is a tested example" ''
-        Each code block in these docs is a file of a flake template. The docs flake evaluates every template and
-        checks its answers, then writes these pages with [sini/files](https://github.com/sini/files).
-        A page cannot show code that does not run.
+        Each code block in these docs is a file from a flake template. The docs flake evaluates every template, checks
+        its answers, and then writes these pages with [sini/files](https://github.com/sini/files), so a page can't show
+        code that doesn't run.
       '')
     ];
 }

@@ -1,6 +1,6 @@
 {
-  title = "About yen";
-  description = "Where yen comes from, and what it is for: complete fleets that people understand and agents can work on.";
+  title = "About Yen";
+  description = "Where Yen comes from, and what it's for: complete fleets that people understand and agents can work on.";
   section = "project";
   order = 1;
 
@@ -10,18 +10,19 @@
       ''
         ## The goal
 
-        yen is for complete fleets: many machines, many people, services that span hosts, environments with their own rules.
-        Advanced and complex fleets, that a person can still read and understand.
+        Yen is for complete fleets: many machines, many people, services that span hosts, environments with their own
+        rules. Advanced, complex fleets that a person can still read and understand.
 
-        yen also treats agents as first-class members of the team that runs the infrastructure. An agent reads the same
-        [queries](/query/queries/) as a person: the [schema](/agents/agent-surface/), the errors, why an [aspect](/behavior/aspects/) is active. It proposes a change as data, the fleet
-        [stages](/agents/stage/) it, checks the rules across machines, and refuses it with the reason. Nothing reaches a machine unchecked.
+        Yen also treats agents as first-class members of the team that runs the infrastructure. An agent reads the same
+        [queries](/query/queries/) a person does: the [schema](/agents/agent-surface/), the errors, why an
+        [aspect](/behavior/aspects/) is active. It proposes a change as data, and the fleet [stages](/agents/stage/) it,
+        checks the rules across machines, and refuses it with the reason if needed. Nothing reaches a machine unchecked.
       ''
       (docs.cards [
         {
           title = "For people";
           icon = "open-book";
-          body = "Four words (see the [glossary](/reference/glossary/)): [kinds](/model/kinds-fields/), [scopes](/model/scopes/), [aspects](/behavior/aspects/), [sinks](/behavior/sinks/). Plain Nix data. Every rule of how content moves is a sink you can read.";
+          body = "Four words (see the [glossary](/reference/glossary/)): [kinds](/model/kinds-fields/), [scopes](/model/scopes/), [aspects](/behavior/aspects/), [sinks](/behavior/sinks/). Plain Nix data, and every rule for how content moves is a sink you can read.";
         }
         {
           title = "For agents";
@@ -32,7 +33,7 @@
       ''
         ## Lineage
 
-        yen is the latest step of a line of projects, each one a lesson for the next.
+        Yen is the latest step in a line of projects, each one a lesson for the next.
       ''
       (docs.mermaid ''
         flowchart LR
@@ -49,7 +50,7 @@
         [
           [
             "[vic/vix](https://github.com/vic/vix)"
-            "a real fleet: vic's machines, homes and dev environments. Today it runs on yen."
+            "a real fleet: vic's machines, homes and dev environments. Today it runs on Yen."
           ]
           [
             "[denful/flake-aspects](https://github.com/denful/flake-aspects)"
@@ -69,7 +70,7 @@
           ]
           [
             "[vic/ren](https://github.com/vic/ren)"
-            "the fleet template that yen's reference fleet models"
+            "the fleet template that Yen's reference fleet models"
           ]
           [
             "vic/yen"
@@ -78,8 +79,9 @@
         ]
       )
       ''
-        The [reference fleet](/reference/fleet-map/) shows every capability of Den, den-hoag and clan, and the advanced
-        patterns of real fleets (vix, sini's and others), each with a check. [Contributing](/project/contributing/) says how to help.
+        The [reference fleet](/reference/fleet-map/) shows everything Den, den-hoag and clan can do, plus the advanced
+        patterns of real fleets (vix, sini's and others), each with a check. If you'd like to help,
+        [Contributing](/project/contributing/) tells you how.
       ''
     ];
 }

@@ -8,16 +8,16 @@
     { docs, result, ... }:
     [
       ''
-        A guest is a machine that runs inside a host: a NixOS container here, a microvm in the
-        [reference fleet](https://github.com/vic/yen/blob/main/reference/modules/platforms/microvm.nix).
-        It is a [scope](/model/scopes/) under its host, with its own `nixos` [sink](/behavior/sinks/). That sink forwards its modules up, into the host.
-        The kinds:
+        A guest is a machine that runs inside a host: a NixOS container here, or a microvm in the
+        [reference fleet](https://github.com/vic/yen/blob/main/reference/modules/platforms/microvm.nix). It is a
+        [scope](/model/scopes/) under its host with its own `nixos` [sink](/behavior/sinks/), and that sink forwards its
+        modules up into the host. Here are the kinds:
       ''
       (docs.fileNoted "{22-23}" "modules/kinds.nix")
       ''
-        At `(1)`, `spawns.guest` makes each guest a scope under the host that it points to with `on`. At `(2)`, `on` is a ref to a host.
-        At `(3)`, the `nixos` sink of the guest forwards its modules to the `nixos` sink of the host. At `(4)`, they become the
-        `config` of a NixOS container. These are the machines:
+        At `(1)`, `spawns.guest` makes each guest a scope under the host it points to with `on`, and at `(2)`, `on` is a
+        ref to that host. At `(3)`, the guest's `nixos` sink forwards its modules to the host's `nixos` sink, and at `(4)`
+        they become the `config` of a NixOS container. The machines:
       ''
       (docs.fileNoted "" "modules/machines.nix")
       ''
@@ -25,15 +25,15 @@
       ''
       (docs.fileNoted "" "modules/services.nix")
       ''
-        At `(1)`, `guest-base` is active at every guest. At `(2)`, `nginx` is active at the guest `web` only. These are the routes:
+        At `(1)`, `guest-base` is active at every guest, and at `(2)`, `nginx` is active only at the guest `web`. The routes:
       ''
       (docs.routes result)
       ''
-        `nginx` runs in the `web` container. The host `box` does not get it: the element went to `web`'s own sink.
+        `nginx` runs in the `web` container, and the host `box` doesn't get it, because the element went to `web`'s own sink.
       ''
       (docs.caution "Content flows up only" ''
         A host aspect never reaches its guests. To give every guest something, write an aspect with `at = yen.kinds.guest`,
-        or `within` a host.
+        or use `within` a host.
       '')
       (docs.sh "sudo nixos-rebuild switch --flake .#box   # builds box and both containers")
     ];

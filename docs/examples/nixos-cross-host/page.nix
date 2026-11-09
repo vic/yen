@@ -9,49 +9,48 @@
     { docs, ... }:
     [
       ''
-        Some configuration of a host is about the other hosts: SSH `knownHosts`, WireGuard peers, Syncthing devices,
-        backup targets. The usual answers:
+        Some of a host's configuration is about the other hosts: SSH `knownHosts`, WireGuard peers, Syncthing devices,
+        backup targets. People usually reach for one of these:
 
-        - A hand-written list of hosts in a shared file. It goes out of date when you add a host.
-        - `self.nixosConfigurations.<other>.config` through `specialArgs`. When two hosts read derived values from
-          each other, the evaluation can recurse without end.
-        - The *collector [aspect](/behavior/aspects/)* of the
-          [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects):
-          each host feature adds its own device to a shared NixOS module. It works, but every host gets every
-          contribution, its own included.
+        - A hand-written list of hosts in a shared file, which goes out of date as soon as you add a host.
+        - `self.nixosConfigurations.<other>.config` through `specialArgs`. When two hosts read derived values from each
+          other, the evaluation can recurse forever.
+        - The *collector [aspect](/behavior/aspects/)* from the
+          [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects),
+          where each host feature adds its own device to a shared NixOS module. It works, but every host gets every
+          contribution, including its own.
 
-        In yen a host's public facts are [fields](/model/kinds-fields/) of its instance. Here are three hosts and
-        their facts:
+        In Yen a host's public facts are [fields](/model/kinds-fields/) of its instance. Here are three hosts and their facts:
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` declares the facts as fields of the `host` kind. `(2)` gives their values for each host.
+        `(1)` declares the facts as fields of the `host` kind, and `(2)` gives each host its values.
 
-        An aspect reads the other hosts through a tree request, a form of the [cycle](/behavior/cycle/):
+        An aspect reads the other hosts through a tree request, which is one form of the [cycle](/behavior/cycle/):
       ''
       (docs.fileNoted "" "modules/mesh.nix")
       ''
-        `(1)` is the tree request: every host, with its data. `(2)` is the `mesh` aspect. At `(3)` it asks the tree for
-        that request. The request is data, so nothing evaluates a NixOS system to read it, and
-        [`stage`](/agents/stage/) sees the read.
+        `(1)` is the tree request: every host, with its data. `(2)` is the `mesh` aspect, and at `(3)` it asks the tree
+        for that request. The request is plain data, so nothing evaluates a NixOS system to read it, and
+        [`stage`](/agents/stage/) can see the read.
 
-        ## Facts that only some hosts have
+        ## Facts only some hosts have
 
-        A Syncthing device id exists only on hosts that run Syncthing. Each of them gives its id to the
-        `syncthing-device` sink of the fleet. A host has no such sink, so the id goes up to the fleet.
+        A Syncthing device id only exists on hosts that run Syncthing. Each of them gives its id to the fleet's
+        `syncthing-device` sink. A host has no such sink, so the id goes up to the fleet.
       ''
       (docs.fileNoted "" "modules/syncthing.nix")
       ''
-        `(1)` is the sink of the fleet. Its `reduce` is `elements`, which keeps who gave each id. `(2)` is a Syncthing
-        host: it reads the sink as an arg, and leaves out its own id. `(3)` is one host that gives its id.
+        `(1)` is the fleet's sink. Its `reduce` is `elements`, which remembers who gave each id. `(2)` is a Syncthing
+        host: it reads the sink as an arg and leaves out its own id. `(3)` is a host giving its id.
       ''
       (docs.note "Why there is no recursion" ''
-        The hosts a tree request gives and the `syncthing-device` sink are yen data. They exist before any NixOS module runs. A NixOS
-        module reads them, and never reads another host's NixOS `config`.
+        The hosts a tree request gives and the `syncthing-device` sink are Yen data, and they exist before any NixOS
+        module runs. A NixOS module reads them, and never reads another host's NixOS `config`.
       '')
       (docs.tip "As a battery" ''
-        This page writes the rule by hand. The shape is ready as `yen.lib.batteries.mesh`: the records of a sink, except
-        your own. See [Generic batteries](/batteries/generic/). When it does not fit, keep your own copy of the lines above.
+        This page writes the rule by hand, but the shape is ready-made as `yen.lib.batteries.mesh`: the records of a sink,
+        minus your own. See [Generic batteries](/batteries/generic/). When it doesn't fit, keep your own copy of the lines above.
       '')
     ];
 

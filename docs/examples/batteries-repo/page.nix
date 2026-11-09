@@ -9,45 +9,48 @@
     { docs, result, ... }:
     [
       ''
-        A repo has files that should follow the code: the README, the CI workflow, a matrix of CI targets, the dev shell,
-        `flake.nix`. [Batteries](/batteries/) write them from [sinks](/behavior/sinks/), so any [aspect](/behavior/aspects/) can add a section, a job, a target or an input.
-        [github:sini/files](https://github.com/sini/files) writes them (`nix run .#write-files`) and gives a check per
-        file: CI fails when a committed file is stale.
+        Some files in a repo should follow the code: the README, the CI workflow, a matrix of CI targets, the dev shell,
+        `flake.nix`. [Batteries](/batteries/) write them from [sinks](/behavior/sinks/), so any
+        [aspect](/behavior/aspects/) can add a section, a job, a target or an input.
+        [github:sini/files](https://github.com/sini/files) writes them (`nix run .#write-files`) and gives a check for
+        each file, so CI fails when a committed file goes stale.
 
-        The repo is one root [scope](/model/scopes/) that writes repo files, and one scope per system for its dev shell:
+        The repo is one root [scope](/model/scopes/) that writes repo files, plus one scope per system for its dev shell:
       ''
       (docs.fileNoted "" "modules/repo.nix")
       ''
-        `(1)` is the `files` sink of the repo. Every key that gives to it becomes a repo file. `files.writer` builds
-        `packages.<system>.write-files` and a check per file. `(2)` builds `devShells.<scope name>.default` from the
-        `{ packages; shellHook; }` records of the system scopes.
+        `(1)` is the repo's `files` sink, and every key that gives to it becomes a repo file. `files.writer` builds
+        `packages.<system>.write-files` and a check for each file. `(2)` builds `devShells.<scope name>.default` from the
+        system scopes' `{ packages; shellHook; }` records.
 
-        A README from sections in any file:
+        A README made of sections from any file:
       ''
       (docs.fileNoted "" "modules/readme.nix")
       ''
-        `(1)` is the `ordered` [reduce](/batteries/generic/#sections-from-many-files): sections come in an order that meets every `before` and `after`.
-        At `(2)`, `files.document` writes one file from the texts of the sink. `(3)` is a notice in the comment syntax of the file's format.
+        `(1)` is the `ordered` [reduce](/batteries/generic/#sections-from-many-files), so sections come in an order that
+        meets every `before` and `after`. At `(2)`, `files.document` writes one file from the sink's texts. `(3)` is a
+        notice in the comment syntax of the file's format.
 
         A CI workflow and a matrix of targets:
       ''
       (docs.fileNoted "" "modules/ci.nix")
       ''
-        `(1)` writes a workflow from a sink of jobs, and `(2)` is its header. `(3)` writes the JSON of the targets sink to `ci.json`.
+        `(1)` writes a workflow from a sink of jobs, and `(2)` is its header. `(3)` writes the targets sink as JSON to `ci.json`.
 
-        A `flake.nix` written from the inputs that each aspect declares:
+        A `flake.nix` written from the inputs each aspect declares:
       ''
       (docs.fileNoted "" "modules/flake-file.nix")
       ''
-        `(1)` writes `flake.nix` with [flake-file](https://github.com/vic/flake-file), and gives `packages.<system>.write-flake` and its check.
+        `(1)` writes `flake.nix` with [flake-file](https://github.com/vic/flake-file), and gives
+        `packages.<system>.write-flake` with its check.
 
-        More repo files, and a dev shell whose commands come from any aspect:
+        More repo files, and a dev shell whose commands can come from any aspect:
       ''
       (docs.fileNoted "" "modules/more.nix")
       ''
-        `(1)` and `(2)` make TOML and YAML text from Nix values. `(3)` makes a numtide/devshell for each system.
+        `(1)` and `(2)` make TOML and YAML text from Nix values, and `(3)` makes a numtide/devshell for each system.
 
-        The files the aspects give, as the files sink holds them:
+        Here are the files the aspects give, as the files sink holds them:
       ''
       (docs.value (
         map (m: builtins.mapAttrs (_: f: f.text) m.files.file) result.reduced.files."repo:main"

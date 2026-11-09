@@ -21,30 +21,31 @@ in
     }:
     [
       ''
-        A cache and a secret are data. The host trusts a cache, the flake asks to trust it, and CI pushes to it.
-        A feature declares the secrets it needs, and a file lists them. [Batteries](/batteries/) write these from [sinks](/behavior/sinks/).
-        This fleet has one NixOS host and a repo root that writes files:
+        A cache and a secret are both data. The host trusts a cache, the flake asks to trust it, and CI pushes to it. A
+        feature declares the secrets it needs, and a file lists them. [Batteries](/batteries/) write all of this from
+        [sinks](/behavior/sinks/). This fleet has one NixOS host and a repo root that writes files:
       ''
       (docs.file "modules/fleet.nix")
       ''
-        Any [aspect](/behavior/aspects/) adds a cache to the sinks. The CI job that pushes to the cache:
+        Any [aspect](/behavior/aspects/) can add a cache to the sinks. Here it is, with the CI job that pushes to it:
       ''
       (docs.fileNoted "" "modules/caches.nix")
       ''
-        A cache is `{ name; publicKey; url ? "https://<name>.cachix.org"; }`. `(1)` gives the host `nix.settings` substituters
-        and trusted keys. `(2)` gives the flake `nixConfig` extra-substituters and keys. At `(3)`, `github.workflow` writes
-        the workflow from a sink of jobs, as on [Repo batteries](/batteries/repo/). `(4)` is a workflow step: `cachix/cachix-action`,
-        which pushes what the job builds. This is the `nixConfig` of the flake:
+        A cache is `{ name; publicKey; url ? "https://<name>.cachix.org"; }`. `(1)` gives the host `nix.settings`
+        substituters and trusted keys, and `(2)` gives the flake `nixConfig` extra-substituters and keys. At `(3)`,
+        `github.workflow` writes the workflow from a sink of jobs, as on [Repo batteries](/batteries/repo/). `(4)` is a
+        workflow step, `cachix/cachix-action`, which pushes what the job builds. The flake's `nixConfig`:
       ''
       (docs.value result.flake.nixConfig)
       ''
-        Secrets are declared by the features that need them. The values live in a provider, never in git:
+        The features that need secrets declare them, and the values live in a provider, never in git:
       ''
       (docs.fileNoted "" "modules/secrets.nix")
       ''
         A secret is `{ name; profile ? "default"; … }` with any [secretspec](https://github.com/cachix/secretspec) field.
-        At `(1)`, `claim` is the [reduce](/batteries/generic/#one-owner-per-key): a secret that two [scopes](/model/scopes/) declare is an error.
-        `(2)` writes `secretspec.toml`. `(3)` writes `.sops.yaml` from a sink of creation rules. These are the files:
+        At `(1)`, `claim` is the [reduce](/batteries/generic/#one-owner-per-key), so a secret declared by two
+        [scopes](/model/scopes/) is an error. `(2)` writes `secretspec.toml`, and `(3)` writes `.sops.yaml` from a sink of
+        creation rules. The files:
       ''
       (docs.code "toml" (textsOf result)."secretspec.toml")
       (docs.code "yaml" (textsOf result).".sops.yaml")

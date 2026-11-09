@@ -1,6 +1,6 @@
 {
   title = "Trimmed module lists";
-  description = "Evaluate only the NixOS base modules a host needs, with a drvPath oracle that proves the system is the same.";
+  description = "Evaluate only the NixOS base modules a host needs, with a drvPath check that proves the system stays the same.";
   section = "perf";
   order = 3;
   badge = "advanced";
@@ -9,11 +9,13 @@
     { docs, ... }:
     [
       ''
-        NixOS evaluates about 1,900 base modules for every host, used or not. A host with `trimmedModules = true` in the
-        [reference fleet](https://github.com/vic/yen/tree/main/reference) evaluates only the ones it needs: about 400.
+        NixOS evaluates about 1,900 base modules for every host, whether it uses them or not. In the
+        [reference fleet](https://github.com/vic/yen/tree/main/reference), a host with `trimmedModules = true` evaluates
+        only the ones it needs, about 400.
 
-        The list is the closure of a learned core and the options the host defines. It filters `module-list.nix` itself,
-        so the order and the inline entries stay. The host passes it to `nixosSystem` as `baseModules`. The code is the host sink in
+        The list is the closure of a learned core plus the options the host defines. It filters `module-list.nix` itself,
+        so the order and the inline entries stay as they are, and the host passes it to `nixosSystem` as `baseModules`.
+        You'll find the code in the host sink of
         [platforms/nixos.nix](https://github.com/vic/yen/blob/main/reference/modules/platforms/nixos.nix).
       ''
       (docs.table
@@ -34,15 +36,15 @@
         ]
       )
       ''
-        ## Three oracles
+        ## Three checks keep it honest
 
         - `modlist-same-drv`: each trimmed toplevel has the same `drvPath` as the full build.
         - `modlist-negative`: the list without nginx fails for a host that runs nginx, and the same list with nginx builds.
         - `cost.sh`: the trimmed eval uses at most 95% of the thunks.
       ''
       (docs.caution "One nixpkgs revision" ''
-        A list belongs to one nixpkgs revision. After an update, `modlist-same-drv` fails until you compute the lists again.
-        Use this only with the oracle in CI.
+        A list belongs to one nixpkgs revision. After an update, `modlist-same-drv` fails until you compute the lists
+        again, so only use this with that check running in CI.
       '')
       (docs.links [
         {

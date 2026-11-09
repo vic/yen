@@ -1,6 +1,6 @@
 {
   title = "Args";
-  description = "An element can be a function with named args. yen fills kinds, sinks and `scope`; other args stay open.";
+  description = "An element can be a function with named args. Yen fills kinds, sinks and `scope`, and other args stay open.";
   section = "behavior";
   order = 7;
 
@@ -13,25 +13,25 @@
     }:
     [
       ''
-        An element can be a function with named args. yen fills the args it knows.
-        In this example, a load balancer reads the addresses that its environment collects.
-        First the [kinds](/model/kinds-fields/) and [sinks](/behavior/sinks/) it reads:
+        An element can be a function with named args, and Yen fills in the args it knows. In this example, a load
+        balancer reads the addresses its environment collects. First, the [kinds](/model/kinds-fields/) and
+        [sinks](/behavior/sinks/) it reads:
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        `(1)` is the sink `backends` of `environment`. Hosts give their address to it. `(2)` is the sink `proxy` of `host`.
-        Now the [aspects](/behavior/aspects/). Their elements are functions with args:
+        `(1)` is the `environment` kind's `backends` sink, where hosts give their address, and `(2)` is the `host` kind's
+        `proxy` sink. Now the [aspects](/behavior/aspects/), whose elements are functions with args:
       ''
       (docs.fileNoted "" "modules/aspects.nix")
       ''
-        `(1)` asks for `host`, the name of a kind. `(2)` also names a kind. `(3)` names a sink.
-        `(4)` is `scope`. `(5)` has a default, so it is optional. This is what the balancer gives:
+        `(1)` asks for `host`, the name of a kind, and `(2)` names a kind too. `(3)` names a sink, and `(4)` is `scope`.
+        `(5)` has a default, so it's optional. Here's what the balancer gives:
       ''
       (docs.value result.flake.proxy)
       ''
-        ## The args yen fills
+        ## The args Yen fills
 
-        These are the rules:
+        The rules:
       ''
       (docs.table
         [ "Arg" "Value" ]
@@ -57,27 +57,27 @@
       ''
         ## Optional and missing args
 
-        `{ cluster ? null, ... }` makes an arg optional. Without a default, an arg with no answer means the element
-        is not given. Add this file to the example:
+        `{ cluster ? null, ... }` makes an arg optional. Without a default, an arg with no answer means the element isn't
+        given at all. Add this file to the example:
       ''
       (docs.fileNoted "" "variants/missing.nix")
       ''
-        `(1)` needs a `cluster`, and no scope here is under one. `errors` says why:
+        `(1)` needs a `cluster`, and no scope here is under one. `errors` tells you why:
       ''
       (docs.value (variant "variants/missing.nix").errors)
       ''
         ## Open args: modules for NixOS and home-manager
 
-        Args that yen does not know stay open. This is how a `nixos` element is a NixOS module. In this file, yen
-        fills `host` and the element stays a function of `pkgs`. NixOS fills `pkgs`, `config` and `lib` later.
+        Args Yen doesn't know stay open, and that's how a `nixos` element can be a NixOS module. In this file Yen fills
+        `host`, and the element stays a function of `pkgs`. NixOS fills `pkgs`, `config` and `lib` later.
       ''
       (docs.fileNoted "" "variants/open.nix")
       ''
-        `(1)` has the arg `host`, which yen fills, and the arg `pkgs`, which stays open.
+        `(1)` has the arg `host`, which Yen fills, and the arg `pkgs`, which stays open.
       ''
       (docs.caution "Overlays" ''
-        A bare `final: prev:` is a function of `final`, and yen has no `final`. That is an error.
-        Wrap it: `{ ... }: final: prev: …`.
+        A bare `final: prev:` is a function of `final`, and Yen has no `final`, so it's an error. Wrap it:
+        `{ ... }: final: prev: …`.
       '')
     ];
 

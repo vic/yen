@@ -20,13 +20,13 @@ in
     }:
     [
       ''
-        You do not have to move your machines to Yen to get its checks. Yen is about the model of your fleet: which hosts
+        You don't have to move your machines to Yen to get its checks. Yen is about the model of your fleet: which hosts
         you have, where they live, and how they relate to each other. That model can sit next to the flake you already
         have, while every host keeps being built by the same `nixosConfigurations` as today. Yen reads the model, decides
         your rules on it, and gives you one flake check. Nothing else in your flake changes.
 
-        I still think you will want to configure your hosts with Yen one day, because then the model and the machines can
-        never disagree. But you can start with the check, and move hosts over later, one at a time or never.
+        I still think you'll want to configure your hosts with Yen one day, because then the model and the machines can
+        never disagree. But you can start with the check and move hosts over later, one at a time, or never.
 
         ## The model
 
@@ -38,32 +38,32 @@ in
       ''
         ## The rules
 
-        A rule is a mistake you never want to deploy, written once for the whole fleet. These two are the classic ones
-        that each host passes alone: two hosts with the same address, and a database in another region than the host
-        that talks to it.
+        A rule is a mistake you never want to deploy, written once for the whole fleet. These two are classics that every
+        host passes on its own: two hosts with the same address, and a database in a different region from the host that
+        talks to it.
       ''
       (docs.file "modules/rules.nix")
       ''
         ## One output
 
-        The flake adds `checks` and nothing more. Merge it into the outputs you already have:
+        The flake only adds `checks`. Merge it into the outputs you already have:
       ''
       (docs.file "flake.nix")
       ''
         With `inputs.nixpkgs`, the check is `checks.<system>.yen-lean`. It runs the [Lean checker](/query/lean/) on the
-        verdict, so it builds only when no rule is broken, no rule is left undecided, and the proof checks. You run it the
-        way you run any check, locally or in CI:
+        verdict, so it only builds when no rule is broken, none is left undecided, and the proof checks. Run it like any
+        other check, locally or in CI:
       ''
       (docs.sh "nix flake check")
       ''
-        This fleet is clean: no violations, and no errors.
+        This fleet is clean, with no violations and no errors.
       ''
       (docs.value (verdictOf result))
       ''
         ## A plausible mistake
 
-        Someone adds a host `web` by copying `api`, and moves it to `us`. The new host still has the address of `api`, and
-        its database is still in `eu`. Both hosts evaluate fine, and both of these would reach production:
+        Someone adds a host `web` by copying `api` and moves it to `us`. The new host still has `api`'s address, and its
+        database is still in `eu`. Both hosts evaluate fine, and both mistakes would reach production:
       ''
       (docs.file "variants/clone.nix")
       ''
@@ -71,9 +71,10 @@ in
       ''
       (docs.value (verdictOf (variant "variants/clone.nix")))
       ''
-        Yen checks the model you write, not the machines you build. When the two can drift apart, keep the model honest by
-        reviewing it with the hosts it describes, or move those hosts to Yen so the model is what builds them. The
-        [invariants](/query/invariants/) page has more about rules, and [From a flake](/migrate/from-flake/) shows the move.
+        Yen checks the model you write, not the machines you build. When the two can drift apart, keep the model honest
+        by reviewing it together with the hosts it describes, or move those hosts to Yen so the model is what builds
+        them. The [invariants](/query/invariants/) page tells you more about rules, and [From a flake](/migrate/from-flake/)
+        shows the move.
       ''
     ];
 

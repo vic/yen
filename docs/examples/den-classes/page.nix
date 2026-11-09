@@ -9,16 +9,16 @@
     { docs, ... }:
     [
       ''
-        In Den, a custom class is a new [aspect](/behavior/aspects/) key, such as `nix` or `persist`, and `den.batteries.forward` sends its
-        content into another class at a path: `fromClass`, `intoClass`, `intoPath`, `adaptArgs`. It is the fifth most
-        used battery in public Den configurations.
+        In Den, a custom class is a new [aspect](/behavior/aspects/) key, like `nix` or `persist`, and
+        `den.batteries.forward` sends its content into another class at a path, with `fromClass`, `intoClass`,
+        `intoPath` and `adaptArgs`. It's the fifth most used battery in public Den configurations.
 
-        In yen a custom class is a [sink](/behavior/sinks/). Aspects give elements to it by its name. The sink's other keys give the reduced
-        content to other sinks, such as `nixos` or `homeManager`, and the function places it at any path. There is no
-        `adaptArgs`: the function gets yen args, and the content is plain data.
+        In Yen a custom class is a [sink](/behavior/sinks/), and aspects give elements to it by name. The sink's other
+        keys give the reduced content to other sinks, like `nixos` or `homeManager`, and the function places it at any
+        path. There's no `adaptArgs`, since the function gets Yen args and the content is plain data.
       ''
       (docs.table
-        [ "Den forward" "yen sink" ]
+        [ "Den forward" "Yen sink" ]
         [
           [
             "`den.classes.nix`"
@@ -38,32 +38,32 @@
           ]
           [
             "`adaptArgs`"
-            "not needed: yen args, such as `host`, are args of the key's function"
+            "not needed: Yen args, like `host`, are args of the key's function"
           ]
         ]
       )
       ''
         ## One class, two targets
 
-        The same `nix` settings go to `nix.settings` of NixOS on hosts, and of home-manager on standalone homes.
-        The hosts and homes are declared in the `fleet.nix` tab below.
+        The same `nix` settings go to NixOS's `nix.settings` on hosts, and to home-manager's on standalone homes. The
+        hosts and homes are declared in the `fleet.nix` tab below.
       ''
       (docs.fileNoted "" "modules/nix.nix")
       ''
-        `(1)` declares the `nix` sink on the `host` kind. The `home` kind has its own. `(2)` is the `nixos` key of the
-        sink: it gives the reduced settings to the `nixos` sink. `(3)` is one aspect that gives `nix` elements to
-        every host and every home, so the settings are written once.
+        `(1)` declares the `nix` sink on the `host` kind, and the `home` kind has its own. `(2)` is the sink's `nixos`
+        key, which gives the reduced settings to the `nixos` sink. `(3)` is a single aspect giving `nix` elements to every
+        host and every home, so the settings are written once.
 
         ## A class under a path
 
-        This is also the *DRY aspect* of the
+        This is also the *DRY aspect* from the
         [dendritic design guide](https://github.com/Doc-Steve/dendritic-design-with-flake-parts/wiki/Dendritic_Aspects),
         for options inside an attribute set of submodules.
       ''
       (docs.fileNoted "" "modules/lan.nix")
       ''
-        A feature writes `lan` content, as at `(3)`. The `lan` sink at `(1)` puts it under the interface that the
-        host names in its `lan` field. It uses `lib.mkMerge` at `(2)`, so two features never overwrite each other.
+        A feature writes `lan` content, as at `(3)`. The `lan` sink at `(1)` puts it under the interface the host names
+        in its `lan` field, using `lib.mkMerge` at `(2)` so two features never overwrite each other.
       ''
       (docs.tabs [
         {
@@ -73,7 +73,7 @@
       ])
       (docs.tip "More classes" ''
         The reference fleet has a `git` user sink that forwards into `homeManager`, and a `maid` sink that writes
-        dotfiles with no home-manager: ${
+        dotfiles without home-manager: ${
           docs.fleet "modules/den/custom-classes.nix" null "den/custom-classes.nix"
         }.
       '')

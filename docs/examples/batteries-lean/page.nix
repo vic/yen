@@ -9,8 +9,8 @@
     { docs, ... }:
     [
       ''
-        A fleet that evaluates without errors can still break a rule. A flake check can ask [Lean](/query/lean/) to verify the
-        fleet when you build. The check builds only when Lean verifies the fleet. A flake you write by hand adds it like this:
+        A fleet can evaluate without errors and still break a rule. A flake check can ask [Lean](/query/lean/) to verify
+        the fleet when you build, and the check only builds when Lean agrees. In a flake you write by hand, add it like this:
       ''
       (docs.nix ''
         checks.x86_64-linux.lean = yen.lib.batteries.lean.verify {
@@ -20,12 +20,12 @@
       '')
       ''
         `result` is the fleet, `yen.lib.eval module`. The battery writes `result.check.lean` to a file and runs
-        `yen-cert-check` on it in the build. The build fails when a violation is true or undefined, when the
-        certificate does not check, or when a rule uses an external relation that Lean cannot decide. Its output is
-        the checker's message. `checker` defaults to the checker built from `pkgs`. A fleet error fails it too.
+        `yen-cert-check` on it during the build. The build fails when a violation is true or undefined, when the
+        certificate doesn't check, or when a rule uses an external relation Lean can't decide, and its output is the
+        checker's message. A fleet error fails it too. `checker` defaults to the checker built from `pkgs`.
 
-        You need it only for a flake you write by hand. A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` has it
-        already, as `checks.<system>.yen-lean` on x86_64-linux, aarch64-linux and aarch64-darwin
+        You only need this for a flake you write by hand. A flake from `yen.lib.mkFlake` with `inputs.nixpkgs` already
+        has it, as `checks.<system>.yen-lean` on x86_64-linux, aarch64-linux and aarch64-darwin
         (`yen.lib.batteries.lean.systems`), for every fleet, clean or not.
 
         | Battery | Value of | Gives |
@@ -34,15 +34,15 @@
         | `lean.waves { pkgs; succ; checker ? ; }` | a flake check | a derivation that builds only when Lean verifies the deploy waves of `succ` (`lib.graphs.layers`) |
         | `lean.systems` | the systems list | the systems of `checks.<system>.yen-lean` |
 
-        The same checker, outside a flake check:
+        You can also run the same checker outside a flake check:
 
-        - `nix run github:vic/yen#yen-cert-check -- verdict.json`, with `verdict.json` from `builtins.toJSON result.check.lean`. Exit 0: verified. Exit 1: rejected. Exit 2: input Lean cannot decide.
+        - `nix run github:vic/yen#yen-cert-check -- verdict.json`, with `verdict.json` from `builtins.toJSON result.check.lean`. Exit 0 means verified, 1 rejected, and 2 an input Lean can't decide.
         - The MCP tool `yen_verify`, from `nix run github:vic/yen#yen-mcp`. See [MCP](/agents/mcp/).
-        - `yen-cert-check --change stage.json`, with `stage.json` from `builtins.toJSON (yen.lib.stage { … }).lean`: the
+        - `yen-cert-check --change stage.json`, with `stage.json` from `builtins.toJSON (yen.lib.stage { … }).lean`. The
           staged fleet must verify, and the checker names the cone of the change. `yen_stage` runs it for agents.
-        - `yen-cert-check --waves waves.json`, with `{ edges; layers; }`: what `lean.waves` runs.
+        - `yen-cert-check --waves waves.json`, with `{ edges; layers; }`, which is what `lean.waves` runs.
 
-        A full fleet with the battery, and what Lean proves: [Verified by Lean](/query/lean/).
+        For a full fleet using the battery, and what exactly Lean proves, see [Verified by Lean](/query/lean/).
       ''
     ];
 }

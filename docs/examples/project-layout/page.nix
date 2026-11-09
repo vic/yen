@@ -11,20 +11,22 @@ in
     { docs, ... }:
     [
       ''
-        A yen project is one directory of files. This is the layout of the template:
+        A Yen project is one directory of files. Here's the template's layout:
       ''
       docs.tree
       ''
-        `modules/` is the fleet. Every file there is a [module](/principles/modules/): put each [kind](/model/kinds-fields/),
-        feature or host in its own file, and move files freely. File order never changes a result.
+        `modules/` is the fleet. Every file in it is a [module](/principles/modules/), so put each
+        [kind](/model/kinds-fields/), feature or host in its own file and move files around freely. File order never
+        changes a result.
 
-        yen reads one module. A module is a path, a function or an attrset. Its keys are `imports`, `yen` and [sinks](/behavior/sinks/).
-        yen does not know what `inputs` or `lib` are. The root module gives them as sinks, and declares them in `yen.sinks`
-        (you see this in `default.nix` below). Any file asks for them as args. See the [glossary](/reference/glossary/) for each term.
+        Yen reads one module, which can be a path, a function or an attrset, with the keys `imports`, `yen` and
+        [sinks](/behavior/sinks/). Yen doesn't know what `inputs` or `lib` are. The root module gives them as sinks and
+        declares them in `yen.sinks` (you'll see this in `default.nix` below), and any file can ask for them as args.
+        The [glossary](/reference/glossary/) explains each term.
 
         ## Two entry points
 
-        The same `modules/` has two entry points:
+        The same `modules/` can be used two ways:
       ''
       (docs.tabs [
         {
@@ -37,7 +39,7 @@ in
         }
       ])
       ''
-        `mkFlake` gives the flake outputs. `eval` gives every query, `flake` included. Both read the same `modules/`.
+        `mkFlake` gives the flake outputs, and `eval` gives every query, `flake` included. Both read the same `modules/`.
       ''
       (docs.file "query.nix")
       (docs.sh ''
@@ -48,16 +50,17 @@ in
       ''
         ## NixOS without the nixpkgs flake
 
-        `nixpkgs.lib.nixosSystem` exists only on the nixpkgs flake. `nixos/lib/eval-config.nix` works with a flake input
-        and with a plain path, so one host file serves both entry points:
+        `nixpkgs.lib.nixosSystem` only exists on the nixpkgs flake, but `nixos/lib/eval-config.nix` works with a flake
+        input and with a plain path, so one host file serves both entry points:
       ''
       (docs.fileNoted "" "modules/host.nix")
       ''
-        At `(1)`, the host imports `eval-config.nix` from the `nixpkgs` input. This works when `nixpkgs` is a flake input or a plain path.
+        At `(1)`, the host imports `eval-config.nix` from the `nixpkgs` input, whether `nixpkgs` is a flake input or a
+        plain path.
       ''
       (docs.caution "Args are explicit" ''
-        yen gives a module only `yen` and the sinks that modules give or declare. A file that asks for `pkgs` at the top level gets an error record:
-        `pkgs` belongs to NixOS. Ask for it inside a `nixos` element.
+        Yen only gives a module `yen` and the sinks that modules give or declare. A file asking for `pkgs` at the top
+        level gets an error record, because `pkgs` belongs to NixOS. Ask for it inside a `nixos` element.
       '')
     ];
 

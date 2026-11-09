@@ -9,36 +9,37 @@
     { docs, result, ... }:
     [
       ''
-        A fleet that builds NixOS hosts often also deploys them, writes DNS records, writes Kubernetes manifests and
-        exports modules for other flakes. [Batteries](/batteries/) do each of these from a [sink](/behavior/sinks/). This example uses all of them.
-        The fleet spawns hosts, a cluster and an export. Each is a [kind](/model/kinds-fields/) with its own sinks.
+        A fleet that builds NixOS hosts often also deploys them, writes DNS records and Kubernetes manifests, and exports
+        modules for other flakes. [Batteries](/batteries/) do each of these from a [sink](/behavior/sinks/), and this
+        example uses all of them. The fleet spawns hosts, a cluster and an export, each a [kind](/model/kinds-fields/)
+        with its own sinks.
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        Each battery is the value of one key (`out`, `reduce` or a NixOS key). It gets the sink it reads as a ref in `from`.
+        Each battery is the value of one key (`out`, `reduce` or a NixOS key), and it gets the sink it reads as a ref in `from`.
 
         - `(1)` collects the modules of every host in a colmena hive. The `out` key builds `colmenaHive`.
         - `(2)` collects terraform modules and builds `terraformConfigurations.dns` with terranix.
-        - `(3)` has no `out`. Machines give modules to each other through it, and `elements` keeps who gave what.
+        - `(3)` has no `out`. Machines give modules to each other through it, and `elements` remembers who gave what.
         - `(4)` builds `nixosConfigurations` for each host.
-        - `(5)` merges the manifests of a cluster with the module system.
-        - `(6)` is an export. It builds no machine: it gives `nixosModules.<name>` for other flakes.
-        - `(7)` is a function in `yen.flake`. It gives one deploy-rs node for each built NixOS configuration.
+        - `(5)` merges a cluster's manifests with the module system.
+        - `(6)` is an export. It builds no machine, it gives `nixosModules.<name>` to other flakes.
+        - `(7)` is a function in `yen.flake` that gives one deploy-rs node for each built NixOS configuration.
 
-        The [aspects](/behavior/aspects/) fill these sinks. `machine` is active at every host and at the export `base`.
-        `hive` gives to the sinks `colmena`, `terraform` and `nixos`.
+        The [aspects](/behavior/aspects/) fill these sinks. `machine` is active at every host and at the `base` export,
+        and `hive` gives to the `colmena`, `terraform` and `nixos` sinks.
       ''
       (docs.fileNoted "" "modules/machines.nix")
       ''
-        `(1)` and `(2)` give one host's hive entry and DNS record, read from `host.addr`. At `(3)`, `distributed.nodes` reads
-        what other machines wrote for this one. At `(4)`, `lb` writes into `web`: its backends know the load balancer.
-        `(5)` and `(6)` are two aspects at one cluster. Both write the ingress of `axon`, and the module system merges them:
+        `(1)` and `(2)` give a host's hive entry and DNS record, read from `host.addr`. At `(3)`, `distributed.nodes` reads
+        what other machines wrote for this one. At `(4)`, `lb` writes into `web`, so its backends know the load balancer.
+        `(5)` and `(6)` are two aspects at the same cluster. Both write `axon`'s ingress, and the module system merges them:
       ''
       (docs.value result.flake.k8sManifests)
       ''
         ## The batteries
 
-        Each battery with the value it is and what it gives:
+        Each battery, the value it is and what it gives:
 
         | Battery | Value of | Gives |
         |---|---|---|

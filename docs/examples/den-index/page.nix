@@ -1,6 +1,6 @@
 {
   title = "Den patterns";
-  description = "Den batteries, includes, provides, classes and the dendritic aspect patterns, in yen. Each page is a tested template.";
+  description = "Den batteries, includes, provides, classes and the dendritic aspect patterns, in Yen. Each page is a tested template.";
   section = "den";
   order = 0;
   route = "den";
@@ -10,11 +10,11 @@
     [
       ''
         These pages start from how people write Den today. We read the 20 most starred public Den configurations on
-        GitHub, counted which batteries and keys they use, and wrote one page per common shape. Each page shows the
-        Den code and the yen form, and its checks evaluate the real NixOS and home-manager configurations.
+        GitHub, counted the batteries and keys they use, and wrote one page for each common shape. Each page puts the Den
+        code next to the Yen version, and its checks evaluate the real NixOS and home-manager configurations.
 
         Start with [From Den](/migrate/from-den/) for the default template, hosts, users and quirks. The
-        [reference fleet](https://github.com/vic/yen/tree/main/reference) shows every capability that Den's CI tests.
+        [reference fleet](https://github.com/vic/yen/tree/main/reference) covers everything Den's CI tests.
       ''
       (docs.links (
         map (p: {

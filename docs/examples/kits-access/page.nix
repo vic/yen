@@ -14,34 +14,35 @@
     }:
     [
       ''
-        The library ships kits for access to machines: ssh servers and clients, user accounts, and a break-glass key.
-        A kit is data with roles, and an assembly puts your machines in its roles. See [Kits batteries](/batteries/kits/) for the model.
-        You import a kit as a [module](/principles/modules/). The fleet below imports three, and it writes the [sinks](/behavior/sinks/) they need: the fleet's own words.
+        The library ships kits for getting into machines: ssh servers and clients, user accounts, and a break-glass key.
+        A kit is data with roles, and an assembly puts your machines into those roles ([Kits batteries](/batteries/kits/)
+        explains the model). You import a kit as a [module](/principles/modules/). The fleet below imports three, and
+        writes the [sinks](/behavior/sinks/) they need in its own words.
       ''
       (docs.fileNoted "" "modules/fleet.nix")
       ''
-        - `(1)` imports the three kits of `yen.lib.kits`.
-        - `(2)` is the `exports` sink. Members write their own element there.
-        - `(3)` is the `generators` sink, for the secrets that the kits generate.
+        - `(1)` imports the three kits from `yen.lib.kits`.
+        - `(2)` is the `exports` sink, where members write their own element.
+        - `(3)` is the `generators` sink, for the secrets the kits generate.
         - `(4)` gives each machine one member [scope](/model/scopes/) for each (assembly, role) it takes.
-        - `(5)` reads the assemblies and the machines through a tree request, and checks the contract.
-        - `(6)` checks that the settings of every member have their types.
+        - `(5)` reads the assemblies and machines through a tree request, and checks the contract.
+        - `(6)` checks that every member's settings have the right types.
 
-        The assemblies. No machine is named by a string: each role's machines are a ref.
+        The assemblies. No machine is named by a string, each role's machines are a ref.
       ''
       (docs.fileNoted "" "modules/access.nix")
       ''
-        - `(1)` is the kit `sshd`, with the roles `server` and `client`. `(2)` puts `db` in the server role. The client role is `web`.
-        - `(3)` says where the public host keys are read from.
-        - `(4)` is the kit `users`, with the role `default`. A user has `user`, `groups` and `shell`.
-        - `(5)` is the kit `emergency-access`: an `authorizedKeys` list for root, on `db` only.
+        - `(1)` is the `sshd` kit, with the roles `server` and `client`. `(2)` puts `db` in the server role, and `web` takes the client role.
+        - `(3)` says where to read the public host keys from.
+        - `(4)` is the `users` kit, with the role `default`. A user has `user`, `groups` and `shell`.
+        - `(5)` is the `emergency-access` kit: an `authorizedKeys` list for root, only on `db`.
 
-        web trusts the key of db, read from `vars/per-machine/db/openssh/ssh.id_ed25519.pub`. db has no known hosts:
+        web trusts db's key, read from `vars/per-machine/db/openssh/ssh.id_ed25519.pub`, while db has no known hosts:
       ''
       (docs.value result.flake.nixos.web.programs.ssh)
       (docs.value (result.flake.nixos.db.programs.ssh or null))
       ''
-        The secrets are in the plan of the generators, each on one machine:
+        The secrets are in the generators' plan, each on one machine:
       ''
       (docs.value (builtins.attrNames result.reduced.generators."fleet:main"))
       ''
@@ -59,18 +60,18 @@
         | `users` | `default` | `user`, `groups`, `shell` (a function from `pkgs` to a package: the fleet has no package ref); a password hash, secret, generated on the machine of that member only |
         | `emergency-access` | `default` | `authorizedKeys` (public keys are data) for root, and a root password hash, secret, on machines that hold a member only |
 
-        `yen.lib.batteries.vars.known-hosts { from; rootOf; entry; keep ? }` is the battery behind the sshd client. It reads the
-        public keys with `public-value` and gives two values: `nixos` (the `programs.ssh.knownHosts` records) and
-        `errors` (one record for each key file that is missing, never a throw).
+        `yen.lib.batteries.vars.known-hosts { from; rootOf; entry; keep ? }` is the battery behind the sshd client. It
+        reads the public keys with `public-value` and gives two values: `nixos` (the `programs.ssh.knownHosts` records)
+        and `errors` (one record for each missing key file, never a throw).
 
         ## Errors
 
-        An sshd assembly with no server is a count of zero, and a client alone has nobody to trust:
+        An sshd assembly with no server fails its count, and a client on its own has nobody to trust:
       ''
       (docs.file "variants/no-server.nix")
       (docs.value (map (e: e.error) (variant "variants/no-server.nix").errors))
       ''
-        A server without a public key file is an error record. The fleet still evaluates:
+        A server without a public key file gives an error record, and the fleet still evaluates:
       ''
       (docs.file "variants/missing-key.nix")
       (docs.value (map (e: e.error) (variant "variants/missing-key.nix").errors))
