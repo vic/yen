@@ -426,4 +426,34 @@ in
       specialArgs.x = 1;
     }
   ]);
+  # the page writers: Starlight markup from data, and the edit link built from `pagesAt`
+  docs-starlight-writers =
+    let
+      w =
+        (bat.docs.starlight-writers {
+          lib = null; # only `value` reads it
+          repo = "https://x.test/r";
+          repoRoot = ./.;
+          pagesAt = "site/pages";
+          extra = _: { shout = s: "${s}!"; };
+        })
+          ./.;
+    in
+    eq
+      {
+        note = w.note "T" "b\n";
+        table = w.table [ "A" ] [ [ "1" ] ];
+        steps = w.steps [ "a\nb" ];
+        src = w.src "page.nix";
+        extra = w.shout "x";
+        marks = w.notesOf "a # (2)\nb # (1)\nc # (2)";
+      }
+      {
+        note = ":::note[T]\nb\n:::";
+        table = "| A |\n|---|\n| 1 |";
+        steps = "<Steps>\n\n1. a\n   b\n\n</Steps>";
+        src = "https://x.test/r/blob/main/site/pages/tests/page.nix";
+        extra = "x!";
+        marks = ''"(2)" "(1)"'';
+      };
 }
