@@ -4,14 +4,16 @@ let
   env = builtins.getEnv;
   fleet = /. + env "YEN_FLEET";
   inputs = (builtins.getFlake (env "YEN_FLAKE")).inputs;
-  yen = inputs.yen;
+  yen = import inputs.yen;
   base = {
     imports = [ (inputs.import-tree (fleet + "/modules")) ];
     inherit inputs;
     inherit (inputs.nixpkgs) lib;
+    resources = fleet + "/resources";
     yen.sinks = {
       inputs = { };
       lib = { };
+      resources = { };
     };
   };
   r = yen.lib.eval base;
